@@ -29,12 +29,12 @@ a:hover {
 
 body {
   margin: 0;
-  display: block; 
   min-width: 320px;
   min-height: 100vh;
-  padding: 1em; 
-  max-width: 1200px; 
-  margin: 0 auto; 
+  width: 100vw; /* Ajuste para ocupar todo el ancho */
+  height: 100vh; /* Ajuste para ocupar todo el alto */
+  padding: 0; /* Eliminar el padding para evitar márgenes innecesarios */
+  background-color: #242424; /* Mantén el color de fondo si es necesario */
 }
 
 h1 {
