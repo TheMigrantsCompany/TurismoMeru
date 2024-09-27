@@ -1,12 +1,12 @@
 /** @type {import('tailwindcss').Config} */
 import colors from 'tailwindcss/colors';
-const twElements = require('tw-elements/plugin.cjs');
+
 
 export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
-    "./node_modules/tw-elements/dist/js/**/*.js",
+   
   ],
   theme: {
     extend: {
@@ -33,8 +33,6 @@ export default {
       },
     },
   },
-  plugins: [
-    twElements, 
-    require('@tailwindcss/forms'),
-  ],
+  plugins: [],
 }
+
