@@ -3,7 +3,7 @@ import React from "react";
 
 export default function StickyNavbar() {
   return (
-    <nav className="bg-white shadow dark:bg-gray-800 sticky top-0 z-50 opacity-70">
+    <nav className="bg-white shadow dark:bg-gray-200 sticky top-0 z-50 opacity-50">
       <div className="container flex items-center justify-center p-1 mx-auto text-gray-900 capitalize dark:text-gray-300">
         <a href="#" className="text-gray-800 transition-colors duration-300 transform dark:text-gray-200 border-b-2 border-blue-500 mx-1.5 sm:mx-6">home</a>
 
