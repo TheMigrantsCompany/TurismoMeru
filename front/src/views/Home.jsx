@@ -2,6 +2,7 @@ import React from "react";
 import Footer from '../components/footer/Footer';
 import Header from '../components/header/Header';
 import Card from "../components/cards/Cards";
+import QueryForm from "../components/queryform/QueryForm";
 import StickyNavbar from "../components/navbar/StickyNavbar";
 
 const Home = () => {
@@ -15,6 +16,9 @@ const Home = () => {
         {cards.map((_, index) => (
           <Card key={index} />
         ))}
+      </div>
+      <div className="mt-8"> 
+      <QueryForm />
       </div>
       <Footer />
     </>
