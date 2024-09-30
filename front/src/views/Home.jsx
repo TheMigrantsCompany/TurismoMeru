@@ -6,23 +6,27 @@ import QueryForm from "../components/queryform/QueryForm";
 import StickyNavbar from "../components/navbar/StickyNavbar";
 
 const Home = () => {
-  const cards = Array(5).fill(null); 
-
-  return (
-    <>
-      <StickyNavbar />
-      <Header />
-      <div className="flex flex-col items-center space-y-8 mt-8">
-        {cards.map((_, index) => (
-          <Card key={index} />
-        ))}
+    const cards = Array(5).fill(null);
+  
+    return (
+      <div className="flex flex-col min-h-screen">
+        <StickyNavbar />
+        <div className="flex-grow">
+          <div className="bg-white bg-opacity-70 p-8 rounded-lg shadow-md max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {cards.map((_, index) => (
+                  <Card key={index} />
+                ))}
+            </div>
+          </div>
+                <Header />
+          <div className="mt-8">
+            <QueryForm /> {/* El formulario ahora tiene transparencia */}
+          </div>
+        </div>
+        <Footer className="mt-auto" />
       </div>
-      <div className="mt-8"> 
-      <QueryForm />
-      </div>
-      <Footer />
-    </>
-  );
-};
-
-export default Home;
+    );
+  };
+  
+  export default Home;
