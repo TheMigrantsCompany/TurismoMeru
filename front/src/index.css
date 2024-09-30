@@ -10,7 +10,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: #ffffff;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -20,21 +20,25 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: #000000;
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: #c92929;
 }
 
 body {
+  background-image: url('src/assets/images/fondo.jpg');
+  background-size: cover; /* Hace que la imagen cubra todo el fondo */
+  background-position: center; /* Centra la imagen */
+  background-attachment: fixed; /* Fija la imagen para que no se mueva */
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
   width: 100vw; /* Ajuste para ocupar todo el ancho */
   height: 100vh; /* Ajuste para ocupar todo el alto */
   padding: 0; /* Eliminar el padding para evitar márgenes innecesarios */
-  background-color: #242424; /* Mantén el color de fondo si es necesario */
+  background-color: #ffffff; /* Mantén el color de fondo si es necesario */
 }
 
 h1 {
@@ -49,12 +53,11 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  border-color: #646464;
 }
 button:focus,
 button:focus-visible {
@@ -63,7 +66,7 @@ button:focus-visible {
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
+    color: #f0f5f8;
     background-color: #ffffff;
   }
   a:hover {
