@@ -30,7 +30,7 @@ const ShoppingCart = () => {
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6 text-black">Carro de la compra</h1>
       <div className="flex flex-col md:flex-row justify-between gap-6">
-        {/* Columna izquierda: Lista de productos */}
+
         <div className="w-full md:w-2/3 space-y-6">
           {cartItems.map((item) => (
             <div key={item.id} className="flex items-center justify-between p-4 border-b">
@@ -70,7 +70,7 @@ const ShoppingCart = () => {
           ))}
         </div>
 
-        {/* Columna derecha: Resumen del pedido */}
+       
         <div className="w-full md:w-1/3 p-6 bg-gray-50 rounded-lg shadow-lg">
           <h2 className="text-xl font-semibold mb-4 text-black">Resumen del pedido</h2>
           <div className="flex justify-between mb-2 text-black">
