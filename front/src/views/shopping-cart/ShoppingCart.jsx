@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
 const ShoppingCart = () => {
- 
   const [cartItems, setCartItems] = useState([
     { id: 1, name: 'Camiseta básica', color: 'Tierra de siena', size: 'Grande', price: 32, quantity: 1, stock: true },
     { id: 2, name: 'Camiseta básica', color: 'Negro', size: 'Grande', price: 32, quantity: 1, stock: false },
@@ -27,10 +26,9 @@ const ShoppingCart = () => {
   const total = subtotal + shipping + taxes;
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6 text-black">Carro de la compra</h1>
+    <div className="container mx-auto p-6 mt-16">
+      <h1 className="text-3xl font-bold mb-6 text-black">Carrito de Compra</h1>
       <div className="flex flex-col md:flex-row justify-between gap-6">
-
         <div className="w-full md:w-2/3 space-y-6">
           {cartItems.map((item) => (
             <div key={item.id} className="flex items-center justify-between p-4 border-b">
@@ -70,7 +68,6 @@ const ShoppingCart = () => {
           ))}
         </div>
 
-       
         <div className="w-full md:w-1/3 p-6 bg-gray-50 rounded-lg shadow-lg">
           <h2 className="text-xl font-semibold mb-4 text-black">Resumen del pedido</h2>
           <div className="flex justify-between mb-2 text-black">
