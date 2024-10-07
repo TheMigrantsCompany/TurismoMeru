@@ -10,7 +10,8 @@ const Home = () => {
   
     return (
       <div className="flex flex-col min-h-screen">
-        <StickyNavbar />
+        
+              <Header />
         <div className="flex-grow mt-16"> 
           <div className="bg-white bg-opacity-70 p-8 rounded-lg shadow-md max-w-7xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -19,7 +20,6 @@ const Home = () => {
                 ))}
             </div>
           </div>
-          <Header />
           <div className="mt-8">
             <QueryForm />
           </div>
