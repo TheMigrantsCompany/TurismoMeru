@@ -7,5 +7,6 @@ export function DashboardUser() {
         <div>
             <UserSideBar />
         </div>
+        
     );
 }
