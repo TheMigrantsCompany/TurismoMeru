@@ -3,7 +3,7 @@ import Footer from '../../components/footer/Footer';
 import Header from '../../components/header/Header';
 import Card from "../../components/cards/Cards";
 import QueryForm from "../../components/queryform/QueryForm";
-import StickyNavbar from "../../components/navbar/StickyNavbar";
+
 
 const Home = () => {
     const cards = Array(5).fill(null);
@@ -12,6 +12,7 @@ const Home = () => {
       <div className="flex flex-col min-h-screen">
         
               <Header />
+        
         <div className="flex-grow mt-16"> 
           <div className="bg-white bg-opacity-70 p-8 rounded-lg shadow-md max-w-7xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
