@@ -15,12 +15,12 @@ const SearchInput = ({ onSearch }) => {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full border h-12 shadow p-4 rounded-full dark:text-gray-800 dark:border-gray-700 dark:bg-gray-200"
+          className="w-full border h-12 shadow p-4 rounded-full text-gray-800 border-gray-300 bg-white" // Cambié a fondo blanco y bordes claros
           placeholder="Buscar..."
         />
-        <button type="submit" className="absolute top-3.5 right-3">
+        <button type="submit" className="absolute top-1/2 right-3 transform -translate-y-1/2"> {/* Centrar verticalmente */}
           <svg
-            className="text-teal-400 h-5 w-5 fill-current dark:text-teal-300"
+            className="text-teal-400 h-5 w-5 fill-current"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 56.966 56.966"
           >
@@ -33,3 +33,4 @@ const SearchInput = ({ onSearch }) => {
 };
 
 export default SearchInput;
+
