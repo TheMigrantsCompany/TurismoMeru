@@ -3,6 +3,8 @@
 import React from "react";
 import SearchInput from "../../../components/inputs/SearchInput";
 import { ReservationsTable } from "../../../components/tables/admin/Reservations";
+
+
 export function ReservationManagement() {
   const handleSearch = (query) => {
     // Aquí iría la función de búsqueda
