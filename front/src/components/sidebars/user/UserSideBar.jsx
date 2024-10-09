@@ -8,9 +8,9 @@ import {
   ListItemSuffix,
 } from "@material-tailwind/react";
 import {
-  PresentationChartBarIcon,
+  UserIcon,
+  StarIcon,
   ShoppingBagIcon,
-  InboxIcon,
   PowerIcon,
 } from "@heroicons/react/24/solid";
 import { useNavigate } from "react-router-dom"; // Importa useNavigate
@@ -31,19 +31,22 @@ export function UserSideBar() {
           className="cursor-pointer"
         >
           <ListItemPrefix>
-            <PresentationChartBarIcon className="h-5 w-5" />
+            <UserIcon className="h-5 w-5" />
           </ListItemPrefix>
           Mi Perfil
         </ListItem>
-        <ListItem>
+        <ListItem
+          onClick={() => navigate("/reviews")} // Redirige a la vista de reviews
+          className="cursor-pointer"
+        >
           <ListItemPrefix>
-            <ShoppingBagIcon className="h-5 w-5" />
+            <StarIcon className="h-5 w-5" />
           </ListItemPrefix>
           Reviews
         </ListItem>
         <ListItem>
           <ListItemPrefix>
-            <InboxIcon className="h-5 w-5" />
+            <ShoppingBagIcon className="h-5 w-5" />
           </ListItemPrefix>
           Mis Compras
           <ListItemSuffix></ListItemSuffix>

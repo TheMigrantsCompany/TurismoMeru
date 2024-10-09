@@ -7,6 +7,7 @@ import { DashboardUser } from './views/dashboardUser/DashboarUser';
 import ShoppingCart from './views/shopping-cart/ShoppingCart';
 import StickyNavbar from './components/navbar/StickyNavbar';
 import ProfileForm from './views/dashboardUser/ProfileForm';
+import Reviews from './views/dashboardUser/Reviews';
 
 import { ReservationManagement } from './views/dashboardAdmin/dashAdminViews/ReservationManagement';
 
@@ -26,6 +27,7 @@ function App() {
         <Route path="/user" element={<DashboardUser />} />
         <Route path="/shopping-cart" element={<ShoppingCart />} />
         <Route path="/profile" element={<ProfileForm />} />
+        <Route path="/reviews" element={<Reviews />} />
       </Routes>
     </Router>
   );
