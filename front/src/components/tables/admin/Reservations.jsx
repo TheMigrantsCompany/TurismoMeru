@@ -1,61 +1,64 @@
-import {
-    ChevronUpDownIcon,
-  } from "@heroicons/react/24/outline";
-  import { PencilIcon } from "@heroicons/react/24/solid";
-  import {
-    Card,
-    CardHeader,
-    Typography,
-    Button,
-    CardBody,
-    Chip,
-    CardFooter,
-    Tabs,
-    TabsHeader,
-    Tab,
-    Tooltip,
-    IconButton,
-  } from "@material-tailwind/react";
-  import Swal from "sweetalert2";
-  
-  // Tabs para diferentes estados de la reserva
-  const TABS = [
-    { label: "Todas", value: "all" },
-    { label: "Aceptadas", value: "accepted" },
-    { label: "Pendientes", value: "pending" },
-    { label: "Canceladas", value: "cancelled" },
-  ];
-  
-  // Encabezados de la tabla
-  const TABLE_HEAD = ["Cliente", "Excursión", "Cantidad de Personas", "Estado", "Fecha de Excursión", ""];
-  
-  // Datos de ejemplo
-  const TABLE_ROWS = [
-    {
-      name: "Juan Pérez",
-      excursion: "Excursión Glaciar",
-      people: 4,
-      status: "accepted",
-      date: "12/10/2024",
-    },
-    {
-      name: "María López",
-      excursion: "Tour de Ballenas",
-      people: 2,
-      status: "pending",
-      date: "25/11/2024",
-    },
-    // Agrega más reservas aquí
-  ];
-  
-  // Función para el manejo del modal de edición de reservas
+import React, { useState } from 'react';
+import { ChevronUpDownIcon, PencilIcon } from "@heroicons/react/24/outline";
+import { Card, CardHeader, Typography, CardBody, Chip, Tooltip, IconButton, CardFooter, Tabs, TabsHeader, Tab, Button } from "@material-tailwind/react";
+import ReservationModal from '../../../components/modals/admin-modal/ReservationModal';
+import Swal from "sweetalert2";
+
+const TABS = [
+  { label: "Todas", value: "all" },
+  { label: "Aceptadas", value: "accepted" },
+  { label: "Pendientes", value: "pending" },
+  { label: "Canceladas", value: "cancelled" },
+];
+
+const TABLE_HEAD = [
+  "Cliente",
+  "Excursión",
+  "Cantidad de Personas",
+  "Estado",
+  "Fecha de Excursión",
+  "",
+];
+
+const initialReservations = [
+  {
+    passengerName: "Juan Pérez",
+    excursionName: "Excursión Glaciar",
+    seats: 4,
+    status: "accepted",
+    excursionDate: "2024-10-12",
+    passengerId: "12345678",
+    paymentMethod: "Tarjeta de Crédito",
+    totalPaid: "$400",
+  },
+  {
+    passengerName: "María López",
+    excursionName: "Tour de Ballenas",
+    seats: 2,
+    status: "pending",
+    excursionDate: "2024-11-25",
+    passengerId: "87654321",
+    paymentMethod: "Transferencia Bancaria",
+    totalPaid: "$200",
+  },
+];
+
+export function ReservationsTable() {
+  const [reservations, setReservations] = useState(initialReservations);
+  const [selectedReservation, setSelectedReservation] = useState(null);
+
   const handleEditReservation = (reservation) => {
-    // Lógica para abrir el modal y editar la reserva
-    console.log("Editando reserva:", reservation);
+    setSelectedReservation(reservation); // Abre el modal con la reserva seleccionada
   };
-  
-  // Función para SweetAlert al modificar reserva
-  const handleSuccessAlert = () => {
+
+  const handleSaveReservation = (updatedReservation) => {
+    setReservations((prevReservations) =>
+      prevReservations.map((reservation) =>
+        reservation.passengerName === updatedReservation.passengerName
+          ? updatedReservation
+          : reservation
+      )
+    );
     Swal.fire({
       title: "¡Reserva modificada!",
       text: "La reserva fue actualizada exitosamente.",
@@ -63,126 +66,61 @@ import {
       confirmButtonText: "OK",
     });
   };
-  
-  export function ReservationsTable() {
-    return (
-      <Card className="h-full w-full">
-        <CardHeader floated={false} shadow={false} className="rounded-none">
-          <div className="mb-8 flex items-center justify-between gap-8">
-            <div>
-              <Typography variant="h5" color="blue-gray">
-                Gestión de Reservas
-              </Typography>
-              <Typography color="gray" className="mt-1 font-normal">
-                Consulta y administra todas las reservas.
-              </Typography>
-            </div>
-          </div>
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <Tabs value="all" className="w-full md:w-max">
-              <TabsHeader>
-                {TABS.map(({ label, value }) => (
-                  <Tab key={value} value={value}>
-                    &nbsp;&nbsp;{label}&nbsp;&nbsp;
-                  </Tab>
-                ))}
-              </TabsHeader>
-            </Tabs>
-          </div>
-        </CardHeader>
-  
-        {/* Quita overflow-scroll y ajusta los estilos */}
-        <CardBody className="px-0">
-          <table className="mt-4 w-full table-auto text-left">
-            <thead>
-              <tr>
-                {TABLE_HEAD.map((head, index) => (
-                  <th
-                    key={head}
-                    className="cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50/50 p-4 transition-colors hover:bg-blue-gray-50"
-                  >
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
-                    >
-                      {head}{" "}
-                      {index !== TABLE_HEAD.length - 1 && (
-                        <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
-                      )}
-                    </Typography>
-                  </th>
-                ))}
+
+  return (
+    <Card className="h-full w-full">
+      <CardHeader floated={false} shadow={false} className="rounded-none">
+        <Typography variant="h5" color="blue-gray">Gestión de Reservas</Typography>
+      </CardHeader>
+
+      <CardBody className="px-0">
+        <table className="mt-4 w-full table-auto text-left">
+          <thead>
+            <tr>
+              {TABLE_HEAD.map((head) => (
+                <th key={head} className="p-4 border-y border-blue-gray-100 bg-blue-gray-50/50">
+                  <Typography variant="small" color="blue-gray" className="flex items-center justify-between gap-2">
+                    {head} <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
+                  </Typography>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {reservations.map((reservation, index) => (
+              <tr key={reservation.passengerName}>
+                <td className="p-4 border-b border-blue-gray-50">{reservation.passengerName}</td>
+                <td className="p-4 border-b border-blue-gray-50">{reservation.excursionName}</td>
+                <td className="p-4 border-b border-blue-gray-50">{reservation.seats}</td>
+                <td className="p-4 border-b border-blue-gray-50">
+                  <Chip
+                    variant="ghost"
+                    size="sm"
+                    value={reservation.status}
+                    color={reservation.status === "accepted" ? "green" : reservation.status === "pending" ? "yellow" : "red"}
+                  />
+                </td>
+                <td className="p-4 border-b border-blue-gray-50">{reservation.excursionDate}</td>
+                <td className="p-4 border-b border-blue-gray-50">
+                  <Tooltip content="Editar Reserva">
+                    <IconButton variant="text" onClick={() => handleEditReservation(reservation)}>
+                      <PencilIcon className="h-4 w-4" />
+                    </IconButton>
+                  </Tooltip>
+                </td>
               </tr>
-            </thead>
-            
-            <tbody>
-              {TABLE_ROWS.map(
-                ({ name, excursion, people, status, date }, index) => {
-                  const isLast = index === TABLE_ROWS.length - 1;
-                  const classes = isLast
-                    ? "p-4"
-                    : "p-4 border-b border-blue-gray-50";
-  
-                  return (
-                    <tr key={name}>
-                      <td className={classes}>
-                        <Typography variant="small" color="blue-gray" className="font-normal">
-                          {name}
-                        </Typography>
-                      </td>
-                      <td className={classes}>
-                        <Typography variant="small" color="blue-gray" className="font-normal">
-                          {excursion}
-                        </Typography>
-                      </td>
-                      <td className={classes}>
-                        <Typography variant="small" color="blue-gray" className="font-normal">
-                          {people}
-                        </Typography>
-                      </td>
-                      <td className={classes}>
-                        <Chip
-                          variant="ghost"
-                          size="sm"
-                          value={status}
-                          color={status === "accepted" ? "green" : status === "pending" ? "yellow" : "red"}
-                        />
-                      </td>
-                      <td className={classes}>
-                        <Typography variant="small" color="blue-gray" className="font-normal">
-                          {date}
-                        </Typography>
-                      </td>
-                      <td className={classes}>
-                        <Tooltip content="Editar Reserva">
-                          <IconButton variant="text" onClick={() => handleEditReservation({ name, excursion, people, status, date })}>
-                            <PencilIcon className="h-4 w-4" />
-                          </IconButton>
-                        </Tooltip>
-                      </td>
-                    </tr>
-                  );
-                }
-              )}
-            </tbody>
-          </table>
-        </CardBody>
-        
-        <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
-          <Typography variant="small" color="blue-gray" className="font-normal">
-            Página 1 de 10
-          </Typography>
-          <div className="flex gap-2">
-            <Button variant="outlined" size="sm">
-              Anterior
-            </Button>
-            <Button variant="outlined" size="sm">
-              Siguiente
-            </Button>
-          </div>
-        </CardFooter>
-      </Card>
-    );
-  }
-  
+            ))}
+          </tbody>
+        </table>
+      </CardBody>
+
+      {selectedReservation && (
+        <ReservationModal
+          reservation={selectedReservation}
+          onClose={() => setSelectedReservation(null)}
+          onSave={handleSaveReservation}
+        />
+      )}
+    </Card>
+  );
+}
