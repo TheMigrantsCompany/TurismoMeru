@@ -4,11 +4,27 @@ import UserTable from '../../../components/tables/admin/UsersTable';
 import UserModal from '../../../components/modals/admin-modal/UserModal'; // Modal similar al de reservas
 
 const initialUsers = [
-  { id: 1, name: 'Juan Pérez', document: '12345678', email: 'juan@example.com', active: true },
-  { id: 2, name: 'María López', document: '87654321', email: 'maria@example.com', active: false },
-  // Más usuarios aquí
-];
-
+    { 
+      id: 1, 
+      name: 'Juan Pérez', 
+      document: '12345678', 
+      email: 'juan@example.com', 
+      active: true, 
+      excursions: [
+        { name: "Excursión A", status: "aceptada" },
+        { name: "Excursión B", status: "pendiente" },
+      ]
+    },
+    { 
+      id: 2, 
+      name: 'María López', 
+      document: '87654321', 
+      email: 'maria@example.com', 
+      active: false,
+      excursions: []
+    },
+    // Más usuarios aquí
+  ];
 export function UserManagement() {
   const [users, setUsers] = useState(initialUsers);
   const [filteredUsers, setFilteredUsers] = useState(initialUsers);
@@ -24,6 +40,14 @@ export function UserManagement() {
 
   const handleEditUser = (user) => {
     setSelectedUser(user);
+  };
+
+  const handleToggleActive = (isActive) => {
+    setUsers(prevUsers => 
+      prevUsers.map(user => 
+        user.id === selectedUser.id ? { ...user, active: isActive } : user
+      )
+    );
   };
 
   const handleSaveUser = (updatedUser) => {
@@ -42,6 +66,7 @@ export function UserManagement() {
         <UserModal
           user={selectedUser}
           onClose={() => setSelectedUser(null)}
+          onToggleActive={isActive => handleToggleActive(selectedUser.id, isActive)}
           onSave={handleSaveUser}
         />
       )}
