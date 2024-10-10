@@ -9,6 +9,8 @@ import StickyNavbar from './components/navbar/StickyNavbar';
 import ProfileForm from './views/dashboardUser/ProfileForm';
 import Reviews from './views/dashboardUser/Reviews';
 
+import { UserManagement } from './views/dashboardAdmin/dashAdminViews/UserManagement';
+
 import { ReservationManagement } from './views/dashboardAdmin/dashAdminViews/ReservationManagement';
 
 function App() {
@@ -22,6 +24,7 @@ function App() {
          <Route path="/admin" element={<DashboardAdmin />}>
           {/* Subrutas dentro de la administración */}
           <Route path="reservas" element={<ReservationManagement />} />
+          <Route path="usuarios" element={<UserManagement/>} />
           {/* Puedes añadir otras subrutas aquí */}
         </Route>
         <Route path="/user" element={<DashboardUser />} />
