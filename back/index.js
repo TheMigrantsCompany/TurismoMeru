@@ -1,16 +1,12 @@
-const express = require('express');
-const cors = require('cors');
+const server = require("./src/server");
+const { sequelize } = require("./src/config/db");
+const PORT = 3001;
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.use(cors());
-app.use(express.json());
-
-app.get('/', (req, res) => {
-  res.send('¡Backend funcionando!');
-});
-
-app.listen(PORT, () => {
-  console.log(`Servidor escuchando en http://localhost:${PORT}`);
+server.listen(PORT, async () => {
+	try {
+		await sequelize.sync({ force: false });
+		console.log(`Server listening on port http://localhost:${PORT}`);
+	} catch (error) {
+		console.error(error);
+	}
 });
