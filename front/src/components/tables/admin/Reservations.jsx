@@ -4,13 +4,6 @@ import { Card, CardHeader, Typography, CardBody, Chip, Tooltip, IconButton, Card
 import ReservationModal from '../../../components/modals/admin-modal/ReservationModal';
 import Swal from "sweetalert2";
 
-const TABS = [
-  { label: "Todas", value: "all" },
-  { label: "Aceptadas", value: "accepted" },
-  { label: "Pendientes", value: "pending" },
-  { label: "Canceladas", value: "cancelled" },
-];
-
 const TABLE_HEAD = [
   "Cliente",
   "Excursión",
@@ -41,14 +34,25 @@ const initialReservations = [
     paymentMethod: "Transferencia Bancaria",
     totalPaid: "$200",
   },
+  {
+    passengerName: "Carlos Ruiz",
+    excursionName: "Aventura en la Selva",
+    seats: 3,
+    status: "cancelled",
+    excursionDate: "2024-12-15",
+    passengerId: "12398765",
+    paymentMethod: "Efectivo",
+    totalPaid: "$300",
+  },
 ];
 
 export function ReservationsTable() {
   const [reservations, setReservations] = useState(initialReservations);
+  const [filteredReservations, setFilteredReservations] = useState(initialReservations);
   const [selectedReservation, setSelectedReservation] = useState(null);
 
   const handleEditReservation = (reservation) => {
-    setSelectedReservation(reservation); // Abre el modal con la reserva seleccionada
+    setSelectedReservation(reservation);
   };
 
   const handleSaveReservation = (updatedReservation) => {
@@ -67,10 +71,26 @@ export function ReservationsTable() {
     });
   };
 
+  const filterReservations = (status) => {
+    if (status === "all") {
+      setFilteredReservations(reservations);
+    } else {
+      setFilteredReservations(reservations.filter(reservation => reservation.status === status));
+    }
+  };
+
   return (
     <Card className="h-full w-full">
       <CardHeader floated={false} shadow={false} className="rounded-none">
         <Typography variant="h5" color="blue-gray">Gestión de Reservas</Typography>
+        
+        {/* Botones de filtrado */}
+        <div className="flex space-x-4 mt-4">
+          <Button onClick={() => filterReservations("all")} color="blue">Todas</Button>
+          <Button onClick={() => filterReservations("accepted")} color="green">Aceptadas</Button>
+          <Button onClick={() => filterReservations("pending")} color="yellow">Pendientes</Button>
+          <Button onClick={() => filterReservations("cancelled")} color="red">Canceladas</Button>
+        </div>
       </CardHeader>
 
       <CardBody className="px-0">
@@ -87,7 +107,7 @@ export function ReservationsTable() {
             </tr>
           </thead>
           <tbody>
-            {reservations.map((reservation, index) => (
+            {filteredReservations.map((reservation) => (
               <tr key={reservation.passengerName}>
                 <td className="p-4 border-b border-blue-gray-50">{reservation.passengerName}</td>
                 <td className="p-4 border-b border-blue-gray-50">{reservation.excursionName}</td>
