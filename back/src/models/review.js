@@ -5,22 +5,24 @@ module.exports = (sequelize) => {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
-      primaryKey: true
+      primaryKey: true,
+      allowNull: false // Obligatorio: siempre debe existir un ID
     },
     content: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: false // Obligatorio: el contenido de la reseña es necesario
     },
     rating: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: false, // Obligatorio: la calificación es necesaria
       validate: {
-        min: 1,
-        max: 5
+        min: 1, // Mínimo valor permitido
+        max: 5  // Máximo valor permitido
       }
     },
     userId: {
       type: DataTypes.UUID,
+      allowNull: false, // Obligatorio: debe asociarse a un usuario
       references: {
         model: 'Users',
         key: 'id'
@@ -28,6 +30,7 @@ module.exports = (sequelize) => {
     },
     serviceId: {
       type: DataTypes.UUID,
+      allowNull: false, // Obligatorio: debe asociarse a un servicio
       references: {
         model: 'Services',
         key: 'id'
@@ -35,7 +38,8 @@ module.exports = (sequelize) => {
     },
     active: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true
+      defaultValue: true, // Opcional: por defecto es verdadero, pero puede no ser necesario especificarlo
+      allowNull: false // Obligatorio: el estado debe estar definido
     }
   }, {
     timestamps: true

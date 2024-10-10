@@ -5,14 +5,16 @@ module.exports = (sequelize) => {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
-      primaryKey: true
+      primaryKey: true,
+      allowNull: false // Obligatorio: siempre debe existir un ID
     },
     bookingDate: {
       type: DataTypes.DATE,
-      allowNull: false
+      allowNull: false // Obligatorio: necesita una fecha de reserva
     },
     userId: {
       type: DataTypes.UUID,
+      allowNull: false, // Obligatorio: debe asociarse a un usuario
       references: {
         model: 'Users',
         key: 'id'
@@ -20,6 +22,7 @@ module.exports = (sequelize) => {
     },
     serviceId: {
       type: DataTypes.UUID,
+      allowNull: false, // Obligatorio: debe asociarse a un servicio
       references: {
         model: 'Services',
         key: 'id'
@@ -27,20 +30,24 @@ module.exports = (sequelize) => {
     },
     serviceOrderId: {
       type: DataTypes.UUID,
+      allowNull: true, // Opcional: puede no haber un pedido de servicio asociado
       references: {
         model: 'ServiceOrders',
         key: 'id'
       }
     },
     paymentStatus: {
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
+      allowNull: true // Opcional: el estado del pago puede no ser inmediato
     },
     seatNumber: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      allowNull: true // Opcional: el número de asiento puede no ser necesario
     },
     active: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true
+      defaultValue: true,
+      allowNull: false // Obligatorio: aunque tiene un valor por defecto, se debe especificar
     }
   }, {
     timestamps: true
