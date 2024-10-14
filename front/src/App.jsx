@@ -13,6 +13,8 @@ import { UserManagement } from './views/dashboardAdmin/dashAdminViews/UserManage
 
 import { ReservationManagement } from './views/dashboardAdmin/dashAdminViews/ReservationManagement';
 
+import { ExcursionManagement } from './views/dashboardAdmin/dashAdminViews/ExcursionManagement';
+
 function App() {
   return (
     <Router> 
@@ -25,6 +27,7 @@ function App() {
           {/* Subrutas dentro de la administración */}
           <Route path="reservas" element={<ReservationManagement />} />
           <Route path="usuarios" element={<UserManagement/>} />
+          <Route path="excursiones" element={<ExcursionManagement />} />
           {/* Puedes añadir otras subrutas aquí */}
         </Route>
         <Route path="/user" element={<DashboardUser />} />
