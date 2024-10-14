@@ -27,7 +27,7 @@ export function UserSideBar() {
       </div>
       <List>
         <ListItem
-          onClick={() => navigate("/profile")} // Redirige al formulario de perfil
+          onClick={() => navigate("/user/profile")} // Redirige al formulario de perfil
           className="cursor-pointer"
         >
           <ListItemPrefix>
@@ -36,7 +36,7 @@ export function UserSideBar() {
           Mi Perfil
         </ListItem>
         <ListItem
-          onClick={() => navigate("/reviews")} // Redirige a la vista de reviews
+          onClick={() => navigate("/user/reviews")} // Redirige a la vista de reviews
           className="cursor-pointer"
         >
           <ListItemPrefix>
