@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { UserSideBar } from '../../components/sidebars/user/UserSideBar';
 
 const ProfileForm = () => {
   const [profile, setProfile] = useState({
@@ -36,7 +37,9 @@ const ProfileForm = () => {
   };
 
   return (
+    
     <div className="max-w-xl mx-auto text-gray-700  p-6 rounded-lg shadow-lg">
+     
       <h2 className="text-2xl font-semibold mb-4">Perfil</h2>
  
 
@@ -128,6 +131,8 @@ const ProfileForm = () => {
        Guardar Cambios
       </button>
     </div>
+    
+  
   );
 };
 
