@@ -15,6 +15,8 @@ import { ExcursionManagement } from './views/dashboardAdmin/dashAdminViews/Excur
 
 import { ReviewsManagement } from './views/dashboardAdmin/dashAdminViews/ReviewManagement';
 
+import { ServiceOrderManagement } from './views/dashboardAdmin/dashAdminViews/ServiceOrderManagement';
+
 function App() {
   return (
     <Router>
@@ -23,11 +25,14 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/detail" element={<Detail />} />
         
-        {/* Ruta para la sección de administración */}
+        {/* Ruta para el Administrador */}
         <Route path="/admin" element={<DashboardAdmin />}>
           {/* Subrutas dentro de la administración */}
           <Route path="reservas" element={<ReservationManagement />} />
           <Route path="usuarios" element={<UserManagement />} />
+          <Route path="excursiones" element={<ExcursionManagement />} />
+          <Route path="reviews" element={<ReviewsManagement />} />
+          <Route path="ordenes" element={<ServiceOrderManagement />} />
         </Route>
 
         {/* Rutas para el usuario */}
@@ -36,9 +41,7 @@ function App() {
           <Route path="profile" element={<ProfileForm />} />
           <Route path="reviews" element={<Reviews />} />
           <Route path="shopping-cart" element={<ShoppingCart />} />
-          <Route path="usuarios" element={<UserManagement/>} />
-          <Route path="excursiones" element={<ExcursionManagement />} />
-          <Route path="reviews" element={<ReviewsManagement />} />
+          
           {/* Puedes añadir otras subrutas aquí */}
         </Route>
       </Routes>

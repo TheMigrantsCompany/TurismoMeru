@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import SearchInput from '../../../components/inputs/SearchInput';
 import ExcursionTable from '../../../components/tables/admin/ExcursionTable';
-import ExcursionModal from '../../../components/modals/admin-modal/ExcursionModal';
+import ExcursionModal from '../../../components/modals/admin-modal/ExcursionModal'; // Ya existente
+import NewExcursionModal from '../../../components/modals/admin-modal/NewExcursionModal'; // Nuevo modal
 
 const initialExcursions = [
   {
@@ -29,6 +30,7 @@ export function ExcursionManagement() {
   const [excursions, setExcursions] = useState(initialExcursions);
   const [filteredExcursions, setFilteredExcursions] = useState(initialExcursions);
   const [selectedExcursion, setSelectedExcursion] = useState(null);
+  const [isCreating, setIsCreating] = useState(false); // Nuevo estado para creación de excursión
 
   useEffect(() => {
     // Aquí iría la consulta al backend con fetch para obtener todas las excursiones
@@ -61,17 +63,39 @@ export function ExcursionManagement() {
     setSelectedExcursion(null);
   };
 
+  const handleCreateExcursion = (newExcursion) => {
+    // Añadir la nueva excursión al estado
+    setExcursions([...excursions, { ...newExcursion, id: excursions.length + 1 }]);
+    setIsCreating(false); // Cierra el modal de creación
+  };
+
   return (
     <div className="top-5 gap-5 flex flex-col w-full h-full">
       <SearchInput onSearch={handleSearch} />
       <h2 className="text-xl text-black font-semibold mb-4">Gestión de Excursiones</h2>
+      
+      <button
+        className="p-2 bg-blue-500 text-white rounded-md mb-4"
+        onClick={() => setIsCreating(true)} // Abrir modal para crear excursión
+      >
+        Crear Excursión
+      </button>
+      
       <ExcursionTable excursions={filteredExcursions} onEdit={handleEditExcursion} />
+      
       {selectedExcursion && (
         <ExcursionModal
           excursion={selectedExcursion}
           onClose={() => setSelectedExcursion(null)}
-          onToggleActive={isActive => handleToggleActive(isActive)}
+          onToggleActive={handleToggleActive}
           onSave={handleSaveExcursion}
+        />
+      )}
+      
+      {isCreating && (
+        <NewExcursionModal // Modal para crear nueva excursión
+          onClose={() => setIsCreating(false)}
+          onSave={handleCreateExcursion}
         />
       )}
     </div>
