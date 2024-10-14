@@ -16,12 +16,12 @@ export function Detail() {
           alt="pink blazer"
           className="h-[36rem]"
         />
-        <div>
+        <div className="mb-12"> 
           <Typography className="mb-4" variant="h3">
             Premium Blazer
           </Typography>
           <Typography variant="h5">$1,490</Typography>
-          <Typography className="!mt-4 text-base font-normal leading-[27px] !text-gray-500">
+          <Typography className="!mt-4 text-base font-normal leading-[27px] text-black">
             As we live, our hearts turn colder. Cause pain is what we go through
             as we become older. We get insulted by others, lose trust for those
             others. We get back stabbed by friends. It becomes harder for us to
@@ -31,7 +31,7 @@ export function Detail() {
           </Typography>
           <div className="my-8 flex items-center gap-2">
             <Rating value={4} className="text-amber-500" />
-            <Typography className="!text-sm font-bold !text-gray-700">
+            <Typography className="!text-sm font-bold text-black">
               4.0/5 (100 reviews)
             </Typography>
           </div>
@@ -53,6 +53,31 @@ export function Detail() {
           </div>
         </div>
       </div>
+
+      
+      <blockquote className="flex flex-col items-start p-4 mt-16 pl-80"> {/* Se ajusta el margen superior */}
+        <p className="max-w-2xl text-sm font-medium text-left text-black md:text-base lg:text-lg">
+          "I recently used this website for a purchase and I was extremely
+          satisfied with the ease of use and the variety of options available.
+          The checkout process was seamless and the delivery was prompt."
+        </p>
+        <footer className="flex items-center gap-3 mt-4 md:mt-6">
+          <img
+            className="flex-shrink-0 w-10 h-10 border rounded-full border-black/10"
+            src="https://loremflickr.com/g/200/200/girl"
+            alt="Jane Doe"
+            loading="lazy"
+          />
+          <a
+            href="#"
+            target="_blank"
+            className="inline-block font-bold tracking-tight text-black"
+          >
+            <p>Jane Doe</p>
+            <p className="font-medium text-black/60">Founder of XYZ</p>
+          </a>
+        </footer>
+      </blockquote>
     </section>
   );
 }
