@@ -13,10 +13,10 @@ import {
   ShoppingBagIcon,
   PowerIcon,
 } from "@heroicons/react/24/solid";
-import { useNavigate } from "react-router-dom"; // Importa useNavigate
+import { useNavigate } from "react-router-dom"; 
 
 export function UserSideBar() {
-  const navigate = useNavigate(); // Define navigate
+  const navigate = useNavigate(); 
 
   return (
     <Card className="h-[calc(100vh-2rem)] w-full max-w-[20rem] p-4 shadow-xl shadow-blue-gray-900/5">
@@ -27,7 +27,7 @@ export function UserSideBar() {
       </div>
       <List>
         <ListItem
-          onClick={() => navigate("/user/profile")} // Redirige al formulario de perfil
+          onClick={() => navigate("/user/profile")} 
           className="cursor-pointer"
         >
           <ListItemPrefix>

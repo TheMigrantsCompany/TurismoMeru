@@ -40,7 +40,7 @@ function App() {
           {/* Asegúrate de que estas rutas están anidadas */}
           <Route path="profile" element={<ProfileForm />} />
           <Route path="reviews" element={<Reviews />} />
-          <Route path="shopping-cart" element={<ShoppingCart />} />
+          <Route path="shoppingcart" element={<ShoppingCart />} />
           
           {/* Puedes añadir otras subrutas aquí */}
         </Route>
