@@ -44,7 +44,10 @@ export function UserSideBar() {
           </ListItemPrefix>
           Reviews
         </ListItem>
-        <ListItem>
+        <ListItem
+          onClick={() => navigate("/user/compras")} 
+          className="cursor-pointer"
+        >
           <ListItemPrefix>
             <ShoppingBagIcon className="h-5 w-5" />
           </ListItemPrefix>
