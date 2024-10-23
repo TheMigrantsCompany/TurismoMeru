@@ -36,6 +36,10 @@ module.exports = (sequelize) => {
         key: 'id_Service',
       }
     },
+    serviceTitle:{    
+      type: DataTypes.STRING,
+      allowNull: true  //El título del servicio se asigna luego
+    },
     active: {
       type: DataTypes.BOOLEAN,
       defaultValue: true, // Opcional: por defecto es verdadero, pero puede no ser necesario especificarlo
