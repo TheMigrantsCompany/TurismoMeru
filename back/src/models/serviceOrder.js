@@ -2,43 +2,40 @@ const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
   return sequelize.define('ServiceOrder', {
-    id: {
+    id_ServiceOrder: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
-      allowNull: false // Obligatorio: siempre debe existir un ID
+      allowNull: false,
     },
     orderDate: {
       type: DataTypes.DATE,
-      allowNull: false // Obligatorio: debe haber una fecha de pedido
+      allowNull: false,
     },
     userId: {
       type: DataTypes.UUID,
-      allowNull: false, // Obligatorio: debe asociarse a un usuario
+      allowNull: false,
       references: {
         model: 'Users',
-        key: 'id'
-      }
-    },
-    serviceId: {
-      type: DataTypes.UUID,
-      allowNull: false, // Obligatorio: debe asociarse a un servicio
-      references: {
-        model: 'Services',
-        key: 'id'
+        key: 'id_User'
       }
     },
     paymentMethod: {
       type: DataTypes.STRING,
-      allowNull: true // Opcional: puede no ser necesario especificar un método de pago
+      allowNull: true,
     },
     paymentInformation: {
-      type: DataTypes.STRING,
-      allowNull: true // Opcional: puede no ser necesario especificar información de pago
+      type: DataTypes.JSONB,
+      allowNull: true //
     },
     total: {
       type: DataTypes.DECIMAL(10, 2),
-      allowNull: false // Obligatorio: el total del pedido es necesario
+      allowNull: false,
+    },
+    paymentStatus: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'Pendiente' // Puede ser "Pendiente" o "Pagado"
     }
   }, {
     timestamps: true

@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
   return sequelize.define('Booking', {
-    id: {
+    id_Booking: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
@@ -17,7 +17,7 @@ module.exports = (sequelize) => {
       allowNull: false, // Obligatorio: debe asociarse a un usuario
       references: {
         model: 'Users',
-        key: 'id'
+        key: 'id_User',
       }
     },
     serviceId: {
@@ -25,7 +25,7 @@ module.exports = (sequelize) => {
       allowNull: false, // Obligatorio: debe asociarse a un servicio
       references: {
         model: 'Services',
-        key: 'id'
+        key: 'id_Service',
       }
     },
     serviceOrderId: {
@@ -33,12 +33,16 @@ module.exports = (sequelize) => {
       allowNull: true, // Opcional: puede no haber un pedido de servicio asociado
       references: {
         model: 'ServiceOrders',
-        key: 'id'
+        key: 'id_ServiceOrder',
       }
     },
-    paymentStatus: {
+    serviceTitle: { // 
       type: DataTypes.STRING,
-      allowNull: true // Opcional: el estado del pago puede no ser inmediato
+      allowNull: false
+    },
+    DNI_Personal: { // 
+      type: DataTypes.STRING,
+      allowNull: false
     },
     seatNumber: {
       type: DataTypes.INTEGER,
