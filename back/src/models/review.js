@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
   return sequelize.define('Review', {
-    id: {
+    id_Review: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
@@ -25,7 +25,7 @@ module.exports = (sequelize) => {
       allowNull: false, // Obligatorio: debe asociarse a un usuario
       references: {
         model: 'Users',
-        key: 'id'
+        key: 'id_User',
       }
     },
     serviceId: {
@@ -33,7 +33,7 @@ module.exports = (sequelize) => {
       allowNull: false, // Obligatorio: debe asociarse a un servicio
       references: {
         model: 'Services',
-        key: 'id'
+        key: 'id_Service',
       }
     },
     active: {

@@ -1,7 +1,7 @@
 const { User } = require('../../config/db');
 
-const deleteUserByIdController = async (id) => {
-  const user = await User.findByPk(id);
+const deleteUserByIdController = async (id_User) => {
+  const user = await User.findByPk(id_User);
   if (!user) return null;
 
   await user.destroy();
