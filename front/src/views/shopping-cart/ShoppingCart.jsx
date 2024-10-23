@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
+import Checkout from '../../components/checkout/CheckOut';
 
 const ShoppingCart = () => {
   const [cartItems, setCartItems] = useState([
     { id: 1, name: 'Camiseta básica', color: 'Tierra de siena', size: 'Grande', price: 32, quantity: 1, stock: true },
     { id: 2, name: 'Camiseta básica', color: 'Negro', size: 'Grande', price: 32, quantity: 1, stock: false },
   ]);
+  
+  const [showCheckout, setShowCheckout] = useState(false); // Estado para mostrar el Checkout
 
   // Función para actualizar la cantidad de un producto
   const updateQuantity = (id, quantity) => {
@@ -21,8 +24,8 @@ const ShoppingCart = () => {
     0
   );
 
-  const shipping = 5; // Estimación de envío fija
-  const taxes = subtotal * 0.1; // Suponiendo un 10% de impuestos
+  const shipping = 5; 
+  const taxes = subtotal * 0.1; 
   const total = subtotal + shipping + taxes;
 
   return (
@@ -68,27 +71,40 @@ const ShoppingCart = () => {
           ))}
         </div>
 
-        <div className="w-full md:w-1/3 p-6 bg-gray-50 rounded-lg shadow-lg">
-          <h2 className="text-xl font-semibold mb-4 text-black">Resumen del pedido</h2>
-          <div className="flex justify-between mb-2 text-black">
-            <span>Total parcial:</span>
-            <span>${subtotal.toFixed(2)}</span>
+        {/* Contenedor para el Resumen del pedido y Checkout */}
+        <div className="w-full md:w-1/3 space-y-6">
+          <div className="p-6 bg-gray-50 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold mb-4 text-black">Resumen del pedido</h2>
+            <div className="flex justify-between mb-2 text-black">
+              <span>Total parcial:</span>
+              <span>${subtotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between mb-2 text-black">
+              <span>Estimación de envío:</span>
+              <span>${shipping.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between mb-4 text-black">
+              <span>Estimación de impuestos:</span>
+              <span>${taxes.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-semibold text-lg mb-4 text-black">
+              <span>Total del pedido:</span>
+              <span>{total.toFixed(2)} dólares</span>
+            </div>
+            <button 
+              className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+              onClick={() => setShowCheckout(true)} // Mostrar el Checkout al hacer clic
+            >
+              Verificar
+            </button>
           </div>
-          <div className="flex justify-between mb-2 text-black">
-            <span>Estimación de envío:</span>
-            <span>${shipping.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between mb-4 text-black">
-            <span>Estimación de impuestos:</span>
-            <span>${taxes.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between font-semibold text-lg mb-4 text-black">
-            <span>Total del pedido:</span>
-            <span>{total.toFixed(2)} dólares</span>
-          </div>
-          <button className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors">
-            Verificar
-          </button>
+
+          {/* Mostrar el componente Checkout cuando showCheckout sea true */}
+          {showCheckout && (
+            <div className="p-6 bg-gray-50 rounded-lg shadow-lg">
+              <Checkout total={total} />
+            </div>
+          )}
         </div>
       </div>
     </div>
