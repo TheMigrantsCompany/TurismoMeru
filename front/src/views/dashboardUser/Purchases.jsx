@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Purchases = ({ purchases }) => {
-  
+  const navigate = useNavigate();
+
   const samplePurchases = [
     {
       id: 1,
@@ -27,7 +29,10 @@ const Purchases = ({ purchases }) => {
     },
   ];
 
-  
+  const handleViewDetails = (id) => {
+    navigate(`/excursion/${id}`); // Redirige al detalle de la excursión con el ID
+  };
+
   const dataToDisplay = purchases && purchases.length > 0 ? purchases : samplePurchases;
 
   return (
@@ -58,7 +63,10 @@ const Purchases = ({ purchases }) => {
                   </p>
                 </div>
               </div>
-              <button className="mt-4 bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors">
+              <button
+                onClick={() => handleViewDetails(purchase.id)}
+                className="mt-4 bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors"
+              >
                 Ver detalles
               </button>
             </div>

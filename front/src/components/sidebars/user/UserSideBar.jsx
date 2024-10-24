@@ -52,7 +52,7 @@ export function UserSideBar() {
             <ShoppingBagIcon className="h-5 w-5" />
           </ListItemPrefix>
           Mis Compras
-          <ListItemSuffix></ListItemSuffix>
+        
         </ListItem>
         <ListItem>
           <ListItemPrefix>
