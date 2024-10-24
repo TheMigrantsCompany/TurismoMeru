@@ -14,16 +14,17 @@ export const signInWithGoogle = async () => {
             Rol: true 
         };
         await sendUserInfoToBackend(userInfo, token);
-        return user;  // Retorna el usuario autenticado
+        return user;
     } catch (error) {
-        console.error('Error signing up with email:', error);
-        throw error;  // Asegúrate de propagar el error para manejarlo en el componente
+        console.error('Error signing in with Google:', error);
+        alert('Hubo un error al iniciar sesión. Por favor, intenta nuevamente.');
+        throw error;
     }
 };
 
 const sendUserInfoToBackend = async (userInfo, token) => {
   try {
-    await axios.post("https://lubricentro.onrender.com/users", userInfo, {
+    await axios.post("http://localhost:3001/user/", userInfo, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`
@@ -31,6 +32,7 @@ const sendUserInfoToBackend = async (userInfo, token) => {
     });
   } catch (error) {
     console.error("Error sending user info to backend:", error);
+    alert('Hubo un error al enviar la información del usuario al servidor.');
   }
 };
 
