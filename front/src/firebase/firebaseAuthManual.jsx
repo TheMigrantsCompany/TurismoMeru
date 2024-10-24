@@ -4,7 +4,7 @@ import {
     auth,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword
-} from "./config";
+} from "../../firebase/confing";
 import { updateProfile } from "firebase/auth";
 
 export const signUpWithEmail = async (email, password, displayName) => {
@@ -23,6 +23,7 @@ export const signUpWithEmail = async (email, password, displayName) => {
         await sendUserInfotoBackend(userInfo, token);
     } catch (error) {
         console.error("Hubo un error al iniciar sesión con email.", error);
+        throw error;  
     }
 };
 
@@ -39,19 +40,19 @@ export const signInWithEmail = async (email, password) => {
         await sendUserInfotoBackend(userInfo, token);
     } catch (error) {
         if (error.code === "auth/user-disabled") {
-            // Si el usuario está desactivado, no continuar con el inicio de sesión
             alert("Esta cuenta está desactivada. Por favor, contacta al administrador.");
             window.location.href = '/';
             return;
-		} else {
-			console.error("Error signing in with email:", error);
-		}
+        } else {
+            console.error("Error signing in with email:", error);
+            throw error;  
+        }
     }
 };
 
 const sendUserInfotoBackend = async (userInfo, token) => {
 	try {
-		await axios.post("https://lubricentro.onrender.com/users", userInfo, {
+		await axios.post("http://localhost:3001/user/", userInfo, {
 			headers: {
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${token}`
@@ -66,14 +67,24 @@ const SignUpForm = () => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [displayName, setDisplayName] = useState("");
+	const [error, setError] = useState(null);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		await signUpWithEmail(email, password, displayName);
+		try {
+			await signUpWithEmail(email, password, displayName);
+			setEmail("");
+			setPassword("");
+			setDisplayName("");
+			setError(null);
+		} catch (err) {
+			setError("Hubo un error al registrarse. Por favor, intente nuevamente.");
+		}
 	};
 
 	return (
 		<form onSubmit={handleSubmit} className="space-y-4">
+			{error && <p className="text-red-500">{error}</p>}
 			<input
 				type="text"
 				value={displayName}
@@ -111,14 +122,23 @@ const SignUpForm = () => {
 const SignInForm = () => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [error, setError] = useState(null);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		await signInWithEmail(email, password);
+		try {
+			await signInWithEmail(email, password);
+			setEmail("");
+			setPassword("");
+			setError(null);
+		} catch (err) {
+			setError("Hubo un error al iniciar sesión. Por favor, verifique sus credenciales.");
+		}
 	};
 
 	return (
 		<form onSubmit={handleSubmit} className="space-y-4">
+			{error && <p className="text-red-500">{error}</p>}
 			<input
 				type="email"
 				value={email}
