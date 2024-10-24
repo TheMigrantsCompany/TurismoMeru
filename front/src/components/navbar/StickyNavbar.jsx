@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { auth } from "../../firebase/confing";
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import ShoppingCartIcon from "@heroicons/react/24/outline/ShoppingCartIcon";
 
 export default function StickyNavbar() {
   const [user, setUser] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar el modal
+  const provider = new GoogleAuthProvider();
 
   // Monitorea el estado de autenticación
   useEffect(() => {
@@ -14,17 +16,30 @@ export default function StickyNavbar() {
     return () => unsubscribe();
   }, []);
 
-  // Función para iniciar sesión (ejemplo simple)
-  const handleLogin = async () => {
+  // Función para iniciar sesión con email y contraseña
+  const handleEmailLogin = async () => {
     const email = prompt("Ingrese su correo electrónico:");
     const password = prompt("Ingrese su contraseña:");
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
       alert("Inicio de sesión exitoso");
+      setIsModalOpen(false); // Cierra el modal después del inicio de sesión
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       alert("Error al iniciar sesión: " + error.message);
+    }
+  };
+
+  // Función para iniciar sesión con Google
+  const handleGoogleLogin = async () => {
+    try {
+      await signInWithPopup(auth, provider);
+      alert("Inicio de sesión con Google exitoso");
+      setIsModalOpen(false); // Cierra el modal después del inicio de sesión
+    } catch (error) {
+      console.error("Error al iniciar sesión con Google:", error);
+      alert("Error al iniciar sesión con Google: " + error.message);
     }
   };
 
@@ -65,9 +80,16 @@ export default function StickyNavbar() {
         <div className="relative inline-block text-left">
           <div>
             {user ? (
-              // Si el usuario está autenticado, muestra su correo y opción para cerrar sesión
+              // Si el usuario está autenticado, muestra su correo, foto de perfil y opción para cerrar sesión
               <div className="flex items-center">
-                <span className="ml-2">Hola, {user.email}</span>
+                {user.photoURL && (
+                  <img
+                    src={user.photoURL}
+                    alt="Foto de perfil"
+                    className="w-8 h-8 rounded-full mr-2"
+                  />
+                )}
+                <span className="ml-2">Hola, {user.displayName || user.email}</span>
                 <button
                   onClick={handleLogout}
                   className="ml-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
@@ -76,17 +98,42 @@ export default function StickyNavbar() {
                 </button>
               </div>
             ) : (
-              // Si no está autenticado, muestra la opción para iniciar sesión
-              <button
-                onClick={handleLogin}
-                className="flex items-center text-gray-600 dark:text-gray-300 focus:outline-none"
-              >
-                <svg className="w-2 h-1 fill-current" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M0 0h24v24H0z" fill="none" />
-                  <path d="M12 15.36l4.52 2.236-.865-5.044 3.664-3.682-5.047-.733L12 2l-1.748 5.184-5.048.733 3.664 3.682-.865 5.044L12 15.36z" />
-                </svg>
-                <span className="ml-2">Iniciar Sesión</span>
-              </button>
+              // Si no está autenticado, muestra un botón para elegir método de inicio de sesión
+              <div>
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="flex items-center text-gray-600 dark:text-gray-300 focus:outline-none px-3 py-1 bg-blue-50 rounded hover:bg-blue-600"
+                >
+                  Iniciar Sesión
+                </button>
+
+                {/* Modal para elegir método de autenticación */}
+                {isModalOpen && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white rounded-lg shadow-lg p-6">
+                      <h2 className="text-lg font-semibold mb-4">Elige un método de autenticación</h2>
+                      <button
+                        onClick={handleEmailLogin}
+                        className="w-full mb-2 px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700"
+                      >
+                        Iniciar Sesión con Email
+                      </button>
+                      <button
+                        onClick={handleGoogleLogin}
+                        className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                      >
+                        Iniciar Sesión con Google
+                      </button>
+                      <button
+                        onClick={() => setIsModalOpen(false)}
+                        className="mt-4 w-full px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -94,3 +141,4 @@ export default function StickyNavbar() {
     </nav>
   );
 }
+
