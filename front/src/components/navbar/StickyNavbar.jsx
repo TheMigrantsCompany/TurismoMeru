@@ -24,6 +24,7 @@ export default function StickyNavbar() {
       alert("Inicio de sesión exitoso");
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
+      alert("Error al iniciar sesión: " + error.message);
     }
   };
 
@@ -34,6 +35,7 @@ export default function StickyNavbar() {
       alert("Sesión cerrada exitosamente");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
+      alert("Error al cerrar sesión: " + error.message);
     }
   };
 

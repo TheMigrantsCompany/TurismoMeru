@@ -1,4 +1,4 @@
-import { auth, googleProvider } from './config';
+import { auth, googleProvider } from "../../firebase/confing";
 import { signInWithPopup, updateProfile } from 'firebase/auth';
 import axios from 'axios';
 

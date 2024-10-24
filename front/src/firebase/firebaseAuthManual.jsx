@@ -4,7 +4,7 @@ import {
     auth,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword
-} from "./config";
+} from "../../firebase/confing";
 import { updateProfile } from "firebase/auth";
 
 export const signUpWithEmail = async (email, password, displayName) => {
