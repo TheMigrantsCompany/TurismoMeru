@@ -1,5 +1,5 @@
 import './App.css';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import Home from './views/home/Home';
 import Detail from './views/detail/Detail';
 import { DashboardAdmin } from './views/dashboardAdmin/DashboardAdmin';
@@ -17,7 +17,7 @@ import { ServiceOrderManagement } from './views/dashboardAdmin/dashAdminViews/Se
 
 function App() {
   return (
-    <Router>
+    <>
       <StickyNavbar />
       <Routes>
         <Route path="/" element={<Home />} />
@@ -35,16 +35,13 @@ function App() {
 
         {/* Rutas para el usuario */}
         <Route path="/user" element={<DashboardUser />}>
-          {/* Asegúrate de que estas rutas están anidadas */}
           <Route path="profile" element={<ProfileForm />} />
           <Route path="reviews" element={<Reviews />} />
           <Route path="shoppingcart" element={<ShoppingCart />} />
           <Route path="compras" element={<Purchases />} />
-          
-          {/* Puedes añadir otras subrutas aquí */}
         </Route>
       </Routes>
-    </Router>
+    </>
   );
 }
 
