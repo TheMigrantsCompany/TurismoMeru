@@ -20,10 +20,7 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onSave }) => {
           <p className="text-gray-800">{excursion.description}</p>
         </div>
 
-        <div className="mb-4">
-          <label className="block font-bold text-gray-800">Capacidad:</label>
-          <p className="text-gray-800">{excursion.capacity}</p>
-        </div>
+      
 
         <div className="mb-4">
           <label className="block font-bold text-gray-800">Precio:</label>

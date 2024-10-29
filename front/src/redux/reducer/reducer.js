@@ -2,12 +2,13 @@ import {
     CREATE_EXCURSION_FAILURE,
     CREATE_EXCURSION_REQUEST,
     CREATE_EXCURSION_SUCCESS,
+    GET_ALL_SERVICES,
 } from "../actions/types";
 
 const initialState = {
     excursion: {
         loading: false,
-        excursion: null,
+        excursion: [],
         error: null,
     }
 };
@@ -20,9 +21,16 @@ const rootReducer = (state = initialState, action) => {
             return { ...state, loading: false, excursion: action.payload, error: null };
         case CREATE_EXCURSION_FAILURE:
             return { ...state, loading: false, error: action.payload };
+
+         case GET_ALL_SERVICES:
+                return {
+                  ...state,
+                  excursions: action.payload
+                };
         default:
             return state;
     }
+    
 };
 
 export default rootReducer;

@@ -75,11 +75,11 @@ export function ExcursionManagement() {
       <h2 className="text-xl text-black font-semibold mb-4">Gestión de Excursiones</h2>
       
       <button
-        className="p-2 bg-blue-500 text-white rounded-md mb-4"
-        onClick={() => setIsCreating(true)} // Abrir modal para crear excursión
-      >
-        Crear Excursión
-      </button>
+  className="text-sm  px-8 bg-blue-500 text-white rounded-md mb-4 mr-auto" // Alineado a la izquierda y tamaño ajustado
+  onClick={() => setIsCreating(true)} // Abrir modal para crear excursión
+>
+  Crear Excursión
+</button>
       
       <ExcursionTable excursions={filteredExcursions} onEdit={handleEditExcursion} />
       

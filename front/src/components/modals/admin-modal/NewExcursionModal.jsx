@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createExcursion } from "../../../redux/actions/actions";
+import { createExcursion, getAllServices } from "../../../redux/actions/actions";
 
 const NewExcursionModal = ({ onClose }) => {
   const dispatch = useDispatch();
@@ -23,18 +23,16 @@ const NewExcursionModal = ({ onClose }) => {
     guides: '',
     stock: 0,
     active: true,
+    
   });
 
   const [formErrors, setFormErrors] = useState({});
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setExcursionData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-
-    setFormErrors((prevErrors) => ({ ...prevErrors, [name]: '' }));
+    setExcursionData({
+      ...excursionData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handlePhotoChange = (e) => {
@@ -48,7 +46,7 @@ const NewExcursionModal = ({ onClose }) => {
 
   const validateForm = () => {
     const errors = {};
-
+    
     if (!excursionData.title) errors.title = 'El nombre es obligatorio';
     if (!excursionData.description) errors.description = 'La descripción es obligatoria';
     if (!excursionData.price) errors.price = 'El precio es obligatorio';
@@ -57,37 +55,41 @@ const NewExcursionModal = ({ onClose }) => {
     return errors;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const errors = validateForm();
     if (Object.keys(errors).length) {
-      setFormErrors(errors);
-      return;
+        setFormErrors(errors);  
+        return; 
     }
 
     setFormErrors({});
-    dispatch(createExcursion(excursionData));
-    onClose();
-  };
+    await dispatch(createExcursion(excursionData));
+    dispatch(getAllServices()); 
+    onClose();  
+};
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-75">
-      <div className="bg-white p-8 rounded-lg max-w-md w-full relative z-10 overflow-y-auto max-h-[90vh] shadow-lg">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-6 text-center">Crear Nueva Excursión</h2>
+
+ <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-75">
+  <div className="bg-white p-8 rounded-lg max-w-md w-full relative z-10 overflow-y-auto max-h-[90vh] shadow-lg">
+    <h2 className="text-2xl font-semibold text-gray-700 mb-6 text-center">Crear Nueva Excursión</h2>
+    
 
         {loading && <p className="text-center text-blue-500">Guardando...</p>}
         {error && <p className="text-center text-red-500">Error: {error}</p>}
 
         <div className="space-y-4">
+          
           <div>
             <label className="block text-sm text-gray-600 font-medium mb-1">Nombre de la Excursión:</label>
             <input
-              type="text"
-              name="title"
-              value={excursionData.title}
-              onChange={handleChange}
-              className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
+             type="text"
+             name="title"
+             value={excursionData.title || ""}
+             onChange={handleChange}
+             className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
             />
-            {formErrors.title && <p className="text-red-500 text-sm">{formErrors.title}</p>}
+            {formErrors.name && <p className="text-red-500 text-sm">{formErrors.name}</p>}
           </div>
 
           <div>
@@ -136,16 +138,7 @@ const NewExcursionModal = ({ onClose }) => {
             />
           </div>
 
-          <div>
-            <label className="block text-sm text-gray-600 font-medium mb-1">Capacidad:</label>
-            <input
-              type="number"
-              name="capacity"
-              value={excursionData.capacity}
-              onChange={handleChange}
-              className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-            />
-          </div>
+         
 
           <div>
             <label className="block text-sm text-gray-600 font-medium mb-1">Duración:</label>
