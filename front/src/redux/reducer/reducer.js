@@ -3,6 +3,7 @@ import {
     CREATE_EXCURSION_REQUEST,
     CREATE_EXCURSION_SUCCESS,
     GET_ALL_SERVICES,
+    DELETE_SERVICE,
 } from "../actions/types";
 
 const initialState = {
@@ -27,6 +28,11 @@ const rootReducer = (state = initialState, action) => {
                   ...state,
                   excursions: action.payload
                 };
+         case DELETE_SERVICE:
+                return {
+                  ...state,
+                  excursions: state.excursions.filter(excursion => excursion.title !== action.payload)
+                    };
         default:
             return state;
     }
