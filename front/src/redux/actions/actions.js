@@ -5,6 +5,7 @@ import {
     CREATE_EXCURSION_SUCCESS,
     GET_ALL_SERVICES,
     DELETE_SERVICE,
+    TOGGLE_SERVICE_STATUS_SUCCESS,
 } from "./types";
 
 export const createExcursion = (excursionData) => async (dispatch) => {
@@ -44,3 +45,12 @@ export const createExcursion = (excursionData) => async (dispatch) => {
         throw error;
     }
 }
+
+export const toggleServiceActiveStatus = (id_Service) => async (dispatch) => {
+  try {
+    const response = await axios.patch(`http://localhost:3001/service/${id_Service}/toggle`);
+    dispatch({ type: 'TOGGLE_SERVICE_STATUS_SUCCESS', payload: response.data });
+  } catch (error) {
+    console.error('Error toggling service status:', error);
+  }
+};

@@ -1,8 +1,8 @@
 import React from 'react';
 
-const ExcursionModal = ({ excursion, onClose, onToggleActive, onSave }) => {
-  const handleStatusChange = (status) => {
-    onToggleActive(status === 'active');
+const ExcursionModal = ({ excursion, onClose, onToggleActive }) => {
+  const handleStatusChange = () => {
+    onToggleActive(excursion.id_Service); 
   };
 
   return (
@@ -20,8 +20,6 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onSave }) => {
           <p className="text-gray-800">{excursion.description}</p>
         </div>
 
-      
-
         <div className="mb-4">
           <label className="block font-bold text-gray-800">Precio:</label>
           <p className="text-gray-800">{excursion.price}</p>
@@ -29,13 +27,13 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onSave }) => {
 
         <div className="flex justify-center space-x-4 mb-4">
           <button
-            onClick={() => handleStatusChange('active')}
+            onClick={handleStatusChange}
             className={`p-2 rounded ${excursion.active ? 'bg-green-500 text-white' : 'bg-gray-300'}`}
           >
             Activa
           </button>
           <button
-            onClick={() => handleStatusChange('inactive')}
+            onClick={handleStatusChange}
             className={`p-2 rounded ${!excursion.active ? 'bg-red-500 text-white' : 'bg-gray-300'}`}
           >
             Inactiva
