@@ -11,7 +11,7 @@ const selectExcursions = createSelector(
     (excursions) => excursions || []
 );
 
-const ExcursionTable = ({ onEdit }) => {
+const ExcursionTable = () => {
     const dispatch = useDispatch();
     const excursions = useSelector(selectExcursions);
     const [filteredExcursions, setFilteredExcursions] = useState([]);
@@ -45,7 +45,10 @@ const ExcursionTable = ({ onEdit }) => {
     };
 
     const handleToggleActiveStatus = (id_Service) => {
-        dispatch(toggleServiceActiveStatus(id_Service));
+        dispatch(toggleServiceActiveStatus(id_Service))
+            .then(() => {
+                dispatch(getAllServices());
+            });
     };
 
     const handleEditClick = (excursion) => {
@@ -69,19 +72,19 @@ const ExcursionTable = ({ onEdit }) => {
                         <th className="text-gray-900">Descripción</th>
                         <th className="text-gray-900">Capacidad</th>
                         <th className="text-gray-900">Precio</th>
-                        <th className="text-gray-900">Reservas</th>
+                        
                         <th className="text-gray-900">Estado</th>
                         <th className="text-gray-900">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {memoizedExcursions.map((excursion) => (
-                        <tr key={excursion.id || `${excursion.name}-${Math.random()}`}>
+                        <tr key={excursion.id || `${excursion.title}-${Math.random()}`}>
                             <td className="text-gray-900">{excursion.title}</td>
                             <td className="text-gray-900">{excursion.description}</td>
                             <td className="text-gray-900">{excursion.stock}</td>
                             <td className="text-gray-900">{excursion.price}</td>
-                            <td className="text-gray-900">{excursion.reservations}</td>
+                           
                             <td>
                                 <Chip color={excursion.active ? "green" : "red"} value={excursion.active ? "Activa" : "Inactiva"} />
                             </td>
@@ -110,4 +113,3 @@ const ExcursionTable = ({ onEdit }) => {
 };
 
 export default ExcursionTable;
-
