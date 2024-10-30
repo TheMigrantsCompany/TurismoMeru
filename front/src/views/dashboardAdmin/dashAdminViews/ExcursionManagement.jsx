@@ -1,46 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import SearchInput from '../../../components/inputs/SearchInput';
 import ExcursionTable from '../../../components/tables/admin/ExcursionTable';
-import ExcursionModal from '../../../components/modals/admin-modal/ExcursionModal'; // Ya existente
-import NewExcursionModal from '../../../components/modals/admin-modal/NewExcursionModal'; // Nuevo modal
-
-const initialExcursions = [
-  {
-    id: 1,
-    name: 'Excursión A',
-    description: 'Una hermosa excursión',
-    capacity: 20,
-    price: 100,
-    active: true,
-    reservations: 5
-  },
-  {
-    id: 2,
-    name: 'Excursión B',
-    description: 'Otra excursión asombrosa',
-    capacity: 15,
-    price: 80,
-    active: false,
-    reservations: 0
-  },
-  // Más excursiones
-];
+import ExcursionModal from '../../../components/modals/admin-modal/ExcursionModal'; 
+import NewExcursionModal from '../../../components/modals/admin-modal/NewExcursionModal'; 
+import { useDispatch } from 'react-redux';
+import { getAllServices } from '../../../redux/actions/actions'; // Asegúrate de tener esta acción definida
 
 export function ExcursionManagement() {
-  const [excursions, setExcursions] = useState(initialExcursions);
-  const [filteredExcursions, setFilteredExcursions] = useState(initialExcursions);
+  const [excursions, setExcursions] = useState([]); // Inicializa como un array vacío
+  const [filteredExcursions, setFilteredExcursions] = useState([]);
   const [selectedExcursion, setSelectedExcursion] = useState(null);
-  const [isCreating, setIsCreating] = useState(false); // Nuevo estado para creación de excursión
+  const [isCreating, setIsCreating] = useState(false); // Estado para creación de excursión
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    // Aquí iría la consulta al backend con fetch para obtener todas las excursiones
-    // fetch('/services').then(res => res.json()).then(data => setExcursions(data));
-  }, []);
+    // Aquí puedes llamar a tu acción para obtener las excursiones
+    const fetchExcursions = async () => {
+      const response = await dispatch(getAllServices()); // Ajusta según cómo se devuelvan las excursiones
+      setExcursions(response); // Asegúrate de que `response` contenga el array de excursiones
+      setFilteredExcursions(response);
+    };
+
+    fetchExcursions();
+  }, [dispatch]);
 
   const handleSearch = (query) => {
     const lowercasedQuery = query.toLowerCase();
     setFilteredExcursions(excursions.filter(excursion =>
-      excursion.name.toLowerCase().includes(lowercasedQuery)
+      excursion.title.toLowerCase().includes(lowercasedQuery) // Cambia 'name' por 'title' si es necesario
     ));
   };
 
@@ -64,9 +51,8 @@ export function ExcursionManagement() {
   };
 
   const handleCreateExcursion = (newExcursion) => {
-    // Añadir la nueva excursión al estado
     setExcursions([...excursions, { ...newExcursion, id: excursions.length + 1 }]);
-    setIsCreating(false); // Cierra el modal de creación
+    setIsCreating(false); 
   };
 
   return (
@@ -75,11 +61,11 @@ export function ExcursionManagement() {
       <h2 className="text-xl text-black font-semibold mb-4">Gestión de Excursiones</h2>
       
       <button
-  className="text-sm  px-8 bg-blue-500 text-white rounded-md mb-4 mr-auto" // Alineado a la izquierda y tamaño ajustado
-  onClick={() => setIsCreating(true)} // Abrir modal para crear excursión
->
-  Crear Excursión
-</button>
+        className="text-sm px-8 bg-blue-500 text-white rounded-md mb-4 mr-auto" 
+        onClick={() => setIsCreating(true)}
+      >
+        Crear Excursión
+      </button>
       
       <ExcursionTable excursions={filteredExcursions} onEdit={handleEditExcursion} />
       
@@ -93,7 +79,7 @@ export function ExcursionManagement() {
       )}
       
       {isCreating && (
-        <NewExcursionModal // Modal para crear nueva excursión
+        <NewExcursionModal 
           onClose={() => setIsCreating(false)}
           onSave={handleCreateExcursion}
         />
