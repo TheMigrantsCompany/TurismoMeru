@@ -1,6 +1,6 @@
 const server = require("./src/server");
 const { sequelize } = require("./src/config/db");
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 server.listen(PORT, async () => {
 	try {

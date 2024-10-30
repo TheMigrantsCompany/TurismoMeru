@@ -12,6 +12,8 @@ const sequelize = new Sequelize(
 		native: false
 	}
 );
+
+
 const basename = path.basename(__filename);
 
 const modelDefiners = [];
@@ -28,6 +30,7 @@ fs.readdirSync(path.join(__dirname, "..", "models"))
 
 modelDefiners.forEach((model) => model(sequelize));
 
+// Capitalizar los nombres de los modelos para usarlos como propiedades de sequelize.models
 let entries = Object.entries(sequelize.models);
 let capsEntries = entries.map((entry) => [
 	entry[0][0].toUpperCase() + entry[0].slice(1),
@@ -35,9 +38,10 @@ let capsEntries = entries.map((entry) => [
 ]);
 sequelize.models = Object.fromEntries(capsEntries);
 
+// Define los modelos de la base de datos 
 const { User, Service, ServiceOrder, Booking, Review } = sequelize.models;
 
-// Definir las relaciones:
+// Definir las relaciones entre modelos:
 
 // Un usuario puede realizar muchas órdenes de servicio
 User.hasMany(ServiceOrder);
