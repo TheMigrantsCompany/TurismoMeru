@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
-import { getAllServices } from "../../../redux/actions/actions";
+import { getAllServices,deleteService } from "../../../redux/actions/actions";
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Chip, IconButton, Button } from "@material-tailwind/react";
 
@@ -31,12 +31,18 @@ const ExcursionTable = ({ onEdit }) => {
         }
     };
 
-    const handleDeleteExcursion = (id) => {
-        console.log(`Eliminando excursión con id: ${id}`);
+    const handleDeleteExcursion = (title) => {
+        dispatch(deleteService(title))
+            .then((response) => {
+                console.log(response.message);
+            })
+            .catch((error) => {
+                console.error("Error eliminando la excursión:", error);
+            });
     };
-
     const memoizedExcursions = useMemo(() => filteredExcursions, [filteredExcursions]);
 
+    
     return (
         <div>
             <div className="flex space-x-4 mb-4">
@@ -71,7 +77,7 @@ const ExcursionTable = ({ onEdit }) => {
                                 <IconButton onClick={() => onEdit(excursion)}>
                                     <PencilIcon className="h-5 w-5" />
                                 </IconButton>
-                                <IconButton onClick={() => handleDeleteExcursion(excursion.id)}>
+                                <IconButton onClick={() => handleDeleteExcursion(excursion.title)}>
                                     <TrashIcon className="h-5 w-5" />
                                 </IconButton>
                             </td>

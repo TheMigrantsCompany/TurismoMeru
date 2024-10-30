@@ -4,6 +4,7 @@ import {
     CREATE_EXCURSION_REQUEST,
     CREATE_EXCURSION_SUCCESS,
     GET_ALL_SERVICES,
+    DELETE_SERVICE,
 } from "./types";
 
 export const createExcursion = (excursionData) => async (dispatch) => {
@@ -32,3 +33,14 @@ export const createExcursion = (excursionData) => async (dispatch) => {
       console.error("Error fetching services:", error);
     }
   };
+
+  export const deleteService = (title) => async (dispatch) => {
+    try {
+        const response = await axios.delete(`http://localhost:3001/service/name/${title}`);
+        dispatch({ type: DELETE_SERVICE, payload: title });
+        return response.data;
+    } catch (error) {
+        console.error('Error eliminando la excursión:', error);
+        throw error;
+    }
+}
