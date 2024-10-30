@@ -4,6 +4,7 @@ import {
     CREATE_EXCURSION_SUCCESS,
     GET_ALL_SERVICES,
     DELETE_SERVICE,
+    TOGGLE_SERVICE_STATUS_SUCCESS,
 } from "../actions/types";
 
 const initialState = {
@@ -33,6 +34,10 @@ const rootReducer = (state = initialState, action) => {
                   ...state,
                   excursions: state.excursions.filter(excursion => excursion.title !== action.payload)
                     };
+                    case TOGGLE_SERVICE_STATUS_SUCCESS:
+                        return state.map(service =>
+                          service.id === action.payload.id_Service ? { ...service, active: action.payload.active } : service
+                        );            
         default:
             return state;
     }

@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
-import { getAllServices,deleteService } from "../../../redux/actions/actions";
+import { getAllServices, deleteService, toggleServiceActiveStatus } from "../../../redux/actions/actions";
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Chip, IconButton, Button } from "@material-tailwind/react";
+import ExcursionModal from '../../modals/admin-modal/ExcursionModal';
 
 const selectExcursions = createSelector(
     (state) => state.excursions,
@@ -14,6 +15,8 @@ const ExcursionTable = ({ onEdit }) => {
     const dispatch = useDispatch();
     const excursions = useSelector(selectExcursions);
     const [filteredExcursions, setFilteredExcursions] = useState([]);
+    const [selectedExcursion, setSelectedExcursion] = useState(null);
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         dispatch(getAllServices());
@@ -40,9 +43,18 @@ const ExcursionTable = ({ onEdit }) => {
                 console.error("Error eliminando la excursión:", error);
             });
     };
+
+    const handleToggleActiveStatus = (id_Service) => {
+        dispatch(toggleServiceActiveStatus(id_Service));
+    };
+
+    const handleEditClick = (excursion) => {
+        setSelectedExcursion(excursion);
+        setShowModal(true);
+    };
+
     const memoizedExcursions = useMemo(() => filteredExcursions, [filteredExcursions]);
 
-    
     return (
         <div>
             <div className="flex space-x-4 mb-4">
@@ -74,7 +86,7 @@ const ExcursionTable = ({ onEdit }) => {
                                 <Chip color={excursion.active ? "green" : "red"} value={excursion.active ? "Activa" : "Inactiva"} />
                             </td>
                             <td className="items-center flex justify-center gap-2">
-                                <IconButton onClick={() => onEdit(excursion)}>
+                                <IconButton onClick={() => handleEditClick(excursion)}>
                                     <PencilIcon className="h-5 w-5" />
                                 </IconButton>
                                 <IconButton onClick={() => handleDeleteExcursion(excursion.title)}>
@@ -85,6 +97,14 @@ const ExcursionTable = ({ onEdit }) => {
                     ))}
                 </tbody>
             </table>
+
+            {showModal && (
+                <ExcursionModal
+                    excursion={selectedExcursion}
+                    onClose={() => setShowModal(false)}
+                    onToggleActive={handleToggleActiveStatus}
+                />
+            )}
         </div>
     );
 };
