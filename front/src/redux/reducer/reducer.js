@@ -35,13 +35,20 @@ const rootReducer = (state = initialState, action) => {
                   excursions: state.excursions.filter(excursion => excursion.title !== action.payload)
                     };
                     case TOGGLE_SERVICE_STATUS_SUCCESS:
-                        return state.map(service =>
-                          service.id === action.payload.id_Service ? { ...service, active: action.payload.active } : service
-                        );            
+            return {
+                ...state,
+                excursion: {
+                    ...state.excursion,
+                    excursion: state.excursion.excursion.map(service =>
+                        service.id_Service === action.payload.id_Service
+                            ? { ...service, active: action.payload.active }
+                            : service
+                    )
+                }
+            };
         default:
             return state;
     }
-    
 };
 
 export default rootReducer;

@@ -48,9 +48,9 @@ export const createExcursion = (excursionData) => async (dispatch) => {
 
 export const toggleServiceActiveStatus = (id_Service) => async (dispatch) => {
   try {
-    const response = await axios.patch(`http://localhost:3001/service/${id_Service}/toggle`);
-    dispatch({ type: 'TOGGLE_SERVICE_STATUS_SUCCESS', payload: response.data });
+      const response = await axios.patch(`http://localhost:3001/service/${id_Service}/toggle`);
+      dispatch({ type: 'TOGGLE_SERVICE_STATUS_SUCCESS', payload: { id_Service: response.data.id_Service, active: response.data.active } });
   } catch (error) {
-    console.error('Error toggling service status:', error);
+      console.error('Error toggling service status:', error);
   }
 };

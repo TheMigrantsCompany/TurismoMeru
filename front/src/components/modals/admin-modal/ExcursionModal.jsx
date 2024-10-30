@@ -12,7 +12,7 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive }) => {
 
         <div className="mb-4">
           <label className="block font-bold text-gray-800">Nombre:</label>
-          <p className="text-gray-800">{excursion.name}</p>
+          <p className="text-gray-800">{excursion.title}</p>
         </div>
 
         <div className="mb-4">
@@ -28,20 +28,20 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive }) => {
         <div className="flex justify-center space-x-4 mb-4">
           <button
             onClick={handleStatusChange}
-            className={`p-2 rounded ${excursion.active ? 'bg-green-500 text-white' : 'bg-gray-300'}`}
+            className={`p-2 rounded ${excursion.active ? 'bg-green-500 text-white' : 'bg-green-500'}`}
           >
             Activa
           </button>
           <button
             onClick={handleStatusChange}
-            className={`p-2 rounded ${!excursion.active ? 'bg-red-500 text-white' : 'bg-gray-300'}`}
+            className={`p-2 rounded ${!excursion.active ? 'bg-red-500 text-white' : 'bg-red-500'}`}
           >
             Inactiva
           </button>
         </div>
 
         <div className="flex justify-between">
-          <button onClick={onClose} className="p-2 border rounded bg-gray-300">Cerrar</button>
+          <button onClick={onClose} className="p-2 border rounded bg-blue-300">Cerrar</button>
         </div>
       </div>
     </div>
