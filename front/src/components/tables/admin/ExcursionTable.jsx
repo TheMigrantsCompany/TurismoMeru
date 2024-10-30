@@ -1,13 +1,30 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { createSelector } from 'reselect';
+import { getAllServices, deleteService, toggleServiceActiveStatus } from "../../../redux/actions/actions";
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Chip, IconButton, Button } from "@material-tailwind/react";
+import ExcursionModal from '../../modals/admin-modal/ExcursionModal';
 
-const ExcursionTable = ({ excursions, onEdit }) => {
-    const [filteredExcursions, setFilteredExcursions] = useState(excursions);
+const selectExcursions = createSelector(
+    (state) => state.excursions,
+    (excursions) => excursions || []
+);
 
-    const handleDeleteExcursion = (id) => {
-        // Lógica para eliminar excursión
-    };
+const ExcursionTable = ({ onEdit }) => {
+    const dispatch = useDispatch();
+    const excursions = useSelector(selectExcursions);
+    const [filteredExcursions, setFilteredExcursions] = useState([]);
+    const [selectedExcursion, setSelectedExcursion] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+
+    useEffect(() => {
+        dispatch(getAllServices());
+    }, [dispatch]);
+
+    useEffect(() => {
+        setFilteredExcursions(excursions);
+    }, [excursions]);
 
     const filterExcursions = (status) => {
         if (status === "all") {
@@ -16,6 +33,27 @@ const ExcursionTable = ({ excursions, onEdit }) => {
             setFilteredExcursions(excursions.filter(excursion => excursion.active === (status === "active")));
         }
     };
+
+    const handleDeleteExcursion = (title) => {
+        dispatch(deleteService(title))
+            .then((response) => {
+                console.log(response.message);
+            })
+            .catch((error) => {
+                console.error("Error eliminando la excursión:", error);
+            });
+    };
+
+    const handleToggleActiveStatus = (id_Service) => {
+        dispatch(toggleServiceActiveStatus(id_Service));
+    };
+
+    const handleEditClick = (excursion) => {
+        setSelectedExcursion(excursion);
+        setShowModal(true);
+    };
+
+    const memoizedExcursions = useMemo(() => filteredExcursions, [filteredExcursions]);
 
     return (
         <div>
@@ -37,21 +75,21 @@ const ExcursionTable = ({ excursions, onEdit }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {filteredExcursions.map(excursion => (
-                        <tr key={excursion.id}>
-                            <td className="text-gray-900">{excursion.name}</td>
+                    {memoizedExcursions.map((excursion) => (
+                        <tr key={excursion.id || `${excursion.name}-${Math.random()}`}>
+                            <td className="text-gray-900">{excursion.title}</td>
                             <td className="text-gray-900">{excursion.description}</td>
-                            <td className="text-gray-900">{excursion.capacity}</td>
+                            <td className="text-gray-900">{excursion.stock}</td>
                             <td className="text-gray-900">{excursion.price}</td>
                             <td className="text-gray-900">{excursion.reservations}</td>
                             <td>
                                 <Chip color={excursion.active ? "green" : "red"} value={excursion.active ? "Activa" : "Inactiva"} />
                             </td>
                             <td className="items-center flex justify-center gap-2">
-                                <IconButton onClick={() => onEdit(excursion)}>
+                                <IconButton onClick={() => handleEditClick(excursion)}>
                                     <PencilIcon className="h-5 w-5" />
                                 </IconButton>
-                                <IconButton onClick={() => handleDeleteExcursion(excursion.id)}>
+                                <IconButton onClick={() => handleDeleteExcursion(excursion.title)}>
                                     <TrashIcon className="h-5 w-5" />
                                 </IconButton>
                             </td>
@@ -59,8 +97,17 @@ const ExcursionTable = ({ excursions, onEdit }) => {
                     ))}
                 </tbody>
             </table>
+
+            {showModal && (
+                <ExcursionModal
+                    excursion={selectedExcursion}
+                    onClose={() => setShowModal(false)}
+                    onToggleActive={handleToggleActiveStatus}
+                />
+            )}
         </div>
     );
 };
 
 export default ExcursionTable;
+

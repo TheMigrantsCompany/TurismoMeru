@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { auth } from "../../firebase/confing";
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
 import ShoppingCartIcon from "@heroicons/react/24/outline/ShoppingCartIcon";
 
 export default function StickyNavbar() {
   const [user, setUser] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar el modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const provider = new GoogleAuthProvider();
 
   // Monitorea el estado de autenticación
@@ -24,7 +30,7 @@ export default function StickyNavbar() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       alert("Inicio de sesión exitoso");
-      setIsModalOpen(false); // Cierra el modal después del inicio de sesión
+      setIsModalOpen(false);
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       alert("Error al iniciar sesión: " + error.message);
@@ -36,7 +42,7 @@ export default function StickyNavbar() {
     try {
       await signInWithPopup(auth, provider);
       alert("Inicio de sesión con Google exitoso");
-      setIsModalOpen(false); // Cierra el modal después del inicio de sesión
+      setIsModalOpen(false);
     } catch (error) {
       console.error("Error al iniciar sesión con Google:", error);
       alert("Error al iniciar sesión con Google: " + error.message);
@@ -57,30 +63,41 @@ export default function StickyNavbar() {
   return (
     <nav className="bg-white shadow dark:bg-gray-200 sticky top-0 z-50 opacity-50">
       <div className="container flex items-center justify-center p-1 mx-auto text-gray-900 capitalize dark:text-gray-300">
-        <a href="#" className="text-gray-800 transition-colors duration-300 transform dark:text-gray-200 border-b-2 border-blue-500 mx-1.5 sm:mx-6">
-          home
+        <a
+          href="#"
+          className="text-gray-800 transition-colors duration-300 transform dark:text-gray-200 border-b-2 border-blue-500 mx-1.5 sm:mx-6"
+        >
+          Home
+        </a>
+        <a
+          href="#"
+          className="border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500 mx-1.5 sm:mx-6"
+        >
+          Features
+        </a>
+        <a
+          href="#"
+          className="border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500 mx-1.5 sm:mx-6"
+        >
+          Pricing
+        </a>
+        <a
+          href="#"
+          className="border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500 mx-1.5 sm:mx-6"
+        >
+          Blog
         </a>
 
-        <a href="#" className="border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500 mx-1.5 sm:mx-6">
-          features
-        </a>
-
-        <a href="#" className="border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500 mx-1.5 sm:mx-6">
-          pricing
-        </a>
-
-        <a href="#" className="border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500 mx-1.5 sm:mx-6">
-          blog
-        </a>
-
-        <a href="/user/shoppingcart" className="flex items-center border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500 mx-1.5 sm:mx-6">
+        <a
+          href="/user/shoppingcart"
+          className="flex items-center border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500 mx-1.5 sm:mx-6"
+        >
           <ShoppingCartIcon className="w-6 h-6" />
         </a>
 
-        <div className="relative inline-block text-left">
+        <div className="relative inline-block text-left ml-auto">
           <div>
             {user ? (
-              // Si el usuario está autenticado, muestra su correo, foto de perfil y opción para cerrar sesión
               <div className="flex items-center">
                 {user.photoURL && (
                   <img
@@ -89,7 +106,9 @@ export default function StickyNavbar() {
                     className="w-8 h-8 rounded-full mr-2"
                   />
                 )}
-                <span className="ml-2">Hola, {user.displayName || user.email}</span>
+                <span className="ml-2">
+                  Hola, {user.displayName || user.email}
+                </span>
                 <button
                   onClick={handleLogout}
                   className="ml-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
@@ -98,7 +117,6 @@ export default function StickyNavbar() {
                 </button>
               </div>
             ) : (
-              // Si no está autenticado, muestra un botón para elegir método de inicio de sesión
               <div>
                 <button
                   onClick={() => setIsModalOpen(true)}
@@ -107,11 +125,12 @@ export default function StickyNavbar() {
                   Iniciar Sesión
                 </button>
 
-                {/* Modal para elegir método de autenticación */}
                 {isModalOpen && (
                   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white rounded-lg shadow-lg p-6">
-                      <h2 className="text-lg font-semibold mb-4">Elige un método de autenticación</h2>
+                      <h2 className="text-lg font-semibold mb-4">
+                        Elige un método de autenticación
+                      </h2>
                       <button
                         onClick={handleEmailLogin}
                         className="w-full mb-2 px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700"
