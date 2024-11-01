@@ -5,7 +5,7 @@ const SearchInput = ({ onSearch }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSearch(query); // Llama a la función onSearch con el término de búsqueda
+    onSearch(query); 
   };
 
   return (

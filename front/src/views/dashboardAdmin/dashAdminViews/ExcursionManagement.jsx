@@ -4,31 +4,38 @@ import ExcursionTable from '../../../components/tables/admin/ExcursionTable';
 import ExcursionModal from '../../../components/modals/admin-modal/ExcursionModal'; 
 import NewExcursionModal from '../../../components/modals/admin-modal/NewExcursionModal'; 
 import { useDispatch } from 'react-redux';
-import { getAllServices } from '../../../redux/actions/actions'; // Asegúrate de tener esta acción definida
+import { getAllServices } from '../../../redux/actions/actions';
 
 export function ExcursionManagement() {
-  const [excursions, setExcursions] = useState([]); // Inicializa como un array vacío
+  const [excursions, setExcursions] = useState([]); 
   const [filteredExcursions, setFilteredExcursions] = useState([]);
   const [selectedExcursion, setSelectedExcursion] = useState(null);
-  const [isCreating, setIsCreating] = useState(false); // Estado para creación de excursión
+  const [isCreating, setIsCreating] = useState(false); 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // Aquí puedes llamar a tu acción para obtener las excursiones
     const fetchExcursions = async () => {
-      const response = await dispatch(getAllServices()); // Ajusta según cómo se devuelvan las excursiones
-      setExcursions(response); // Asegúrate de que `response` contenga el array de excursiones
+      const response = await dispatch(getAllServices()); 
+      setExcursions(response); 
       setFilteredExcursions(response);
     };
 
     fetchExcursions();
   }, [dispatch]);
 
-  const handleSearch = (query) => {
-    const lowercasedQuery = query.toLowerCase();
-    setFilteredExcursions(excursions.filter(excursion =>
-      excursion.title.toLowerCase().includes(lowercasedQuery) // Cambia 'name' por 'title' si es necesario
-    ));
+  const handleSearch = async (query) => {
+    if (query.length < 3) {
+      setFilteredExcursions([]);
+      return;
+    }
+
+    try {
+      const response = await axios.get(`http://localhost:3001/service/name/${query}`);
+      setFilteredExcursions(response.data);
+    } catch (error) {
+      console.error("Error al buscar las excursiones:", error);
+      setFilteredExcursions([]);
+    }
   };
 
   const handleEditExcursion = (excursion) => {
