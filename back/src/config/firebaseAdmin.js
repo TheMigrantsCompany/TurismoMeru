@@ -1,6 +1,6 @@
 // config/firebaseAdmin.js
 const admin = require('firebase-admin');
-const serviceAccount = require('./turismomeru-firebase-adminsdk-j2s1g-34f77ab0b5.json'); // Ajusta la ruta según donde hayas guardado el archivo
+const serviceAccount = require('./meruvyt-firebase-adminsdk-nyqwo-111d27bd49.json'); // Ajusta la ruta según donde hayas guardado el archivo
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)

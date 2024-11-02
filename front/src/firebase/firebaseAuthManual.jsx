@@ -4,10 +4,11 @@ import {
     auth,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword
-} from "../../firebase/confing";
+} from "../../firebase/config";
 import { updateProfile } from "firebase/auth";
 
 export const signUpWithEmail = async (email, password, displayName) => {
+	console.log("Función signUpWithEmail llamada"); // Añadir aquí
     try {
         const result = await createUserWithEmailAndPassword(auth, email, password);
         const user = result.user;
@@ -20,10 +21,15 @@ export const signUpWithEmail = async (email, password, displayName) => {
 			Name: user.displayName, 
 			Rol: true
 		};
+		
         await sendUserInfotoBackend(userInfo, token);
+		console.log("Información de usuario (Email):", userInfo);
+        console.log("Token de autenticación:", token);
+		
+		console.log("Enviando información de registro:", userInfo);  // Log antes de enviar
     } catch (error) {
-        console.error("Hubo un error al iniciar sesión con email.", error);
-        throw error;  
+        console.error("Error signing in with email:", error.code, error.message);
+        alert(`Error: ${error.message}`); // Mostrar un mensaje de error más claro al usuario
     }
 };
 
@@ -37,27 +43,31 @@ export const signInWithEmail = async (email, password) => {
 			Name: user.displayName,
 			Rol: true
         };
+
+        console.log("Enviando información de inicio de sesión:", userInfo);  // Log antes de enviar
         await sendUserInfotoBackend(userInfo, token);
     } catch (error) {
         if (error.code === "auth/user-disabled") {
+            // Si el usuario está desactivado, no continuar con el inicio de sesión
             alert("Esta cuenta está desactivada. Por favor, contacta al administrador.");
             window.location.href = '/';
             return;
-        } else {
-            console.error("Error signing in with email:", error);
-            throw error;  
-        }
+		} else {
+			console.error("Error signing in with email:", error);
+		}
     }
 };
 
 const sendUserInfotoBackend = async (userInfo, token) => {
 	try {
-		await axios.post("http://localhost:3001/user/", userInfo, {
+		console.log("Enviando información al backend con el token:", token);
+		const response = await axios.post("http://localhost:3001/user/", userInfo, {
 			headers: {
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${token}`
 			}
 		});
+		console.log("Respuesta del backend:", response.data);  // Log de la respuesta
 	} catch (error) {
 		console.error("Error sending user info to backend:", error);
 	}
@@ -67,24 +77,14 @@ const SignUpForm = () => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [displayName, setDisplayName] = useState("");
-	const [error, setError] = useState(null);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		try {
-			await signUpWithEmail(email, password, displayName);
-			setEmail("");
-			setPassword("");
-			setDisplayName("");
-			setError(null);
-		} catch (err) {
-			setError("Hubo un error al registrarse. Por favor, intente nuevamente.");
-		}
+		await signUpWithEmail(email, password, displayName);
 	};
 
 	return (
 		<form onSubmit={handleSubmit} className="space-y-4">
-			{error && <p className="text-red-500">{error}</p>}
 			<input
 				type="text"
 				value={displayName}
@@ -122,23 +122,14 @@ const SignUpForm = () => {
 const SignInForm = () => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-	const [error, setError] = useState(null);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		try {
-			await signInWithEmail(email, password);
-			setEmail("");
-			setPassword("");
-			setError(null);
-		} catch (err) {
-			setError("Hubo un error al iniciar sesión. Por favor, verifique sus credenciales.");
-		}
+		await signInWithEmail(email, password);
 	};
 
 	return (
 		<form onSubmit={handleSubmit} className="space-y-4">
-			{error && <p className="text-red-500">{error}</p>}
 			<input
 				type="email"
 				value={email}
