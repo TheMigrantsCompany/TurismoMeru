@@ -101,6 +101,14 @@ const ExcursionTable = () => {
         setShowModal(true);
     };
 
+    const updateExcursionLocally = (updatedExcursion) => {
+        setFilteredExcursions((prevExcursions) => 
+            prevExcursions.map((excursion) =>
+                excursion.id_Service === updatedExcursion.id_Service ? updatedExcursion : excursion
+            )
+        );
+    };
+
     return (
         <div>
             <div className="flex space-x-4 mb-4">
@@ -152,11 +160,12 @@ const ExcursionTable = () => {
                 </tbody>
             </table>
             {showModal && (
-                <ExcursionModal
-                    excursion={selectedExcursion}
-                    onClose={() => setShowModal(false)}
-                    onToggleActive={handleToggleActiveStatus}
-                />
+              <ExcursionModal
+                excursion={selectedExcursion}
+                onClose={() => setShowModal(false)}
+                onToggleActive={handleToggleActiveStatus}
+                onUpdate={updateExcursionLocally} // Nueva prop
+               />
             )}
         </div>
     );
