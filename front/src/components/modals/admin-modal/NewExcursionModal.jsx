@@ -9,8 +9,8 @@ const NewExcursionModal = ({ onClose }) => {
   const [excursionData, setExcursionData] = useState({
     title: '',
     description: '',
-    price: '',
-    duration: '',
+    price: 0,
+    duration: 0,
     difficulty: '',
     location: '',
     availabilityDate: '',
@@ -20,19 +20,19 @@ const NewExcursionModal = ({ onClose }) => {
     requirements: '',
     cancellationPolicy: '',
     additionalEquipment: '',
-    guides: '',
+    guides: [],
     stock: 0,
     active: true,
-    
   });
 
   const [formErrors, setFormErrors] = useState({});
 
   const handleChange = (e) => {
-    setExcursionData({
-      ...excursionData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setExcursionData((prevData) => ({
+      ...prevData,
+      [name]: name === "price" || name === "duration" || name === "stock" ? Number(value) : value,
+    }));
   };
 
   const handlePhotoChange = (e) => {
@@ -67,7 +67,6 @@ const NewExcursionModal = ({ onClose }) => {
     dispatch(getAllServices()); 
     onClose();  
 };
-
   return (
 
  <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-75">
@@ -89,7 +88,7 @@ const NewExcursionModal = ({ onClose }) => {
              onChange={handleChange}
              className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
             />
-            {formErrors.name && <p className="text-red-500 text-sm">{formErrors.name}</p>}
+            {formErrors.title && <p className="text-red-500 text-sm">{formErrors.title}</p>}
           </div>
 
           <div>
