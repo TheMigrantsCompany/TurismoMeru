@@ -21,7 +21,7 @@ function App() {
       <StickyNavbar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/detail" element={<Detail />} />
+        <Route path="/detail/:id_Service" element={<Detail />} />
         
         {/* Ruta para el Administrador */}
         <Route path="/admin" element={<DashboardAdmin />}>

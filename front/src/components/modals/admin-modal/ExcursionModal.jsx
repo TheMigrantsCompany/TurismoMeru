@@ -15,9 +15,15 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate  }) => {
   };
 
   const handlePhotoChange = (e) => {
+    const files = Array.from(e.target.files);
+  
+    // Aquí deberías convertir cada archivo en una URL o base64 y actualizar el campo photos.
+    // Suponiendo que ya tienes URLs (o las generas de alguna manera), asignamos un array de URLs.
+    const photoURLs = files.map(file => URL.createObjectURL(file)); // Solo para demostración, no se debe usar en producción sin cargar las imágenes
+  
     setExcursionData((prevData) => ({
       ...prevData,
-      photos: Array.from(e.target.files),
+      photos: photoURLs,
     }));
   };
 
