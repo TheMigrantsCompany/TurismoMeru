@@ -1,22 +1,70 @@
 import React, { useState, useEffect } from "react";
-import { auth, googleProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "../../firebase/config";
-import { signOut, onAuthStateChanged, signInWithPopup, updateProfile } from "firebase/auth";
+import {
+  auth,
+  googleProvider,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from "../../firebase/config";
+import {
+  signOut,
+  onAuthStateChanged,
+  signInWithPopup,
+  updateProfile,
+} from "firebase/auth";
+import axios from "axios"; 
 import ShoppingCartIcon from "@heroicons/react/24/outline/ShoppingCartIcon";
 import Swal from "sweetalert2";
+
 export default function StickyNavbar() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      console.log("Estado de autenticación cambiado:", currentUser); // Añadir aquí
+      console.log("Estado de autenticación cambiado:", currentUser);
     });
     return () => unsubscribe();
   }, []);
 
+  /// Función para guardar los datos del usuario en el backend
+const saveUserToBackend = async (userData, password) => {
+  try {
+    // Verificar si userData es válido
+    if (!userData) {
+      throw new Error("No se pudo obtener los datos del usuario.");
+    }
+
+    // Obtener el token del usuario autenticado
+    const token = await userData.getIdToken();
+    if (!token) {
+      throw new Error("No se pudo obtener el token de autenticación.");
+    }
+
+    // Enviar los datos del usuario al backend, incluyendo la contraseña
+    await axios.post(
+      "http://localhost:3001/user/",
+      {
+        name: userData.displayName || userData.name || "",
+        email: userData.email,
+        image: userData.photoURL || "",
+        role: "customer",
+        active: true,
+        password, // Incluir la contraseña
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    console.log("Usuario guardado en el backend");
+  } catch (error) {
+    console.error("Error al guardar el usuario en el backend:", error);
+    Swal.fire("Error al guardar usuario", error.message, "error");
+  }
+};
   const handleGoogleLogin = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      await saveUserToBackend(result.user);
       Swal.fire("Inicio de sesión con Google exitoso", "", "success");
     } catch (error) {
       Swal.fire("Error al iniciar sesión con Google", error.message, "error");
@@ -24,9 +72,10 @@ export default function StickyNavbar() {
   };
 
   const handleEmailLogin = async (email, password) => {
-    console.log("Intentando iniciar sesión con email:", email); // Añadir aquí
+    console.log("Intentando iniciar sesión con email:", email);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      await saveUserToBackend(result.user);
       Swal.fire("Inicio de sesión exitoso", "", "success");
     } catch (error) {
       Swal.fire("Error al iniciar sesión", error.message, "error");
@@ -34,15 +83,16 @@ export default function StickyNavbar() {
   };
 
   const handleEmailSignUp = async (email, password, displayName) => {
-    console.log("Intentando registrarse con email:", email); // Añadir aquí
+    console.log("Intentando registrarse con email:", email);
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(result.user, { displayName });
+      await saveUserToBackend(result.user, password); // Guardar el nuevo usuario y su contraseña en el backend
       Swal.fire("Registro exitoso", "", "success");
     } catch (error) {
       Swal.fire("Error al registrarse", error.message, "error");
     }
-  };
+  }
 
   const handleAuthAlert = () => {
     Swal.fire({
