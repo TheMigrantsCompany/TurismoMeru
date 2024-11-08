@@ -3,49 +3,75 @@ import React, { useState } from 'react';
 const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate  }) => {
   const [excursionData, setExcursionData] = useState({ ...excursion });
   const [formErrors, setFormErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
 
   const handleStatusChange = () => {
-    const newActiveStatus = !excursionData.active; // Cambia el estado
-    onToggleActive(excursion.id_Service); // Llama a la función para cambiar el estado en el backend
-    setExcursionData((prevData) => ({ ...prevData, active: newActiveStatus })); // Actualiza el estado local
+    const newActiveStatus = !excursionData.active; 
+    onToggleActive(excursion.id_Service); 
+    setExcursionData((prevData) => ({ ...prevData, active: newActiveStatus })); 
   };
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setExcursionData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  const handlePhotoChange = (e) => {
+  const handlePhotoChange = async (e) => {
     const files = Array.from(e.target.files);
-  
-    // Aquí deberías convertir cada archivo en una URL o base64 y actualizar el campo photos.
-    // Suponiendo que ya tienes URLs (o las generas de alguna manera), asignamos un array de URLs.
-    const photoURLs = files.map(file => URL.createObjectURL(file)); // Solo para demostración, no se debe usar en producción sin cargar las imágenes
-  
-    setExcursionData((prevData) => ({
-      ...prevData,
-      photos: photoURLs,
-    }));
+    setLoading(true); // Muestra el indicador de carga
+
+    try {
+      const uploadedPhotos = await Promise.all(
+        files.map((file) => uploadPhotoToCloudinary(file))
+      );
+
+      setExcursionData((prevData) => ({
+        ...prevData,
+        photos: uploadedPhotos, 
+      }));
+    } catch (error) {
+      console.error("Error uploading photos:", error);
+    } finally {
+      setLoading(false); 
+    }
   };
+
+  const uploadPhotoToCloudinary = (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "meruvyt"); 
+
+    return fetch("https://api.cloudinary.com/v1_1/dzrnybyqo/image/upload", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => data.secure_url) 
+      .catch((error) => {
+        throw new Error("Error uploading image to Cloudinary");
+      });
+  };
+
 
   const handleSubmit = async () => {
     try {
-        const response = await fetch(`http://localhost:3001/service/id/${excursion.id_Service}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(excursionData),
-        });
-        if (!response.ok) {
-            throw new Error('Error al actualizar el servicio');
-        }
-        const updatedExcursion = await response.json();
-        onUpdate(updatedExcursion);  // Llama a la función para actualizar localmente
-        onClose();
+      const response = await fetch(`http://localhost:3001/service/id/${excursion.id_Service}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(excursionData),
+      });
+      if (!response.ok) {
+        throw new Error('Error al actualizar el servicio');
+      }
+      const updatedExcursion = await response.json();
+      onUpdate(updatedExcursion); 
+      onClose();
     } catch (error) {
-        console.error(error);
-        setFormErrors({ general: 'No se pudo actualizar el servicio. Intenta nuevamente.' });
+      console.error(error);
+      setFormErrors({ general: 'No se pudo actualizar el servicio. Intenta nuevamente.' });
     }
-};
-
+  };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-75 pointer-events-auto">
       <div className="bg-white p-6 rounded-lg max-w-lg w-full relative z-10 overflow-y-auto max-h-[90vh]">
