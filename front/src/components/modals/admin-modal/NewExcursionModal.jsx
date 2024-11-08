@@ -26,6 +26,7 @@ const NewExcursionModal = ({ onClose }) => {
   });
 
   const [formErrors, setFormErrors] = useState({});
+  const [imagePreviews, setImagePreviews] = useState([]); // Estado para miniaturas
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,38 +36,75 @@ const NewExcursionModal = ({ onClose }) => {
     }));
   };
 
-  const handlePhotoChange = (e) => {
+  const handlePhotoChange = async (e) => {
     const files = Array.from(e.target.files);
-    const photos = files.map((file) => URL.createObjectURL(file));
+    const uploadedUrls = [];
+    const previews = []; // Arreglo para almacenar las miniaturas de las imágenes
+
+    for (const file of files) {
+      // Crear una URL de vista previa para la miniatura
+      const previewUrl = URL.createObjectURL(file);
+      previews.push(previewUrl);
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "meruvyt");
+
+      try {
+        const response = await fetch("https://api.cloudinary.com/v1_1/dzrnybyqo/image/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await response.json();
+        if (data.secure_url) {
+          uploadedUrls.push(data.secure_url);
+        } else {
+          console.error("Error en la subida de Cloudinary:", data);
+        }
+      } catch (error) {
+        console.error("Error al subir la imagen:", error);
+      }
+    }
+
     setExcursionData((prevState) => ({
       ...prevState,
-      photos,
+      photos: uploadedUrls,
     }));
+
+    setImagePreviews(previews); // Actualizar las miniaturas
   };
 
   const validateForm = () => {
     const errors = {};
-    
+
     if (!excursionData.title) errors.title = 'El nombre es obligatorio';
     if (!excursionData.description) errors.description = 'La descripción es obligatoria';
     if (!excursionData.price) errors.price = 'El precio es obligatorio';
     if (!excursionData.stock && excursionData.stock !== 0) errors.stock = 'El stock es obligatorio';
-
+    if (!excursionData.photos.length) {
+      console.error("No se han cargado fotos correctamente en Cloudinary");
+      return;
+    }
     return errors;
   };
 
   const handleSubmit = async () => {
     const errors = validateForm();
     if (Object.keys(errors).length) {
-        setFormErrors(errors);  
-        return; 
+      setFormErrors(errors);
+      return;
     }
 
     setFormErrors({});
-    await dispatch(createExcursion(excursionData));
-    dispatch(getAllServices()); 
-    onClose();  
-};
+    try {
+      await dispatch(createExcursion(excursionData));
+      dispatch(getAllServices());
+      onClose();
+    } catch (err) {
+      console.error("Error al crear la excursión:", err);
+    }
+  };
+
   return (
 
  <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-75">
@@ -132,12 +170,22 @@ const NewExcursionModal = ({ onClose }) => {
             <input
               type="file"
               multiple
+              accept="image/*"
               onChange={handlePhotoChange}
               className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
             />
           </div>
 
-         
+          <div className="flex flex-wrap space-x-4 mt-4">
+            {imagePreviews.map((preview, index) => (
+              <img
+               key={index}
+               src={preview}
+               alt={`Preview ${index}`}
+               className="w-20 h-20 object-cover rounded-md mb-2"
+              />
+            ))}
+         </div>
 
           <div>
             <label className="block text-sm text-gray-600 font-medium mb-1">Duración:</label>

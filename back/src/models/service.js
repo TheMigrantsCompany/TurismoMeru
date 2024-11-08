@@ -37,8 +37,8 @@ module.exports = (sequelize) => {
       allowNull: true // Opcional: puede no ser necesario especificar la fecha de disponibilidad
     },
     photos: {
-      type: DataTypes.JSON,
-      allowNull: true // Opcional: puede no haber fotos disponibles inicialmente
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: false
     },
     category: {
       type: DataTypes.STRING,
