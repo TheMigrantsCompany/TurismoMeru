@@ -39,10 +39,9 @@ const NewExcursionModal = ({ onClose }) => {
   const handlePhotoChange = async (e) => {
     const files = Array.from(e.target.files);
     const uploadedUrls = [];
-    const previews = []; // Arreglo para almacenar las miniaturas de las imágenes
+    const previews = []; 
 
     for (const file of files) {
-      // Crear una URL de vista previa para la miniatura
       const previewUrl = URL.createObjectURL(file);
       previews.push(previewUrl);
 
@@ -68,10 +67,9 @@ const NewExcursionModal = ({ onClose }) => {
 
     setExcursionData((prevState) => ({
       ...prevState,
-      photos: uploadedUrls,
+      photos: [...prevState.photos, ...uploadedUrls],
     }));
-
-    setImagePreviews(previews); // Actualizar las miniaturas
+    setImagePreviews((prevPreviews) => [...prevPreviews, ...previews]);
   };
 
   const validateForm = () => {
@@ -174,17 +172,17 @@ const NewExcursionModal = ({ onClose }) => {
               onChange={handlePhotoChange}
               className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
             />
-          </div>
+         </div>
 
-          <div className="flex flex-wrap space-x-4 mt-4">
-            {imagePreviews.map((preview, index) => (
-              <img
-               key={index}
-               src={preview}
-               alt={`Preview ${index}`}
+          <div className="flex flex-wrap gap-4 mt-4">
+              {imagePreviews.map((preview, index) => (
+           <img
+             key={index}
+              src={preview}
+              alt={`Preview ${index}`}
                className="w-20 h-20 object-cover rounded-md mb-2"
-              />
-            ))}
+           />
+              ))}
          </div>
 
           <div>
