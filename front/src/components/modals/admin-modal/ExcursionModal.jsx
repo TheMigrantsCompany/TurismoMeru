@@ -63,7 +63,7 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
       });
   };
 
-  // Manejar eliminación de miniaturas
+  
   const handleRemoveImage = (index) => {
     setImagePreviews((prevPreviews) =>
       prevPreviews.filter((_, i) => i !== index)

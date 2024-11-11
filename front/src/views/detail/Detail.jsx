@@ -1,28 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // Importa useNavigate
 import { Button, IconButton, Rating, Typography } from "@material-tailwind/react";
 import { HeartIcon } from "@heroicons/react/24/outline";
 
 export function Detail() {
   const { id_Service } = useParams();
+  const navigate = useNavigate(); // Inicializa useNavigate
   const [excursion, setExcursion] = useState(null);
-  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0); // índice de la foto actual
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
   useEffect(() => {
     fetch(`http://localhost:3001/service/id/${id_Service}`)
       .then((response) => response.json())
-      .then((data) => {
-        console.log("Fetched excursion data:", data); // Verifica el contenido de los datos obtenidos
-        setExcursion(data);
-      })
+      .then((data) => setExcursion(data))
       .catch((error) => console.error("Error fetching excursion details:", error));
   }, [id_Service]);
 
   if (!excursion) return <p>Loading...</p>;
 
-  const photos = excursion.photos || []; // Asegura que photos sea un array
+  const photos = excursion.photos || [];
 
-  // Funciones para manejar el cambio de foto en el carrusel
   const handleNextPhoto = () => {
     setCurrentPhotoIndex((prevIndex) =>
       prevIndex === photos.length - 1 ? 0 : prevIndex + 1
@@ -35,6 +32,11 @@ export function Detail() {
     );
   };
 
+  // Función para manejar la redirección al carrito de compras
+  const handleAddToCart = () => {
+    navigate("/user/shoppingcart");
+  };
+
   return (
     <section className="py-16 px-8">
       <div className="mx-auto container grid place-items-center grid-cols-1 md:grid-cols-2">
@@ -45,12 +47,11 @@ export function Detail() {
               src={photos[currentPhotoIndex]}
               alt={`Excursion photo ${currentPhotoIndex + 1}`}
               className="h-[36rem]"
-              onError={(e) => (e.target.src = "default_image_url.png")} // Maneja error de imagen no encontrada
+              onError={(e) => (e.target.src = "default_image_url.png")}
             />
           ) : (
             <img src="default_image_url.png" alt="Default" className="h-[36rem]" />
           )}
-          {/* Botones de navegación del carrusel */}
           {photos.length > 1 && (
             <>
               <button
@@ -69,7 +70,6 @@ export function Detail() {
           )}
         </div>
 
-        {/* Detalles de la excursión */}
         <div className="mb-12">
           <Typography className="mb-4" variant="h3">
             {excursion.title}
@@ -88,7 +88,7 @@ export function Detail() {
             Color
           </Typography>
           <div className="mb-4 flex w-full items-center gap-3 md:w-1/2">
-            <Button color="gray" className="w-52">
+            <Button color="gray" className="w-52" onClick={handleAddToCart}>
               Add to Cart
             </Button>
             <IconButton color="gray" variant="text" className="shrink-0">
