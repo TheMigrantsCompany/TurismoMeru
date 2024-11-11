@@ -26,7 +26,7 @@ const NewExcursionModal = ({ onClose }) => {
   });
 
   const [formErrors, setFormErrors] = useState({});
-  const [imagePreviews, setImagePreviews] = useState([]); // Estado para miniaturas
+  const [imagePreviews, setImagePreviews] = useState([]); 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
