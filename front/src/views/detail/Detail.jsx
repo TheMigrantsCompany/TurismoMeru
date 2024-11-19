@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // Importa useNavigate
+import { useParams, useNavigate } from "react-router-dom"; 
 import { Button, IconButton, Rating, Typography } from "@material-tailwind/react";
 import { HeartIcon } from "@heroicons/react/24/outline";
+import { useCart } from "../shopping-cart/CartContext";
+
+
 
 export function Detail() {
   const { id_Service } = useParams();
-  const navigate = useNavigate(); // Inicializa useNavigate
+  const navigate = useNavigate(); 
   const [excursion, setExcursion] = useState(null);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const { addToCart } = useCart();
+
 
   useEffect(() => {
     fetch(`http://localhost:3001/service/id/${id_Service}`)
@@ -32,8 +37,9 @@ export function Detail() {
     );
   };
 
-  // Función para manejar la redirección al carrito de compras
+  
   const handleAddToCart = () => {
+    addToCart(excursion);
     navigate("/user/shoppingcart");
   };
 
@@ -88,7 +94,7 @@ export function Detail() {
             Color
           </Typography>
           <div className="mb-4 flex w-full items-center gap-3 md:w-1/2">
-            <Button color="gray" className="w-52" onClick={handleAddToCart}>
+            <Button onClick={handleAddToCart} className="btn-add-to-cart">
               Add to Cart
             </Button>
             <IconButton color="gray" variant="text" className="shrink-0">

@@ -1,26 +1,14 @@
 import React, { useState } from 'react';
+import { useCart } from './CartContext';
 import Checkout from '../../components/checkout/CheckOut';
 
 const ShoppingCart = () => {
-  const [cartItems, setCartItems] = useState([
-    { id: 1, name: 'Camiseta básica', color: 'Tierra de siena', size: 'Grande', price: 32, quantity: 1, stock: true },
-    { id: 2, name: 'Camiseta básica', color: 'Negro', size: 'Grande', price: 32, quantity: 1, stock: false },
-  ]);
-  
-  const [showCheckout, setShowCheckout] = useState(false); // Estado para mostrar el Checkout
-
-  // Función para actualizar la cantidad de un producto
-  const updateQuantity = (id, quantity) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id ? { ...item, quantity: parseInt(quantity) } : item
-      )
-    );
-  };
+  const { cartItems, updateQuantity, removeFromCart } = useCart(); 
+  const [showCheckout, setShowCheckout] = useState(false); 
 
   // Cálculo del total del carrito
   const subtotal = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
+    (acc, item) => acc + (item.price ? Number(item.price) : 0) * item.quantity,
     0
   );
 
@@ -33,19 +21,21 @@ const ShoppingCart = () => {
       <h1 className="text-3xl font-bold mb-6 text-black">Carrito de Compra</h1>
       <div className="flex flex-col md:flex-row justify-between gap-6">
         <div className="w-full md:w-2/3 space-y-6">
-          {cartItems.map((item) => (
-            <div key={item.id} className="flex items-center justify-between p-4 border-b">
+          {cartItems.map((item, index) => (
+            <div key={`cart-item-${item.id}-${index}`} className="flex items-center justify-between p-4 border-b">
               <div className="flex items-center space-x-4">
-                <img
-                  src={`https://via.placeholder.com/80`}
-                  alt={item.name}
-                  className="w-20 h-20 object-cover"
-                />
+              <img
+  src={item.photos && item.photos.length > 0 ? item.photos[0] : 'https://via.placeholder.com/80'} 
+  alt={item.title} 
+  className="w-20 h-20 object-cover"
+/>
                 <div>
-                  <h3 className="text-lg font-semibold text-black">{item.name}</h3>
+                  <h3 className="text-lg font-semibold text-black">{item.title}</h3>
                   <p className="text-sm text-black">{item.color}</p>
                   <p className="text-sm text-black">{item.size}</p>
-                  <p className="text-sm font-bold text-black">${item.price.toFixed(2)}</p>
+                  <p className="text-sm font-bold text-black">
+  ${(item.price && typeof item.price === 'number' ? item.price : 0).toFixed(2)}
+</p>
                   {item.stock ? (
                     <p className="text-green-500 text-sm">En stock</p>
                   ) : (
@@ -57,15 +47,20 @@ const ShoppingCart = () => {
                 <select
                   className="border border-gray-300 rounded-lg p-2"
                   value={item.quantity}
-                  onChange={(e) => updateQuantity(item.id, e.target.value)}
+                  onChange={(e) => updateQuantity(item.id, Number(e.target.value))}
                 >
                   {[1, 2, 3, 4, 5].map((quantity) => (
-                    <option key={quantity} value={quantity}>
+                    <option key={`quantity-${item.id}-${quantity}`} value={quantity}>
                       {quantity}
                     </option>
                   ))}
                 </select>
-                <button className="ml-4 text-gray-500 hover:text-red-500">×</button>
+                <button 
+                  className="ml-4 text-gray-500 hover:text-red-500"
+                  onClick={() => removeFromCart(item.id)}
+                >
+                  ×
+                </button>
               </div>
             </div>
           ))}
@@ -89,7 +84,7 @@ const ShoppingCart = () => {
             </div>
             <div className="flex justify-between font-semibold text-lg mb-4 text-black">
               <span>Total del pedido:</span>
-              <span>{total.toFixed(2)} dólares</span>
+              <span>${total.toFixed(2)}</span>
             </div>
             <button 
               className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors"
@@ -99,7 +94,7 @@ const ShoppingCart = () => {
             </button>
           </div>
 
-          {/* Mostrar el componente Checkout cuando showCheckout sea true */}
+          {/* Muestra el componente Checkout al hacer clic en "Verificar" */}
           {showCheckout && (
             <div className="p-6 bg-gray-50 rounded-lg shadow-lg">
               <Checkout total={total} />
