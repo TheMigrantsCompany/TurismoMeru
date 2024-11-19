@@ -33,7 +33,7 @@ module.exports = (sequelize) => {
       allowNull: true // Opcional: puede no ser necesario especificar la ubicación
     },
     availabilityDate: {
-      type: DataTypes.DATE,
+      type: DataTypes.ARRAY(DataTypes.DATE),
       allowNull: true // Opcional: puede no ser necesario especificar la fecha de disponibilidad
     },
     photos: {
