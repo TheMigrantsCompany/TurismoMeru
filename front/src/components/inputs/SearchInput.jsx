@@ -3,9 +3,15 @@ import React, { useState } from 'react';
 const SearchInput = ({ onSearch }) => {
   const [query, setQuery] = useState('');
 
+  const handleInputChange = (e) => {
+    const query = e.target.value;
+    setQuery(query);
+    onSearch(query);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSearch(query); // Llama a la función onSearch con el término de búsqueda
+    onSearch(query);
   };
 
   return (
@@ -14,11 +20,11 @@ const SearchInput = ({ onSearch }) => {
         <input
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="w-full border h-12 shadow p-4 rounded-full text-gray-800 border-gray-300 bg-white" // Cambié a fondo blanco y bordes claros
+          onChange={handleInputChange}
+          className="w-full border h-12 shadow p-4 rounded-full text-gray-800 border-gray-300 bg-white"
           placeholder="Buscar..."
         />
-        <button type="submit" className="absolute top-1/2 right-3 transform -translate-y-1/2"> {/* Centrar verticalmente */}
+        <button type="submit" className="absolute top-1/2 right-3 transform -translate-y-1/2">
           <svg
             className="text-teal-400 h-5 w-5 fill-current"
             xmlns="http://www.w3.org/2000/svg"
@@ -33,4 +39,3 @@ const SearchInput = ({ onSearch }) => {
 };
 
 export default SearchInput;
-

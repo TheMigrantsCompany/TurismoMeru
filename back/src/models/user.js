@@ -19,7 +19,7 @@ module.exports = (sequelize) => {
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false // Obligatorio: la contraseña es necesaria
+      allowNull: true, // Obligatorio: la contraseña es necesaria
     },
     role: {
       type: DataTypes.STRING,

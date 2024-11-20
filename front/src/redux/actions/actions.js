@@ -29,10 +29,7 @@ import {
 export const createExcursion = (excursionData) => async (dispatch) => {
   dispatch({ type: CREATE_EXCURSION_REQUEST });
   try {
-    const response = await axios.post(
-      "http://localhost:3001/service/",
-      excursionData
-    );
+    const response = await axios.post('http://localhost:3001/service/', excursionData);
     dispatch({
       type: CREATE_EXCURSION_SUCCESS,
       payload: response.data,
@@ -44,17 +41,18 @@ export const createExcursion = (excursionData) => async (dispatch) => {
     });
   }
 };
-export const getAllServices = () => async (dispatch) => {
-  try {
-    const response = await axios.get("http://localhost:3001/service");
-    dispatch({
-      type: GET_ALL_SERVICES,
-      payload: response.data,
-    });
-  } catch (error) {
-    console.error("Error fetching services:", error);
-  }
-};
+
+  export const getAllServices = () => async (dispatch) => {
+    try {
+      const response = await axios.get('http://localhost:3001/service'); 
+      dispatch({
+        type: GET_ALL_SERVICES,
+        payload: response.data
+      });
+    } catch (error) {
+      console.error("Error fetching services:", error);
+    }
+  };
 
 export const deleteService = (title) => async (dispatch) => {
   try {
@@ -71,6 +69,8 @@ export const deleteService = (title) => async (dispatch) => {
 
 export const toggleServiceActiveStatus = (id_Service) => async (dispatch) => {
   try {
+      const response = await axios.patch(`http://localhost:3001/service/${id_Service}/toggle`);
+      dispatch({ type: TOGGLE_SERVICE_STATUS_SUCCESS, payload: { id_Service: response.data.id_Service, active: response.data.active } });
     const response = await axios.patch(
       `http://localhost:3001/service/${id_Service}/toggle`
     );

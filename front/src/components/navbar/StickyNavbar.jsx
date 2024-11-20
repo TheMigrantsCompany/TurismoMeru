@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useMemo } from "react";
 import { auth, googleProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "../../firebase/config";
 import { signOut, onAuthStateChanged, signInWithPopup, updateProfile } from "firebase/auth";
 import axios from "axios";
+import axios from "axios";
 import ShoppingCartIcon from "@heroicons/react/24/outline/ShoppingCartIcon";
 import Swal from "sweetalert2";
+
 
 export default function StickyNavbar() {
   const [user, setUser] = useState(null);
@@ -11,6 +13,7 @@ export default function StickyNavbar() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      console.log("Estado de autenticación cambiado:", currentUser);
       console.log("Estado de autenticación cambiado:", currentUser);
     });
     return () => unsubscribe();
@@ -48,9 +51,42 @@ export default function StickyNavbar() {
   };
 
   // Manejo de inicio de sesión con Google
+  // Función para guardar los datos del usuario en el backend
+  const saveUserToBackend = async (userData, password) => {
+    try {
+      if (!userData) {
+        throw new Error("No se pudo obtener los datos del usuario.");
+      }
+      
+      const token = await userData.getIdToken();
+      if (!token) {
+        throw new Error("No se pudo obtener el token de autenticación.");
+      }
+
+      await axios.post(
+        "http://localhost:3001/user/",
+        {
+          name: userData.displayName || userData.name || "",
+          email: userData.email,
+          image: userData.photoURL || "",
+          role: "customer",
+          active: true,
+          password,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      console.log("Usuario guardado en el backend");
+    } catch (error) {
+      console.error("Error al guardar el usuario en el backend:", error);
+      Swal.fire("Error al guardar usuario", error.message, "error");
+    }
+  };
+
+  // Manejo de inicio de sesión con Google
   const handleGoogleLogin = async () => {
     try {
-      const result = await signInWithPopup(auth, googleProvider);
+      const result = const result = await signInWithPopup(auth, googleProvider);
+      await saveUserToBackend(result.user);
       await saveUserToBackend(result.user);
       Swal.fire("Inicio de sesión con Google exitoso", "", "success");
     } catch (error) {
@@ -59,9 +95,11 @@ export default function StickyNavbar() {
   };
 
   // Manejo de inicio de sesión con email
+  // Manejo de inicio de sesión con email
   const handleEmailLogin = async (email, password) => {
     try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
+      const result = const result = await signInWithEmailAndPassword(auth, email, password);
+      await saveUserToBackend(result.user);
       await saveUserToBackend(result.user);
       Swal.fire("Inicio de sesión exitoso", "", "success");
     } catch (error) {
@@ -69,6 +107,7 @@ export default function StickyNavbar() {
     }
   };
 
+  // Manejo de registro con email
   // Manejo de registro con email
   const handleEmailSignUp = async (email, password, displayName) => {
     try {
@@ -81,6 +120,7 @@ export default function StickyNavbar() {
     }
   };
 
+  // Mostrar el formulario de inicio de sesión o registro
   // Mostrar el formulario de inicio de sesión o registro
   const handleAuthAlert = () => {
     Swal.fire({
@@ -99,6 +139,7 @@ export default function StickyNavbar() {
     });
   };
 
+  // Mostrar formulario de inicio de sesión
   // Mostrar formulario de inicio de sesión
   const showLoginForm = () => {
     Swal.fire({
@@ -136,6 +177,7 @@ export default function StickyNavbar() {
   };
 
   // Mostrar formulario de registro
+  // Mostrar formulario de registro
   const showSignUpForm = () => {
     Swal.fire({
       title: "Registrarse",
@@ -165,6 +207,7 @@ export default function StickyNavbar() {
   };
 
   // Manejo de cierre de sesión
+  // Manejo de cierre de sesión
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -174,6 +217,8 @@ export default function StickyNavbar() {
     }
   };
 
+  // Memorizar el renderizado de la navbar
+  const renderedNavbar = useMemo(() => (
   // Memorizar el renderizado de la navbar
   const renderedNavbar = useMemo(() => (
     <nav className="bg-white shadow dark:bg-gray-200 sticky top-0 z-50 opacity-50">
@@ -201,6 +246,8 @@ export default function StickyNavbar() {
       </div>
     </nav>
   ), [user]); // Solo se recalcula si el estado de user cambia
+
+  return renderedNavbar, [user]); // Solo se recalcula si el estado de user cambia
 
   return renderedNavbar;
 }

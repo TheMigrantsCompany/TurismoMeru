@@ -71,7 +71,7 @@ export default function Footer() {
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <path d="..."></path>
+                
               </svg>
             </a>
 
@@ -86,7 +86,7 @@ export default function Footer() {
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <path d="..."></path>
+                
               </svg>
             </a>
 
@@ -101,7 +101,7 @@ export default function Footer() {
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <path d="..."></path>
+               
               </svg>
             </a>
           </div>
