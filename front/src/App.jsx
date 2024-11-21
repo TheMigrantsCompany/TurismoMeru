@@ -14,14 +14,15 @@ import { ReservationManagement } from './views/dashboardAdmin/dashAdminViews/Res
 import { ExcursionManagement } from './views/dashboardAdmin/dashAdminViews/ExcursionManagement';
 import { ReviewsManagement } from './views/dashboardAdmin/dashAdminViews/ReviewManagement';
 import { ServiceOrderManagement } from './views/dashboardAdmin/dashAdminViews/ServiceOrderManagement';
+import { CartProvider } from './views/shopping-cart/CartContext';
 
 function App() {
   return (
-    <>
+    <CartProvider>
       <StickyNavbar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/detail" element={<Detail />} />
+        <Route path="/detail/:id_Service" element={<Detail />} />
         
         {/* Ruta para el Administrador */}
         <Route path="/admin" element={<DashboardAdmin />}>
@@ -41,7 +42,7 @@ function App() {
           <Route path="compras" element={<Purchases />} />
         </Route>
       </Routes>
-    </>
+    </CartProvider>
   );
 }
 

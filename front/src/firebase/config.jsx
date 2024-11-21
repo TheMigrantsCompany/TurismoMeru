@@ -3,14 +3,14 @@ import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDbEYGuefkr4ZP_flHER0OCFbZH8gtU3Rw",
-    authDomain: "turismomeru.firebaseapp.com",
-    projectId: "turismomeru",
-    storageBucket: "turismomeru.appspot.com",
-    messagingSenderId: "689519457256",
-    appId: "1:689519457256:web:999034d39a78e1abce6a5d",
-    measurementId: "G-BL6W7YPEFE"
+    apiKey: "AIzaSyDKhIlfVR4Ej3maTgmY-f8Tz6hx63cfwQg",
+    authDomain: "meruvyt.firebaseapp.com",
+    projectId: "meruvyt",
+    storageBucket: "meruvyt.appspot.com",
+    messagingSenderId: "549392748184",
+    appId: "1:549392748184:web:b96b5dacbf3a01de7e0aed"
   };
+  
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
