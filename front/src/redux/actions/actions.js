@@ -29,10 +29,7 @@ import {
 export const createExcursion = (excursionData) => async (dispatch) => {
   dispatch({ type: CREATE_EXCURSION_REQUEST });
   try {
-    const response = await axios.post(
-      "http://localhost:3001/service/",
-      excursionData
-    );
+    const response = await axios.post("http://localhost:3001/service/", excursionData);
     dispatch({
       type: CREATE_EXCURSION_SUCCESS,
       payload: response.data,
