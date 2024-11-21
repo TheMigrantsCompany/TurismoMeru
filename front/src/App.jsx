@@ -38,7 +38,7 @@ function App() {
         <Route path="/user" element={<DashboardUser />}>
           <Route path="profile" element={<ProfileForm />} />
           <Route path="reviews" element={<Reviews />} />
-          <Route path="shoppingcart" element={<ShoppingCart />} />
+          <Route path="shopping-cart" element={<ShoppingCart />} />
           <Route path="compras" element={<Purchases />} />
         </Route>
       </Routes>
