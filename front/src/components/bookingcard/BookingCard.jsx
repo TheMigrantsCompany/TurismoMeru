@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../../views/shopping-cart/CartContext";
 
 const BookingCard = ({ id_Service, price }) => {
-  const [excursion, setExcursion] = useState(null); // Guardar detalles de la excursión
+  const [excursion, setExcursion] = useState(null);
   const [availableDates, setAvailableDates] = useState([]);
   const [availableTimes, setAvailableTimes] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
@@ -16,7 +16,7 @@ const BookingCard = ({ id_Service, price }) => {
   });
   const [totalPrice, setTotalPrice] = useState(0);
 
-  const { addToCart } = useCart(); // Obtener la función para añadir al carrito desde el contexto.
+  const { addToCart } = useCart();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,7 +25,7 @@ const BookingCard = ({ id_Service, price }) => {
         const response = await axios.get(
           `http://localhost:3001/service/id/${id_Service}`
         );
-        setExcursion(response.data); // Guardar los detalles de la excursión
+        setExcursion(response.data);
         const rawDates = response.data.availabilityDate || [];
         const dates = [...new Set(rawDates.map(date => new Date(date).toLocaleDateString()))];
         const times = [...new Set(rawDates.map(date => new Date(date).toLocaleTimeString()))];
@@ -41,14 +41,14 @@ const BookingCard = ({ id_Service, price }) => {
   }, [id_Service]);
 
   useEffect(() => {
-  if (excursion) {
-    const total =
-      excursion.price * quantities.adultos +
-      excursion.price * 0.8 * quantities.menores +
-      excursion.price * 0.7 * quantities.jubilados;
-    setTotalPrice(total);
-  }
-}, [quantities, excursion]);
+    if (excursion) {
+      const total =
+        excursion.price * quantities.adultos +
+        excursion.price * 0.8 * quantities.menores +
+        excursion.price * 0.7 * quantities.jubilados;
+      setTotalPrice(total);
+    }
+  }, [quantities, excursion]);
 
   const handleQuantityChange = (type, action) => {
     setQuantities((prev) => ({
@@ -80,8 +80,8 @@ const BookingCard = ({ id_Service, price }) => {
         children: quantities.menores,
         seniors: quantities.jubilados,
       },
-      photos: excursion?.photos || [], // Asegúrate de que sea un array
-      stock: excursion?.stock || 0, // Agregar stock si es necesario
+      photos: excursion?.photos || [],
+      stock: excursion?.stock || 0,
       duration: excursion?.duration || "No disponible",
     };
 
@@ -90,12 +90,11 @@ const BookingCard = ({ id_Service, price }) => {
   };
 
   return (
-    <div className="bg-red-600 text-white p-6 rounded-lg max-w-sm">
-      {/* Fecha */}
-      <div className="mb-4">
-        <label className="block font-bold mb-2">Fecha de llegada</label>
+    <div className="bg-gray-800 text-white p-4 rounded-lg max-w-xs shadow-lg">
+      <div className="mb-3">
+        <label className="block text-sm font-bold">Fecha de llegada</label>
         <select
-          className="w-full p-2 rounded text-black"
+          className="w-full p-1 rounded text-gray-800 text-sm"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
         >
@@ -108,11 +107,10 @@ const BookingCard = ({ id_Service, price }) => {
         </select>
       </div>
 
-      {/* Horario */}
-      <div className="mb-4">
-        <label className="block font-bold mb-2">Horario</label>
+      <div className="mb-3">
+        <label className="block text-sm font-bold">Horario</label>
         <select
-          className="w-full p-2 rounded text-black"
+          className="w-full p-1 rounded text-gray-800 text-sm"
           value={selectedTime}
           onChange={(e) => setSelectedTime(e.target.value)}
         >
@@ -125,11 +123,10 @@ const BookingCard = ({ id_Service, price }) => {
         </select>
       </div>
 
-      {/* Personas */}
-      <div className="mb-4">
-        <label className="block font-bold mb-2">Personas</label>
+      <div className="mb-3">
+        <label className="block text-sm font-bold">Personas</label>
         {["adultos", "menores", "jubilados"].map((type) => (
-          <div key={type} className="flex items-center justify-between mb-2">
+          <div key={type} className="flex items-center justify-between mb-1 text-sm">
             <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
             <div className="flex items-center space-x-2">
               <button
@@ -150,21 +147,18 @@ const BookingCard = ({ id_Service, price }) => {
         ))}
       </div>
 
-      {/* Botón de añadir */}
       <button
-        className="bg-blue-800 w-full py-2 rounded mt-4"
+        className="bg-blue-600 w-full py-1 rounded text-sm"
         onClick={handleAddToCart}
       >
         Añadir al carrito
       </button>
 
-      {/* Nota, precio base y precio total */}
-      <p className="text-sm mt-4">
-        Tarifas promocionales por compra anticipada hasta 72hs antes de la salida.
-        No válidas en destino.
+      <p className="text-xs mt-3">
+        Promoción válida por compras 72 horas antes de la salida.
       </p>
-      <p className="text-lg font-bold mt-2 text-center">Precio base: ${price}</p>
-      <p className="text-lg font-bold mt-2 text-center">Precio total: ${totalPrice.toFixed(2)}</p>
+      <p className="text-sm font-bold mt-2">Precio base: ${price}</p>
+      <p className="text-sm font-bold mt-2">Precio total: ${totalPrice.toFixed(2)}</p>
     </div>
   );
 };

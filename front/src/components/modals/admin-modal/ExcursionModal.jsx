@@ -174,13 +174,14 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
 
         <div>
           <label className="block text-sm text-gray-600 font-medium mb-1">Descripción:</label>
-          <input
-            type="text"
+          <textarea
             name="description"
             value={excursionData.description}
             onChange={handleChange}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-          />
+            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black resize-none h-28"
+            rows="5" 
+            placeholder="Escribe una descripción detallada aquí..."
+          ></textarea>
           {formErrors.description && <p className="text-red-500 text-sm">{formErrors.description}</p>}
         </div>
 
