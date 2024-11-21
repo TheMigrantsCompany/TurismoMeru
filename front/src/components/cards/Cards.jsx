@@ -17,9 +17,7 @@ export default function Card({ excursion }) {
           >
             {excursion.title}
           </Link>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            {excursion.description}
-          </p>
+         
         </div>
         <div className="mt-4">
           <div className="flex items-center">
