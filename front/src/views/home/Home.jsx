@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Footer from '../../components/footer/Footer';
 import Header from '../../components/header/Header';
 import Card from '../../components/cards/Cards'
@@ -7,6 +8,7 @@ import axios from "axios";
 
 const Home = () => {
   const [excursions, setExcursions] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
 
@@ -18,6 +20,10 @@ const Home = () => {
         console.error("Error fetching excursions:", error);
       });
   }, []);
+  const handleLoginSuccess = () => {
+    // Simula que el usuario inició sesión correctamente
+    navigate("/dashboard");
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -35,6 +41,7 @@ const Home = () => {
         </div>
       </div>
       <Footer className="mt-auto" />
+      
     </div>
   );
 };
