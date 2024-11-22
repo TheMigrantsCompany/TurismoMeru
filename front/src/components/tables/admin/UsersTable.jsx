@@ -1,58 +1,85 @@
 import React from "react";
 import { TrashIcon, EyeIcon } from "@heroicons/react/24/outline";
-import { Chip, IconButton } from "@material-tailwind/react";
+import { Chip, IconButton, Button, Typography, Tooltip, Card, CardHeader, CardBody } from "@material-tailwind/react";
 
-const UserTable = ({ users = [], onDelete, onToggleActive, onViewDetails }) => {
-  const filterUsers = (status) => {
-    if (!users) return [];
-    if (status === "all") return users;
-    return users.filter((user) => user.active === (status === "active"));
-  };
-
-  const [filter, setFilter] = React.useState("all");
-
+const UserTable = ({ users = [], onFilterChange, onDelete, onToggleActive, onViewDetails }) => {
   return (
-    <div>
-      <div className="flex space-x-4 mb-4">
-        <button onClick={() => setFilter("all")}>Todos</button>
-        <button onClick={() => setFilter("active")}>Activos</button>
-        <button onClick={() => setFilter("inactive")}>Inactivos</button>
-      </div>
-      <table className="table-auto text-center min-w-full border-collapse border border-gray-200">
-        <thead>
-          <tr className="bg-gray-100">
-            <th>Nombre</th>
-            <th>Documento</th>
-            <th>Email</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filterUsers(filter).map((user) => (
-            <tr key={user.id_User}>
-              <td>{user.name}</td>
-              <td>{user.document}</td>
-              <td>{user.email}</td>
-              <td>
-                <Chip color={user.active ? "green" : "red"} value={user.active ? "Activo" : "Inactivo"} />
-              </td>
-              <td className="flex justify-center gap-2">
-                <IconButton onClick={() => onViewDetails(user)} color="blue">
-                  <EyeIcon />
-                </IconButton>
-                <IconButton onClick={() => onDelete(user.id_User)} color="red">
-                  <TrashIcon />
-                </IconButton>
-                <IconButton onClick={() => onToggleActive(user.id_User)} color={user.active ? "red" : "green"}>
-                  {user.active ? "D" : "A"}
-                </IconButton>
-              </td>
+    <Card className="h-full w-full">
+      <CardHeader floated={false} shadow={false} className="rounded-none">
+        <Typography variant="h5" color="blue-gray">Gestión de Usuarios</Typography>
+
+        {/* Botones de filtrado */}
+        <div className="flex space-x-4 mt-4">
+          <Button onClick={() => onFilterChange("all")} color="blue">Todos</Button>
+          <Button onClick={() => onFilterChange("active")} color="green">Activos</Button>
+          <Button onClick={() => onFilterChange("inactive")} color="red">Inactivos</Button>
+        </div>
+      </CardHeader>
+
+      <CardBody className="px-0">
+        <table className="mt-4 w-full table-auto text-left">
+          <thead>
+            <tr>
+              <th className="p-4 border-y border-blue-gray-100 bg-blue-gray-50/50">
+                <Typography variant="small" color="blue-gray">Nombre</Typography>
+              </th>
+              <th className="p-4 border-y border-blue-gray-100 bg-blue-gray-50/50">
+                <Typography variant="small" color="blue-gray">Documento</Typography>
+              </th>
+              <th className="p-4 border-y border-blue-gray-100 bg-blue-gray-50/50">
+                <Typography variant="small" color="blue-gray">Email</Typography>
+              </th>
+              <th className="p-4 border-y border-blue-gray-100 bg-blue-gray-50/50">
+                <Typography variant="small" color="blue-gray">Estado</Typography>
+              </th>
+              <th className="p-4 border-y border-blue-gray-100 bg-blue-gray-50/50">
+                <Typography variant="small" color="blue-gray">Acciones</Typography>
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {users.length > 0 ? (
+              users.map((user) => (
+                <tr key={user.id_User}>
+                  <td className="p-4 border-b border-blue-gray-50 text-black">{user.name}</td>
+                  <td className="p-4 border-b border-blue-gray-50 text-black">{user.document}</td>
+                  <td className="p-4 border-b border-blue-gray-50 text-black">{user.email}</td>
+                  <td className="p-4 border-b border-blue-gray-50">
+                    <Chip
+                      variant="ghost"
+                      size="sm"
+                      value={user.active ? "Activo" : "Inactivo"}
+                      color={user.active ? "green" : "red"}
+                    />
+                  </td>
+                  <td className="p-4 border-b border-blue-gray-50 flex gap-2">
+                    <Tooltip content="Ver Detalles">
+                      <IconButton variant="text" onClick={() => onViewDetails(user)}>
+                        <EyeIcon className="h-4 w-4" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip content="Eliminar Usuario">
+                      <IconButton variant="text" onClick={() => onDelete(user.id_User)}>
+                        <TrashIcon className="h-4 w-4" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip content={user.active ? "Desactivar Usuario" : "Activar Usuario"}>
+                      <IconButton variant="text" onClick={() => onToggleActive(user.id_User)}>
+                        <Typography className="h-4 w-4">{user.active ? "D" : "A"}</Typography>
+                      </IconButton>
+                    </Tooltip>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="text-center text-black">No se encontraron resultados.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </CardBody>
+    </Card>
   );
 };
 
