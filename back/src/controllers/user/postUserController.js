@@ -6,7 +6,8 @@ const postUserController = async (userData) => {
   // Verificar si ya existe un usuario con el mismo correo
   const existingUser = await User.findOne({ where: { email } });
   if (existingUser) {
-    throw new Error('El usuario con ese correo ya existe');
+    // Si el usuario ya existe, retornar el usuario existente con su rol
+    return existingUser;
   }
 
   // Lista de correos que deben tener el rol de admin
@@ -23,7 +24,7 @@ const postUserController = async (userData) => {
   // Asignar el rol al userData
   userData.role = role;
 
-  // Creación del nuevo usuario
+  // Crear el nuevo usuario
   const newUser = await User.create(userData);
   return newUser;
 };
