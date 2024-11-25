@@ -1,9 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Checkout = ({ total }) => {
-  const handlePayment = () => {
-    // Lógica para procesar el pago
-    alert(`Pagando ${total.toFixed(2)} dólares`);
+  const navigate = useNavigate();
+
+  const handleRedirect = () => {
+    navigate('/orderform'); // Redirige al formulario de pago
   };
 
   return (
@@ -12,7 +14,7 @@ const Checkout = ({ total }) => {
       <p className="text-black mb-4">Total a pagar: ${total.toFixed(2)}</p>
       <button 
         className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors"
-        onClick={handlePayment}
+        onClick={handleRedirect}
       >
         Confirmar Pedido 
       </button>

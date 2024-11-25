@@ -8,7 +8,7 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [userId, setUserId] = useState(null);
 
-  // Recuperar carrito del localStorage al iniciar
+ 
   useEffect(() => {
     if (userId) {
       const storedCart = localStorage.getItem(`cartItems_${userId}`);
@@ -18,7 +18,7 @@ export const CartProvider = ({ children }) => {
     }
   }, [userId]);
 
-  // Sincronizar el carrito con localStorage cuando cambia
+  
   useEffect(() => {
     if (userId) {
       localStorage.setItem(`cartItems_${userId}`, JSON.stringify(cartItems));
@@ -71,7 +71,7 @@ export const CartProvider = ({ children }) => {
         updateQuantity,
         removeFromCart,
         clearCart,
-        setUserId, // Permitir cambiar el userId cuando inicie/cierre sesión
+        setUserId, 
       }}
     >
       {children}

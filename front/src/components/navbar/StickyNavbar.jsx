@@ -15,15 +15,14 @@ export default function StickyNavbar() {
       setUser(currentUser);
 
       if (currentUser) {
-        setUserId(currentUser.uid); // Asignar ID del usuario al carrito
+        setUserId(currentUser.uid); 
       } else {
         setUserId(null);
-        clearCart(); // Limpiar el carrito al cerrar sesión
+        clearCart(); 
       }
     });
     return () => unsubscribe();
   }, [setUserId, clearCart]);
-
 
 
   // Función para guardar los datos del usuario en el backend
@@ -180,7 +179,7 @@ export default function StickyNavbar() {
       await signOut(auth);
       Swal.fire("Sesión cerrada exitosamente", "", "success");
 
-      // Limpiar carrito del localStorage y estado
+
       clearCart();
       window.location.reload();
     } catch (error) {
@@ -199,7 +198,7 @@ export default function StickyNavbar() {
         <a href="#" className="border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500 mx-1.5 sm:mx-6">Pricing</a>
         <a href="#" className="border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500 mx-1.5 sm:mx-6">Blog</a>
 
-        <a href="/user/shoppingcart" className="flex items-center border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500 mx-1.5 sm:mx-6">
+        <a href="/user/shopping-cart" className="flex items-center border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500 mx-1.5 sm:mx-6">
           <ShoppingCartIcon className="w-6 h-6" />
         </a>
 
