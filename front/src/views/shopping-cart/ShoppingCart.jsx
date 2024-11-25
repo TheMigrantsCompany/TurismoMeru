@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Checkout from "../../components/checkout/CheckOut";
 
 const ShoppingCart = () => {
-  const { cartItems, updateQuantity, removeFromCart } = useCart();
+  const { cartItems, removeFromCart } = useCart();
   const [showCheckout, setShowCheckout] = useState(false);
   const navigate = useNavigate();
   const subtotal = cartItems.reduce(
@@ -24,7 +24,7 @@ const ShoppingCart = () => {
               key={`cart-item-${item.id_Service}-${index}`}
               className="flex flex-col space-y-4 p-4 border-b bg-gray-50 rounded-lg shadow"
             >
-              {/* Imagen y título */}
+             
               <div className="flex items-center space-x-4">
                 <img
                   src={
@@ -43,7 +43,7 @@ const ShoppingCart = () => {
                 </div>
               </div>
 
-              {/* Detalles de la excursión */}
+            
               <div className="text-sm text-gray-700">
                 <p>
                   <strong>Adultos:</strong> {item.quantities?.adults || 0}
@@ -54,7 +54,7 @@ const ShoppingCart = () => {
                 <p>
                   <strong>Jubilados:</strong> {item.quantities?.seniors || 0}
                 </p>
-                {/* Fecha y hora seleccionada */}
+                
                 <p>
                   <strong>Fecha:</strong> {item.selectedDate || "No seleccionada"}
                 </p>
@@ -63,7 +63,7 @@ const ShoppingCart = () => {
                 </p>
               </div>
 
-              {/* Precio, cantidad y opción eliminar */}
+             
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-lg font-semibold text-black">
@@ -71,7 +71,7 @@ const ShoppingCart = () => {
                   </p>
                   <p
                     className="text-sm text-red-500 underline cursor-pointer hover:text-red-700 transition"
-                    onClick={() => removeFromCart(item.id_Service)} // Eliminar el artículo del carrito usando id_Service
+                    onClick={() => removeFromCart(item.id_Service)} 
                   >
                     Eliminar
                   </p>
@@ -82,7 +82,7 @@ const ShoppingCart = () => {
           ))}
         </div>
 
-        {/* Resumen del pedido */}
+       
         <div className="w-full md:w-1/3 space-y-6">
           <div className="p-6 bg-gray-50 rounded-lg shadow-lg">
             <h2 className="text-xl font-semibold mb-4 text-black">
