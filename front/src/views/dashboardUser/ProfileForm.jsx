@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserSideBar } from '../../components/sidebars/user/UserSideBar';
+//import { UserSideBar } from '../../components/sidebars/user/UserSideBar';
 
 const ProfileForm = () => {
   const [profile, setProfile] = useState({
