@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 const CartContext = createContext();
 
@@ -6,6 +6,24 @@ export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
+  const [userId, setUserId] = useState(null);
+
+  // Recuperar carrito del localStorage al iniciar
+  useEffect(() => {
+    if (userId) {
+      const storedCart = localStorage.getItem(`cartItems_${userId}`);
+      if (storedCart) {
+        setCartItems(JSON.parse(storedCart));
+      }
+    }
+  }, [userId]);
+
+  // Sincronizar el carrito con localStorage cuando cambia
+  useEffect(() => {
+    if (userId) {
+      localStorage.setItem(`cartItems_${userId}`, JSON.stringify(cartItems));
+    }
+  }, [cartItems, userId]);
 
   const addToCart = (item) => {
     setCartItems((prev) => {
@@ -16,9 +34,9 @@ export const CartProvider = ({ children }) => {
             ? {
                 ...cartItem,
                 quantities: {
-                  adultos: cartItem.quantities.adultos + item.quantities.adultos,
-                  menores: cartItem.quantities.menores + item.quantities.menores,
-                  jubilados: cartItem.quantities.jubilados + item.quantities.jubilados,
+                  adults: cartItem.quantities.adults + item.quantities.adults,
+                  children: cartItem.quantities.children + item.quantities.children,
+                  seniors: cartItem.quantities.seniors + item.quantities.seniors,
                 },
                 totalPrice: cartItem.totalPrice + item.totalPrice,
               }
@@ -41,9 +59,20 @@ export const CartProvider = ({ children }) => {
     setCartItems((prev) => prev.filter((item) => item.id_Service !== id_Service));
   };
 
+  const clearCart = () => {
+    setCartItems([]);
+  };
+
   return (
     <CartContext.Provider
-      value={{ cartItems, addToCart, updateQuantity, removeFromCart }}
+      value={{
+        cartItems,
+        addToCart,
+        updateQuantity,
+        removeFromCart,
+        clearCart,
+        setUserId, // Permitir cambiar el userId cuando inicie/cierre sesión
+      }}
     >
       {children}
     </CartContext.Provider>
