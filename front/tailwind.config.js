@@ -29,6 +29,7 @@ export default withMT({
           strong: colors.gray[900],
           inverted: colors.white,
         },
+        
       },
     },
   },

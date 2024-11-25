@@ -17,117 +17,121 @@ export function Detail() {
       );
   }, [id_Service]);
 
-  if (!excursion) return <p className="text-center text-gray-500">Cargando...</p>;
+  if (!excursion) return <p>Loading...</p>;
 
   const photos = excursion.photos || [];
 
+  const handleNextPhoto = () => {
+    setCurrentPhotoIndex((prevIndex) =>
+      prevIndex === photos.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  const handlePreviousPhoto = () => {
+    setCurrentPhotoIndex((prevIndex) =>
+      prevIndex === 0 ? photos.length - 1 : prevIndex - 1
+    );
+  };
+
   return (
-    <section className="py-12 px-4 bg-gray-50">
+    <section className="py-16 px-8 bg-gray-50">
       <div className="container mx-auto max-w-6xl">
-        {/* Título */}
-        <Typography className="mb-8 text-3xl lg:text-4xl font-bold text-gray-800 text-center">
+        {/* Título separado arriba */}
+        <Typography
+          variant="h3"
+          className="font-semibold text-gray-800 text-center mb-10"
+        >
           {excursion.title}
         </Typography>
 
         {/* Contenedor principal */}
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Imagen y detalles */}
-          <div className="lg:w-2/3">
-            {/* Contenedor de imagen */}
-            <div className="relative max-w-full mx-auto mb-6">
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Imagen y texto alineados */}
+          <div className="lg:col-span-2 flex flex-wrap lg:flex-nowrap gap-6 items-start">
+            {/* Imagen / Carrusel */}
+            <div className="relative max-w-sm">
               {photos.length > 0 ? (
-                <img
-                  src={photos[currentPhotoIndex]}
-                  alt={`Excursion photo ${currentPhotoIndex + 1}`}
-                  className="w-full h-72 object-cover rounded-lg shadow-lg transition-transform transform hover:scale-105 duration-300"
-                  onError={(e) => (e.target.src = "default_image_url.png")}
-                />
+                <div className="relative">
+                  <img
+                    src={photos[currentPhotoIndex]}
+                    alt={`Excursion photo ${currentPhotoIndex + 1}`}
+                    className="w-full h-auto rounded-lg shadow-md"
+                    onError={(e) => (e.target.src = "default_image_url.png")}
+                  />
+                  {photos.length > 1 && (
+                    <div className="absolute inset-0 flex justify-between items-center">
+                      <button
+                        onClick={handlePreviousPhoto}
+                        className="bg-gray-700 text-white bg-opacity-50 p-2 rounded-full hover:bg-opacity-75 focus:outline-none absolute left-2 top-1/2 transform -translate-y-1/2"
+                      >
+                        ❮
+                      </button>
+                      <button
+                        onClick={handleNextPhoto}
+                        className="bg-gray-700 text-white bg-opacity-50 p-2 rounded-full hover:bg-opacity-75 focus:outline-none absolute right-2 top-1/2 transform -translate-y-1/2"
+                      >
+                        ❯
+                      </button>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <img
                   src="default_image_url.png"
                   alt="Default"
-                  className="w-full h-72 object-cover rounded-lg shadow-lg"
+                  className="w-full h-auto rounded-lg shadow-md"
                 />
-              )}
-              {photos.length > 1 && (
-                <div className="flex justify-between absolute inset-0 items-center px-4">
-                  <button
-                    onClick={() =>
-                      setCurrentPhotoIndex((prev) =>
-                        prev === 0 ? photos.length - 1 : prev - 1
-                      )
-                    }
-                    className="bg-gray-700 text-white bg-opacity-50 p-2 rounded-full hover:bg-opacity-75 focus:outline-none"
-                  >
-                    ❮
-                  </button>
-                  <button
-                    onClick={() =>
-                      setCurrentPhotoIndex((prev) =>
-                        prev === photos.length - 1 ? 0 : prev + 1
-                      )
-                    }
-                    className="bg-gray-700 text-white bg-opacity-50 p-2 rounded-full hover:bg-opacity-75 focus:outline-none"
-                  >
-                    ❯
-                  </button>
-                </div>
               )}
             </div>
 
-            {/* Descripción */}
-            <Typography
-              variant="body1"
-              className="text-justify text-gray-700 mb-6 leading-relaxed"
-            >
-              {excursion.description}
-            </Typography>
-
-            {/* Información adicional */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Texto dinámico al lado de la imagen */}
+            <div className="flex-1 text-gray-700">
+              <Typography variant="paragraph" className="text-justify mb-4">
+                {excursion.description}
+              </Typography>
               {excursion.location && (
-                <Typography className="text-gray-700">
-                  <strong className="font-semibold text-gray-800">Ubicación:</strong>{" "}
-                  {excursion.location}
+                <Typography variant="small" color="gray" className="text-lg mb-2">
+                  <strong>Ubicación:</strong> {excursion.location}
                 </Typography>
               )}
               {excursion.duration && (
-                <Typography className="text-gray-700">
-                  <strong className="font-semibold text-gray-800">Duración:</strong>{" "}
-                  {excursion.duration} horas
+                <Typography variant="small" color="gray" className="text-lg mb-2">
+                  <strong>Duración:</strong> {excursion.duration} horas
                 </Typography>
               )}
               {excursion.difficulty && (
-                <Typography className="text-gray-700">
-                  <strong className="font-semibold text-gray-800">Dificultad:</strong>{" "}
-                  {excursion.difficulty}
+                <Typography variant="small" color="gray" className="text-lg mb-2">
+                  <strong>Dificultad:</strong> {excursion.difficulty}
+                </Typography>
+              )}
+              {Array.isArray(excursion.guides) && excursion.guides.length > 0 ? (
+                <div>
+                  <Typography
+                    variant="h6"
+                    color="blue-gray"
+                    className="text-lg font-semibold"
+                  >
+                    Guías:
+                  </Typography>
+                  <ul className="list-disc pl-6 text-gray-700">
+                    {excursion.guides.map((guide, index) => (
+                      <li key={index} className="text-gray-700">
+                        {guide.name} - {guide.language}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <Typography variant="small" color="gray">
+                  No hay guías disponibles.
                 </Typography>
               )}
             </div>
-
-            {/* Guías */}
-            {Array.isArray(excursion.guides) && excursion.guides.length > 0 && (
-              <div className="mt-6">
-                <Typography
-                  variant="h6"
-                  className="text-lg font-semibold text-gray-800 mb-2"
-                >
-                  Guías:
-                </Typography>
-                <ul className="list-disc pl-6 text-gray-700">
-                  {excursion.guides.map((guide, index) => (
-                    <li key={index}>
-                      {guide.name} - {guide.language}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </div>
 
-          {/* Tarjeta de reserva */}
-          <div className="lg:w-1/3">
-            <div className="bg-white p-6 rounded-lg shadow-lg sticky top-24">
+          {/* BookingCard */}
+          <div className="lg:col-span-1">
+            <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200 sticky top-24">
               <BookingCard id_Service={id_Service} price={excursion.price} />
             </div>
           </div>

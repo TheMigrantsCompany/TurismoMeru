@@ -14,7 +14,7 @@ const Checkout = ({ total }) => {
         className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors"
         onClick={handlePayment}
       >
-        Realizar Pago
+        Confirmar Pedido 
       </button>
     </div>
   );
