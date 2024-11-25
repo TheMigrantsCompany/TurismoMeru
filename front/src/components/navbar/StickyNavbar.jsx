@@ -16,8 +16,20 @@ export default function StickyNavbar() {
   const navigate = useNavigate(); // Instanciamos useNavigate
 
   useEffect(() => {
+    // Intentamos recuperar el usuario desde localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser)); // Si existe, lo seteamos en el estado
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+      if (currentUser) {
+        setUser(currentUser);
+        localStorage.setItem('user', JSON.stringify(currentUser)); // Guardamos al usuario en localStorage
+      } else {
+        setUser(null);
+        localStorage.removeItem('user'); // Si no hay usuario, lo eliminamos del localStorage
+      }
       console.log("Estado de autenticación cambiado:", currentUser);
     });
     return () => unsubscribe();
@@ -42,8 +54,11 @@ export default function StickyNavbar() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
   
-      // Obtener el rol del usuario desde la respuesta del backend
-      const { role } = response.data;
+      // Guardar el UUID en localStorage
+      const { id_User, role } = response.data; // Extrae `id_User` del backend
+      localStorage.setItem("uuid", id_User);
+  
+      console.log("Usuario registrado con UUID:", id_User);
   
       // Redirigir según el rol
       if (role === "admin") {
@@ -91,6 +106,7 @@ export default function StickyNavbar() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      localStorage.removeItem('user'); // Eliminar el usuario de localStorage
       Swal.fire("Sesión cerrada exitosamente", "", "success");
       navigate("/"); // Redirige a la página de inicio
     } catch (error) {
@@ -118,7 +134,7 @@ export default function StickyNavbar() {
   const showLoginForm = () => {
     Swal.fire({
       title: "Iniciar Sesión",
-      html: `
+      html: `  
         <button id="googleLogin" class="swal2-confirm swal2-styled" style="background-color:#dd4b39; margin-bottom: 10px;">
           Iniciar sesión con Google
         </button>
@@ -153,7 +169,7 @@ export default function StickyNavbar() {
   const showSignUpForm = () => {
     Swal.fire({
       title: "Registrarse",
-      html: `
+      html: `  
         <input type="text" id="displayName" class="swal2-input" placeholder="Nombre de usuario">
         <input type="email" id="email" class="swal2-input" placeholder="Correo electrónico">
         <input type="password" id="password" class="swal2-input" placeholder="Contraseña">
