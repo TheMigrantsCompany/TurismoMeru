@@ -24,12 +24,18 @@ import {
   GET_USER_BY_DNI_REQUEST,
   GET_USER_BY_DNI_SUCCESS,
   GET_USER_BY_DNI_FAILURE,
+  UPDATE_USER_REQUEST,
+  UPDATE_USER_SUCCESS,
+  UPDATE_USER_FAILURE,
 } from "./types";
 
 export const createExcursion = (excursionData) => async (dispatch) => {
   dispatch({ type: CREATE_EXCURSION_REQUEST });
   try {
-    const response = await axios.post("http://localhost:3001/service/", excursionData);
+    const response = await axios.post(
+      "http://localhost:3001/service/",
+      excursionData
+    );
     dispatch({
       type: CREATE_EXCURSION_SUCCESS,
       payload: response.data,
@@ -204,5 +210,30 @@ export const getUserByDni = (dni) => async (dispatch) => {
       error.message
     );
     dispatch({ type: GET_USER_BY_DNI_FAILURE, payload: error.message });
+  }
+};
+
+//UPDATE user por ID
+export const updateUserDetails = (id_User, updatedData) => async (dispatch) => {
+  console.log(
+    `Actions - updateUserDetails: Actualizando detalles del usuario con ID: ${id_User}`
+  );
+  dispatch({ type: UPDATE_USER_REQUEST });
+  try {
+    const response = await axios.put(
+      `http://localhost:3001/user/id/${id_User}`,
+      updatedData
+    );
+    console.log(
+      "Actions - updateUserDetails: Usuario actualizado con éxito:",
+      response.data
+    );
+    dispatch({ type: UPDATE_USER_SUCCESS, payload: response.data });
+  } catch (error) {
+    console.error(
+      "Actions - updateUserDetails: Error al actualizar usuario:",
+      error.message
+    );
+    dispatch({ type: UPDATE_USER_FAILURE, payload: error.message });
   }
 };

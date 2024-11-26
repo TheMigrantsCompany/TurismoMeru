@@ -24,6 +24,9 @@ import {
   GET_USER_BY_DNI_REQUEST,
   GET_USER_BY_DNI_SUCCESS,
   GET_USER_BY_DNI_FAILURE,
+  UPDATE_USER_REQUEST,
+  UPDATE_USER_SUCCESS,
+  UPDATE_USER_FAILURE,
 } from "../actions/types";
 
 const initialState = {
@@ -317,6 +320,38 @@ const rootReducer = (state = initialState, action) => {
         ...state,
         users: { ...state.users, loading: false, error: action.payload },
       };
+
+      case UPDATE_USER_REQUEST:
+        console.log("Reducer - UPDATE_USER_REQUEST: Solicitando actualización de usuario");
+        return {
+          ...state,
+          users: { ...state.users, loading: true, error: null },
+        };
+      
+      case UPDATE_USER_SUCCESS:
+        console.log("Reducer - UPDATE_USER_SUCCESS: Usuario actualizado con éxito", action.payload);
+        return {
+          ...state,
+          users: {
+            ...state.users,
+            loading: false,
+            userList: state.users.userList.map((user) =>
+              user.id_User === action.payload.id_User ? action.payload : user
+            ),
+            userDetails: action.payload, // Actualizamos también los detalles del usuario si aplica
+            error: null,
+          },
+        };
+      
+      case UPDATE_USER_FAILURE:
+        console.error(
+          "Reducer - UPDATE_USER_FAILURE: Error al actualizar usuario",
+          action.payload
+        );
+        return {
+          ...state,
+          users: { ...state.users, loading: false, error: action.payload },
+        };
 
     default:
       return state;
