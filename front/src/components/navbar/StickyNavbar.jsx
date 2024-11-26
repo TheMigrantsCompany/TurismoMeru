@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { auth, googleProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "../../firebase/config";
+import { auth, googleProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "../../firebase/config";
 import { signOut, onAuthStateChanged, signInWithPopup, updateProfile } from "firebase/auth";
 import axios from "axios";
 import ShoppingCartIcon from "@heroicons/react/24/outline/ShoppingCartIcon";
@@ -111,6 +112,7 @@ export default function StickyNavbar() {
 };
 
   // Mostrar el formulario de inicio de sesión o registro
+  // Mostrar el formulario de inicio de sesión o registro
   const handleAuthAlert = () => {
     Swal.fire({
       title: "Iniciar Sesión o Registrarse",
@@ -128,6 +130,7 @@ export default function StickyNavbar() {
     });
   };
 
+  // Mostrar formulario de inicio de sesión
   // Mostrar formulario de inicio de sesión
   const showLoginForm = () => {
     Swal.fire({
@@ -164,6 +167,7 @@ export default function StickyNavbar() {
     });
   };
 
+  // Mostrar formulario de registro
   // Mostrar formulario de registro
   const showSignUpForm = () => {
     Swal.fire({
