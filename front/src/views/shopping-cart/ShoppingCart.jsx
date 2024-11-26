@@ -4,16 +4,15 @@ import { useNavigate } from "react-router-dom";
 import Checkout from "../../components/checkout/CheckOut";
 
 const ShoppingCart = () => {
-  const { cartItems, updateQuantity, removeFromCart } = useCart();
+  const { cartItems, removeFromCart } = useCart();
   const [showCheckout, setShowCheckout] = useState(false);
   const navigate = useNavigate();
   const subtotal = cartItems.reduce(
     (acc, item) => acc + (typeof item.totalPrice === "number" ? item.totalPrice : 0),
     0
   );
-  
-  
-  const total = subtotal 
+
+  const total = subtotal;
 
   return (
     <div className="container mx-auto p-6 mt-16">
@@ -25,7 +24,7 @@ const ShoppingCart = () => {
               key={`cart-item-${item.id_Service}-${index}`}
               className="flex flex-col space-y-4 p-4 border-b bg-gray-50 rounded-lg shadow"
             >
-              {/* Imagen y título */}
+             
               <div className="flex items-center space-x-4">
                 <img
                   src={
@@ -44,7 +43,7 @@ const ShoppingCart = () => {
                 </div>
               </div>
 
-              {/* Detalles de la excursión */}
+            
               <div className="text-sm text-gray-700">
                 <p>
                   <strong>Adultos:</strong> {item.quantities?.adults || 0}
@@ -55,7 +54,7 @@ const ShoppingCart = () => {
                 <p>
                   <strong>Jubilados:</strong> {item.quantities?.seniors || 0}
                 </p>
-                {/* Fecha y hora seleccionada */}
+                
                 <p>
                   <strong>Fecha:</strong> {item.selectedDate || "No seleccionada"}
                 </p>
@@ -64,39 +63,31 @@ const ShoppingCart = () => {
                 </p>
               </div>
 
-              {/* Precio y cantidad */}
+             
               <div className="flex items-center justify-between">
-                <p className="text-lg font-semibold text-black">
-                  Precio base: ${item.price || "No disponible"}
-                </p>
-                <div className="flex items-center">
-                  <select
-                    className="border border-gray-300 rounded-lg p-2"
-                    value={item.quantity}
-                    onChange={(e) => updateQuantity(item.id, Number(e.target.value))}
+                <div>
+                  <p className="text-lg font-semibold text-black">
+                    Precio base: ${item.price || "No disponible"}
+                  </p>
+                  <p
+                    className="text-sm text-red-500 underline cursor-pointer hover:text-red-700 transition"
+                    onClick={() => removeFromCart(item.id_Service)} 
                   >
-                    {[1, 2, 3, 4, 5].map((quantity) => (
-                      <option key={`quantity-${item.id}-${quantity}`} value={quantity}>
-                        {quantity}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    className="ml-4 text-gray-500 hover:text-red-500"
-                    onClick={() => removeFromCart(item.id)}
-                  >
-                    ×
-                  </button>
+                    Eliminar
+                  </p>
                 </div>
+                
               </div>
             </div>
           ))}
         </div>
 
-        {/* Resumen del pedido */}
+       
         <div className="w-full md:w-1/3 space-y-6">
           <div className="p-6 bg-gray-50 rounded-lg shadow-lg">
-            <h2 className="text-xl font-semibold mb-4 text-black">Resumen del pedido</h2>
+            <h2 className="text-xl font-semibold mb-4 text-black">
+              Resumen del pedido
+            </h2>
             <div className="flex justify-between font-semibold text-lg mb-4 text-black">
               <span>Subtotal:</span>
               <span>${subtotal.toFixed(2)}</span>
