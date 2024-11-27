@@ -12,6 +12,8 @@ const NewExcursionModal = ({ onClose }) => {
     title: '',
     description: '',
     price: 0,
+    discountForMinors: 0,
+    discountForSeniors: 0,
     duration: 0,
     difficulty: '',
     location: '',
@@ -35,12 +37,15 @@ const NewExcursionModal = ({ onClose }) => {
     date: new Date(),
     time: new Date(),
   });
+  const [newGuide, setNewGuide] = useState({ name: '', experience: '' });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setExcursionData((prevData) => ({
       ...prevData,
-      [name]: name === "price" || name === "duration" || name === "stock" ? Number(value) : value,
+      [name]: name === "price" || name === "duration" || name === "stock" || name.includes("discount")
+        ? Number(value)
+        : value,
     }));
   };
 
@@ -48,6 +53,25 @@ const NewExcursionModal = ({ onClose }) => {
     setNewAvailability((prev) => ({
       ...prev,
       date: selectedDate,
+    }));
+  };
+
+  const handleAddGuide = () => {
+    if (!newGuide.name.trim() || !newGuide.experience.trim()) {
+      alert("Debes completar el nombre y la experiencia del guía.");
+      return;
+    }
+    setExcursionData((prevData) => ({
+      ...prevData,
+      guides: [...prevData.guides, newGuide],
+    }));
+    setNewGuide({ name: '', experience: '' });
+  };
+
+  const handleRemoveGuide = (index) => {
+    setExcursionData((prevData) => ({
+      ...prevData,
+      guides: prevData.guides.filter((_, i) => i !== index),
     }));
   };
 
@@ -134,6 +158,7 @@ const NewExcursionModal = ({ onClose }) => {
     if (!excursionData.stock || excursionData.stock <= 0) errors.stock = "El stock debe ser mayor a 0.";
     if (!excursionData.photos.length) errors.photos = "Debes subir al menos una foto.";
     if (!availabilities.length) errors.availabilityDate = "Debes agregar al menos una fecha.";
+    if (excursionData.guides.length === 0) errors.guides = "Debes agregar al menos un guía.";
     return errors;
   };
 
@@ -209,6 +234,27 @@ const NewExcursionModal = ({ onClose }) => {
               className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
             />
             {formErrors.price && <p className="text-red-500 text-sm">{formErrors.price}</p>}
+          </div>
+          {/* Descuentos */}
+          <div>
+            <label className="block text-sm text-gray-600 font-medium mb-1">Descuento para menores (%):</label>
+            <input
+              type="number"
+              name="discountForMinors"
+              value={excursionData.discountForMinors}
+              onChange={handleChange}
+              className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-600 font-medium mb-1">Descuento para mayores (%):</label>
+            <input
+              type="number"
+              name="discountForSeniors"
+              value={excursionData.discountForSeniors}
+              onChange={handleChange}
+              className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
+            />
           </div>
 
           {/* Stock */}
