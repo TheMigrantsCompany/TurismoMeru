@@ -24,6 +24,10 @@ import {
   GET_USER_BY_DNI_REQUEST,
   GET_USER_BY_DNI_SUCCESS,
   GET_USER_BY_DNI_FAILURE,
+
+   CREATE_ORDER_REQUEST,
+   CREATE_ORDER_SUCCESS,
+   CREATE_ORDER_FAILURE,
 } from "./types";
 
 export const createExcursion = (excursionData) => async (dispatch) => {
@@ -205,4 +209,30 @@ export const getUserByDni = (dni) => async (dispatch) => {
     );
     dispatch({ type: GET_USER_BY_DNI_FAILURE, payload: error.message });
   }
+};
+
+//crear orden de servicio
+
+export const createServiceOrder = (orderData) => {
+  return async (dispatch) => {
+      try {
+          const response = await fetch('http://localhost:3001/servicesOrder/', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(orderData),
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+              dispatch({ type: 'CREATE_ORDER_SUCCESS', payload: data });
+          } else {
+              dispatch({ type: 'CREATE_ORDER_FAILURE', error: data.error });
+          }
+      } catch (error) {
+          console.error('Error al crear el pedido:', error);
+          dispatch({ type: 'CREATE_ORDER_FAILURE', error });
+      }
+  };
 };

@@ -24,6 +24,12 @@ import {
   GET_USER_BY_DNI_REQUEST,
   GET_USER_BY_DNI_SUCCESS,
   GET_USER_BY_DNI_FAILURE,
+
+  CREATE_ORDER_REQUEST,
+  CREATE_ORDER_SUCCESS,
+  CREATE_ORDER_FAILURE,
+  RESET_ORDER,
+
 } from "../actions/types";
 
 const initialState = {
@@ -39,9 +45,15 @@ const initialState = {
     userDetails: null, // Detalles del usuario seleccionado
     error: null, // Errores de la API
   },
+   orders: {
+    loading: false,
+    order: null,
+    error: null,
+  },
 };
 
 const rootReducer = (state = initialState, action) => {
+  
   switch (action.type) {
     case CREATE_EXCURSION_REQUEST:
       return { ...state, loading: true, error: null };
@@ -318,9 +330,17 @@ const rootReducer = (state = initialState, action) => {
         users: { ...state.users, loading: false, error: action.payload },
       };
 
-    default:
-      return state;
-  }
-};
+      //crear ordenes de servicio
+
+      case CREATE_ORDER_REQUEST:
+        return { ...state, loading: true };
+      case CREATE_ORDER_SUCCESS:
+        return { ...state, loading: false, order: action.payload };
+      case CREATE_ORDER_FAILURE:
+        return { ...state, loading: false, error: action.payload };
+      default:
+        return state;
+    }
+  };
 
 export default rootReducer;
