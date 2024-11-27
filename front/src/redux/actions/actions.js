@@ -24,6 +24,9 @@ import {
   GET_USER_BY_DNI_REQUEST,
   GET_USER_BY_DNI_SUCCESS,
   GET_USER_BY_DNI_FAILURE,
+  UPDATE_USER_REQUEST,
+  UPDATE_USER_SUCCESS,
+  UPDATE_USER_FAILURE,
 
    CREATE_ORDER_REQUEST,
    CREATE_ORDER_SUCCESS,
@@ -211,6 +214,31 @@ export const getUserByDni = (dni) => async (dispatch) => {
   }
 };
 
+//UPDATE user por ID
+export const updateUserDetails = (id_User, updatedData) => async (dispatch) => {
+  console.log(
+    `Actions - updateUserDetails: Actualizando detalles del usuario con ID: ${id_User}`
+  );
+  dispatch({ type: UPDATE_USER_REQUEST });
+  try {
+    const response = await axios.put(
+      `http://localhost:3001/user/id/${id_User}`,
+      updatedData
+    );
+    console.log(
+      "Actions - updateUserDetails: Usuario actualizado con éxito:",
+      response.data
+    );
+    dispatch({ type: UPDATE_USER_SUCCESS, payload: response.data });
+  } catch (error) {
+    console.error(
+      "Actions - updateUserDetails: Error al actualizar usuario:",
+      error.message
+    );
+    dispatch({ type: UPDATE_USER_FAILURE, payload: error.message });
+  }
+};
+
 //crear orden de servicio
 
 export const createServiceOrder = (orderData) => {
@@ -226,13 +254,13 @@ export const createServiceOrder = (orderData) => {
 
           const data = await response.json();
           if (response.ok) {
-              dispatch({ type: 'CREATE_ORDER_SUCCESS', payload: data });
+              dispatch({ type: CREATE_ORDER_SUCCESS, payload: data });
           } else {
-              dispatch({ type: 'CREATE_ORDER_FAILURE', error: data.error });
+              dispatch({ type: CREATE_ORDER_FAILURE, error: data.error });
           }
       } catch (error) {
           console.error('Error al crear el pedido:', error);
-          dispatch({ type: 'CREATE_ORDER_FAILURE', error });
+          dispatch({ type: CREATE_ORDER_FAILURE, error });
       }
   };
 };
