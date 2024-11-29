@@ -5,29 +5,29 @@ import {
   GET_ALL_SERVICES,
   DELETE_SERVICE,
   TOGGLE_SERVICE_STATUS_SUCCESS,
-   // Users
-   GET_USERS_REQUEST,
-   GET_USERS_SUCCESS,
-   GET_USERS_FAILURE,
-   TOGGLE_USER_STATUS_SUCCESS,
-   TOGGLE_USER_STATUS_FAILURE,
-   TOGGLE_USER_STATUS_REQUEST,
-   DELETE_USER_REQUEST,
-   DELETE_USER_FAILURE,
-   DELETE_USER_SUCCESS,
-   GET_USER_DETAILS_REQUEST,
-   GET_USER_DETAILS_SUCCESS,
-   GET_USER_DETAILS_FAILURE,
-   GET_USER_BY_NAME_REQUEST,
-   GET_USER_BY_NAME_SUCCESS,
-   GET_USER_BY_NAME_FAILURE,
-   GET_USER_BY_DNI_REQUEST,
-   GET_USER_BY_DNI_SUCCESS,
-   GET_USER_BY_DNI_FAILURE,
-   UPDATE_USER_REQUEST,
-   UPDATE_USER_SUCCESS,
-   UPDATE_USER_FAILURE,
-
+  // Users
+  GET_USERS_REQUEST,
+  GET_USERS_SUCCESS,
+  GET_USERS_FAILURE,
+  TOGGLE_USER_STATUS_SUCCESS,
+  TOGGLE_USER_STATUS_FAILURE,
+  TOGGLE_USER_STATUS_REQUEST,
+  DELETE_USER_REQUEST,
+  DELETE_USER_FAILURE,
+  DELETE_USER_SUCCESS,
+  GET_USER_DETAILS_REQUEST,
+  GET_USER_DETAILS_SUCCESS,
+  GET_USER_DETAILS_FAILURE,
+  GET_USER_BY_NAME_REQUEST,
+  GET_USER_BY_NAME_SUCCESS,
+  GET_USER_BY_NAME_FAILURE,
+  GET_USER_BY_DNI_REQUEST,
+  GET_USER_BY_DNI_SUCCESS,
+  GET_USER_BY_DNI_FAILURE,
+  UPDATE_USER_REQUEST,
+  UPDATE_USER_SUCCESS,
+  UPDATE_USER_FAILURE,
+  //ordenes
   CREATE_ORDER_REQUEST,
   CREATE_ORDER_SUCCESS,
   CREATE_ORDER_FAILURE,
@@ -56,7 +56,6 @@ const initialState = {
 };
 
 const rootReducer = (state = initialState, action) => {
-  
   switch (action.type) {
     case CREATE_EXCURSION_REQUEST:
       return { ...state, loading: true, error: null };
@@ -332,6 +331,7 @@ const rootReducer = (state = initialState, action) => {
         ...state,
         users: { ...state.users, loading: false, error: action.payload },
       };
+
       case UPDATE_USER_REQUEST:
         console.log("Reducer - UPDATE_USER_REQUEST: Solicitando actualización de usuario");
         return {
@@ -359,15 +359,19 @@ const rootReducer = (state = initialState, action) => {
           "Reducer - UPDATE_USER_FAILURE: Error al actualizar usuario",
           action.payload
         );
+        return {
+          ...state,
+          users: { ...state.users, loading: false, error: action.payload },
+        };
         
       //crear ordenes de servicio
-
       case CREATE_ORDER_REQUEST:
         return { ...state, loading: true };
       case CREATE_ORDER_SUCCESS:
         return { ...state, loading: false, order: action.payload };
       case CREATE_ORDER_FAILURE:
         return { ...state, loading: false, error: action.payload };
+
       default:
         return state;
     }
