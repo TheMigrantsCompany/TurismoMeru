@@ -36,7 +36,10 @@ import {
 export const createExcursion = (excursionData) => async (dispatch) => {
   dispatch({ type: CREATE_EXCURSION_REQUEST });
   try {
-    const response = await axios.post("http://localhost:3001/service/", excursionData);
+    const response = await axios.post(
+      "http://localhost:3001/service/",
+      excursionData
+    );
     dispatch({
       type: CREATE_EXCURSION_SUCCESS,
       payload: response.data,
@@ -214,6 +217,8 @@ export const getUserByDni = (dni) => async (dispatch) => {
     dispatch({ type: GET_USER_BY_DNI_FAILURE, payload: error.message });
   }
 };
+
+
 
 //UPDATE user por ID
 export const updateUserDetails = (id_User, updatedData) => async (dispatch) => {

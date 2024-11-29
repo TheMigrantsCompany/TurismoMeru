@@ -363,6 +363,38 @@ const rootReducer = (state = initialState, action) => {
           ...state,
           users: { ...state.users, loading: false, error: action.payload },
         };
+
+      case UPDATE_USER_REQUEST:
+        console.log("Reducer - UPDATE_USER_REQUEST: Solicitando actualización de usuario");
+        return {
+          ...state,
+          users: { ...state.users, loading: true, error: null },
+        };
+      
+      case UPDATE_USER_SUCCESS:
+        console.log("Reducer - UPDATE_USER_SUCCESS: Usuario actualizado con éxito", action.payload);
+        return {
+          ...state,
+          users: {
+            ...state.users,
+            loading: false,
+            userList: state.users.userList.map((user) =>
+              user.id_User === action.payload.id_User ? action.payload : user
+            ),
+            userDetails: action.payload, // Actualizamos también los detalles del usuario si aplica
+            error: null,
+          },
+        };
+      
+      case UPDATE_USER_FAILURE:
+        console.error(
+          "Reducer - UPDATE_USER_FAILURE: Error al actualizar usuario",
+          action.payload
+        );
+        return {
+          ...state,
+          users: { ...state.users, loading: false, error: action.payload },
+        };
         
       //crear ordenes de servicio
       case CREATE_ORDER_REQUEST:

@@ -20,6 +20,16 @@ module.exports = (sequelize) => {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false // Obligatorio: el precio es necesario
     },
+    discountForMinors: {
+      type: DataTypes.INTEGER, // Enteros para representar descuentos (10, 20, 30, etc.)
+      allowNull: true, // Opcional, puede no aplicarse un descuento
+      defaultValue: 0 // Por defecto, no hay descuento
+    },
+    discountForSeniors: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0
+    },
     duration: {
       type: DataTypes.INTEGER,
       allowNull: true // Opcional: puede no ser necesario especificar la duración
