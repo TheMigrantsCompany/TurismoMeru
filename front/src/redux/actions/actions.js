@@ -28,6 +28,7 @@ import {
   UPDATE_USER_REQUEST,
   UPDATE_USER_SUCCESS,
   UPDATE_USER_FAILURE,
+
   
    CREATE_ORDER_SUCCESS,
    CREATE_ORDER_FAILURE,
@@ -245,33 +246,37 @@ export const updateUserDetails = (id_User, updatedData) => async (dispatch) => {
   }
 };
 
-export const setUserData = (userData) => ({
-  type: SET_USER_DATA,
-  payload: userData,
-});
 
 //crear orden de servicio
 
-export const createServiceOrder = (orderData) => {
-  return async (dispatch) => {
-      try {
-          const response = await fetch('http://localhost:3001/servicesOrder/', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(orderData),
-          });
+export const createServiceOrder = (orderData) => async (dispatch) => {
+  try {
+      console.log("Enviando datos al endpoint:", orderData);
+      const response = await fetch('http://localhost:3001/servicesOrder/', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(orderData),
+      });
 
-          const data = await response.json();
-          if (response.ok) {
-              dispatch({ type: CREATE_ORDER_SUCCESS, payload: data });
-          } else {
-              dispatch({ type: CREATE_ORDER_FAILURE, error: data.error });
-          }
-      } catch (error) {
-          console.error('Error al crear el pedido:', error);
-          dispatch({ type: CREATE_ORDER_FAILURE, error });
+      const data = await response.json();
+      console.log("Respuesta del backend:", data);
+
+      if (!response.ok) {
+          throw new Error(data.message || "Error al crear la orden");
       }
-  };
+
+      dispatch({
+          type: CREATE_ORDER_SUCCESS,
+          payload: data,
+      });
+  } catch (error) {
+      console.error("Error en createServiceOrder:", error);
+      dispatch({
+          type: CREATE_ORDER_FAILURE,
+          payload: error.message,
+      });
+  }
 };
+

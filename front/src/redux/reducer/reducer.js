@@ -27,6 +27,7 @@ import {
   UPDATE_USER_REQUEST,
   UPDATE_USER_SUCCESS,
   UPDATE_USER_FAILURE,
+
   //ordenes
   CREATE_ORDER_REQUEST,
   CREATE_ORDER_SUCCESS,
@@ -47,6 +48,7 @@ const initialState = {
     filteredUsers: [], // Lista de usuarios filtrados
     userDetails: null, // Detalles del usuario seleccionado
     error: null, // Errores de la API
+    id_User: null,
   },
    orders: {
     loading: false,
@@ -240,8 +242,10 @@ const rootReducer = (state = initialState, action) => {
       };
 
     case GET_USER_DETAILS_SUCCESS:
+      console.log('Actualizando userDetails en el reducer', action.payload);
       console.log(
         "Reducer - GET_USER_DETAILS_SUCCESS: Detalles de usuario obtenidos con éxito",
+        
         action.payload
       );
       return {
@@ -396,6 +400,7 @@ const rootReducer = (state = initialState, action) => {
           users: { ...state.users, loading: false, error: action.payload },
         };
         
+        
       //crear ordenes de servicio
       case CREATE_ORDER_REQUEST:
         return { ...state, loading: true };
@@ -403,6 +408,7 @@ const rootReducer = (state = initialState, action) => {
         return { ...state, loading: false, order: action.payload };
       case CREATE_ORDER_FAILURE:
         return { ...state, loading: false, error: action.payload };
+
 
       default:
         return state;

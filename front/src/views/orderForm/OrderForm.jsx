@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { useCart } from '../shopping-cart/CartContext';
-import { useDispatch, useSelector } from 'react-redux';
-import { createServiceOrder, getUserDetails } from '../../redux/actions/actions';
+import { useDispatch } from 'react-redux';
+import { createServiceOrder } from '../../redux/actions/actions';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../firebase/AuthContext';
 
 const OrderForm = () => {
     const dispatch = useDispatch();
@@ -10,6 +11,7 @@ const OrderForm = () => {
     const navigate = useNavigate();
     const formRef = useRef(null);
 
+    const { id_User } = useContext(AuthContext); // Obtener el id_User desde el contexto
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -23,22 +25,7 @@ const OrderForm = () => {
         postalCode: '',
     });
 
-    // Estado de carga y errores
     const [loading, setLoading] = useState(false);
-    const userData = useSelector((state) => state.auth?.userData);
-    const userDetails = useSelector((state) => state.users?.userDetails);
-    const id_User = userData?.id_User;
-    console.log("userData desde Redux:", userData);
-    console.log("id_User desde userData:", id_User);
-
-    useEffect(() => {
-  if (id_User && !userDetails) {
-    console.log("Despachando getUserDetails para:", id_User);
-    setLoading(true);
-    dispatch(getUserDetails(id_User))
-      .finally(() => setLoading(false));
-  }
-}, [dispatch, id_User, userDetails]);
 
     const subtotal = cartItems.reduce((acc, item) => {
         const quantity = item.quantities?.adults || 1;
@@ -52,15 +39,24 @@ const OrderForm = () => {
     };
 
     const validateForm = () => {
-        const requiredFields = ['firstName', 'lastName', 'dni', 'paymentMethod'];
+        const requiredFields = ['firstName', 'lastName', 'dni', 'paymentMethod', 'country', 'address', 'city', 'state', 'postalCode'];
         return requiredFields.every((field) => formData[field]?.trim());
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        if (loading) {
+            alert('La solicitud ya está en proceso. Por favor, espera...');
+            return;
+        }
 
-        if (loading || !id_User) {
-            alert('Cargando datos del usuario. Por favor espera...');
+        if (!id_User) {
+            alert('Error: No se pudo encontrar el usuario autenticado. Por favor, verifica tu sesión.');
+            return;
+        }
+
+        if (cartItems.length === 0) {
+            alert('No puedes confirmar un pedido sin artículos en el carrito.');
             return;
         }
 
@@ -69,22 +65,37 @@ const OrderForm = () => {
             return;
         }
 
+        setLoading(true);
+
         const orderData = {
             orderDate: new Date().toISOString(),
-            id_User,
+            id_User: id_User, // Usar el id_User obtenido desde el contexto
             paymentMethod: formData.paymentMethod,
             items: cartItems.map((item) => ({
                 title: item.title,
                 ServiceId: item.id_Service,
                 quantity: item.quantities?.adults || 1,
-                price: item.price,
+                price: item.price || 0,
             })),
             paymentStatus: 'Pendiente',
         };
 
-        console.log('Datos del pedido:', orderData);
-        dispatch(createServiceOrder(orderData));
-        navigate('/payment-page');
+        try {
+            await dispatch(createServiceOrder(orderData));
+            alert('¡Pedido confirmado exitosamente!');
+            navigate('/thank-you');
+        } catch (error) {
+            console.error('Error al crear la orden:', error);
+            alert('Hubo un error al procesar tu pedido. Por favor, intenta de nuevo.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleExternalSubmit = () => {
+        if (formRef.current) {
+            formRef.current.requestSubmit();
+        }
     };
 
     return (
@@ -97,11 +108,9 @@ const OrderForm = () => {
             >
                 <h2 className="text-xl font-bold text-gray-700 mb-6">Detalles de Facturación</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {[
-                        { label: 'Nombre *', name: 'firstName', required: true },
-                        { label: 'Apellidos *', name: 'lastName', required: true },
-                        { label: 'DNI / Pasaporte *', name: 'dni', required: true },
-                    ].map((field) => (
+                    {[{ label: 'Nombre *', name: 'firstName', required: true },
+                    { label: 'Apellidos *', name: 'lastName', required: true },
+                    { label: 'DNI / Pasaporte *', name: 'dni', required: true }].map((field) => (
                         <div key={field.name}>
                             <label className="block text-sm font-medium text-gray-700">{field.label}</label>
                             <input
@@ -124,14 +133,12 @@ const OrderForm = () => {
                             required
                         >
                             <option value="">Selecciona un país</option>
-                            {[
-                                'Argentina', 'Bolivia', 'Brasil', 'Chile', 'Colombia', 'Ecuador',
-                                'Paraguay', 'Perú', 'Uruguay', 'Venezuela', 'Estados Unidos',
-                            ].map((country) => (
-                                <option key={country} value={country}>
-                                    {country}
-                                </option>
-                            ))}
+                            {['Argentina', 'Bolivia', 'Brasil', 'Chile', 'Colombia', 'Ecuador',
+                                'Paraguay', 'Perú', 'Uruguay', 'Venezuela', 'Estados Unidos'].map((country) => (
+                                    <option key={country} value={country}>
+                                        {country}
+                                    </option>
+                                ))}
                         </select>
                     </div>
                 </div>
@@ -155,11 +162,9 @@ const OrderForm = () => {
                     />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-                    {[
-                        { label: 'Ciudad *', name: 'city', required: true },
-                        { label: 'Región / Provincia *', name: 'state', required: true },
-                        { label: 'Código Postal *', name: 'postalCode', required: true },
-                    ].map((field) => (
+                    {[{ label: 'Ciudad *', name: 'city', required: true },
+                    { label: 'Región / Provincia *', name: 'state', required: true },
+                    { label: 'Código Postal *', name: 'postalCode', required: true }].map((field) => (
                         <div key={field.name}>
                             <label className="block text-sm font-medium text-gray-700">{field.label}</label>
                             <input
@@ -215,19 +220,18 @@ const OrderForm = () => {
                         >
                             <option value="">Selecciona un método</option>
                             <option value="Pagos desde Argentina">Pagos desde Argentina</option>
-                            <option value="Pagos desde el Exterior">Pagos desde el Exterior</option>
+                            <option value="Pagos desde el exterior">Pagos desde el exterior</option>
+                            <option value="Transferencia bancaria">Transferencia bancaria</option>
                         </select>
                     </div>
+                </div>
+                <div className="mt-8 flex justify-center">
                     <button
-                        type="submit"
-                        form="orderForm"
-                        disabled={loading || !id_User}
-                        className={`mt-6 w-full py-3 rounded-md transition-colors ${loading || !id_User
-                                ? 'bg-gray-400 cursor-not-allowed'
-                                : 'bg-blue-600 text-white hover:bg-blue-700'
-                            }`}
+                        type="button"
+                        onClick={handleExternalSubmit}
+                        className="px-4 py-2 bg-blue-500 text-white font-bold rounded-lg shadow hover:bg-blue-600 transition"
                     >
-                        {loading ? 'Cargando...' : 'Confirmar Pedido'}
+                        Confirmar Pedido
                     </button>
                 </div>
             </div>

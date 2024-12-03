@@ -5,15 +5,16 @@ import { Provider } from 'react-redux'
 import store from './redux/store/store.js'
 import App from './App.jsx'
 import './index.css'
+import { AuthProvider } from './firebase/AuthContext.jsx'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <Provider store={store}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <AuthProvider> {/* Añadir AuthProvider aquí */}
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </AuthProvider>
     </Provider>
   </React.StrictMode>,
-
 );
-
