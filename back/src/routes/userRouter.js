@@ -11,7 +11,7 @@ const toggleUserActiveHandler = require('../handlers/user/toggleUserActiveHandle
 const deleteUserByIdHandler = require('../handlers/user/deleteUserByIdHandler');
 const deleteUserByNameHandler = require('../handlers/user/deleteUserByNameHandler');
 const syncUsersHandler = require('../handlers/user/syncUsersHandler');
-const getUserByEmailHandler = require ('../handlers/user/getUserByEmailHandler');
+const getUserByEmailHandler = require('../handlers/user/getUserByEmailHandler');
 // Definición de enrutador
 const userRouter = express.Router();
 

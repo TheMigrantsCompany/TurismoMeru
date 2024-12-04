@@ -1,9 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import React, { useState, useEffect } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
-  const [excursionData, setExcursionData] = useState({ ...excursion });
+  const [excursionData, setExcursionData] = useState({
+    ...excursion,
+    discount: excursion.discount || {
+      seniorPercentage: 0,
+      minorPercentage: 0,
+    },
+  });
   const [formErrors, setFormErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -24,6 +30,18 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
           return { date, times: [] };
         })
       );
+    }
+  }, [excursion]);
+
+  useEffect(() => {
+    if (excursion) {
+      setExcursionData({
+        ...excursion,
+        discount: excursion.discount || {
+          seniorPercentage: 0,
+          minorPercentage: 0,
+        },
+      });
     }
   }, [excursion]);
 
@@ -55,7 +73,7 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
         photos: [...prevData.photos, ...uploadedPhotos],
       }));
     } catch (error) {
-      console.error('Error uploading photos:', error);
+      console.error("Error uploading photos:", error);
     } finally {
       setLoading(false);
     }
@@ -63,17 +81,17 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
 
   const uploadPhotoToCloudinary = (file) => {
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', 'meruvyt');
+    formData.append("file", file);
+    formData.append("upload_preset", "meruvyt");
 
-    return fetch('https://api.cloudinary.com/v1_1/dzrnybyqo/image/upload', {
-      method: 'POST',
+    return fetch("https://api.cloudinary.com/v1_1/dzrnybyqo/image/upload", {
+      method: "POST",
       body: formData,
     })
       .then((response) => response.json())
       .then((data) => data.secure_url)
       .catch((error) => {
-        throw new Error('Error uploading image to Cloudinary');
+        throw new Error("Error uploading image to Cloudinary");
       });
   };
 
@@ -104,7 +122,7 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
   const handleAddAvailability = () => {
     const { date, time } = newAvailability;
     if (!date || !time) {
-      alert('Debes seleccionar una fecha y una hora.');
+      alert("Debes seleccionar una fecha y una hora.");
       return;
     }
 
@@ -131,37 +149,67 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
   };
 
   const handleSubmit = async () => {
-    if (!excursionData.title || !excursionData.description || !excursionData.price) {
-      setFormErrors({ general: 'Todos los campos deben estar completos.' });
+    console.log("Datos enviados:", excursionData);
+    if (
+      !excursionData.title ||
+      !excursionData.description ||
+      !excursionData.price ||
+      excursionData.discount.seniorPercentage < 0 ||
+      excursionData.discount.seniorPercentage > 100 ||
+      excursionData.discount.minorPercentage < 0 ||
+      excursionData.discount.minorPercentage > 100
+    ) {
+      setFormErrors({ general: "Todos los campos deben estar completos." });
       return;
     }
     try {
-      const response = await fetch(`http://localhost:3001/service/id/${excursion.id_Service}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...excursionData,
-          availabilityDate: selectedDates.map((d) => d.date),
-        }),
-      });
-      if (!response.ok) throw new Error('Error al actualizar el servicio');
+      const response = await fetch(
+        `http://localhost:3001/service/id/${excursion.id_Service}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...excursionData,
+            discountForMinors: excursionData.discount.minorPercentage,
+            discountForSeniors: excursionData.discount.seniorPercentage,
+            availabilityDate: selectedDates.map((d) => d.date),
+          }),
+        }
+      );
+      if (!response.ok) throw new Error("Error al actualizar el servicio");
       const updatedExcursion = await response.json();
-      console.log('Excursión actualizada:', updatedExcursion);
+      console.log("Excursión actualizada:", updatedExcursion);
       onUpdate(updatedExcursion);
       onClose();
     } catch (error) {
       console.error(error);
-      setFormErrors({ general: 'No se pudo actualizar el servicio. Intenta nuevamente.' });
+      setFormErrors({
+        general: "No se pudo actualizar el servicio. Intenta nuevamente.",
+      });
     }
+  };
+
+  const handleDiscountChange = (type, value) => {
+    setExcursionData((prev) => ({
+      ...prev,
+      discount: {
+        ...prev.discount,
+        [type]: value, // Actualiza dinámicamente seniorPercentage o minorPercentage
+      },
+    }));
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-75 pointer-events-auto">
       <div className="bg-white p-6 rounded-lg max-w-lg w-full relative z-10 overflow-y-auto max-h-[90vh]">
-        <h2 className="text-xl font-semibold mb-4 text-black">Actualizar Excursión</h2>
+        <h2 className="text-xl font-semibold mb-4 text-black">
+          Actualizar Excursión
+        </h2>
 
         <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">Nombre de la Excursión:</label>
+          <label className="block text-sm text-gray-600 font-medium mb-1">
+            Nombre de la Excursión:
+          </label>
           <input
             type="text"
             name="title"
@@ -169,24 +217,32 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
             onChange={handleChange}
             className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
           />
-          {formErrors.title && <p className="text-red-500 text-sm">{formErrors.title}</p>}
+          {formErrors.title && (
+            <p className="text-red-500 text-sm">{formErrors.title}</p>
+          )}
         </div>
 
         <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">Descripción:</label>
+          <label className="block text-sm text-gray-600 font-medium mb-1">
+            Descripción:
+          </label>
           <textarea
             name="description"
             value={excursionData.description}
             onChange={handleChange}
             className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black resize-none h-28"
-            rows="5" 
+            rows="5"
             placeholder="Escribe una descripción detallada aquí..."
           ></textarea>
-          {formErrors.description && <p className="text-red-500 text-sm">{formErrors.description}</p>}
+          {formErrors.description && (
+            <p className="text-red-500 text-sm">{formErrors.description}</p>
+          )}
         </div>
 
         <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">Precio:</label>
+          <label className="block text-sm text-gray-600 font-medium mb-1">
+            Precio:
+          </label>
           <input
             type="number"
             name="price"
@@ -194,11 +250,45 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
             onChange={handleChange}
             className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
           />
-          {formErrors.price && <p className="text-red-500 text-sm">{formErrors.price}</p>}
+          {formErrors.price && (
+            <p className="text-red-500 text-sm">{formErrors.price}</p>
+          )}
         </div>
 
         <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">Stock:</label>
+          <label className="block text-sm text-gray-600 font-medium mb-1">
+            Descuento para Jubilados (%):
+          </label>
+          <input
+            type="number"
+            name="seniorPercentage"
+            value={excursionData?.discount?.seniorPercentage || 0}
+            onChange={(e) =>
+              handleDiscountChange("seniorPercentage", Number(e.target.value))
+            }
+            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-600 font-medium mb-1">
+            Descuento para Menores (%):
+          </label>
+          <input
+            type="number"
+            name="minorPercentage"
+            value={excursionData?.discount?.minorPercentage || 0}
+            onChange={(e) =>
+              handleDiscountChange("minorPercentage", Number(e.target.value))
+            }
+            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-600 font-medium mb-1">
+            Stock:
+          </label>
           <input
             type="number"
             name="stock"
@@ -206,11 +296,15 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
             onChange={handleChange}
             className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
           />
-          {formErrors.stock && <p className="text-red-500 text-sm">{formErrors.stock}</p>}
+          {formErrors.stock && (
+            <p className="text-red-500 text-sm">{formErrors.stock}</p>
+          )}
         </div>
 
         <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">Fotos:</label>
+          <label className="block text-sm text-gray-600 font-medium mb-1">
+            Fotos:
+          </label>
           <input
             type="file"
             multiple
@@ -239,7 +333,9 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
           ))}
         </div>
         <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">Duración:</label>
+          <label className="block text-sm text-gray-600 font-medium mb-1">
+            Duración:
+          </label>
           <input
             type="text"
             name="duration"
@@ -250,7 +346,9 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">Dificultad:</label>
+          <label className="block text-sm text-gray-600 font-medium mb-1">
+            Dificultad:
+          </label>
           <input
             type="text"
             name="difficulty"
@@ -261,7 +359,9 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">Ubicación:</label>
+          <label className="block text-sm text-gray-600 font-medium mb-1">
+            Ubicación:
+          </label>
           <input
             type="text"
             name="location"
@@ -272,7 +372,9 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
         </div>
 
         <div className="mt-4">
-          <label className="block text-sm text-gray-600 font-medium mb-1">Agregar Nueva Fecha:</label>
+          <label className="block text-sm text-gray-600 font-medium mb-1">
+            Agregar Nueva Fecha:
+          </label>
 
           <div className="relative mb-2">
             <DatePicker
@@ -306,17 +408,22 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
 
         {/* Fechas seleccionadas */}
         <div className="mt-6">
-          <label className="block text-sm text-gray-600 font-medium mb-1">Fechas Agregadas:</label>
+          <label className="block text-sm text-gray-600 font-medium mb-1">
+            Fechas Agregadas:
+          </label>
           <ul className="space-y-2">
             {selectedDates.map((availability, index) => {
-              const formattedDate = new Date(availability.date).toLocaleString('es-ES', {
-                weekday: 'short',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              });
+              const formattedDate = new Date(availability.date).toLocaleString(
+                "es-ES",
+                {
+                  weekday: "short",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }
+              );
               return (
                 <li key={index} className="flex justify-between items-center">
                   <span className="text-black">{formattedDate}</span>
@@ -333,7 +440,9 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">Categoría:</label>
+          <label className="block text-sm text-gray-600 font-medium mb-1">
+            Categoría:
+          </label>
           <input
             type="text"
             name="category"
@@ -344,7 +453,9 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">Punto de Encuentro:</label>
+          <label className="block text-sm text-gray-600 font-medium mb-1">
+            Punto de Encuentro:
+          </label>
           <input
             type="text"
             name="meetingPoint"
@@ -355,7 +466,9 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">Requisitos:</label>
+          <label className="block text-sm text-gray-600 font-medium mb-1">
+            Requisitos:
+          </label>
           <input
             type="text"
             name="requirements"
@@ -366,7 +479,9 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">Política de Cancelación:</label>
+          <label className="block text-sm text-gray-600 font-medium mb-1">
+            Política de Cancelación:
+          </label>
           <input
             type="text"
             name="cancellationPolicy"
@@ -377,7 +492,9 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">Equipo Adicional:</label>
+          <label className="block text-sm text-gray-600 font-medium mb-1">
+            Equipo Adicional:
+          </label>
           <input
             type="text"
             name="additionalEquipment"
@@ -388,7 +505,9 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">Guías:</label>
+          <label className="block text-sm text-gray-600 font-medium mb-1">
+            Guías:
+          </label>
           <input
             type="text"
             name="guides"
@@ -401,27 +520,47 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
         <div className="flex justify-center space-x-4 mb-4 mt-4">
           <button
             onClick={handleStatusChange}
-            className={`p-2 rounded ${excursionData.active ? 'bg-green-500 text-white' : 'bg-gray-300 text-black'}`}
+            className={`p-2 rounded ${
+              excursionData.active
+                ? "bg-green-500 text-white"
+                : "bg-gray-300 text-black"
+            }`}
           >
             Activa
           </button>
           <button
             onClick={handleStatusChange}
-            className={`p-2 rounded ${!excursionData.active ? 'bg-red-500 text-white' : 'bg-gray-300 text-black'}`}
+            className={`p-2 rounded ${
+              !excursionData.active
+                ? "bg-red-500 text-white"
+                : "bg-gray-300 text-black"
+            }`}
           >
             Inactiva
           </button>
         </div>
         <div className="flex justify-between mt-4">
-          <button onClick={handleSubmit} className={`py-2 px-4 rounded-md text-white ${excursionData.active ? 'bg-red-500' : 'bg-green-500'}`}>
+          <button
+            onClick={handleSubmit}
+            className={`py-2 px-4 rounded-md text-white ${
+              excursionData.active ? "bg-red-500" : "bg-green-500"
+            }`}
+          >
             Guardar
           </button>
-          <button onClick={onClose} className={`py-2 px-4 rounded-md text-white ${excursionData.active ? 'bg-red-500' : 'bg-green-500'}`}>
+          <button
+            onClick={onClose}
+            className={`py-2 px-4 rounded-md text-white ${
+              excursionData.active ? "bg-red-500" : "bg-green-500"
+            }`}
+          >
             Cancelar
           </button>
         </div>
 
-        {formErrors.general && <p className="text-red-500 text-sm mt-2">{formErrors.general}</p>}
+        {formErrors.general && (
+          <p className="text-red-500 text-sm mt-2">{formErrors.general}</p>
+        )}
       </div>
     </div>
   );
