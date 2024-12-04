@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { createServiceOrder } from '../../redux/actions/actions';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../firebase/AuthContext';
+import GetnetPayment from '../../../getnet/GetnetPayment';
 
 const OrderForm = () => {
     const dispatch = useDispatch();
@@ -11,7 +12,7 @@ const OrderForm = () => {
     const navigate = useNavigate();
     const formRef = useRef(null);
 
-    const { id_User } = useContext(AuthContext); // Obtener el id_User desde el contexto
+    const { id_User } = useContext(AuthContext); 
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -23,10 +24,11 @@ const OrderForm = () => {
         city: '',
         state: '',
         postalCode: '',
-    });
+    }); 
 
     const [loading, setLoading] = useState(false);
-
+    const [orderId, setOrderId] = useState(null);
+    const sellerId = "TU_SELLER_ID"; 
     const subtotal = cartItems.reduce((acc, item) => {
         const quantity = item.quantities?.adults || 1;
         const price = item.totalPrice || item.price || 0;
@@ -69,7 +71,7 @@ const OrderForm = () => {
 
         const orderData = {
             orderDate: new Date().toISOString(),
-            id_User: id_User, // Usar el id_User obtenido desde el contexto
+            id_User: id_User, 
             paymentMethod: formData.paymentMethod,
             items: cartItems.map((item) => ({
                 title: item.title,
@@ -81,9 +83,12 @@ const OrderForm = () => {
         };
 
         try {
-            await dispatch(createServiceOrder(orderData));
+            const createdOrder = await dispatch(createServiceOrder(orderData));
+            const { id_ServiceOrder } = createdOrder.payload; // Asegúrate de que el backend retorne este campo
+    
+            setOrderId(id_ServiceOrder); // Almacena el id_ServiceOrder para usarlo en el componente de pago
+    
             alert('¡Pedido confirmado exitosamente!');
-            navigate('/thank-you');
         } catch (error) {
             console.error('Error al crear la orden:', error);
             alert('Hubo un error al procesar tu pedido. Por favor, intenta de nuevo.');
@@ -91,12 +96,21 @@ const OrderForm = () => {
             setLoading(false);
         }
     };
-
     const handleExternalSubmit = () => {
         if (formRef.current) {
             formRef.current.requestSubmit();
         }
     };
+    const handlePaymentSuccess = (response) => {
+        console.log("Pago exitoso:", response);
+        alert("¡Pago realizado con éxito!");
+        // Redirigir o ejecutar lógica adicional
+      };
+    
+      const handlePaymentError = (error) => {
+        console.error("Error en el pago:", error);
+        alert("Hubo un problema con el pago. Por favor, intenta de nuevo.");
+      };
 
     return (
         <div className="flex flex-col lg:flex-row gap-12 mt-10">
@@ -221,9 +235,19 @@ const OrderForm = () => {
                             <option value="">Selecciona un método</option>
                             <option value="Pagos desde Argentina">Pagos desde Argentina</option>
                             <option value="Pagos desde el exterior">Pagos desde el exterior</option>
-                            <option value="Transferencia bancaria">Transferencia bancaria</option>
                         </select>
                     </div>
+                    {formData.paymentMethod === "Pagos desde Argentina" && (
+          <div className="mt-8">
+            <GetnetPayment
+               orderId={orderId}
+              amount={subtotal}
+              sellerId={sellerId} 
+              onSuccess={handlePaymentSuccess}
+              onError={handlePaymentError}
+            />
+          </div>
+        )}
                 </div>
                 <div className="mt-8 flex justify-center">
                     <button
