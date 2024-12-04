@@ -12,7 +12,6 @@ const deleteUserByIdHandler = require('../handlers/user/deleteUserByIdHandler');
 const deleteUserByNameHandler = require('../handlers/user/deleteUserByNameHandler');
 const syncUsersHandler = require('../handlers/user/syncUsersHandler');
 const getUserByEmailHandler = require('../handlers/user/getUserByEmailHandler');
-
 // Definición de enrutador
 const userRouter = express.Router();
 
@@ -47,6 +46,7 @@ userRouter.delete('/name/:name', deleteUserByNameHandler);
 
 // Obtener un usuario por su correo
 userRouter.get('/email/:email', getUserByEmailHandler);
+
 /*
 // Sincronizar usuarios con Firebase
 userRouter.get('/sync', syncUsersHandler);

@@ -27,6 +27,13 @@ import {
   UPDATE_USER_REQUEST,
   UPDATE_USER_SUCCESS,
   UPDATE_USER_FAILURE,
+
+  //ordenes
+  CREATE_ORDER_REQUEST,
+  CREATE_ORDER_SUCCESS,
+  CREATE_ORDER_FAILURE,
+  
+
 } from "../actions/types";
 
 const initialState = {
@@ -41,6 +48,12 @@ const initialState = {
     filteredUsers: [], // Lista de usuarios filtrados
     userDetails: null, // Detalles del usuario seleccionado
     error: null, // Errores de la API
+    id_User: null,
+  },
+   orders: {
+    loading: false,
+    order: null,
+    error: null,
   },
 };
 
@@ -229,8 +242,10 @@ const rootReducer = (state = initialState, action) => {
       };
 
     case GET_USER_DETAILS_SUCCESS:
+      console.log('Actualizando userDetails en el reducer', action.payload);
       console.log(
         "Reducer - GET_USER_DETAILS_SUCCESS: Detalles de usuario obtenidos con éxito",
+        
         action.payload
       );
       return {
@@ -353,9 +368,51 @@ const rootReducer = (state = initialState, action) => {
           users: { ...state.users, loading: false, error: action.payload },
         };
 
-    default:
-      return state;
-  }
-};
+      case UPDATE_USER_REQUEST:
+        console.log("Reducer - UPDATE_USER_REQUEST: Solicitando actualización de usuario");
+        return {
+          ...state,
+          users: { ...state.users, loading: true, error: null },
+        };
+      
+      case UPDATE_USER_SUCCESS:
+        console.log("Reducer - UPDATE_USER_SUCCESS: Usuario actualizado con éxito", action.payload);
+        return {
+          ...state,
+          users: {
+            ...state.users,
+            loading: false,
+            userList: state.users.userList.map((user) =>
+              user.id_User === action.payload.id_User ? action.payload : user
+            ),
+            userDetails: action.payload, // Actualizamos también los detalles del usuario si aplica
+            error: null,
+          },
+        };
+      
+      case UPDATE_USER_FAILURE:
+        console.error(
+          "Reducer - UPDATE_USER_FAILURE: Error al actualizar usuario",
+          action.payload
+        );
+        return {
+          ...state,
+          users: { ...state.users, loading: false, error: action.payload },
+        };
+        
+        
+      //crear ordenes de servicio
+      case CREATE_ORDER_REQUEST:
+        return { ...state, loading: true };
+      case CREATE_ORDER_SUCCESS:
+        return { ...state, loading: false, order: action.payload };
+      case CREATE_ORDER_FAILURE:
+        return { ...state, loading: false, error: action.payload };
+
+
+      default:
+        return state;
+    }
+  };
 
 export default rootReducer;

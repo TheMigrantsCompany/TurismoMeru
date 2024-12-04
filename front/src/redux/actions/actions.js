@@ -10,15 +10,16 @@ import {
   GET_USERS_REQUEST,
   GET_USERS_SUCCESS,
   GET_USERS_FAILURE,
-  TOGGLE_USER_STATUS_REQUEST,
   TOGGLE_USER_STATUS_SUCCESS,
   TOGGLE_USER_STATUS_FAILURE,
+  TOGGLE_USER_STATUS_REQUEST,
   DELETE_USER_REQUEST,
-  DELETE_USER_SUCCESS,
   DELETE_USER_FAILURE,
+  DELETE_USER_SUCCESS,
   GET_USER_DETAILS_REQUEST,
   GET_USER_DETAILS_SUCCESS,
   GET_USER_DETAILS_FAILURE,
+  GET_USER_BY_NAME_REQUEST,
   GET_USER_BY_NAME_SUCCESS,
   GET_USER_BY_NAME_FAILURE,
   GET_USER_BY_DNI_REQUEST,
@@ -27,6 +28,10 @@ import {
   UPDATE_USER_REQUEST,
   UPDATE_USER_SUCCESS,
   UPDATE_USER_FAILURE,
+
+  
+   CREATE_ORDER_SUCCESS,
+   CREATE_ORDER_FAILURE,
 } from "./types";
 
 export const createExcursion = (excursionData) => async (dispatch) => {
@@ -165,6 +170,7 @@ export const getUserDetails = (id_User) => async (dispatch) => {
     const response = await axios.get(
       `http://localhost:3001/user/id/${id_User}`
     );
+    console.log(id_User)
     console.log(
       "Actions - getUserDetails: Detalles del usuario obtenidos:",
       response.data
@@ -213,6 +219,8 @@ export const getUserByDni = (dni) => async (dispatch) => {
   }
 };
 
+
+
 //UPDATE user por ID
 export const updateUserDetails = (id_User, updatedData) => async (dispatch) => {
   console.log(
@@ -237,3 +245,38 @@ export const updateUserDetails = (id_User, updatedData) => async (dispatch) => {
     dispatch({ type: UPDATE_USER_FAILURE, payload: error.message });
   }
 };
+
+
+//crear orden de servicio
+
+export const createServiceOrder = (orderData) => async (dispatch) => {
+  try {
+      console.log("Enviando datos al endpoint:", orderData);
+      const response = await fetch('http://localhost:3001/servicesOrder/', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(orderData),
+      });
+
+      const data = await response.json();
+      console.log("Respuesta del backend:", data);
+
+      if (!response.ok) {
+          throw new Error(data.message || "Error al crear la orden");
+      }
+
+      dispatch({
+          type: CREATE_ORDER_SUCCESS,
+          payload: data,
+      });
+  } catch (error) {
+      console.error("Error en createServiceOrder:", error);
+      dispatch({
+          type: CREATE_ORDER_FAILURE,
+          payload: error.message,
+      });
+  }
+};
+
