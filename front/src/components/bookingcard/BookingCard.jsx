@@ -27,8 +27,8 @@ const BookingCard = ({ id_Service, price }) => {
         );
         setExcursion(response.data);
         const rawDates = response.data.availabilityDate || [];
-        const dates = [...new Set(rawDates.map(date => new Date(date).toLocaleDateString()))];
-        const times = [...new Set(rawDates.map(date => new Date(date).toLocaleTimeString()))];
+        const dates = [...new Set(rawDates.map((date) => new Date(date).toLocaleDateString()))];
+        const times = [...new Set(rawDates.map((date) => new Date(date).toLocaleTimeString()))];
 
         setAvailableDates(dates);
         setAvailableTimes(times);
@@ -42,10 +42,14 @@ const BookingCard = ({ id_Service, price }) => {
 
   useEffect(() => {
     if (excursion) {
+      const minorDiscount = (100 - (excursion.discountForMinors || 0)) / 100;
+      const seniorDiscount = (100 - (excursion.discountForSeniors || 0)) / 100;
+
       const total =
         excursion.price * quantities.adultos +
-        excursion.price * 0.8 * quantities.menores +
-        excursion.price * 0.7 * quantities.jubilados;
+        excursion.price * minorDiscount * quantities.menores +
+        excursion.price * seniorDiscount * quantities.jubilados;
+
       setTotalPrice(total);
     }
   }, [quantities, excursion]);
