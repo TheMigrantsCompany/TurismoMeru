@@ -27,8 +27,8 @@ const BookingCard = ({ id_Service, price }) => {
         );
         setExcursion(response.data);
         const rawDates = response.data.availabilityDate || [];
-        const dates = [...new Set(rawDates.map(date => new Date(date).toLocaleDateString()))];
-        const times = [...new Set(rawDates.map(date => new Date(date).toLocaleTimeString()))];
+        const dates = [...new Set(rawDates.map((date) => new Date(date).toLocaleDateString()))];
+        const times = [...new Set(rawDates.map((date) => new Date(date).toLocaleTimeString()))];
 
         setAvailableDates(dates);
         setAvailableTimes(times);
@@ -42,10 +42,14 @@ const BookingCard = ({ id_Service, price }) => {
 
   useEffect(() => {
     if (excursion) {
+      const minorDiscount = (100 - (excursion.discountForMinors || 0)) / 100;
+      const seniorDiscount = (100 - (excursion.discountForSeniors || 0)) / 100;
+
       const total =
         excursion.price * quantities.adultos +
-        excursion.price * 0.8 * quantities.menores +
-        excursion.price * 0.7 * quantities.jubilados;
+        excursion.price * minorDiscount * quantities.menores +
+        excursion.price * seniorDiscount * quantities.jubilados;
+
       setTotalPrice(total);
     }
   }, [quantities, excursion]);
@@ -56,18 +60,21 @@ const BookingCard = ({ id_Service, price }) => {
       [type]: action === "increment" ? prev[type] + 1 : Math.max(prev[type] - 1, 0),
     }));
   };
-
   const handleAddToCart = () => {
     if (!selectedDate || !selectedTime) {
       alert("Por favor selecciona una fecha y un horario.");
       return;
     }
-
+  
     if (Object.values(quantities).every((quantity) => quantity === 0)) {
       alert("Debes seleccionar al menos una persona.");
       return;
     }
-
+  
+    const minorDiscount = (100 - (excursion.discountForMinors || 0)) / 100;
+    const seniorDiscount = (100 - (excursion.discountForSeniors || 0)) / 100;
+  
+    // Guardar descuentos individuales y precio por persona en el item del carrito
     const cartItem = {
       id_Service,
       title: excursion?.title || "Título no disponible",
@@ -80,15 +87,17 @@ const BookingCard = ({ id_Service, price }) => {
         children: quantities.menores,
         seniors: quantities.jubilados,
       },
+      childDiscount: excursion.discountForMinors,
+      seniorDiscount: excursion.discountForSeniors,
       photos: excursion?.photos || [],
       stock: excursion?.stock || 0,
       duration: excursion?.duration || "No disponible",
     };
-
+  
     addToCart(cartItem);
     navigate("/user/shopping-cart");
-  };
-
+  
+};
   return (
     <div className="bg-gray-800 text-white p-4 rounded-lg max-w-xs shadow-lg">
       <div className="mb-3">

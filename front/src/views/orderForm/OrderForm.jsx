@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { createServiceOrder } from '../../redux/actions/actions';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../firebase/AuthContext';
+import GetnetPayment from '../../../getnet/GetnetPayment';
 
 const OrderForm = () => {
     const dispatch = useDispatch();
@@ -11,7 +12,7 @@ const OrderForm = () => {
     const navigate = useNavigate();
     const formRef = useRef(null);
 
-    const { id_User } = useContext(AuthContext); // Obtener el id_User desde el contexto
+    const { id_User } = useContext(AuthContext);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -26,7 +27,8 @@ const OrderForm = () => {
     });
 
     const [loading, setLoading] = useState(false);
-
+    const [orderId, setOrderId] = useState(null);
+    const sellerId = "TU_SELLER_ID";
     const subtotal = cartItems.reduce((acc, item) => {
         const quantity = item.quantities?.adults || 1;
         const price = item.totalPrice || item.price || 0;
@@ -67,23 +69,50 @@ const OrderForm = () => {
 
         setLoading(true);
 
+        const totalOrderPrice = cartItems.reduce((acc, item) => {
+            const adults = item.quantities?.adults || 0;
+            const children = item.quantities?.children || 0;
+            const seniors = item.quantities?.seniors || 0;
+
+            const adultsTotal = adults * item.price;
+            const childrenTotal = children * item.price * ((100 - (item.childDiscount || 0)) / 100);
+            const seniorsTotal = seniors * item.price * ((100 - (item.seniorDiscount || 0)) / 100);
+
+            return acc + adultsTotal + childrenTotal + seniorsTotal;
+        }, 0);
+
         const orderData = {
             orderDate: new Date().toISOString(),
-            id_User: id_User, // Usar el id_User obtenido desde el contexto
+            id_User: id_User,
             paymentMethod: formData.paymentMethod,
-            items: cartItems.map((item) => ({
-                title: item.title,
-                ServiceId: item.id_Service,
-                quantity: item.quantities?.adults || 1,
-                price: item.price || 0,
-            })),
+            items: cartItems.map((item) => {
+                const adults = item.quantities?.adults || 0;
+                const children = item.quantities?.children || 0;
+                const seniors = item.quantities?.seniors || 0;
+
+                const adultsTotal = adults * item.price;
+                const childrenTotal = children * item.price * ((100 - (item.childDiscount || 0)) / 100);
+                const seniorsTotal = seniors * item.price * ((100 - (item.seniorDiscount || 0)) / 100);
+
+                const totalItemPrice = adultsTotal + childrenTotal + seniorsTotal;
+
+                return {
+                    ServiceId: item.id_Service,
+                    adults,
+                    minors: children,
+                    seniors,
+                };
+            }),
             paymentStatus: 'Pendiente',
         };
 
         try {
-            await dispatch(createServiceOrder(orderData));
+            const createdOrder = await dispatch(createServiceOrder(orderData));
+            const { id_ServiceOrder } = createdOrder.payload;
+
+            setOrderId(id_ServiceOrder);
+
             alert('¡Pedido confirmado exitosamente!');
-            navigate('/thank-you');
         } catch (error) {
             console.error('Error al crear la orden:', error);
             alert('Hubo un error al procesar tu pedido. Por favor, intenta de nuevo.');
@@ -97,6 +126,17 @@ const OrderForm = () => {
             formRef.current.requestSubmit();
         }
     };
+
+    const handlePaymentSuccess = (response) => {
+        console.log("Pago exitoso:", response);
+        alert("¡Pago realizado con éxito!");
+    };
+
+    const handlePaymentError = (error) => {
+        console.error("Error en el pago:", error);
+        alert("Hubo un problema con el pago. Por favor, intenta de nuevo.");
+    };
+
 
     return (
         <div className="flex flex-col lg:flex-row gap-12 mt-10">
@@ -184,47 +224,104 @@ const OrderForm = () => {
                     Resumen de la Orden
                 </h2>
                 <div className="space-y-4">
-                    {cartItems.map((item, index) => (
-                        <div
-                            key={`order-item-${item.id_Service}-${index}`}
-                            className="p-4 border rounded-md shadow-sm bg-gray-50"
-                        >
-                            <p className="text-lg font-medium">{item.title}</p>
-                            <p className="text-sm text-gray-900">
-                                {item.quantities?.adults || 1} x ${item.price.toLocaleString()}
-                            </p>
-                            <p className="text-xs text-gray-900">
-                                Fecha: {item.selectedDate || 'Fecha no seleccionada'}
-                            </p>
-                            <p className="text-xs text-gray-900">
-                                Hora: {item.selectedTime || 'Hora no seleccionada'}
-                            </p>
-                        </div>
-                    ))}
+                {cartItems.map((item, index) => {
+                        const adultsTotal = (item.quantities?.adults || 0) * item.price;
+                        const childrenTotal = (item.quantities?.children || 0) * item.price * ((100 - (item.childDiscount || 0)) / 100);
+                        const seniorsTotal = (item.quantities?.seniors || 0) * item.price * ((100 - (item.seniorDiscount || 0)) / 100);
+
+                        const totalItemPrice = adultsTotal + childrenTotal + seniorsTotal;
+                    
+                        return (
+                            <div
+                                key={`order-item-${item.id_Service}-${index}`}
+                                className="p-4 border rounded-md shadow-sm bg-gray-50"
+                            >
+                                <p className="text-lg font-medium">{item.title}</p>
+                                {item.quantities?.adults > 0 && (
+                                    <p className="text-sm text-gray-900">
+                                        Adultos: {item.quantities?.adults} x ${item.price.toLocaleString()} = ${adultsTotal.toFixed(2)}
+                                    </p>
+                                )}
+                                {item.quantities?.children > 0 && (
+                                    <p className="text-sm text-gray-900">
+                                        Menores: {item.quantities?.children} x ${(
+                                            item.price * ((100 - (item.childDiscount || 0)) / 100)
+                                        ).toFixed(2)} = ${childrenTotal.toFixed(2)}
+                                    </p>
+                                )}
+                                {item.quantities?.seniors > 0 && (
+                                    <p className="text-sm text-gray-900">
+                                        Jubilados: {item.quantities?.seniors} x ${(
+                                            item.price * ((100 - (item.seniorDiscount || 0)) / 100)
+                                        ).toFixed(2)} = ${seniorsTotal.toFixed(2)}
+                                    </p>
+                                )}
+                                <p className="text-xs text-gray-900">
+                                    Fecha: {item.selectedDate || 'Fecha no seleccionada'}
+                                </p>
+                                <p className="text-xs text-gray-900">
+                                    Hora: {item.selectedTime || 'Hora no seleccionada'}
+                                </p>
+                                <p className="text-sm font-semibold text-gray-900 mt-2">
+                                    Total por este ítem: ${totalItemPrice.toFixed(2)}
+                                </p>
+                            </div>
+                        );
+                    })}
                     <div className="flex justify-between text-gray-900 text-lg font-semibold mt-4">
                         <p>Subtotal</p>
-                        <p>${subtotal.toLocaleString()}</p>
+                        <p>
+                            ${cartItems
+                                .reduce((acc, item) => {
+                                    const totalItemPrice =
+                                        item.quantities?.adults * item.price +
+                                        item.quantities?.children * item.price * ((100 - (item.childDiscount || 0)) / 100) +
+                                        item.quantities?.seniors * item.price * ((100 - (item.seniorDiscount || 0)) / 100);
+                                    return acc + totalItemPrice;
+                                }, 0)
+                                .toFixed(2)}
+                        </p>
                     </div>
                     <div className="flex justify-between text-gray-900 text-xl font-bold mt-4">
                         <p>Total</p>
-                        <p>${subtotal.toLocaleString()}</p>
-                    </div>
-                    <div className="mt-6">
-                        <label className="block text-sm font-medium text-gray-900 mb-1">Método de Pago</label>
-                        <select
-                            name="paymentMethod"
-                            value={formData.paymentMethod}
-                            onChange={handleChange}
-                            className="w-full p-3 border text-gray-900 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required
-                        >
-                            <option value="">Selecciona un método</option>
-                            <option value="Pagos desde Argentina">Pagos desde Argentina</option>
-                            <option value="Pagos desde el exterior">Pagos desde el exterior</option>
-                            <option value="Transferencia bancaria">Transferencia bancaria</option>
-                        </select>
+                        <p>
+                            ${cartItems
+                                .reduce((acc, item) => {
+                                    const totalItemPrice =
+                                        item.quantities?.adults * item.price +
+                                        item.quantities?.children * item.price * ((100 - (item.childDiscount || 0)) / 100) +
+                                        item.quantities?.seniors * item.price * ((100 - (item.seniorDiscount || 0)) / 100);
+                                    return acc + totalItemPrice;
+                                }, 0)
+                                .toFixed(2)}
+                        </p>
                     </div>
                 </div>
+                <div className="mt-6">
+                    <label className="block text-sm font-medium text-gray-900 mb-1">Método de Pago</label>
+                    <select
+                        name="paymentMethod"
+                        value={formData.paymentMethod}
+                        onChange={handleChange}
+                        className="w-full p-3 border text-gray-900 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                    >
+                        <option value="">Selecciona un método</option>
+                        <option value="Pagos desde Argentina">Pagos desde Argentina</option>
+                        <option value="Pagos desde el exterior">Pagos desde el exterior</option>
+                    </select>
+                </div>
+                {formData.paymentMethod === "Pagos desde Argentina" && (
+                    <div className="mt-8">
+                        <GetnetPayment
+                            orderId={orderId}
+                            amount={subtotal}
+                            sellerId={sellerId}
+                            onSuccess={handlePaymentSuccess}
+                            onError={handlePaymentError}
+                        />
+                    </div>
+                )}
                 <div className="mt-8 flex justify-center">
                     <button
                         type="button"
