@@ -7,7 +7,7 @@ const createServiceOrderController = async (orderData) => {
   let total = 0;
   const updatedItems = [];
 
-  // Validar que todas las excursiones existan y calcular el total
+  // Validar y calcular el total con descuentos
   for (const item of items) {
     const excursion = await Service.findByPk(item.ServiceId);
 
@@ -15,16 +15,33 @@ const createServiceOrderController = async (orderData) => {
       throw new Error(`La excursión con ID ${item.ServiceId} no existe`);
     }
 
-    // Calcular el precio total de este item (precio de la excursión * cantidad)
-    const itemTotal = excursion.price * item.quantity;
+    // Validar descuentos
+    const discountForMinors = Math.max(0, Math.min(100, excursion.discountForMinors || 0));
+    const discountForSeniors = Math.max(0, Math.min(100, excursion.discountForSeniors || 0));
+
+    // Validar que los valores sean números
+    const price = parseFloat(excursion.price || 0);
+    const adults = parseInt(item.adults || 0, 10);
+    const minors = parseInt(item.minors || 0, 10);
+    const seniors = parseInt(item.seniors || 0, 10);
+
+    // Cálculos por tipo de cliente
+    const priceForAdults = price * adults;
+    const priceForMinors = price * (1 - discountForMinors / 100) * minors;
+    const priceForSeniors = price * (1 - discountForSeniors / 100) * seniors;
+
+    const itemTotal = priceForAdults + priceForMinors + priceForSeniors;
     total += itemTotal;
 
-    // Actualizar la información del ítem para que incluya el precio real
+    // Actualizar información del ítem
     updatedItems.push({
       title: excursion.title,
       ServiceId: item.ServiceId,
-      quantity: item.quantity,
-      price: excursion.price
+      adults,
+      minors,
+      seniors,
+      price: price.toFixed(2), // Mostrar el precio con dos decimales
+      itemTotal: itemTotal.toFixed(2) // Mostrar el total con dos decimales
     });
   }
 
@@ -34,11 +51,11 @@ const createServiceOrderController = async (orderData) => {
     userId: id_User,
     paymentMethod,
     paymentInformation: updatedItems,
-    total,
+    total: total.toFixed(2), // Mostrar el total con dos decimales
     paymentStatus: paymentStatus || 'Pendiente'
   });
 
   return newOrder; // Devolver los datos al handler
 };
 
-module.exports =  createServiceOrderController ;
+module.exports = createServiceOrderController;
