@@ -32,7 +32,10 @@ import {
   CREATE_ORDER_REQUEST,
   CREATE_ORDER_SUCCESS,
   CREATE_ORDER_FAILURE,
-  
+  GET_ALL_ORDERS,
+  GET_ALL_ORDERS_REQUEST,
+  GET_ALL_ORDERS_ERROR,
+
 
 } from "../actions/types";
 
@@ -50,10 +53,11 @@ const initialState = {
     error: null, // Errores de la API
     id_User: null,
   },
-   orders: {
+  orders: {
     loading: false,
     order: null,
     error: null,
+    ordersList: [],
   },
 };
 
@@ -242,10 +246,10 @@ const rootReducer = (state = initialState, action) => {
       };
 
     case GET_USER_DETAILS_SUCCESS:
-      console.log('Actualizando userDetails en el reducer', action.payload);
+      console.log("Actualizando userDetails en el reducer", action.payload);
       console.log(
         "Reducer - GET_USER_DETAILS_SUCCESS: Detalles de usuario obtenidos con éxito",
-        
+
         action.payload
       );
       return {
@@ -336,83 +340,124 @@ const rootReducer = (state = initialState, action) => {
         users: { ...state.users, loading: false, error: action.payload },
       };
 
-      case UPDATE_USER_REQUEST:
-        console.log("Reducer - UPDATE_USER_REQUEST: Solicitando actualización de usuario");
-        return {
-          ...state,
-          users: { ...state.users, loading: true, error: null },
-        };
-      
-      case UPDATE_USER_SUCCESS:
-        console.log("Reducer - UPDATE_USER_SUCCESS: Usuario actualizado con éxito", action.payload);
-        return {
-          ...state,
-          users: {
-            ...state.users,
-            loading: false,
-            userList: state.users.userList.map((user) =>
-              user.id_User === action.payload.id_User ? action.payload : user
-            ),
-            userDetails: action.payload, // Actualizamos también los detalles del usuario si aplica
-            error: null,
-          },
-        };
-      
-      case UPDATE_USER_FAILURE:
-        console.error(
-          "Reducer - UPDATE_USER_FAILURE: Error al actualizar usuario",
-          action.payload
-        );
-        return {
-          ...state,
-          users: { ...state.users, loading: false, error: action.payload },
-        };
+    case UPDATE_USER_REQUEST:
+      console.log(
+        "Reducer - UPDATE_USER_REQUEST: Solicitando actualización de usuario"
+      );
+      return {
+        ...state,
+        users: { ...state.users, loading: true, error: null },
+      };
 
-      case UPDATE_USER_REQUEST:
-        console.log("Reducer - UPDATE_USER_REQUEST: Solicitando actualización de usuario");
-        return {
-          ...state,
-          users: { ...state.users, loading: true, error: null },
-        };
-      
-      case UPDATE_USER_SUCCESS:
-        console.log("Reducer - UPDATE_USER_SUCCESS: Usuario actualizado con éxito", action.payload);
-        return {
-          ...state,
-          users: {
-            ...state.users,
-            loading: false,
-            userList: state.users.userList.map((user) =>
-              user.id_User === action.payload.id_User ? action.payload : user
-            ),
-            userDetails: action.payload, // Actualizamos también los detalles del usuario si aplica
-            error: null,
-          },
-        };
-      
-      case UPDATE_USER_FAILURE:
-        console.error(
-          "Reducer - UPDATE_USER_FAILURE: Error al actualizar usuario",
-          action.payload
-        );
-        return {
-          ...state,
-          users: { ...state.users, loading: false, error: action.payload },
-        };
-        
-        
-      //crear ordenes de servicio
-      case CREATE_ORDER_REQUEST:
-        return { ...state, loading: true };
-      case CREATE_ORDER_SUCCESS:
-        return { ...state, loading: false, order: action.payload };
-      case CREATE_ORDER_FAILURE:
-        return { ...state, loading: false, error: action.payload };
+    case UPDATE_USER_SUCCESS:
+      console.log(
+        "Reducer - UPDATE_USER_SUCCESS: Usuario actualizado con éxito",
+        action.payload
+      );
+      return {
+        ...state,
+        users: {
+          ...state.users,
+          loading: false,
+          userList: state.users.userList.map((user) =>
+            user.id_User === action.payload.id_User ? action.payload : user
+          ),
+          userDetails: action.payload, // Actualizamos también los detalles del usuario si aplica
+          error: null,
+        },
+      };
+
+    case UPDATE_USER_FAILURE:
+      console.error(
+        "Reducer - UPDATE_USER_FAILURE: Error al actualizar usuario",
+        action.payload
+      );
+      return {
+        ...state,
+        users: { ...state.users, loading: false, error: action.payload },
+      };
+
+    case UPDATE_USER_REQUEST:
+      console.log(
+        "Reducer - UPDATE_USER_REQUEST: Solicitando actualización de usuario"
+      );
+      return {
+        ...state,
+        users: { ...state.users, loading: true, error: null },
+      };
+
+    case UPDATE_USER_SUCCESS:
+      console.log(
+        "Reducer - UPDATE_USER_SUCCESS: Usuario actualizado con éxito",
+        action.payload
+      );
+      return {
+        ...state,
+        users: {
+          ...state.users,
+          loading: false,
+          userList: state.users.userList.map((user) =>
+            user.id_User === action.payload.id_User ? action.payload : user
+          ),
+          userDetails: action.payload, // Actualizamos también los detalles del usuario si aplica
+          error: null,
+        },
+      };
+
+    case UPDATE_USER_FAILURE:
+      console.error(
+        "Reducer - UPDATE_USER_FAILURE: Error al actualizar usuario",
+        action.payload
+      );
+      return {
+        ...state,
+        users: { ...state.users, loading: false, error: action.payload },
+      };
+
+    //ORDENES DE SERVICIO
+    //crear ordenes de servicio
+    case CREATE_ORDER_REQUEST:
+      return { ...state, loading: true };
+    case CREATE_ORDER_SUCCESS:
+      return { ...state, loading: false, order: action.payload };
+    case CREATE_ORDER_FAILURE:
+      return { ...state, loading: false, error: action.payload };
+
+    //obtener todas las ordenes de servicio
+    case GET_ALL_ORDERS_REQUEST:
+      return {
+        ...state,
+        orders: {
+          ...state.orders, // Mantén el resto del estado de `orders`
+          loading: true,   // Cambia solo `loading`
+        },
+      };
+
+    case GET_ALL_ORDERS:
+      return {
+        ...state,
+        orders: {
+          ...state.orders,      // Mantén el resto del estado de `orders`
+          loading: false,       // Cambia `loading` a false
+          ordersList: action.payload, // Actualiza la lista de órdenes
+          error: null,          // Resetea errores
+        },
+      };
+
+    case GET_ALL_ORDERS_ERROR:
+      return {
+        ...state,
+        orders: {
+          ...state.orders,
+          loading: false, // Desactiva el estado de carga
+          error: action.payload, // Guarda el mensaje de error
+        },
+      };
 
 
-      default:
-        return state;
-    }
-  };
+    default:
+      return state;
+  }
+};
 
 export default rootReducer;

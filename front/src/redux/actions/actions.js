@@ -32,6 +32,9 @@ import {
   
    CREATE_ORDER_SUCCESS,
    CREATE_ORDER_FAILURE,
+   GET_ALL_ORDERS,
+   GET_ALL_ORDERS_REQUEST,
+   GET_ALL_ORDERS_ERROR,
 } from "./types";
 
 export const createExcursion = (excursionData) => async (dispatch) => {
@@ -246,7 +249,7 @@ export const updateUserDetails = (id_User, updatedData) => async (dispatch) => {
   }
 };
 
-
+//ORDENES DE SERVICIO
 //crear orden de servicio
 
 export const createServiceOrder = (orderData) => async (dispatch) => {
@@ -280,3 +283,13 @@ export const createServiceOrder = (orderData) => async (dispatch) => {
   }
 };
 
+//GET todas las ordenes de servicio
+export const getAllOrders = () => async (dispatch) => {
+  dispatch({ type: GET_ALL_ORDERS_REQUEST });
+  try {
+    const response = await axios.get('http://localhost:3001/servicesOrder/');
+    dispatch({ type: GET_ALL_ORDERS, payload: response.data });
+  } catch (error) {
+    dispatch({ type: GET_ALL_ORDERS_ERROR, payload: error.message });
+  }
+};

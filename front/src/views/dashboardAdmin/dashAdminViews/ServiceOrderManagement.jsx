@@ -1,49 +1,56 @@
-import React, { useState } from 'react';
-import SearchInput from '../../../components/inputs/SearchInput';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllOrders } from '../../../redux/actions/actions'; // Ajusta el path si es necesario
 import ServiceOrdersTable from '../../../components/tables/admin/ServiceOrdersTable';
 import ServiceOrderModal from '../../../components/modals/admin-modal/ServiceOrderModal';
 
-const initialServiceOrders = [
-    {
-      id: 1,
-      excursionName: 'Excursión A',
-      date: '2024-10-15',
-      passengers: 10,
-      status: 'pending',
-    },
-    {
-      id: 2,
-      excursionName: 'Excursión B',
-      date: '2024-11-01',
-      passengers: 20,
-      status: 'completed',
-    },
-    // Más órdenes de servicio...
-  ];
 export function ServiceOrderManagement() {
+  const dispatch = useDispatch();
+  const { ordersList, loading, error } = useSelector(state => state.orders);
+
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [orders, setOrders] = useState(initialServiceOrders);
+
+  // Transformar las órdenes al formato esperado por la tabla
+  const transformOrders = (orders) => {
+    return orders.map(order => {
+      const totalPassengers =
+        order.paymentInformation.reduce(
+          (sum, info) => sum + info.adults + info.minors + info.seniors,
+          0
+        );
+
+      return {
+        id: order.id_ServiceOrder,
+        excursionName: order.paymentInformation[0]?.title || "Sin título",
+        date: new Date(order.orderDate).toLocaleDateString(),
+        passengers: totalPassengers,
+        status: order.paymentStatus.toLowerCase(), // pendiente o completada
+      };
+    });
+  };
+
+  useEffect(() => {
+    dispatch(getAllOrders());
+  }, [dispatch]);
 
   const handleEditOrder = (order) => {
     setSelectedOrder(order);
   };
 
-  const handleChangeOrderStatus = (updatedOrder) => {
-    setOrders(prevOrders =>
-      prevOrders.map(order => (order.id === updatedOrder.id ? updatedOrder : order))
-    );
-    setSelectedOrder(null);
-  };
+  if (loading) return <div>Cargando órdenes...</div>;
+  if (error) return <div>Error al cargar órdenes: {error}</div>;
+
+  const transformedOrders = transformOrders(ordersList);
 
   return (
     <div className="top-5 gap-5 flex flex-col w-full h-full">
       <h2 className="text-xl text-black font-semibold mb-4">Gestión de Órdenes de Servicio</h2>
-      <ServiceOrdersTable orders={orders} onEdit={handleEditOrder} />
+      <ServiceOrdersTable orders={transformedOrders} onEdit={handleEditOrder} />
       {selectedOrder && (
         <ServiceOrderModal
           order={selectedOrder}
           onClose={() => setSelectedOrder(null)}
-          onChangeStatus={handleChangeOrderStatus}
+          onChangeStatus={() => {}}
         />
       )}
     </div>
