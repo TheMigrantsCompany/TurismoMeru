@@ -5,9 +5,15 @@ import "react-datepicker/dist/react-datepicker.css";
 const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
   const [excursionData, setExcursionData] = useState({
     ...excursion,
-    discount: excursion.discount || {
-      seniorPercentage: 0,
-      minorPercentage: 0,
+    discount: {
+      seniorPercentage:
+        excursion?.discount?.seniorPercentage ??
+        excursion?.discountForSeniors ??
+        0,
+      minorPercentage:
+        excursion?.discount?.minorPercentage ??
+        excursion?.discountForMinors ??
+        0,
     },
   });
   const [formErrors, setFormErrors] = useState({});
@@ -37,9 +43,15 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
     if (excursion) {
       setExcursionData({
         ...excursion,
-        discount: excursion.discount || {
-          seniorPercentage: 0,
-          minorPercentage: 0,
+        discount: {
+          seniorPercentage:
+            excursion.discount?.seniorPercentage ??
+            excursion.discountForSeniors ??
+            0,
+          minorPercentage:
+            excursion.discount?.minorPercentage ??
+            excursion.discountForMinors ??
+            0,
         },
       });
     }
@@ -262,9 +274,12 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
           <input
             type="number"
             name="seniorPercentage"
-            value={excursionData?.discount?.seniorPercentage || 0}
+            value={excursionData.discount.seniorPercentage}
             onChange={(e) =>
-              handleDiscountChange("seniorPercentage", Number(e.target.value))
+              handleDiscountChange(
+                "seniorPercentage",
+                parseFloat(e.target.value)
+              )
             }
             className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
           />
@@ -277,9 +292,12 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
           <input
             type="number"
             name="minorPercentage"
-            value={excursionData?.discount?.minorPercentage || 0}
+            value={excursionData.discount.minorPercentage}
             onChange={(e) =>
-              handleDiscountChange("minorPercentage", Number(e.target.value))
+              handleDiscountChange(
+                "minorPercentage",
+                parseFloat(e.target.value)
+              )
             }
             className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
           />
