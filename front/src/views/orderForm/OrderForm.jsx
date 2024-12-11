@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import { useCart } from '../shopping-cart/CartContext';
 import { useDispatch } from 'react-redux';
 import { createServiceOrder } from '../../redux/actions/actions';
@@ -69,40 +69,16 @@ const OrderForm = () => {
 
         setLoading(true);
 
-        const totalOrderPrice = cartItems.reduce((acc, item) => {
-            const adults = item.quantities?.adults || 0;
-            const children = item.quantities?.children || 0;
-            const seniors = item.quantities?.seniors || 0;
-
-            const adultsTotal = adults * item.price;
-            const childrenTotal = children * item.price * ((100 - (item.childDiscount || 0)) / 100);
-            const seniorsTotal = seniors * item.price * ((100 - (item.seniorDiscount || 0)) / 100);
-
-            return acc + adultsTotal + childrenTotal + seniorsTotal;
-        }, 0);
-
         const orderData = {
             orderDate: new Date().toISOString(),
             id_User: id_User,
             paymentMethod: formData.paymentMethod,
-            items: cartItems.map((item) => {
-                const adults = item.quantities?.adults || 0;
-                const children = item.quantities?.children || 0;
-                const seniors = item.quantities?.seniors || 0;
-
-                const adultsTotal = adults * item.price;
-                const childrenTotal = children * item.price * ((100 - (item.childDiscount || 0)) / 100);
-                const seniorsTotal = seniors * item.price * ((100 - (item.seniorDiscount || 0)) / 100);
-
-                const totalItemPrice = adultsTotal + childrenTotal + seniorsTotal;
-
-                return {
-                    ServiceId: item.id_Service,
-                    adults,
-                    minors: children,
-                    seniors,
-                };
-            }),
+            items: cartItems.map((item) => ({
+                id_Service: item.id_Service,
+                adults: item.quantities?.adults || 0,
+                minors: item.quantities?.children || 0,
+                seniors: item.quantities?.seniors || 0,
+            })),
             paymentStatus: 'Pendiente',
         };
 
@@ -113,6 +89,7 @@ const OrderForm = () => {
             setOrderId(id_ServiceOrder);
 
             alert('¡Pedido confirmado exitosamente!');
+            navigate('/order-confirmation'); 
         } catch (error) {
             console.error('Error al crear la orden:', error);
             alert('Hubo un error al procesar tu pedido. Por favor, intenta de nuevo.');
@@ -234,7 +211,7 @@ const OrderForm = () => {
                         return (
                             <div
                                 key={`order-item-${item.id_Service}-${index}`}
-                                className="p-4 border rounded-md shadow-sm bg-gray-50"
+                                className="p-4 border rounded-md shadow-sm text-gray-900"
                             >
                                 <p className="text-lg font-medium">{item.title}</p>
                                 {item.quantities?.adults > 0 && (
@@ -262,9 +239,7 @@ const OrderForm = () => {
                                 <p className="text-xs text-gray-900">
                                     Hora: {item.selectedTime || 'Hora no seleccionada'}
                                 </p>
-                                <p className="text-sm font-semibold text-gray-900 mt-2">
-                                    Total por este ítem: ${totalItemPrice.toFixed(2)}
-                                </p>
+                               
                             </div>
                         );
                     })}

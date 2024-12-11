@@ -10,6 +10,7 @@ import ProfileForm from './views/dashboardUser/ProfileForm';
 import Reviews from './views/dashboardUser/Reviews';
 import Purchases from './views/dashboardUser/Purchases';
 import OrderForm from './views/orderForm/OrderForm';
+import BookingForm from './views/bookingform/BookingForm';
 import { UserManagement } from './views/dashboardAdmin/dashAdminViews/UserManagement';
 import { ReservationManagement } from './views/dashboardAdmin/dashAdminViews/ReservationManagement';
 import { ExcursionManagement } from './views/dashboardAdmin/dashAdminViews/ExcursionManagement';
@@ -43,6 +44,7 @@ function App() {
           <Route path="compras" element={<Purchases />} />
         </Route>
         <Route path="/orderform" element={<OrderForm />} />
+        <Route path="/bookingform" element={<BookingForm />} />
       </Routes>
     </CartProvider>
   );
