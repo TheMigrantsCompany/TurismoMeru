@@ -9,10 +9,10 @@ const createServiceOrderController = async (orderData) => {
 
   // Validar y calcular el total con descuentos
   for (const item of items) {
-    const excursion = await Service.findByPk(item.ServiceId);
+    const excursion = await Service.findByPk(item.id_Service);
 
     if (!excursion) {
-      throw new Error(`La excursión con ID ${item.ServiceId} no existe`);
+      throw new Error(`La excursión con ID ${item.id_Service} no existe`);
     }
 
     // Validar descuentos
@@ -36,7 +36,7 @@ const createServiceOrderController = async (orderData) => {
     // Actualizar información del ítem
     updatedItems.push({
       title: excursion.title,
-      ServiceId: item.ServiceId,
+      id_Service: item.id_Service,
       adults,
       minors,
       seniors,
@@ -48,7 +48,7 @@ const createServiceOrderController = async (orderData) => {
   // Crear la nueva orden en la base de datos
   const newOrder = await ServiceOrder.create({
     orderDate,
-    userId: id_User,
+    id_User,
     paymentMethod,
     paymentInformation: updatedItems,
     total: total.toFixed(2), // Mostrar el total con dos decimales

@@ -13,7 +13,7 @@ const createServiceOrderHandler = async (req, res) => {
     if (orderData.paymentStatus === 'Pagado') {
       const bookingData = {
         id_ServiceOrder: newOrder.dataValues.id_ServiceOrder,
-        userId: newOrder.dataValues.userId,
+        id_User: newOrder.dataValues.id_User,
         paymentMethod: newOrder.dataValues.paymentMethod,
         paymentInformation: newOrder.dataValues.paymentInformation,
         paymentStatus: newOrder.dataValues.paymentStatus,

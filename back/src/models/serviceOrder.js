@@ -12,7 +12,7 @@ module.exports = (sequelize) => {
       type: DataTypes.DATE,
       allowNull: false,
     },
-    userId: {
+    id_User: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -41,5 +41,3 @@ module.exports = (sequelize) => {
     timestamps: true
   });
 };
-
-
