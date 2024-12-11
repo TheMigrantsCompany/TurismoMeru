@@ -71,13 +71,12 @@ Booking.belongsTo(Service);
 ServiceOrder.hasMany(Booking);
 Booking.belongsTo(ServiceOrder);
 
-// Un usuario puede dejar muchas reseñas
-User.hasMany(Review);
-Review.belongsTo(User);
+// Relaciones Muchos a Uno
+Service.hasMany(Review, { foreignKey: 'id_Service', as: 'reviews' });
+Review.belongsTo(Service, { foreignKey: 'id_Service', as: 'services' });
 
-// Un servicio puede recibir muchas reseñas
-Service.hasMany(Review);
-Review.belongsTo(Service);
+User.hasMany(Review, { foreignKey: 'id_User', as: 'reviews' });
+Review.belongsTo(User, { foreignKey: 'id_User', as: 'user' });
 
 module.exports = {
   ...sequelize.models, // Exportamos todos los modelos

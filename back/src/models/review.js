@@ -20,7 +20,7 @@ module.exports = (sequelize) => {
         max: 5  // Máximo valor permitido
       }
     },
-    userId: {
+    id_User: {
       type: DataTypes.UUID,
       allowNull: false, // Obligatorio: debe asociarse a un usuario
       references: {
@@ -28,7 +28,7 @@ module.exports = (sequelize) => {
         key: 'id_User',
       }
     },
-    serviceId: {
+    id_Service: {
       type: DataTypes.UUID,
       allowNull: false, // Obligatorio: debe asociarse a un servicio
       references: {
