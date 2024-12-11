@@ -2,39 +2,25 @@ import React, { useState } from 'react';
 import { PencilIcon } from '@heroicons/react/24/outline';
 import { Button, IconButton, Chip } from '@material-tailwind/react';
 
-const initialServiceOrders = [
-  {
-    id: 1,
-    excursionName: 'Excursión A',
-    date: '2024-10-15',
-    passengers: 10,
-    status: 'pending',
-  },
-  {
-    id: 2,
-    excursionName: 'Excursión B',
-    date: '2024-11-01',
-    passengers: 20,
-    status: 'completed',
-  },
-  // Más órdenes de servicio...
-];
+const ServiceOrdersTable = ({ orders, onEdit }) => {
+  const [filteredOrders, setFilteredOrders] = useState(orders);
 
-const ServiceOrdersTable = ({ onEdit }) => {
-  const [serviceOrders, setServiceOrders] = useState(initialServiceOrders);
-  const [filteredOrders, setFilteredOrders] = useState(serviceOrders);
+  // Actualizar las órdenes filtradas cuando cambien las órdenes desde Redux
+  React.useEffect(() => {
+    setFilteredOrders(orders);
+  }, [orders]);
 
   const filterOrdersByStatus = (status) => {
     if (status === 'all') {
-      setFilteredOrders(serviceOrders);
+      setFilteredOrders(orders);
     } else {
-      setFilteredOrders(serviceOrders.filter(order => order.status === status));
+      setFilteredOrders(orders.filter(order => order.status === status));
     }
   };
 
   const handleSearchByName = (name) => {
     setFilteredOrders(
-      serviceOrders.filter(order =>
+      orders.filter(order =>
         order.excursionName.toLowerCase().includes(name.toLowerCase())
       )
     );

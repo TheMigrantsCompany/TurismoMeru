@@ -44,12 +44,13 @@ const { User, Service, ServiceOrder, Booking, Review } = sequelize.models;
 // Definir las relaciones entre modelos:
 
 // Un usuario puede realizar muchas órdenes de servicio
-User.hasMany(ServiceOrder);
-ServiceOrder.belongsTo(User);
+ServiceOrder.belongsTo(User, { foreignKey: 'id_User' });
+User.hasMany(ServiceOrder, { foreignKey: 'id_User' });
 
-// Un servicio puede aparecer en muchas órdenes de servicio
-Service.hasMany(ServiceOrder);
-ServiceOrder.belongsTo(Service);
+
+// Relaciones Muchos a Muchos entre ServiceOrder y Service
+ServiceOrder.belongsToMany(Service, { through: 'ServiceOrderService', foreignKey: 'id_ServiceOrder', otherKey: 'serviceId', as: 'services' });
+Service.belongsToMany(ServiceOrder, { through: 'ServiceOrderService', foreignKey: 'id_Service', otherKey: 'serviceOrderId', as: 'serviceOrders' });
 
 // Un usuario puede hacer muchas reservas
 User.hasMany(Booking);
