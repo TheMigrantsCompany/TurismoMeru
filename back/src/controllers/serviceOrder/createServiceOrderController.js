@@ -55,6 +55,10 @@ const createServiceOrderController = async (orderData) => {
     paymentStatus: paymentStatus || 'Pendiente'
   });
 
+  // Asociar los servicios a la orden de servicio
+  const serviceIds = items.map(item => item.id_Service); // Extraer los IDs de los servicios
+  await newOrder.addServices(serviceIds); // Asociar los servicios a la orden
+
   return newOrder; // Devolver los datos al handler
 };
 
