@@ -1,93 +1,113 @@
-import React, { useState } from "react";
-import { StarIcon } from "@heroicons/react/24/solid";
-import { Button, Card, Typography } from "@material-tailwind/react";
+import React, { useState } from 'react';
+import { Rating } from '@material-tailwind/react';
+import { motion } from 'framer-motion';
+import axios from 'axios';
 
-const Reviews = ({ excursionImage }) => {
-  const [review, setReview] = useState({
-    name: "",
-    rating: 0,
-    comment: "",
-  });
+const Review = ({ excursionTitle, excursionPhoto, idService, idUser }) => {
+  const [name, setName] = useState('');
+  const [review, setReview] = useState('');
+  const [rating, setRating] = useState(0);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setReview((prevReview) => ({
-      ...prevReview,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(review);
-    // Reiniciar el formulario después de enviar
-    setReview({ name: "", rating: 0, comment: "" });
+    try {
+      const response = await axios.post('http://localhost:3001/review/', {
+        id_User: idUser,
+        id_Service: idService,
+        content: review,
+        rating,
+      });
+
+      if (response.status === 201) {
+        setSubmitted(true);
+        console.log('Reseña guardada:', response.data);
+      }
+    } catch (err) {
+      setError('Hubo un problema al guardar la reseña. Inténtalo de nuevo.');
+      console.error('Error al guardar la reseña:', err);
+    }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen p-4 bg-gray-100">
-      <Card className="max-w-md w-full p-6 shadow-lg flex flex-col bg-white rounded-lg">
-        <div className="mb-4">
-          {excursionImage && (
-            <img
-              src={excursionImage}
-              alt="Excursión"
-              className="object-cover rounded-lg shadow-md"
-            />
-          )}
-        </div>
-        <Typography variant="h5" className="mb-4 text-center font-bold">
-          Deja tu Reseña
-        </Typography>
-        <form onSubmit={handleSubmit} className="flex flex-col">
-          <div className="mb-4">
-            <label className="block text-gray-700 font-bold mb-1">Nombre</label>
-            <input
-              type="text"
-              name="name"
-              value={review.name}
-              onChange={handleChange}
-              className="mt-1 p-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Tu nombre"
-              required
-            />
-          </div>
+    <motion.div
+      initial={{ opacity: 0, x: -30 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5 }}
+      className="flex flex-col md:flex-row items-center md:items-start p-4 bg-white rounded-lg shadow-lg space-y-4 md:space-y-0 md:space-x-4 max-w-2xl mx-auto"
+    >
+      
+      <div className="w-40 h-40 md:w-44 md:h-44 rounded-lg overflow-hidden shadow-md">
+        <img
+          src={excursionPhoto}
+          alt={excursionTitle}
+          className="w-full h-full object-cover"
+        />
+      </div>
 
-          <div className="mb-4">
-            <label className="block text-gray-700 font-bold mb-1">Calificación</label>
-            <div className="flex items-center">
-              {[...Array(5)].map((_, index) => (
-                <StarIcon
-                  key={index}
-                  className={`h-6 w-6 cursor-pointer ${
-                    index < review.rating ? "text-yellow-500" : "text-gray-300"
-                  } hover:text-yellow-400 transition duration-150 ease-in-out`}
-                  onClick={() => setReview({ ...review, rating: index + 1 })}
-                />
-              ))}
+      
+      <div className="flex-1 flex flex-col items-center md:items-start">
+        {!submitted ? (
+          <form onSubmit={handleSubmit} className="space-y-4 w-full flex flex-col items-center">
+           
+            <h2 className="text-lg font-semibold text-gray-800 mb-2 text-center md:text-left">{excursionTitle}</h2>
+
+            
+            <div className="flex flex-col w-full max-w-sm">
+              <label className="text-sm font-medium text-gray-600 mb-1">Nombre:</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-sm"
+                placeholder="Tu nombre"
+                required
+              />
             </div>
-          </div>
 
-          <div className="mb-4">
-            <label className="block text-gray-700 font-bold mb-1">Comentario</label>
-            <textarea
-              name="comment"
-              value={review.comment}
-              onChange={handleChange}
-              className="mt-1 p-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              rows="4"
-              placeholder="Tu comentario"
-              required
-            />
-          </div>
-
-          <Button type="submit" className="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition duration-150 ease-in-out">
-            Enviar Reseña
-          </Button>
-        </form>
-      </Card>
-    </div>
+            
+            <div className="flex flex-col w-full max-w-sm">
+              <label className="text-sm font-medium text-gray-600 mb-1">Reseña:</label>
+              <textarea
+                value={review}
+                onChange={(e) => setReview(e.target.value)}
+                rows="3"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-sm resize-none"
+                placeholder="Escribe tu opinión aquí"
+                required
+              ></textarea>
+            </div>
+            <div className="flex items-center space-x-3 w-full max-w-sm">
+              <label className="text-sm font-medium text-gray-600">Calificación:</label>
+              <Rating value={rating} onChange={setRating} className="scale-110" />
+            </div>
+            {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              type="submit"
+              className="w-32 bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm"
+            >
+              Enviar Reseña
+            </motion.button>
+          </form>
+        ) : (
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="text-center"
+          >
+            <h2 className="text-lg font-semibold text-blue-600 mb-2">
+              ¡Gracias por tu reseña!
+            </h2>
+            <p className="text-sm text-gray-700">
+              Has calificado <span className="font-bold">{excursionTitle}</span> con {rating} estrellas.
+            </p>
+          </motion.div>
+        )}
+      </div>
+    </motion.div>
   );
 };
 
-export default Reviews;
+export default Review;
