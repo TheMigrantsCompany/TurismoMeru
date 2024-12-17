@@ -16,7 +16,7 @@ const getReviewsByServiceTitle = async (title) => {
   }
 
   // Busca las reseñas que correspondan al id del servicio encontrado
-  const reviews = await Review.findAll({ where: { serviceId: service.id_Service } });
+  const reviews = await Review.findAll({ where: { id_Service: service.id_Service } });
   
   return reviews;
 };

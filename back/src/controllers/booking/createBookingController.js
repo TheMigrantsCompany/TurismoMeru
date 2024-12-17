@@ -15,15 +15,15 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
       throw new Error('paymentInformation debe ser un arreglo');
     }
 
-    for (const { ServiceId, quantity } of paymentInformation) {
-      console.log('Procesando servicio:', ServiceId, 'con cantidad:', quantity);
+    for (const { id_Service, quantity } of paymentInformation) {
+      console.log('Procesando servicio:', id_Service, 'con cantidad:', quantity);
       
-      const service = await Service.findByPk(ServiceId);
+      const service = await Service.findByPk(id_Service);
   
       // Verifica que el servicio exista y que tenga stock disponible
       if (!service) {
-        console.log(`El servicio con ID ${ServiceId} no existe.`);
-        throw new Error(`El servicio con ID ${ServiceId} no existe.`);
+        console.log(`El servicio con ID ${id_Service} no existe.`);
+        throw new Error(`El servicio con ID ${id_Service} no existe.`);
       }
 
       const service_ = service.dataValues;
@@ -38,7 +38,7 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
       
       // Encuentra el último número de asiento asignado para el servicio
       const lastBooking = await Booking.findOne({
-        where: { serviceId: ServiceId },
+        where: { id_Service: id_Service },
         order: [['seatNumber', 'DESC']],
       });
 
@@ -56,7 +56,7 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
 
         const booking = await Booking.create({
           id_User,
-          serviceId: ServiceId,
+          id_Service,
           serviceTitle: service.title,
           serviceOrderId,
           bookingDate: new Date(),

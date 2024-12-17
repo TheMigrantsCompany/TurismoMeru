@@ -13,7 +13,7 @@ const updateBookingController = async (id_Booking, updateData) => {
     const existingBooking = await Booking.findOne({
       where: {
         seatNumber: updateData.seatNumber,
-        serviceId: booking.serviceId, // Asegúrate de que el servicio coincida
+        id_Service: booking.id_Service, // Asegúrate de que el servicio coincida
         id_Booking: { [Op.ne]: id_Booking }, // Excluye la reserva actual
       },
     });
