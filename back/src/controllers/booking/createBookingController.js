@@ -1,12 +1,12 @@
 const { Console } = require('console');
 const { Booking, Service } = require('../../config/db'); // Importa los modelos
 
-const createBookingController = async (userId, paymentStatus, paymentInformation, serviceOrderId) => {
+const createBookingController = async (id_User, paymentStatus, paymentInformation, serviceOrderId) => {
   try {
     const bookings = [];
 
     console.log('Inicio de la creación de reservas');
-    console.log('User ID:', userId);
+    console.log('User ID:', id_User);
     console.log('Payment Status:', paymentStatus);
     console.log('Payment Information:', paymentInformation);
     
@@ -55,7 +55,7 @@ const createBookingController = async (userId, paymentStatus, paymentInformation
         const seatNumber = lastSeatNumber + i + 1; // Asigna el siguiente número de asiento disponible
 
         const booking = await Booking.create({
-          userId,
+          id_User,
           serviceId: ServiceId,
           serviceTitle: service.title,
           serviceOrderId,

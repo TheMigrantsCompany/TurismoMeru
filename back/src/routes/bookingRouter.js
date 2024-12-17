@@ -24,7 +24,7 @@ bookingRouter.get('/id/:id_Booking', getBookingByIdHandler);
 //Rutas para obtener todas las reservas que tengan el titulo de la excursion
 bookingRouter.get('/service/:serviceTitle', getBookingsByServiceTitleHandler);
 //Ruta para obtener todas las reservas de un usuario
-bookingRouter.get('/user/:userId', getBookingsByUserIdHandler);
+bookingRouter.get('/user/:id_User', getBookingsByUserIdHandler);
 
 //Ruta para actualizar los datos de la reserva por id 
 bookingRouter.patch('/id/:id_Booking', updateBookingHandler);

@@ -1,9 +1,9 @@
 const { Booking } = require('../../config/db');
 
-const getBookingsByUserIdController = async (userId) => {
+const getBookingsByUserIdController = async (id_User) => {
   const bookings = await Booking.findAll({
     where: {
-      userId: userId
+      id_User,
     }
   });
 

@@ -8,7 +8,7 @@ const updatePaymentStatusController = async (orderId, paymentStatus) => {
     if (!order) throw new Error('Service order not found');
     
     // Extraer los valores de order.dataValues
-    const { id_ServiceOrder, userId, paymentMethod, paymentInformation } = order.dataValues;
+    const { id_ServiceOrder, id_User, paymentMethod, paymentInformation } = order.dataValues;
 
     // Actualizar el estado de pago solo si no está ya pagado
     if (paymentStatus === 'Pagado' && order.paymentStatus !== 'Pagado') {
@@ -17,7 +17,7 @@ const updatePaymentStatusController = async (orderId, paymentStatus) => {
       // Verificar el estado de pago y procesar reservas si es 'Pagado'
       const bookingData = {
         id_ServiceOrder: id_ServiceOrder,    // ID de la orden de servicio
-        userId: userId,                      // ID del usuario
+        id_User,                      // ID del usuario
         paymentMethod: paymentMethod,        // Método de pago de la orden
         paymentInformation: paymentInformation, // Información de pago
         paymentStatus: 'Pagado',             // Estado de pago (Pagado)

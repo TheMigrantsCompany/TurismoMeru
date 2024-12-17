@@ -24,7 +24,7 @@ reviewRouter.get('/id/:id', getReviewByIdHandler);
 // Ruta para obtener las reseñas por título de excursión  
 reviewRouter.get('/service/:title', getReviewsByServiceTitleHandler);
 // Ruta para obtener las reseñas por usuario  id  (user_id)
-reviewRouter.get('/user/:userId', getReviewsByUserIdHandler);
+reviewRouter.get('/user/:id_User', getReviewsByUserIdHandler);
 // Ruta para aprobar las reseñas
 reviewRouter.patch('/id/:id/approve', patchReviewActiveHandler);
 // Ruta para modificar las reseñas

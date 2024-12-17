@@ -12,7 +12,7 @@ module.exports = (sequelize) => {
       type: DataTypes.DATE,
       allowNull: false // Obligatorio: necesita una fecha de reserva
     },
-    userId: {
+    id_User: {
       type: DataTypes.UUID,
       allowNull: false, // Obligatorio: debe asociarse a un usuario
       references: {
@@ -20,7 +20,7 @@ module.exports = (sequelize) => {
         key: 'id_User',
       }
     },
-    serviceId: {
+    id_Service: {
       type: DataTypes.UUID,
       allowNull: false, // Obligatorio: debe asociarse a un servicio
       references: {
@@ -28,7 +28,7 @@ module.exports = (sequelize) => {
         key: 'id_Service',
       }
     },
-    serviceOrderId: {
+    id_ServiceOrder: {
       type: DataTypes.UUID,
       allowNull: true, // Opcional: puede no haber un pedido de servicio asociado
       references: {
