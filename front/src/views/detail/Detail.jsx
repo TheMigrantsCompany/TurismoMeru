@@ -1,19 +1,65 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Typography } from "@material-tailwind/react";
+import { Typography, Avatar, Rating } from "@material-tailwind/react";
 import BookingCard from "../../components/bookingcard/BookingCard";
+
+const Review = ({ review, rating, userImage, userName }) => {
+  return (
+    <div className="px-8 text-center">
+      <Typography variant="h2" color="blue-gray" className="mb-6 font-medium">
+        &quot;{review}&quot;
+      </Typography>
+      <Avatar
+        src={
+          userImage ||
+          "https://via.placeholder.com/50" // Imagen por defecto
+        }
+        alt={userName || "Usuario"}
+        size="lg"
+      />
+      <Typography variant="h6" className="mt-4">
+        {userName || "Usuario Anónimo"}
+      </Typography>
+      <Rating value={rating} readonly />
+    </div>
+  );
+};
 
 export function Detail() {
   const { id_Service } = useParams();
   const [excursion, setExcursion] = useState(null);
+  const [reviews, setReviews] = useState([]); // Estado separado para las reseñas
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
+  // Fetch para obtener la información de la excursión
   useEffect(() => {
     fetch(`http://localhost:3001/service/id/${id_Service}`)
       .then((response) => response.json())
-      .then((data) => setExcursion(data))
+      .then((data) => {
+        console.log("Datos de la excursión:", data);
+        setExcursion(data);
+      })
       .catch((error) =>
-        console.error("Error fetching excursion details:", error)
+        console.error("Error al obtener los detalles de la excursión:", error)
+      );
+  }, [id_Service]);
+
+  // Fetch para obtener las reseñas aprobadas de la excursión
+  useEffect(() => {
+    fetch("http://localhost:3001/review/")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Reseñas recibidas:", data);
+
+        // Filtrar solo las reseñas aprobadas (active === true)
+        const approvedReviews = data.filter(
+          (review) => review.active === true && review.id_Service === id_Service
+        );
+        console.log("Reseñas aprobadas:", approvedReviews);
+        setReviews(approvedReviews);
+      })
+      .catch((error) =>
+        console.error("Error al obtener las reseñas:", error)
       );
   }, [id_Service]);
 
@@ -36,7 +82,6 @@ export function Detail() {
   return (
     <section className="py-16 px-8 bg-gray-50">
       <div className="container mx-auto max-w-6xl">
-        {/* Título separado arriba */}
         <Typography
           variant="h3"
           className="font-semibold text-gray-800 text-center mb-10"
@@ -90,40 +135,30 @@ export function Detail() {
                 {excursion.description}
               </Typography>
               {excursion.location && (
-                <Typography variant="small" color="gray" className="text-lg mb-2">
+                <Typography
+                  variant="small"
+                  color="gray"
+                  className="text-lg mb-2"
+                >
                   <strong>Ubicación:</strong> {excursion.location}
                 </Typography>
               )}
               {excursion.duration && (
-                <Typography variant="small" color="gray" className="text-lg mb-2">
+                <Typography
+                  variant="small"
+                  color="gray"
+                  className="text-lg mb-2"
+                >
                   <strong>Duración:</strong> {excursion.duration} horas
                 </Typography>
               )}
               {excursion.difficulty && (
-                <Typography variant="small" color="gray" className="text-lg mb-2">
+                <Typography
+                  variant="small"
+                  color="gray"
+                  className="text-lg mb-2"
+                >
                   <strong>Dificultad:</strong> {excursion.difficulty}
-                </Typography>
-              )}
-              {Array.isArray(excursion.guides) && excursion.guides.length > 0 ? (
-                <div>
-                  <Typography
-                    variant="h6"
-                    color="blue-gray"
-                    className="text-lg font-semibold"
-                  >
-                    Guías:
-                  </Typography>
-                  <ul className="list-disc pl-6 text-gray-700">
-                    {excursion.guides.map((guide, index) => (
-                      <li key={index} className="text-gray-700">
-                        {guide.name} - {guide.language}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : (
-                <Typography variant="small" color="gray">
-                  No hay guías disponibles.
                 </Typography>
               )}
             </div>
@@ -135,6 +170,30 @@ export function Detail() {
               <BookingCard id_Service={id_Service} price={excursion.price} />
             </div>
           </div>
+        </div>
+
+        {/* Reseñas */}
+        <div className="mt-12">
+          <Typography variant="h4" className="font-bold text-gray-800 mb-6">
+            Reseñas
+          </Typography>
+          {reviews && reviews.length > 0 ? (
+            <div className="space-y-8">
+              {reviews.map((review, index) => (
+                <Review
+                  key={index}
+                  review={review.content}
+                  rating={review.rating}
+                  userImage={review.userImage} // Imagen del usuario
+                  userName={review.userName} // Nombre del usuario
+                />
+              ))}
+            </div>
+          ) : (
+            <Typography variant="small" color="gray">
+              No hay reseñas disponibles para esta excursión.
+            </Typography>
+          )}
         </div>
       </div>
     </section>

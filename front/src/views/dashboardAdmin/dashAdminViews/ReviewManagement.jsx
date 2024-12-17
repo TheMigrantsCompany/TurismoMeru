@@ -10,6 +10,7 @@ export function ReviewsManagement() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Fetch inicial de reseñas
   useEffect(() => {
     const fetchReviews = async () => {
       try {
@@ -28,6 +29,7 @@ export function ReviewsManagement() {
     fetchReviews();
   }, []);
 
+  // Filtrar reseñas según búsqueda
   const handleSearch = (query) => {
     const lowercasedQuery = query.toLowerCase();
     setFilteredReviews(
@@ -39,12 +41,33 @@ export function ReviewsManagement() {
     );
   };
 
-  const handleReviewStatusChange = (reviewId, status) => {
-    setReviews((prevReviews) =>
-      prevReviews.map((review) =>
-        review.id === reviewId ? { ...review, status } : review
-      )
-    );
+  // Cambiar estado de la reseña (aprobar o desaprobar)
+  const handleReviewStatusChange = async (reviewId, action) => {
+    try {
+      const response = await fetch(`http://localhost:3001/review/id/${reviewId}/approve`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+      });
+  
+      if (!response.ok) throw new Error('Error al cambiar el estado de la reseña');
+  
+      const updatedReview = await response.json();
+  
+      // Actualizar el estado local con la reseña aprobada
+      setReviews((prevReviews) =>
+        prevReviews.map((review) =>
+          review.id_Review === updatedReview.id_Review ? updatedReview : review
+        )
+      );
+  
+      setFilteredReviews((prevReviews) =>
+        prevReviews.map((review) =>
+          review.id_Review === updatedReview.id_Review ? updatedReview : review
+        )
+      );
+    } catch (err) {
+      console.error(err.message);
+    }
   };
 
   if (loading) return <div>Cargando reseñas...</div>;
