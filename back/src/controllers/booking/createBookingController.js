@@ -1,7 +1,7 @@
 const { Console } = require('console');
 const { Booking, Service } = require('../../config/db'); // Importa los modelos
 
-const createBookingController = async (id_User, paymentStatus, paymentInformation, serviceOrderId) => {
+const createBookingController = async (id_User, paymentStatus, paymentInformation, id_ServiceOrder) => {
   try {
     const bookings = [];
 
@@ -58,7 +58,7 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
           id_User,
           id_Service,
           serviceTitle: service.title,
-          serviceOrderId,
+          id_ServiceOrder,
           bookingDate: new Date(),
           paymentStatus,
           DNI_Personal: "null", // Reemplaza esto con el valor real si es necesario
