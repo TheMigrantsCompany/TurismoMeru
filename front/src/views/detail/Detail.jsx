@@ -5,22 +5,19 @@ import BookingCard from "../../components/bookingcard/BookingCard";
 
 const Review = ({ review, rating, userImage, userName }) => {
   return (
-    <div className="px-8 text-center">
-      <Typography variant="h2" color="blue-gray" className="mb-6 font-medium">
+    <div className="px-4 text-center">
+      <Typography variant="h6" color="blue-gray" className="mb-4 font-bold">
         &quot;{review}&quot;
       </Typography>
       <Avatar
-        src={
-          userImage ||
-          "https://via.placeholder.com/50" // Imagen por defecto
-        }
-        alt={userName || "Usuario"}
-        size="lg"
+        src={userImage}
+        alt={userName}
+        size="sm" // Tamaño más pequeño para el avatar
       />
-      <Typography variant="h6" className="mt-4">
-        {userName || "Usuario Anónimo"}
+      <Typography variant="body1" color="blue-gray" className="mt-2">
+        {userName}
       </Typography>
-      <Rating value={rating} readonly />
+      <Rating value={rating} readonly size="sm" />
     </div>
   );
 };
@@ -28,10 +25,9 @@ const Review = ({ review, rating, userImage, userName }) => {
 export function Detail() {
   const { id_Service } = useParams();
   const [excursion, setExcursion] = useState(null);
-  const [reviews, setReviews] = useState([]); // Estado separado para las reseñas
+  const [reviews, setReviews] = useState([]); 
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
-  // Fetch para obtener la información de la excursión
   useEffect(() => {
     fetch(`http://localhost:3001/service/id/${id_Service}`)
       .then((response) => response.json())
@@ -44,19 +40,34 @@ export function Detail() {
       );
   }, [id_Service]);
 
-  // Fetch para obtener las reseñas aprobadas de la excursión
+ 
   useEffect(() => {
     fetch("http://localhost:3001/review/")
       .then((response) => response.json())
       .then((data) => {
         console.log("Reseñas recibidas:", data);
-
-        // Filtrar solo las reseñas aprobadas (active === true)
         const approvedReviews = data.filter(
           (review) => review.active === true && review.id_Service === id_Service
         );
-        console.log("Reseñas aprobadas:", approvedReviews);
-        setReviews(approvedReviews);
+        fetch("http://localhost:3001/user/") 
+          .then((userResponse) => userResponse.json())
+          .then((users) => {
+            
+            const reviewsWithUserData = approvedReviews.map((review) => {
+              const user = users.find((u) => u.id_User === review.id_User);
+              return {
+                ...review,
+                userName: user?.name || "Usuario Anónimo",
+                userImage: user?.image || "https://via.placeholder.com/50", 
+              };
+            });
+  
+            console.log("Reseñas con datos de usuario:", reviewsWithUserData);
+            setReviews(reviewsWithUserData);
+          })
+          .catch((userError) =>
+            console.error("Error al obtener los usuarios:", userError)
+          );
       })
       .catch((error) =>
         console.error("Error al obtener las reseñas:", error)
@@ -88,12 +99,8 @@ export function Detail() {
         >
           {excursion.title}
         </Typography>
-
-        {/* Contenedor principal */}
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Imagen y texto alineados */}
           <div className="lg:col-span-2 flex flex-wrap lg:flex-nowrap gap-6 items-start">
-            {/* Imagen / Carrusel */}
             <div className="relative max-w-sm">
               {photos.length > 0 ? (
                 <div className="relative">
@@ -128,8 +135,6 @@ export function Detail() {
                 />
               )}
             </div>
-
-            {/* Texto dinámico al lado de la imagen */}
             <div className="flex-1 text-gray-700">
               <Typography variant="paragraph" className="text-justify mb-4">
                 {excursion.description}
@@ -184,8 +189,8 @@ export function Detail() {
                   key={index}
                   review={review.content}
                   rating={review.rating}
-                  userImage={review.userImage} // Imagen del usuario
-                  userName={review.userName} // Nombre del usuario
+                  userImage={review.userImage}
+                  userName={review.userName}
                 />
               ))}
             </div>

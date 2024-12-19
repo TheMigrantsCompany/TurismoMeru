@@ -81,9 +81,9 @@ const ReviewsTable = ({ reviews, onReviewStatusChange, onViewDetails }) => {
                 >
                   <XMarkIcon className={`h-5 w-5 ${loadingReviewId === review.id_Review ? 'text-gray-400' : 'text-red-500'}`} />
                 </IconButton>
-                <IconButton onClick={() => onViewDetails(review)}>
-                  <PencilIcon className="h-5 w-5 text-blue-500" />
-                </IconButton>
+                <IconButton onClick={() => onViewDetails(review, userMap)}>
+  <PencilIcon className="h-5 w-5 text-blue-500" />
+</IconButton>
               </td>
             </tr>
           ))
