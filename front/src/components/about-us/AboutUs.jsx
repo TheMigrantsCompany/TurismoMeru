@@ -4,7 +4,7 @@ import aboutusImage from "../../assets/images/aboutus/aboutus.jpg";
 export default function AboutUs() {
   return (
     <section className="bg-[#dac9aa] py-16 px-6">
-      <div className="max-w-5xl mx-auto bg-white shadow-md rounded-lg p-10">
+      <div className="max-w-5xl mx-auto bg-white bg-opacity-90 shadow-md rounded-lg p-10">
         <h2 className="text-4xl font-bold text-[#f4925b] text-center mb-6">
           Sobre nosotros
         </h2>
