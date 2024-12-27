@@ -42,10 +42,9 @@ export default function QueryForm() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-xl">
+    <div className="max-w-4xl mx-auto bg-white bg-opacity-80 p-8 rounded-lg shadow-xl backdrop-blur-sm">
       <h2 className="text-3xl font-bold mb-6 text-center text-[#4256a6]">Consulta</h2>
       <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
-      
         <input
           type="hidden"
           name="subject"
