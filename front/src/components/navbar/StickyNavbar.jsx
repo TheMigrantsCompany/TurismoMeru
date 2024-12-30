@@ -225,7 +225,7 @@ export default function StickyNavbar() {
   // Memorizar el renderizado de la navbar
   const renderedNavbar = useMemo(
     () => (
-      <nav className="bg-white shadow dark:bg-gray-200 sticky top-0 z-50">
+      <nav className="bg-[#f9f3e1] shadow dark:bg-gray-200 sticky top-0 z-50">
         <div className="container flex items-center justify-between px-4 py-2 mx-auto text-gray-900 capitalize dark:text-gray-300">
           {/* Logo */}
           <a href="/" className="flex items-center">

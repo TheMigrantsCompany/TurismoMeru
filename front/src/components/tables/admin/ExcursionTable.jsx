@@ -106,15 +106,15 @@ const ExcursionTable = () => {
     };
 
     return (
-        <Card className="h-full w-full">
+        <Card className="h-full w-full bg-[#f9f3e1]">
             <CardHeader floated={false} shadow={false} className="rounded-none">
-                <Typography variant="h5" color="blue-gray">Gestión de Excursiones</Typography>
+                <Typography variant="h5" color="blue-gray" className="text-[#4256a6]">Gestión de Excursiones</Typography>
 
                 {/* Botones de filtrado */}
                 <div className="flex space-x-4 mt-4">
-                    <Button onClick={() => filterExcursions("all")} color="blue">Todas</Button>
-                    <Button onClick={() => filterExcursions("active")} color="green">Activas</Button>
-                    <Button onClick={() => filterExcursions("inactive")} color="red">Inactivas</Button>
+                    <Button onClick={() => filterExcursions("all")} color="blue" className="bg-[#4256a6] hover:bg-[#3b4a85]">Todas</Button>
+                    <Button onClick={() => filterExcursions("active")} color="green" className="bg-[#42b44f] hover:bg-[#388e3c]">Activas</Button>
+                    <Button onClick={() => filterExcursions("inactive")} color="red" className="bg-[#e53935] hover:bg-[#c62828]">Inactivas</Button>
                 </div>
             </CardHeader>
 
@@ -160,12 +160,12 @@ const ExcursionTable = () => {
                                     <td className="p-4 border-b border-blue-gray-50">
                                         <Tooltip content="Editar Excursión">
                                             <IconButton variant="text" onClick={() => handleEditClick(excursion)}>
-                                                <PencilIcon className="h-4 w-4" />
+                                                <PencilIcon className="h-4 w-4 text-[#4256a6]" />
                                             </IconButton>
                                         </Tooltip>
                                         <Tooltip content="Eliminar Excursión">
                                             <IconButton variant="text" onClick={() => handleDeleteExcursion(excursion.title)}>
-                                                <TrashIcon className="h-4 w-4" />
+                                                <TrashIcon className="h-4 w-4 text-[#e53935]" />
                                             </IconButton>
                                         </Tooltip>
                                     </td>

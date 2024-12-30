@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronUpDownIcon, PencilIcon } from "@heroicons/react/24/outline";
-import { Card, CardHeader, Typography, CardBody, Chip, Tooltip, IconButton, CardFooter, Tabs, TabsHeader, Tab, Button } from "@material-tailwind/react";
+import { Card, CardHeader, Typography, CardBody, Chip, Tooltip, IconButton, Button } from "@material-tailwind/react";
 import ReservationModal from '../../../components/modals/admin-modal/ReservationModal';
 import Swal from "sweetalert2";
 
@@ -80,9 +80,11 @@ export function ReservationsTable() {
   };
 
   return (
-    <Card className="h-full w-full">
+    <Card className="h-full w-full mt-6"> {/* Agregado mt-6 para bajar la posición */}
       <CardHeader floated={false} shadow={false} className="rounded-none">
-        <Typography variant="h5" color="blue-gray">Gestión de Reservas</Typography>
+        <Typography variant="h5" color="blue-gray" className="text-[#4256a6] font-semibold text-2xl font-poppins">
+          Gestión de Reservas
+        </Typography>
         
         {/* Botones de filtrado */}
         <div className="flex space-x-4 mt-4">
@@ -94,12 +96,12 @@ export function ReservationsTable() {
       </CardHeader>
 
       <CardBody className="px-0">
-        <table className="mt-4 w-full table-auto text-left">
+        <table className="mt-4 w-full table-auto text-left bg-[#f9f3e1]"> {/* Color de fondo beige claro */}
           <thead>
             <tr>
               {TABLE_HEAD.map((head) => (
-                <th key={head} className="p-4 border-y border-blue-gray-100 bg-blue-gray-50/50">
-                  <Typography variant="small" color="blue-gray" className="flex items-center justify-between gap-2">
+                <th key={head} className="p-4 border-y border-[#4256a6] bg-[#f0f5fc]"> {/* Cambiado el color de fondo y bordes */}
+                  <Typography variant="small" color="blue-gray" className="flex items-center justify-between gap-2 text-[#4256a6]">
                     {head} <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
                   </Typography>
                 </th>
@@ -109,10 +111,10 @@ export function ReservationsTable() {
           <tbody>
             {filteredReservations.map((reservation) => (
               <tr key={reservation.passengerName}>
-                <td className="p-4 border-b border-blue-gray-50">{reservation.passengerName}</td>
-                <td className="p-4 border-b border-blue-gray-50">{reservation.excursionName}</td>
-                <td className="p-4 border-b border-blue-gray-50">{reservation.seats}</td>
-                <td className="p-4 border-b border-blue-gray-50">
+                <td className="p-4 border-b border-[#4256a6]">{reservation.passengerName}</td>
+                <td className="p-4 border-b border-[#4256a6]">{reservation.excursionName}</td>
+                <td className="p-4 border-b border-[#4256a6]">{reservation.seats}</td>
+                <td className="p-4 border-b border-[#4256a6]">
                   <Chip
                     variant="ghost"
                     size="sm"
@@ -120,11 +122,11 @@ export function ReservationsTable() {
                     color={reservation.status === "accepted" ? "green" : reservation.status === "pending" ? "yellow" : "red"}
                   />
                 </td>
-                <td className="p-4 border-b border-blue-gray-50">{reservation.excursionDate}</td>
-                <td className="p-4 border-b border-blue-gray-50">
+                <td className="p-4 border-b border-[#4256a6]">{reservation.excursionDate}</td>
+                <td className="p-4 border-b border-[#4256a6]">
                   <Tooltip content="Editar Reserva">
                     <IconButton variant="text" onClick={() => handleEditReservation(reservation)}>
-                      <PencilIcon className="h-4 w-4" />
+                      <PencilIcon className="h-4 w-4 text-[#4256a6]" />
                     </IconButton>
                   </Tooltip>
                 </td>
