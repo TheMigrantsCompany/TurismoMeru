@@ -56,21 +56,21 @@ const BookingCard = ({ id_Service, price }) => {
       [type]: action === "increment" ? prev[type] + 1 : Math.max(prev[type] - 1, 0),
     }));
   };
+
   const handleAddToCart = () => {
     if (!selectedDate || !selectedTime) {
       alert("Por favor selecciona una fecha y un horario.");
       return;
     }
-  
+
     if (Object.values(quantities).every((quantity) => quantity === 0)) {
       alert("Debes seleccionar al menos una persona.");
       return;
     }
-  
+
     const minorDiscount = (100 - (excursion.discountForMinors || 0)) / 100;
     const seniorDiscount = (100 - (excursion.discountForSeniors || 0)) / 100;
-  
-    // Guardar descuentos individuales y precio por persona en el item del carrito
+
     const cartItem = {
       id_Service,
       title: excursion?.title || "Título no disponible",
@@ -89,83 +89,91 @@ const BookingCard = ({ id_Service, price }) => {
       stock: excursion?.stock || 0,
       duration: excursion?.duration || "No disponible",
     };
-  
+
     addToCart(cartItem);
     navigate("/user/shopping-cart");
-  
-};
+  };
+
   return (
-    <div className="bg-gray-800 text-white p-4 rounded-lg max-w-xs shadow-lg">
-      <div className="mb-3">
-        <label className="block text-sm font-bold">Fecha de llegada</label>
-        <select
-          className="w-full p-1 rounded text-gray-800 text-sm"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-        >
-          <option value="">Seleccione una fecha</option>
-          {availableDates.map((date, index) => (
-            <option key={index} value={date}>
-              {date}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="mb-3">
-        <label className="block text-sm font-bold">Horario</label>
-        <select
-          className="w-full p-1 rounded text-gray-800 text-sm"
-          value={selectedTime}
-          onChange={(e) => setSelectedTime(e.target.value)}
-        >
-          <option value="">Seleccione un horario</option>
-          {availableTimes.map((time, index) => (
-            <option key={index} value={time}>
-              {time}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="mb-3">
-        <label className="block text-sm font-bold">Personas</label>
-        {["adultos", "menores", "jubilados"].map((type) => (
-          <div key={type} className="flex items-center justify-between mb-1 text-sm">
-            <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
-            <div className="flex items-center space-x-2">
-              <button
-                className="bg-gray-700 px-2 rounded"
-                onClick={() => handleQuantityChange(type, "decrement")}
-              >
-                -
-              </button>
-              <span>{quantities[type]}</span>
-              <button
-                className="bg-gray-700 px-2 rounded"
-                onClick={() => handleQuantityChange(type, "increment")}
-              >
-                +
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <button
-        className="bg-blue-600 w-full py-1 rounded text-sm"
-        onClick={handleAddToCart}
+    <div
+    className="bg-[#dac9aa] text-[#152917] p-4 rounded-lg max-w-sm shadow-lg border-2 border-[#425a66]"
+    style={{ fontFamily: "Arial, sans-serif" }}
+  >
+    <div className="mb-3">
+      <label className="block text-sm font-bold">Fecha de llegada</label>
+      <select
+        className="w-full p-1 rounded text-[#152917] text-sm border border-[#425a66]"
+        value={selectedDate}
+        onChange={(e) => setSelectedDate(e.target.value)}
       >
-        Añadir al carrito
-      </button>
-
-      <p className="text-xs mt-3">
-        Promoción válida por compras 72 horas antes de la salida.
-      </p>
-      <p className="text-sm font-bold mt-2">Precio base: ${price}</p>
-      <p className="text-sm font-bold mt-2">Precio total: ${totalPrice.toFixed(2)}</p>
+        <option value="">Seleccione una fecha</option>
+        {availableDates.map((date, index) => (
+          <option key={index} value={date}>
+            {date}
+          </option>
+        ))}
+      </select>
     </div>
-  );
+
+    <div className="mb-3">
+      <label className="block text-sm font-bold">Horario</label>
+      <select
+        className="w-full p-1 rounded text-[#152917] text-sm border border-[#425a66]"
+        value={selectedTime}
+        onChange={(e) => setSelectedTime(e.target.value)}
+      >
+        <option value="">Seleccione un horario</option>
+        {availableTimes.map((time, index) => (
+          <option key={index} value={time}>
+            {time}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    <div className="mb-3">
+      <label className="block text-sm font-bold">Personas</label>
+      {[
+        { type: "adultos", label: "Adultos" },
+        { type: "menores", label: "Menores" },
+        { type: "jubilados", label: "Jubilados" },
+      ].map(({ type, label }) => (
+        <div key={type} className="flex items-center justify-between mb-1 text-sm">
+          <span>{label}</span>
+          <div className="flex items-center space-x-2">
+            <button
+              className="bg-[#f4a25b] px-2 rounded"
+              onClick={() => handleQuantityChange(type, "decrement")}
+            >
+              -
+            </button>
+            <span>{quantities[type]}</span>
+            <button
+              className="bg-[#f4a25b] px-2 rounded"
+              onClick={() => handleQuantityChange(type, "increment")}
+            >
+              +
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <button
+      className="bg-[#425a66] text-white w-full py-1 rounded text-sm hover:bg-[#152917]"
+      onClick={handleAddToCart}
+    >
+      Añadir al carrito
+    </button>
+
+    <p className="text-xs mt-3 text-[#152917]">
+      Promoción válida por compras 72 horas antes de la salida.
+    </p>
+    <p className="text-sm font-bold mt-2 text-[#152917]">Precio base: ${price}</p>
+    <p className="text-sm font-bold mt-2 text-[#152917]">Precio total: ${totalPrice.toFixed(2)}</p>
+  </div>
+);
+
 };
 
 export default BookingCard;
