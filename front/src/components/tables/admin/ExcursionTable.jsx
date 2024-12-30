@@ -108,8 +108,6 @@ const ExcursionTable = () => {
     return (
         <Card className="h-full w-full bg-[#f9f3e1]">
             <CardHeader floated={false} shadow={false} className="rounded-none">
-                <Typography variant="h5" color="blue-gray" className="text-[#4256a6]">Gestión de Excursiones</Typography>
-
                 {/* Botones de filtrado */}
                 <div className="flex space-x-4 mt-4">
                     <Button onClick={() => filterExcursions("all")} color="blue" className="bg-[#4256a6] hover:bg-[#3b4a85]">Todas</Button>
@@ -123,22 +121,22 @@ const ExcursionTable = () => {
                 <table className="mt-4 w-full table-auto text-left">
                     <thead>
                         <tr>
-                            <th className="p-4 border-y border-blue-gray-100 bg-blue-gray-50/50">
-                                <Typography variant="small" color="blue-gray" className="flex items-center">
+                            <th className="p-4 border-y border-blue-gray-100 bg-[#4256a6]/50 text-white">
+                                <Typography variant="small" color="white" className="flex items-center">
                                     Nombre
                                 </Typography>
                             </th>
-                            <th className="p-4 border-y border-blue-gray-100 bg-blue-gray-50/50">
-                                <Typography variant="small" color="blue-gray">Capacidad</Typography>
+                            <th className="p-4 border-y border-blue-gray-100 bg-[#4256a6]/50 text-white">
+                                <Typography variant="small" color="white">Capacidad</Typography>
                             </th>
-                            <th className="p-4 border-y border-blue-gray-100 bg-blue-gray-50/50">
-                                <Typography variant="small" color="blue-gray">Precio</Typography>
+                            <th className="p-4 border-y border-blue-gray-100 bg-[#4256a6]/50 text-white">
+                                <Typography variant="small" color="white">Precio</Typography>
                             </th>
-                            <th className="p-4 border-y border-blue-gray-100 bg-blue-gray-50/50">
-                                <Typography variant="small" color="blue-gray">Estado</Typography>
+                            <th className="p-4 border-y border-blue-gray-100 bg-[#4256a6]/50 text-white">
+                                <Typography variant="small" color="white">Estado</Typography>
                             </th>
-                            <th className="p-4 border-y border-blue-gray-100 bg-blue-gray-50/50">
-                                <Typography variant="small" color="blue-gray">Acciones</Typography>
+                            <th className="p-4 border-y border-blue-gray-100 bg-[#4256a6]/50 text-white">
+                                <Typography variant="small" color="white">Acciones</Typography>
                             </th>
                         </tr>
                     </thead>
