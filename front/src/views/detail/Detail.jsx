@@ -5,19 +5,23 @@ import BookingCard from "../../components/bookingcard/BookingCard";
 
 const Review = ({ review, rating, userImage, userName }) => {
   return (
-    <div className="px-4 text-center">
-      <Typography variant="h6" color="blue-gray" className="mb-4 font-bold">
+    <div className="bg-[#dac9aa] text-[#152917] p-4 rounded-lg max-w-sm shadow-lg border-2 border-[#425a66]">
+      <Typography variant="h6" color="blue-gray" className="text-center font-semibold text-[#152917]">
         &quot;{review}&quot;
       </Typography>
-      <Avatar
-        src={userImage}
-        alt={userName}
-        size="sm" // Tamaño más pequeño para el avatar
-      />
-      <Typography variant="body1" color="blue-gray" className="mt-2">
-        {userName}
-      </Typography>
-      <Rating value={rating} readonly size="sm" />
+      <div className="flex justify-center items-center space-x-4">
+        <Avatar
+          src={userImage}
+          alt={userName}
+          size="lg"
+        />
+        <div className="text-center">
+          <Typography variant="body1" color="blue-gray" className="mt-2 text-lg font-medium text-[#152917]">
+            {userName}
+          </Typography>
+          <Rating value={rating} readonly size="sm" className="mt-2" />
+        </div>
+      </div>
     </div>
   );
 };
@@ -25,53 +29,41 @@ const Review = ({ review, rating, userImage, userName }) => {
 export function Detail() {
   const { id_Service } = useParams();
   const [excursion, setExcursion] = useState(null);
-  const [reviews, setReviews] = useState([]); 
+  const [reviews, setReviews] = useState([]);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
   useEffect(() => {
     fetch(`http://localhost:3001/service/id/${id_Service}`)
       .then((response) => response.json())
       .then((data) => {
-        console.log("Datos de la excursión:", data);
         setExcursion(data);
       })
-      .catch((error) =>
-        console.error("Error al obtener los detalles de la excursión:", error)
-      );
+      .catch((error) => console.error("Error al obtener los detalles de la excursión:", error));
   }, [id_Service]);
 
- 
   useEffect(() => {
     fetch("http://localhost:3001/review/")
       .then((response) => response.json())
       .then((data) => {
-        console.log("Reseñas recibidas:", data);
         const approvedReviews = data.filter(
           (review) => review.active === true && review.id_Service === id_Service
         );
-        fetch("http://localhost:3001/user/") 
+        fetch("http://localhost:3001/user/")
           .then((userResponse) => userResponse.json())
           .then((users) => {
-            
             const reviewsWithUserData = approvedReviews.map((review) => {
               const user = users.find((u) => u.id_User === review.id_User);
               return {
                 ...review,
                 userName: user?.name || "Usuario Anónimo",
-                userImage: user?.image || "https://via.placeholder.com/50", 
+                userImage: user?.image || "https://via.placeholder.com/50",
               };
             });
-  
-            console.log("Reseñas con datos de usuario:", reviewsWithUserData);
             setReviews(reviewsWithUserData);
           })
-          .catch((userError) =>
-            console.error("Error al obtener los usuarios:", userError)
-          );
+          .catch((userError) => console.error("Error al obtener los usuarios:", userError));
       })
-      .catch((error) =>
-        console.error("Error al obtener las reseñas:", error)
-      );
+      .catch((error) => console.error("Error al obtener las reseñas:", error));
   }, [id_Service]);
 
   if (!excursion) return <p>Loading...</p>;
@@ -91,117 +83,113 @@ export function Detail() {
   };
 
   return (
-    <section className="py-16 px-8 bg-gray-50">
-      <div className="container mx-auto max-w-6xl">
-        <Typography
-          variant="h3"
-          className="font-semibold text-gray-800 text-center mb-10"
-        >
-          {excursion.title}
-        </Typography>
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 flex flex-wrap lg:flex-nowrap gap-6 items-start">
-            <div className="relative max-w-sm">
-              {photos.length > 0 ? (
-                <div className="relative">
-                  <img
-                    src={photos[currentPhotoIndex]}
-                    alt={`Excursion photo ${currentPhotoIndex + 1}`}
-                    className="w-full h-auto rounded-lg shadow-md"
-                    onError={(e) => (e.target.src = "default_image_url.png")}
-                  />
-                  {photos.length > 1 && (
-                    <div className="absolute inset-0 flex justify-between items-center">
-                      <button
-                        onClick={handlePreviousPhoto}
-                        className="bg-gray-700 text-white bg-opacity-50 p-2 rounded-full hover:bg-opacity-75 focus:outline-none absolute left-2 top-1/2 transform -translate-y-1/2"
-                      >
-                        ❮
-                      </button>
-                      <button
-                        onClick={handleNextPhoto}
-                        className="bg-gray-700 text-white bg-opacity-50 p-2 rounded-full hover:bg-opacity-75 focus:outline-none absolute right-2 top-1/2 transform -translate-y-1/2"
-                      >
-                        ❯
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
+    <section className="py-16 px-4 bg-[#dac9aa]">
+    <div className="w-full px-4 lg:px-6">
+      <Typography variant="h3" className="font-semibold text-gray-800 text-center mb-16 hover:text-f4925b transition-colors duration-300">
+  {excursion.title}
+</Typography>
+      <div className="grid lg:grid-cols-3 gap-12">
+        {/* Contenedor de fotos y descripción */}
+        <div className="lg:col-span-2 flex flex-col lg:flex-row gap-12 items-start">
+          {/* Fotos */}
+          <div className="relative w-full lg:w-2/5">
+            {photos.length > 0 ? (
+              <div className="relative aspect-[3/2]">
+                <img
+                  src={photos[currentPhotoIndex]}
+                  alt={`Foto ${currentPhotoIndex + 1} de la excursión ${excursion.title}`}
+                  className="w-full h-full object-cover rounded-lg shadow-lg transition-transform duration-300 hover:scale-105"
+                  onError={(e) => (e.target.src = "default_image_url.png")}
+                />
+                {photos.length > 1 && (
+                  <>
+                    <button
+                      onClick={handlePreviousPhoto}
+                      aria-label="Foto anterior"
+                      className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    >
+                      ❮
+                    </button>
+                    <button
+                      onClick={handleNextPhoto}
+                      aria-label="Foto siguiente"
+                      className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    >
+                      ❯
+                    </button>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="relative aspect-[3/2]">
                 <img
                   src="default_image_url.png"
-                  alt="Default"
-                  className="w-full h-auto rounded-lg shadow-md"
+                  alt="Imagen por defecto"
+                  className="w-full h-full object-cover rounded-lg shadow-lg"
                 />
-              )}
-            </div>
-            <div className="flex-1 text-gray-700">
-              <Typography variant="paragraph" className="text-justify mb-4">
-                {excursion.description}
-              </Typography>
-              {excursion.location && (
-                <Typography
-                  variant="small"
-                  color="gray"
-                  className="text-lg mb-2"
-                >
-                  <strong>Ubicación:</strong> {excursion.location}
-                </Typography>
-              )}
-              {excursion.duration && (
-                <Typography
-                  variant="small"
-                  color="gray"
-                  className="text-lg mb-2"
-                >
-                  <strong>Duración:</strong> {excursion.duration} horas
-                </Typography>
-              )}
-              {excursion.difficulty && (
-                <Typography
-                  variant="small"
-                  color="gray"
-                  className="text-lg mb-2"
-                >
-                  <strong>Dificultad:</strong> {excursion.difficulty}
-                </Typography>
-              )}
-            </div>
+              </div>
+            )}
           </div>
-
-          {/* BookingCard */}
-          <div className="lg:col-span-1">
-            <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200 sticky top-24">
-              <BookingCard id_Service={id_Service} price={excursion.price} />
-            </div>
+          {/* Descripción */}
+          <div className="flex-1 text-gray-700 lg:pl-8">
+            <Typography variant="paragraph" className="text-justify mb-8 text-lg">
+              {excursion.description}
+            </Typography>
+            
+            {excursion.location && (
+              <Typography variant="small" color="gray" className="text-lg mb-6">
+                <strong>Ubicación:</strong> {excursion.location}
+              </Typography>
+            )}
+            {excursion.duration && (
+              <Typography variant="small" color="gray" className="text-lg mb-6">
+                <strong>Duración:</strong> {excursion.duration} horas
+              </Typography>
+            )}
+            {excursion.difficulty && (
+              <Typography variant="small" color="gray" className="text-lg mb-6">
+                <strong>Dificultad:</strong> {excursion.difficulty}
+              </Typography>
+            )}
           </div>
         </div>
-
-        {/* Reseñas */}
-        <div className="mt-12">
-          <Typography variant="h4" className="font-bold text-gray-800 mb-6">
-            Reseñas
-          </Typography>
-          {reviews && reviews.length > 0 ? (
-            <div className="space-y-8">
-              {reviews.map((review, index) => (
-                <Review
-                  key={index}
-                  review={review.content}
-                  rating={review.rating}
-                  userImage={review.userImage}
-                  userName={review.userName}
-                />
-              ))}
-            </div>
-          ) : (
-            <Typography variant="small" color="gray">
-              No hay reseñas disponibles para esta excursión.
-            </Typography>
-          )}
+  
+        {/* BookingCard */}
+        <div className="lg:col-span-1 mt-12 lg:mt-0">
+          <BookingCard id_Service={id_Service} price={excursion.price} />
         </div>
       </div>
-    </section>
+  
+      {/* Reseñas */}
+      <div className="mt-20">
+  <Typography variant="h4" className="font-bold text-center text-gray-800 mb-12">
+    Reseñas
+  </Typography>
+  {reviews && reviews.length > 0 ? (
+    <div className="flex flex-wrap gap-8 justify-center">
+      {reviews.map((review, index) => (
+        <div key={index} className="w-full sm:w-1/2 lg:w-1/3">
+          <Review
+            review={review.content}
+            rating={review.rating}
+            userImage={review.userImage}
+            userName={review.userName}
+          >
+            <Typography variant="small" color="gray" className="text-sm mt-2">
+              {new Date(review.date).toLocaleDateString()}
+            </Typography>
+          </Review>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <Typography variant="small" color="gray">
+      No hay reseñas disponibles para esta excursión.
+    </Typography>
+  )}
+</div>
+    </div>
+  </section>
   );
 }
 
