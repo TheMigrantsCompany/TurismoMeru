@@ -37,6 +37,7 @@ body {
   height: 100vh; 
   padding: 0; 
   background-color: #dac9aa; 
+  @apply font-sans;
 }
 
 h1 {

@@ -35,10 +35,9 @@ const Review = ({ excursionTitle, excursionPhoto, idService, idUser }) => {
       initial={{ opacity: 0, x: -30 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5 }}
-      className="flex flex-col md:flex-row items-center md:items-start p-4 bg-white rounded-lg shadow-lg space-y-4 md:space-y-0 md:space-x-4 max-w-2xl mx-auto"
+      className="flex flex-col md:flex-row items-center md:items-start p-4 bg-[#f9f3e1] rounded-lg shadow-lg space-y-4 md:space-y-0 md:space-x-4 max-w-2xl mx-auto border-l-4 border-[#425a66]"
     >
-      
-      <div className="w-40 h-40 md:w-44 md:h-44 rounded-lg overflow-hidden shadow-md">
+      <div className="w-40 h-40 md:w-44 md:h-44 rounded-lg overflow-hidden shadow-md border border-[#425a66]">
         <img
           src={excursionPhoto}
           alt={excursionTitle}
@@ -46,47 +45,46 @@ const Review = ({ excursionTitle, excursionPhoto, idService, idUser }) => {
         />
       </div>
 
-      
       <div className="flex-1 flex flex-col items-center md:items-start">
         {!submitted ? (
           <form onSubmit={handleSubmit} className="space-y-4 w-full flex flex-col items-center">
-           
-            <h2 className="text-lg font-semibold text-gray-800 mb-2 text-center md:text-left">{excursionTitle}</h2>
+            <h2 className="text-lg font-semibold text-[#4256a6] mb-2 text-center md:text-left">
+              {excursionTitle}
+            </h2>
 
-            
             <div className="flex flex-col w-full max-w-sm">
-              <label className="text-sm font-medium text-gray-600 mb-1">Nombre:</label>
+              <label className="text-sm font-medium text-[#425a66] mb-1">Nombre:</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-sm"
+                className="w-full px-4 py-2 border border-[#425a66] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#4256a6] focus:border-transparent text-sm"
                 placeholder="Tu nombre"
                 required
               />
             </div>
 
-            
             <div className="flex flex-col w-full max-w-sm">
-              <label className="text-sm font-medium text-gray-600 mb-1">Reseña:</label>
+              <label className="text-sm font-medium text-[#425a66] mb-1">Reseña:</label>
               <textarea
                 value={review}
                 onChange={(e) => setReview(e.target.value)}
                 rows="3"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-sm resize-none"
+                className="w-full px-4 py-2 border border-[#425a66] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#4256a6] focus:border-transparent text-sm resize-none"
                 placeholder="Escribe tu opinión aquí"
                 required
               ></textarea>
             </div>
+
             <div className="flex items-center space-x-3 w-full max-w-sm">
-              <label className="text-sm font-medium text-gray-600">Calificación:</label>
-              <Rating value={rating} onChange={setRating} className="scale-110" />
+              <label className="text-sm font-medium text-[#425a66]">Calificación:</label>
+              <Rating value={rating} onChange={setRating} className="scale-110 text-[#4256a6]" />
             </div>
             {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
             <motion.button
               whileHover={{ scale: 1.05 }}
               type="submit"
-              className="w-32 bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm"
+              className="w-32 bg-[#4256a6] text-white py-2 px-4 rounded-lg shadow-md hover:bg-[#334477] focus:ring-2 focus:ring-[#4256a6] focus:outline-none text-sm"
             >
               Enviar Reseña
             </motion.button>
@@ -97,10 +95,10 @@ const Review = ({ excursionTitle, excursionPhoto, idService, idUser }) => {
             animate={{ scale: 1, opacity: 1 }}
             className="text-center"
           >
-            <h2 className="text-lg font-semibold text-blue-600 mb-2">
+            <h2 className="text-lg font-semibold text-[#4256a6] mb-2">
               ¡Gracias por tu reseña!
             </h2>
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-[#425a66]">
               Has calificado <span className="font-bold">{excursionTitle}</span> con {rating} estrellas.
             </p>
           </motion.div>

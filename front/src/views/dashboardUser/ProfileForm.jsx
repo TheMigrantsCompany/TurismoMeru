@@ -15,7 +15,6 @@ const ProfileForm = () => {
     image: "https://via.placeholder.com/150",
   });
 
-  // Cargar datos iniciales del usuario
   useEffect(() => {
     const uuid = localStorage.getItem("uuid");
     if (uuid) {
@@ -36,7 +35,6 @@ const ProfileForm = () => {
     }
   }, [userDetails]);
 
-  // Manejar cambios en los inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProfile((prev) => ({
@@ -45,18 +43,17 @@ const ProfileForm = () => {
     }));
   };
 
-  // Manejar la carga de una nueva imagen a Cloudinary
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "meruvyt"); // Cambia "meruvyt" por tu upload preset de Cloudinary
+    formData.append("upload_preset", "meruvyt");
 
     try {
       const response = await fetch(
-        "https://api.cloudinary.com/v1_1/dzrnybyqo/image/upload", // Cambia "dzrnybyqo" por tu cloud name de Cloudinary
+        "https://api.cloudinary.com/v1_1/dzrnybyqo/image/upload",
         {
           method: "POST",
           body: formData,
@@ -79,7 +76,6 @@ const ProfileForm = () => {
     }
   };
 
-  // Guardar datos del usuario
   const handleSave = () => {
     const uuid = localStorage.getItem("uuid");
     if (!profile.name || !profile.email || !profile.address) {
@@ -99,17 +95,16 @@ const ProfileForm = () => {
   };
 
   return (
-    <div className="max-w-xl mx-auto text-gray-700 p-6 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-semibold mb-4">Perfil</h2>
+    <div className="max-w-xl mx-auto bg-[#f9f3e1] border-l-4 border-[#425a66] p-6 rounded-lg shadow-lg">
+      <h2 className="text-2xl font-semibold mb-4 text-[#4256a6] font-poppins">Perfil</h2>
 
-      {/* Foto de perfil */}
       <div className="flex items-center mb-6">
-        <label className="block text-gray-700 font-bold mr-4">Foto</label>
+        <label className="block text-[#4256a6] font-bold mr-4">Foto</label>
         <div className="relative">
           <img
             src={profile.image}
             alt="Perfil"
-            className="w-24 h-24 rounded-full object-cover"
+            className="w-24 h-24 rounded-full object-cover border border-[#425a66]"
           />
           <input
             type="file"
@@ -120,68 +115,68 @@ const ProfileForm = () => {
         </div>
       </div>
 
-      {/* Campos del formulario */}
       <div className="grid grid-cols-1 gap-4 mb-4">
-        <div>
-          <label className="block text-gray-700 font-bold">Nombre completo</label>
-          <input
-            type="text"
-            name="name"
-            value={profile.name}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            placeholder="Nombre completo"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Email</label>
-          <input
-            type="email"
-            name="email"
-            value={profile.email}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            placeholder="Email"
-            readOnly
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">DNI</label>
-          <input
-            type="text"
-            name="DNI"
-            value={profile.DNI}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            placeholder="DNI"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Teléfono</label>
-          <input
-            type="text"
-            name="phone"
-            value={profile.phone}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            placeholder="Teléfono"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Dirección</label>
-          <input
-            type="text"
-            name="address"
-            value={profile.address}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            placeholder="Dirección"
-          />
-        </div>
-      </div>
+  <div>
+    <label className="block text-[#4256a6] font-bold">Nombre completo</label>
+    <input
+      type="text"
+      name="name"
+      value={profile.name}
+      onChange={handleChange}
+      className="w-full p-2 border border-[#425a66] rounded bg-white text-[#425a66] placeholder-gray-500"
+      placeholder="Nombre completo"
+    />
+  </div>
+  <div>
+    <label className="block text-[#4256a6] font-bold">Email</label>
+    <input
+      type="email"
+      name="email"
+      value={profile.email}
+      onChange={handleChange}
+      className="w-full p-2 border border-[#425a66] rounded bg-white text-[#425a66] placeholder-gray-500"
+      placeholder="Email"
+      readOnly
+    />
+  </div>
+  <div>
+    <label className="block text-[#425a6] font-bold">DNI</label>
+    <input
+      type="text"
+      name="DNI"
+      value={profile.DNI}
+      onChange={handleChange}
+      className="w-full p-2 border border-[#425a66] rounded bg-white text-[#425a66] placeholder-gray-500"
+      placeholder="DNI"
+    />
+  </div>
+  <div>
+    <label className="block text-[#425a6] font-bold">Teléfono</label>
+    <input
+      type="text"
+      name="phone"
+      value={profile.phone}
+      onChange={handleChange}
+      className="w-full p-2 border border-[#425a66] rounded bg-white text-[#425a66] placeholder-gray-500"
+      placeholder="Teléfono"
+    />
+  </div>
+  <div>
+    <label className="block text-[#425a6] font-bold">Dirección</label>
+    <input
+      type="text"
+      name="address"
+      value={profile.address}
+      onChange={handleChange}
+      className="w-full p-2 border border-[#425a66] rounded bg-white text-[#425a66] placeholder-gray-500"
+      placeholder="Dirección"
+    />
+  </div>
+</div>
+
 
       <button
-        className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
+        className="w-full bg-[#4256a6] text-white py-2 px-4 rounded-lg hover:bg-[#334477] transition-all"
         onClick={handleSave}
       >
         Guardar Cambios
