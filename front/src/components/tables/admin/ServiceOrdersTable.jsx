@@ -29,9 +29,9 @@ const ServiceOrdersTable = ({ orders, onEdit }) => {
   return (
     <div>
       <div className="flex space-x-4 mb-4">
-        <Button onClick={() => filterOrdersByStatus('all')} color="blue">Todas</Button>
-        <Button onClick={() => filterOrdersByStatus('pending')} color="yellow">Pendientes</Button>
-        <Button onClick={() => filterOrdersByStatus('completed')} color="green">Completadas</Button>
+        <Button onClick={() => filterOrdersByStatus('all')} color="blue" className="bg-[#4256a6] text-white">Todas</Button>
+        <Button onClick={() => filterOrdersByStatus('pending')} color="yellow" className="bg-[#f9f3e1] text-black">Pendientes</Button>
+        <Button onClick={() => filterOrdersByStatus('completed')} color="green" className="bg-[#425a66] text-white">Completadas</Button>
       </div>
       <input
         type="text"
@@ -39,8 +39,8 @@ const ServiceOrdersTable = ({ orders, onEdit }) => {
         onChange={(e) => handleSearchByName(e.target.value)}
         className="border p-2 mb-4"
       />
-      <table className="text-center text-black min-w-full border border-gray-200">
-        <thead className="bg-gray-100">
+      <table className="text-center text-black min-w-full border border-[#4256a6]">
+        <thead className="bg-[#f9f3e1]">
           <tr>
             <th>Nombre de Excursión</th>
             <th>Fecha</th>
@@ -62,7 +62,7 @@ const ServiceOrdersTable = ({ orders, onEdit }) => {
                 />
               </td>
               <td>
-                <IconButton onClick={() => onEdit(order)}>
+                <IconButton onClick={() => onEdit(order)} className="text-[#4256a6]">
                   <PencilIcon className="h-5 w-5" />
                 </IconButton>
               </td>

@@ -70,13 +70,13 @@ export function ReviewsManagement() {
     }
   };
 
-  if (loading) return <div>Cargando reseñas...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return <div className="text-[#4256a6]">Cargando reseñas...</div>;
+  if (error) return <div className="text-[#4256a6]">Error: {error}</div>;
 
   return (
-    <div className="top-5 gap-5 flex flex-col w-full h-full">
-      <SearchInput onSearch={handleSearch} />
-      <h2 className="text-xl text-black font-semibold mb-4">Gestión de Reviews</h2>
+    <div className="top-5 gap-5 flex flex-col w-full h-full p-6 bg-[#f9f3e1]">
+      <h2 className="text-2xl text-[#4256a6] font-semibold mb-4">Gestión de Reseñas</h2>
+      <SearchInput onSearch={handleSearch} className="mb-6" />
       <ReviewsTable
         reviews={filteredReviews}
         onReviewStatusChange={handleReviewStatusChange}

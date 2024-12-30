@@ -26,76 +26,82 @@ const ReviewsTable = ({ reviews, onReviewStatusChange, onViewDetails }) => {
   }, []);
 
   return (
-    <table className="text-center min-w-full border-collapse border border-gray-200 table-auto">
-      <thead>
-        <tr className="bg-gray-100">
-          <th className="p-2 text-gray-900">Usuario</th>
-          <th className="p-2 text-gray-900">Puntuación</th>
-          <th className="p-2 text-gray-900">Comentario</th>
-          <th className="p-2 text-gray-900">Estado</th>
-          <th className="p-2 text-gray-900">Fecha</th>
-          <th className="p-2 text-gray-900">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        {reviews.length > 0 ? (
-          reviews.map((review) => (
-            <tr key={review.id_Review} className="border-b">
-              <td className="p-2 text-gray-900">{userMap[review.id_User] || 'Desconocido'}</td>
-              <td className="p-2 text-gray-900">{review.rating || 'Sin puntuación'}</td>
-              <td className="p-2 text-gray-900">{review.content || 'Sin comentario'}</td>
-              <td className="p-2 text-gray-900">
-                {review.active ? (
-                  <span className="text-green-500">Activa</span>
-                ) : (
-                  <span className="text-yellow-500">Inactiva</span>
-                )}
-              </td>
-              <td className="p-2 text-gray-900">
-                {review.createdAt
-                  ? new Date(review.createdAt).toLocaleDateString('es-ES', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })
-                  : 'Fecha no disponible'}
-              </td>
-              <td className="p-2 flex justify-center gap-2">
-                <IconButton
-                  onClick={async () => {
-                    setLoadingReviewId(review.id_Review);
-                    await onReviewStatusChange(review.id_Review, 'approved');
-                    setLoadingReviewId(null);
-                  }}
-                  disabled={loadingReviewId === review.id_Review}
-                >
-                  <CheckIcon className={`h-5 w-5 ${loadingReviewId === review.id_Review ? 'text-gray-400' : 'text-green-500'}`} />
-                </IconButton>
-                <IconButton
-                  onClick={async () => {
-                    setLoadingReviewId(review.id_Review);
-                    await onReviewStatusChange(review.id_Review, 'rejected');
-                    setLoadingReviewId(null);
-                  }}
-                  disabled={loadingReviewId === review.id_Review}
-                >
-                  <XMarkIcon className={`h-5 w-5 ${loadingReviewId === review.id_Review ? 'text-gray-400' : 'text-red-500'}`} />
-                </IconButton>
-                <IconButton onClick={() => onViewDetails(review, userMap)}>
-  <PencilIcon className="h-5 w-5 text-blue-500" />
-</IconButton>
-              </td>
+    <div className="rounded-lg bg-white shadow-lg p-6">
+      <h5 className="text-xl font-semibold text-gray-800">Gestión de Reseñas</h5>
+
+      <div className="overflow-x-auto mt-6">
+        <table className="min-w-full table-auto text-left border-collapse border border-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="p-4 text-sm font-medium text-gray-600 border-b border-gray-200">Usuario</th>
+              <th className="p-4 text-sm font-medium text-gray-600 border-b border-gray-200">Puntuación</th>
+              <th className="p-4 text-sm font-medium text-gray-600 border-b border-gray-200">Comentario</th>
+              <th className="p-4 text-sm font-medium text-gray-600 border-b border-gray-200">Estado</th>
+              <th className="p-4 text-sm font-medium text-gray-600 border-b border-gray-200">Fecha</th>
+              <th className="p-4 text-sm font-medium text-gray-600 border-b border-gray-200">Acciones</th>
             </tr>
-          ))
-        ) : (
-          <tr>
-            <td colSpan="6" className="p-4 text-gray-900">
-              No se encontraron reseñas.
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
+          </thead>
+          <tbody>
+            {reviews.length > 0 ? (
+              reviews.map((review) => (
+                <tr key={review.id_Review} className="border-b border-gray-200">
+                  <td className="p-4 text-sm text-gray-800">{userMap[review.id_User] || 'Desconocido'}</td>
+                  <td className="p-4 text-sm text-gray-800">{review.rating || 'Sin puntuación'}</td>
+                  <td className="p-4 text-sm text-gray-800">{review.content || 'Sin comentario'}</td>
+                  <td className="p-4 text-sm text-gray-800">
+                    {review.active ? (
+                      <span className="text-green-500">Activa</span>
+                    ) : (
+                      <span className="text-yellow-500">Inactiva</span>
+                    )}
+                  </td>
+                  <td className="p-4 text-sm text-gray-800">
+                    {review.createdAt
+                      ? new Date(review.createdAt).toLocaleDateString('es-ES', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })
+                      : 'Fecha no disponible'}
+                  </td>
+                  <td className="p-4 flex justify-center gap-2">
+                    <IconButton
+                      onClick={async () => {
+                        setLoadingReviewId(review.id_Review);
+                        await onReviewStatusChange(review.id_Review, 'approved');
+                        setLoadingReviewId(null);
+                      }}
+                      disabled={loadingReviewId === review.id_Review}
+                    >
+                      <CheckIcon className={`h-5 w-5 ${loadingReviewId === review.id_Review ? 'text-gray-400' : 'text-green-500'}`} />
+                    </IconButton>
+                    <IconButton
+                      onClick={async () => {
+                        setLoadingReviewId(review.id_Review);
+                        await onReviewStatusChange(review.id_Review, 'rejected');
+                        setLoadingReviewId(null);
+                      }}
+                      disabled={loadingReviewId === review.id_Review}
+                    >
+                      <XMarkIcon className={`h-5 w-5 ${loadingReviewId === review.id_Review ? 'text-gray-400' : 'text-red-500'}`} />
+                    </IconButton>
+                    <IconButton onClick={() => onViewDetails(review, userMap)}>
+                      <PencilIcon className="h-5 w-5 text-blue-500" />
+                    </IconButton>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" className="p-4 text-center text-gray-600">
+                  No se encontraron reseñas.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
 

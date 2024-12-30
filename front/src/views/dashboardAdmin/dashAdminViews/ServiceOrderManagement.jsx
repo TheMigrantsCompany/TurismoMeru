@@ -37,14 +37,14 @@ export function ServiceOrderManagement() {
     setSelectedOrder(order);
   };
 
-  if (loading) return <div>Cargando órdenes...</div>;
-  if (error) return <div>Error al cargar órdenes: {error}</div>;
+  if (loading) return <div className="text-[#4256a6]">Cargando órdenes...</div>;
+  if (error) return <div className="text-[#4256a6]">Error al cargar órdenes: {error}</div>;
 
   const transformedOrders = transformOrders(ordersList);
 
   return (
-    <div className="top-5 gap-5 flex flex-col w-full h-full">
-      <h2 className="text-xl text-black font-semibold mb-4">Gestión de Órdenes de Servicio</h2>
+    <div className="top-5 gap-5 flex flex-col w-full h-full p-6 bg-[#f9f3e1]">
+      <h2 className="text-2xl text-[#4256a6] font-semibold mb-4">Gestión de Órdenes de Servicio</h2>
       <ServiceOrdersTable orders={transformedOrders} onEdit={handleEditOrder} />
       {selectedOrder && (
         <ServiceOrderModal

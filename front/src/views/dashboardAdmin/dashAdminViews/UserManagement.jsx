@@ -51,9 +51,9 @@ export function UserManagement() {
   };
 
   return (
-    <div className="top-5 gap-5 flex flex-col w-full h-full">
+    <div className="top-5 gap-5 flex flex-col w-full h-full p-6 bg-[#f9f3e1]">
       <SearchInput onSearch={handleSearch} />
-      <h2 className="text-xl text-black font-semibold mb-4">Gestión de Usuarios</h2>
+      <h2 className="text-2xl text-[#4256a6] font-semibold mb-4">Gestión de Usuarios</h2>
       <UserTable
         users={filteredUsers}
         onFilterChange={setFilterStatus} // Actualizar filtro
