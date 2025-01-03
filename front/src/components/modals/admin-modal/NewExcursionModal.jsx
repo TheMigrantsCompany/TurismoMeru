@@ -188,52 +188,53 @@ const NewExcursionModal = ({ onClose }) => {
 
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-75">
-      <div className="bg-white p-8 rounded-lg max-w-md w-full relative z-10 overflow-y-auto max-h-[90vh] shadow-lg">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-6 text-center">Crear Nueva Excursión</h2>
-
-        {loading && <p className="text-center text-blue-500">Guardando...</p>}
-        {error && <p className="text-center text-red-500">Error: {error}</p>}
-
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#4256a6]/80">
+      <div className="bg-[#dac9aa] p-8 rounded-lg max-w-md w-full relative z-10 overflow-y-auto max-h-[90vh] shadow-lg">
+        <h2 className="text-2xl font-semibold text-[#4256a6] mb-6 text-center">
+          Crear Nueva Excursión
+        </h2>
+  
+        {loading && <p className="text-center text-[#4256a6]">Guardando...</p>}
+        {error && <p className="text-center text-[#f4925b]">Error: {error}</p>}
+  
         <div className="space-y-4">
           {/* Nombre de la Excursión */}
           <div>
-            <label className="block text-sm text-gray-600 font-medium mb-1">Nombre de la Excursión:</label>
+            <label className="block text-sm text-[#152817] font-medium mb-1">Nombre de la Excursión:</label>
             <input
               type="text"
               name="title"
               value={excursionData.title || ""}
               onChange={handleChange}
-              className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
+              className="w-full border border-[#4256a6] px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#4256a6] transition text-[#152817]"
             />
-            {formErrors.title && <p className="text-red-500 text-sm">{formErrors.title}</p>}
+            {formErrors.title && <p className="text-[#f4925b] text-sm">{formErrors.title}</p>}
           </div>
-
+  
           {/* Descripción */}
           <div>
-            <label className="block text-sm text-gray-600 font-medium mb-1">Descripción:</label>
+            <label className="block text-sm text-[#152817] font-medium mb-1">Descripción:</label>
             <textarea
               name="description"
               value={excursionData.description}
               onChange={handleChange}
-              className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black resize-none h-28"
-              rows="5" 
+              className="w-full border border-[#4256a6] px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#4256a6] transition text-[#152817] resize-none h-28"
               placeholder="Escribe una descripción detallada aquí..."
             ></textarea>
-            {formErrors.description && <p className="text-red-500 text-sm">{formErrors.description}</p>}
+            {formErrors.description && <p className="text-[#f4925b] text-sm">{formErrors.description}</p>}
           </div>
-
+  
           {/* Precio */}
           <div>
-            <label className="block text-sm text-gray-600 font-medium mb-1">Precio:</label>
+            <label className="block text-sm text-[#152817] font-medium mb-1">Precio:</label>
             <input
               type="number"
               name="price"
               value={excursionData.price}
               onChange={handleChange}
-              className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
+              className="w-full border border-[#4256a6] px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#4256a6] transition text-[#152817]"
             />
-            {formErrors.price && <p className="text-red-500 text-sm">{formErrors.price}</p>}
+            {formErrors.price && <p className="text-[#f4925b] text-sm">{formErrors.price}</p>}
           </div>
           {/* Descuentos */}
           <div>
@@ -474,22 +475,22 @@ const NewExcursionModal = ({ onClose }) => {
 
         {/* Botones de Cancelar y Guardar */}
         <div className="flex justify-end space-x-2 mt-6">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-          >
-            Guardar
-          </button>
-        </div>
+        <button
+          onClick={onClose}
+          className="px-4 py-2 text-sm bg-[#f4925b] text-white rounded-md hover:bg-[#e0834e] transition"
+        >
+          Cancelar
+        </button>
+        <button
+          onClick={handleSubmit}
+          className="px-4 py-2 text-sm bg-[#152817] text-white rounded-md hover:bg-[#0e2013] transition"
+        >
+          Guardar
+        </button>
       </div>
     </div>
-  );
+  </div>
+);
 }
 
 export default NewExcursionModal;
