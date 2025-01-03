@@ -12,13 +12,13 @@ const ProfileForm = () => {
     DNI: "",
     phone: "",
     address: "",
-    image: "https://via.placeholder.com/150",
+    image: "https://via.placeholder.com/150", 
   });
 
   useEffect(() => {
     const uuid = localStorage.getItem("uuid");
     if (uuid) {
-      dispatch(getUserDetails(uuid));
+      dispatch(getUserDetails(uuid)); 
     }
   }, [dispatch]);
 
@@ -30,7 +30,7 @@ const ProfileForm = () => {
         DNI: userDetails.DNI || "",
         phone: userDetails.phone || "",
         address: userDetails.address || "",
-        image: userDetails.image || "https://via.placeholder.com/150",
+        image: userDetails.image || "https://via.placeholder.com/150", 
       });
     }
   }, [userDetails]);
@@ -64,7 +64,7 @@ const ProfileForm = () => {
       if (data.secure_url) {
         setProfile((prev) => ({
           ...prev,
-          image: data.secure_url,
+          image: data.secure_url, 
         }));
         Swal.fire("Imagen subida", "La imagen se ha cargado correctamente.", "success");
       } else {
@@ -84,7 +84,7 @@ const ProfileForm = () => {
     }
 
     if (uuid) {
-      dispatch(updateUserDetails(uuid, profile))
+      dispatch(updateUserDetails(uuid, profile)) 
         .then(() => {
           Swal.fire("Perfil actualizado", "Los datos han sido guardados.", "success");
         })
@@ -116,64 +116,63 @@ const ProfileForm = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-4 mb-4">
-  <div>
-    <label className="block text-[#4256a6] font-bold">Nombre completo</label>
-    <input
-      type="text"
-      name="name"
-      value={profile.name}
-      onChange={handleChange}
-      className="w-full p-2 border border-[#425a66] rounded bg-white text-[#425a66] placeholder-gray-500"
-      placeholder="Nombre completo"
-    />
-  </div>
-  <div>
-    <label className="block text-[#4256a6] font-bold">Email</label>
-    <input
-      type="email"
-      name="email"
-      value={profile.email}
-      onChange={handleChange}
-      className="w-full p-2 border border-[#425a66] rounded bg-white text-[#425a66] placeholder-gray-500"
-      placeholder="Email"
-      readOnly
-    />
-  </div>
-  <div>
-    <label className="block text-[#425a6] font-bold">DNI</label>
-    <input
-      type="text"
-      name="DNI"
-      value={profile.DNI}
-      onChange={handleChange}
-      className="w-full p-2 border border-[#425a66] rounded bg-white text-[#425a66] placeholder-gray-500"
-      placeholder="DNI"
-    />
-  </div>
-  <div>
-    <label className="block text-[#425a6] font-bold">Teléfono</label>
-    <input
-      type="text"
-      name="phone"
-      value={profile.phone}
-      onChange={handleChange}
-      className="w-full p-2 border border-[#425a66] rounded bg-white text-[#425a66] placeholder-gray-500"
-      placeholder="Teléfono"
-    />
-  </div>
-  <div>
-    <label className="block text-[#425a6] font-bold">Dirección</label>
-    <input
-      type="text"
-      name="address"
-      value={profile.address}
-      onChange={handleChange}
-      className="w-full p-2 border border-[#425a66] rounded bg-white text-[#425a66] placeholder-gray-500"
-      placeholder="Dirección"
-    />
-  </div>
-</div>
-
+        <div>
+          <label className="block text-[#4256a6] font-bold">Nombre completo</label>
+          <input
+            type="text"
+            name="name"
+            value={profile.name}
+            onChange={handleChange}
+            className="w-full p-2 border border-[#425a66] rounded bg-white text-[#425a66] placeholder-gray-500"
+            placeholder="Nombre completo"
+          />
+        </div>
+        <div>
+          <label className="block text-[#4256a6] font-bold">Email</label>
+          <input
+            type="email"
+            name="email"
+            value={profile.email}
+            onChange={handleChange}
+            className="w-full p-2 border border-[#425a66] rounded bg-white text-[#425a66] placeholder-gray-500"
+            placeholder="Email"
+            readOnly
+          />
+        </div>
+        <div>
+          <label className="block text-[#425a6] font-bold">DNI</label>
+          <input
+            type="text"
+            name="DNI"
+            value={profile.DNI}
+            onChange={handleChange}
+            className="w-full p-2 border border-[#425a66] rounded bg-white text-[#425a66] placeholder-gray-500"
+            placeholder="DNI"
+          />
+        </div>
+        <div>
+          <label className="block text-[#425a6] font-bold">Teléfono</label>
+          <input
+            type="text"
+            name="phone"
+            value={profile.phone}
+            onChange={handleChange}
+            className="w-full p-2 border border-[#425a66] rounded bg-white text-[#425a66] placeholder-gray-500"
+            placeholder="Teléfono"
+          />
+        </div>
+        <div>
+          <label className="block text-[#425a6] font-bold">Dirección</label>
+          <input
+            type="text"
+            name="address"
+            value={profile.address}
+            onChange={handleChange}
+            className="w-full p-2 border border-[#425a66] rounded bg-white text-[#425a66] placeholder-gray-500"
+            placeholder="Dirección"
+          />
+        </div>
+      </div>
 
       <button
         className="w-full bg-[#4256a6] text-white py-2 px-4 rounded-lg hover:bg-[#334477] transition-all"

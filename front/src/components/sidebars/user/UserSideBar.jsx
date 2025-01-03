@@ -52,14 +52,7 @@ export function UserSideBar() {
           </ListItemPrefix>
           Mis Compras
         </ListItem>
-        <ListItem
-          className="cursor-pointer text-[#4256a6] hover:bg-[#dac9aa] hover:text-white hover:border-l-4 hover:border-[#425a66] transition-all duration-200 py-3 text-lg font-poppins"
-        >
-          <ListItemPrefix>
-            <PowerIcon className="h-6 w-6 text-[#4256a6]" />
-          </ListItemPrefix>
-          Log Out
-        </ListItem>
+        
       </List>
     </Card>
   );
