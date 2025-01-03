@@ -5,6 +5,7 @@ import NewExcursionModal from '../../../components/modals/admin-modal/NewExcursi
 import { useDispatch } from 'react-redux';
 import { getAllServices } from '../../../redux/actions/actions';
 
+
 export function ExcursionManagement() {
     const dispatch = useDispatch();
     const [excursions, setExcursions] = useState([]); 
@@ -55,13 +56,14 @@ export function ExcursionManagement() {
 
     return (
         <div className="top-5 gap-5 flex flex-col w-full h-full">
-            <h2 className="text-xl text-black font-semibold mb-4">Gestión de Excursiones</h2>
+            <h2 className="text-2xl text-[#4256a6] font-semibold mb-4">Gestión de Excursiones</h2>
             <button
-                className="text-sm px-8 bg-blue-500 text-white rounded-md mb-4 mr-auto" 
+                className="text-sm px-8 bg-[#4256a6] text-white rounded-md mb-4 mr-auto" 
                 onClick={() => setIsCreating(true)}
             >
                 Crear Excursión
             </button>
+            
             <ExcursionTable 
                 excursions={excursions} 
                 onEdit={handleEditExcursion} 

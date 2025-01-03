@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { IconButton } from "@material-tailwind/react";
-import { CheckIcon, XMarkIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, XMarkIcon, PencilIcon } from "@heroicons/react/24/outline";
 
 const ReviewsTable = ({ reviews, onReviewStatusChange, onViewDetails }) => {
   const [userMap, setUserMap] = useState({});
@@ -10,7 +10,7 @@ const ReviewsTable = ({ reviews, onReviewStatusChange, onViewDetails }) => {
     const fetchUsers = async () => {
       try {
         const response = await fetch("http://localhost:3001/user");
-        if (!response.ok) throw new Error('Error al cargar los usuarios');
+        if (!response.ok) throw new Error("Error al cargar los usuarios");
         const users = await response.json();
         const map = users.reduce((acc, user) => {
           acc[user.id_User] = user.name;
@@ -26,74 +26,90 @@ const ReviewsTable = ({ reviews, onReviewStatusChange, onViewDetails }) => {
   }, []);
 
   return (
-    <div className="rounded-lg bg-white shadow-lg p-6">
-      <h5 className="text-xl font-semibold text-gray-800">Gestión de Reseñas</h5>
-
+    <div className="rounded-lg bg-[#f9f3e1] shadow-lg p-6">
       <div className="overflow-x-auto mt-6">
-        <table className="min-w-full table-auto text-left border-collapse border border-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="p-4 text-sm font-medium text-gray-600 border-b border-gray-200">Usuario</th>
-              <th className="p-4 text-sm font-medium text-gray-600 border-b border-gray-200">Puntuación</th>
-              <th className="p-4 text-sm font-medium text-gray-600 border-b border-gray-200">Comentario</th>
-              <th className="p-4 text-sm font-medium text-gray-600 border-b border-gray-200">Estado</th>
-              <th className="p-4 text-sm font-medium text-gray-600 border-b border-gray-200">Fecha</th>
-              <th className="p-4 text-sm font-medium text-gray-600 border-b border-gray-200">Acciones</th>
+        <table className="w-full table-auto text-left">
+          <thead>
+            <tr className="bg-[#f0f5fc]">
+              {["Usuario", "Puntuación", "Comentario", "Estado", "Fecha", "Acciones"].map((header) => (
+                <th
+                  key={header}
+                  className="p-4 text-sm font-medium text-[#4256a6] border-b border-[#4256a6]"
+                >
+                  {header}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {reviews.length > 0 ? (
               reviews.map((review) => (
-                <tr key={review.id_Review} className="border-b border-gray-200">
-                  <td className="p-4 text-sm text-gray-800">{userMap[review.id_User] || 'Desconocido'}</td>
-                  <td className="p-4 text-sm text-gray-800">{review.rating || 'Sin puntuación'}</td>
-                  <td className="p-4 text-sm text-gray-800">{review.content || 'Sin comentario'}</td>
-                  <td className="p-4 text-sm text-gray-800">
-                    {review.active ? (
-                      <span className="text-green-500">Activa</span>
-                    ) : (
-                      <span className="text-yellow-500">Inactiva</span>
-                    )}
+                <tr
+                  key={review.id_Review}
+                  className="hover:bg-[#e1d4b0] transition-colors border-b border-[#4256a6]"
+                >
+                  <td className="p-4 text-sm text-[#4256a6]">
+                    {userMap[review.id_User] || "Desconocido"}
                   </td>
-                  <td className="p-4 text-sm text-gray-800">
+                  <td className="p-4 text-sm text-[#4256a6]">
+                    {review.rating || "Sin puntuación"}
+                  </td>
+                  <td className="p-4 text-sm text-[#4256a6]">
+                    {review.content || "Sin comentario"}
+                  </td>
+                  <td className="p-4 text-sm">
+                    <span
+                      className={`font-semibold ${
+                        review.active ? "text-green-600" : "text-red-600"
+                      }`}
+                    >
+                      {review.active ? "Activa" : "Inactiva"}
+                    </span>
+                  </td>
+                  <td className="p-4 text-sm text-[#4256a6]">
                     {review.createdAt
-                      ? new Date(review.createdAt).toLocaleDateString('es-ES', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
+                      ? new Date(review.createdAt).toLocaleDateString("es-ES", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
                         })
-                      : 'Fecha no disponible'}
+                      : "Fecha no disponible"}
                   </td>
                   <td className="p-4 flex justify-center gap-2">
                     <IconButton
                       onClick={async () => {
                         setLoadingReviewId(review.id_Review);
-                        await onReviewStatusChange(review.id_Review, 'approved');
+                        await onReviewStatusChange(review.id_Review, "approved");
                         setLoadingReviewId(null);
                       }}
                       disabled={loadingReviewId === review.id_Review}
+                      className="bg-[#4256a6] hover:bg-[#364d73]"
                     >
-                      <CheckIcon className={`h-5 w-5 ${loadingReviewId === review.id_Review ? 'text-gray-400' : 'text-green-500'}`} />
+                      <CheckIcon className="h-5 w-5 text-white" />
                     </IconButton>
                     <IconButton
                       onClick={async () => {
                         setLoadingReviewId(review.id_Review);
-                        await onReviewStatusChange(review.id_Review, 'rejected');
+                        await onReviewStatusChange(review.id_Review, "rejected");
                         setLoadingReviewId(null);
                       }}
                       disabled={loadingReviewId === review.id_Review}
+                      className="bg-[#f4925b] hover:bg-[#d98248]"
                     >
-                      <XMarkIcon className={`h-5 w-5 ${loadingReviewId === review.id_Review ? 'text-gray-400' : 'text-red-500'}`} />
+                      <XMarkIcon className="h-5 w-5 text-white" />
                     </IconButton>
-                    <IconButton onClick={() => onViewDetails(review, userMap)}>
-                      <PencilIcon className="h-5 w-5 text-blue-500" />
+                    <IconButton
+                      onClick={() => onViewDetails(review, userMap)}
+                      className="bg-[#152817] hover:bg-[#0f1e11]"
+                    >
+                      <PencilIcon className="h-5 w-5 text-white" />
                     </IconButton>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="p-4 text-center text-gray-600">
+                <td colSpan="6" className="p-4 text-center text-[#4256a6]">
                   No se encontraron reseñas.
                 </td>
               </tr>

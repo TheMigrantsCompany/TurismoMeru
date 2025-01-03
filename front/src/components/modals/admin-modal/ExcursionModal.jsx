@@ -212,14 +212,12 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-75 pointer-events-auto">
-      <div className="bg-white p-6 rounded-lg max-w-lg w-full relative z-10 overflow-y-auto max-h-[90vh]">
-        <h2 className="text-xl font-semibold mb-4 text-black">
-          Actualizar Excursión
-        </h2>
-
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 pointer-events-auto">
+      <div className="bg-[#dac9aa] p-6 rounded-lg max-w-lg w-full relative z-10 overflow-y-auto max-h-[90vh] shadow-lg">
+        <h2 className="text-2xl font-semibold mb-4 text-[#152817]">Actualizar Excursión</h2>
+  
         <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">
+          <label className="block text-sm text-[#4256a6] font-medium mb-1">
             Nombre de la Excursión:
           </label>
           <input
@@ -227,27 +225,27 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
             name="title"
             value={excursionData.title || ""}
             onChange={handleChange}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
+            className="w-full border border-[#4256a6] px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#f4925b] transition text-[#152817]"
           />
           {formErrors.title && (
-            <p className="text-red-500 text-sm">{formErrors.title}</p>
+            <p className="text-red-600 text-sm">{formErrors.title}</p>
           )}
         </div>
-
+  
         <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">
+          <label className="block text-sm text-[#4256a6] font-medium mb-1">
             Descripción:
           </label>
           <textarea
             name="description"
             value={excursionData.description}
             onChange={handleChange}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black resize-none h-28"
+            className="w-full border border-[#4256a6] px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#f4925b] transition text-[#152817] resize-none h-28"
             rows="5"
             placeholder="Escribe una descripción detallada aquí..."
           ></textarea>
           {formErrors.description && (
-            <p className="text-red-500 text-sm">{formErrors.description}</p>
+            <p className="text-red-600 text-sm">{formErrors.description}</p>
           )}
         </div>
 
@@ -557,31 +555,27 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
             Inactiva
           </button>
         </div>
-        <div className="flex justify-between mt-4">
-          <button
-            onClick={handleSubmit}
-            className={`py-2 px-4 rounded-md text-white ${
-              excursionData.active ? "bg-red-500" : "bg-green-500"
-            }`}
-          >
-            Guardar
-          </button>
-          <button
-            onClick={onClose}
-            className={`py-2 px-4 rounded-md text-white ${
-              excursionData.active ? "bg-red-500" : "bg-green-500"
-            }`}
-          >
-            Cancelar
-          </button>
-        </div>
-
-        {formErrors.general && (
-          <p className="text-red-500 text-sm mt-2">{formErrors.general}</p>
-        )}
+        <div className="flex justify-center gap-4 mt-6">
+        <button
+          onClick={handleSubmit}
+          className="py-2 px-4 rounded-md bg-[#4256a6] text-white hover:bg-[#f4925b] transition font-medium"
+        >
+          Guardar
+        </button>
+        <button
+          onClick={onClose}
+          className="py-2 px-4 rounded-md bg-[#f4925b] text-white hover:bg-[#4256a6] transition font-medium"
+        >
+          Cancelar
+        </button>
       </div>
+
+      {formErrors.general && (
+        <p className="text-red-600 text-sm mt-4">{formErrors.general}</p>
+      )}
     </div>
-  );
+  </div>
+);
 };
 
 export default ExcursionModal;
