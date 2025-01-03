@@ -81,9 +81,9 @@ export default function StickyNavbar() {
 
       // Redirigir según el rol
       if (role === "admin") {
-        navigate("/admin"); // Redirige al dashboard de admin
+        navigate("/admin/reservas"); // Redirige al dashboard de admin
       } else {
-        navigate("/user"); // Redirige al dashboard de usuario
+        navigate("/user/profile"); // Redirige al dashboard de usuario
       }
     } catch (error) {
       console.error("Error al guardar el usuario en el backend:", error);
@@ -266,23 +266,27 @@ export default function StickyNavbar() {
             {/* Menú de navegación */}
             <div
               id="mobile-menu"
-              className="hidden md:flex md:items-center space-x-8" // Más espacio horizontal
+              className="hidden md:flex md:items-center space-x-8"
             >
-              <a
-                href="/user/shopping-cart"
-                className="block md:inline items-center border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500"
-              >
-                <ShoppingCartIcon className="w-6 h-6" />
-              </a>
-  
-              <a
-                href={
-                  localStorage.getItem("role") === "admin" ? "/admin" : "/user"
-                }
-                className="block md:inline border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500"
-              >
-                Dashboard
-              </a>
+              {/* Mostrar carrito solo si el usuario está logueado */}
+              {user && (
+                <a
+                  href="/user/shopping-cart"
+                  className="block md:inline items-center border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500"
+                >
+                  <ShoppingCartIcon className="w-6 h-6" />
+                </a>
+              )}
+
+              {/* Mostrar Dashboard solo si el usuario está logueado */}
+              {user && (
+                <a
+                  href={localStorage.getItem("role") === "admin" ? "/admin/reservas" : "/user"}
+                  className="block md:inline border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500"
+                >
+                  Dashboard
+                </a>
+              )}
             </div>
   
             {/* Sección de usuario */}
