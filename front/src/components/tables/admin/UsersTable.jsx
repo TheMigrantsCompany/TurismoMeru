@@ -59,7 +59,7 @@ const UserTable = ({ users = [], onFilterChange, onDelete, onToggleActive, onVie
                   className="hover:bg-[#e1d4b0] transition-colors border-b border-[#4256a6]"
                 >
                   <td className="p-4 text-[#4256a6]">{user.name}</td>
-                  <td className="p-4 text-[#4256a6]">{user.document}</td>
+                  <td className="p-4 text-[#4256a6]">{user.DNI}</td>
                   <td className="p-4 text-[#4256a6]">{user.email}</td>
                   <td className="p-4 text-[#4256a6]">
                     <Chip

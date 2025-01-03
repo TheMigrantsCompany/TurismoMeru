@@ -31,14 +31,16 @@ const ReviewsTable = ({ reviews, onReviewStatusChange, onViewDetails }) => {
         <table className="w-full table-auto text-left">
           <thead>
             <tr className="bg-[#f0f5fc]">
-              {["Usuario", "Puntuación", "Comentario", "Estado", "Fecha", "Acciones"].map((header) => (
-                <th
-                  key={header}
-                  className="p-4 text-sm font-medium text-[#4256a6] border-b border-[#4256a6]"
-                >
-                  {header}
-                </th>
-              ))}
+              {["Usuario", "Título de Excursión", "Puntuación", "Comentario", "Estado", "Fecha", "Acciones"].map(
+                (header) => (
+                  <th
+                    key={header}
+                    className="p-4 text-sm font-medium text-[#4256a6] border-b border-[#4256a6]"
+                  >
+                    {header}
+                  </th>
+                )
+              )}
             </tr>
           </thead>
           <tbody>
@@ -50,6 +52,9 @@ const ReviewsTable = ({ reviews, onReviewStatusChange, onViewDetails }) => {
                 >
                   <td className="p-4 text-sm text-[#4256a6]">
                     {userMap[review.id_User] || "Desconocido"}
+                  </td>
+                  <td className="p-4 text-sm text-[#4256a6]">
+                    {review.serviceTitle || "Sin título"}
                   </td>
                   <td className="p-4 text-sm text-[#4256a6]">
                     {review.rating || "Sin puntuación"}
@@ -109,7 +114,7 @@ const ReviewsTable = ({ reviews, onReviewStatusChange, onViewDetails }) => {
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="p-4 text-center text-[#4256a6]">
+                <td colSpan="7" className="p-4 text-center text-[#4256a6]">
                   No se encontraron reseñas.
                 </td>
               </tr>
