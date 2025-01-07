@@ -27,7 +27,7 @@ module.exports = (sequelize) => {
       defaultValue: 'customer' // Valor por defecto
     },
     DNI: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: true // Opcional: el DNI puede no ser obligatorio
     },
     phone: {
