@@ -8,6 +8,7 @@ const getBookingsByServiceTitleHandler = require('../handlers/booking/getBooking
 const getBookingsByUserIdHandler = require('../handlers/booking/getBookingsByUserIdHandler'); //
 const updateBookingHandler = require('../handlers/booking/updateBookingHandler'); //
 const deleteBookingHandler = require('../handlers/booking/deleteBookingHandler'); //
+const getBookingsByServiceHandler = require('../handlers/booking/getBookingsByServiceHandler');
 
 // Definicion de enrutador
 const bookingRouter = express.Router();
@@ -21,6 +22,8 @@ bookingRouter.post('/', createBookingHandler);
 bookingRouter.get('/', getAllBookingsHandler);
 // Ruta para obtener la reserva por id 
 bookingRouter.get('/id/:id_Booking', getBookingByIdHandler);
+//Ruta para obtener todas las reservas de un servicio
+bookingRouter.get('/service/:id_Service', getBookingsByServiceHandler);
 //Rutas para obtener todas las reservas que tengan el titulo de la excursion
 bookingRouter.get('/service/:serviceTitle', getBookingsByServiceTitleHandler);
 //Ruta para obtener todas las reservas de un usuario
@@ -31,5 +34,6 @@ bookingRouter.patch('/id/:id_Booking', updateBookingHandler);
 
 //Ruta para eliminar una reserva por id
 bookingRouter.delete('/id/:id_Booking', deleteBookingHandler);
+
 
 module.exports = bookingRouter;

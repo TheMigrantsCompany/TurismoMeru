@@ -10,9 +10,9 @@ const updatePaymentStatusController = async (id_ServiceOrder, paymentStatus, bod
     console.log(`[Controller] Parámetros recibidos: id_ServiceOrder=${id_ServiceOrder}, paymentStatus=${paymentStatus}, body=`, body);
 
     const serviceOrder = await ServiceOrder.findByPk(id_ServiceOrder, { transaction });
-    if (!serviceOrder) throw new Error(`Orden de servicio no encontrada para id_ServiceOrder=${id_ServiceOrder}`);
+    console.log('[Controller] Orden de servicio obtenida:', serviceOrder ? serviceOrder.dataValues : 'No encontrada');
 
-    console.log('[Controller] Orden de servicio encontrada:', serviceOrder.dataValues);
+    if (!serviceOrder) throw new Error(`Orden de servicio no encontrada para id_ServiceOrder=${id_ServiceOrder}`);
 
     const parsedPaymentInformation = serviceOrder.paymentInformation || [];
     console.log('[Controller] Información de pago parseada:', parsedPaymentInformation);
@@ -22,9 +22,9 @@ const updatePaymentStatusController = async (id_ServiceOrder, paymentStatus, bod
         console.log('[Controller] Procesando item de paymentInformation:', item);
 
         const service = await Service.findByPk(item.id_Service, { transaction });
-        if (!service) throw new Error(`Servicio no encontrado para id_Service=${item.id_Service}`);
+        console.log('[Controller] Servicio obtenido:', service ? service.dataValues : 'No encontrado');
 
-        console.log('[Controller] Servicio encontrado:', service.dataValues);
+        if (!service) throw new Error(`Servicio no encontrado para id_Service=${item.id_Service}`);
 
         const bookingData = {
           id_User: serviceOrder.id_User,
@@ -32,7 +32,7 @@ const updatePaymentStatusController = async (id_ServiceOrder, paymentStatus, bod
           id_Service: item.id_Service,
           totalPeople: item.totalPeople || 0,
           totalPrice: item.totalPrice || 0,
-          transaction,
+          id_ServiceOrder,
           paymentStatus,
           paymentInformation: parsedPaymentInformation,
         };

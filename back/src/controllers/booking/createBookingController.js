@@ -2,8 +2,10 @@ const { Booking, Service, sequelize } = require('../../config/db');
 
 const createBookingController = async (id_User, paymentStatus, paymentInformation, id_ServiceOrder, DNI) => {
   console.log('[Controller] paymentInformation recibido:', paymentInformation);
+  console.log('[Controller] id_ServiceOrder recibido:', id_ServiceOrder);
 
   if (!DNI) {
+    console.error('[Controller] El campo DNI es obligatorio.');
     throw new Error('El campo DNI es obligatorio.');
   }
 
@@ -16,9 +18,10 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
 
     const bookings = [];
     for (const item of paymentInformation) {
-      const { id_Service, lockedStock, totalPeople, totalPrice } = item;
       console.log('[Controller] Datos del item recibido:', item);
+      console.log('[Controller] id_ServiceOrder al crear booking:', id_ServiceOrder);
 
+      const { id_Service, lockedStock, totalPeople, totalPrice } = item;
       const validatedTotalPeople = totalPeople || 0;
       const validatedTotalPrice = totalPrice || 0;
 
@@ -28,6 +31,8 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
       }
 
       const service = await Service.findByPk(id_Service, { transaction });
+      console.log('[Controller] Servicio obtenido:', service ? service.dataValues : 'No encontrado');
+
       if (!service) throw new Error(`El servicio con ID ${id_Service} no existe.`);
       if (service.stock < lockedStock) throw new Error(`Stock insuficiente para el servicio ${service.title}.`);
 
