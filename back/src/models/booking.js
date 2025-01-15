@@ -61,6 +61,10 @@ module.exports = (sequelize) => {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    dateTime: {
+      type: DataTypes.STRING, // Guardará el valor combinado "YYYY-MM-DD HH:mm"
+      allowNull: false
+    }
   }, {
     timestamps: true
   });

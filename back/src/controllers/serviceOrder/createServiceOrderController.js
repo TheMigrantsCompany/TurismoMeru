@@ -3,87 +3,87 @@ const { ServiceOrder, Service, User, sequelize } = require("../../config/db");
 const createServiceOrderController = async (orderData) => {
   const { orderDate, id_User, paymentMethod, items, paymentStatus } = orderData;
 
-  console.log("Datos recibidos para crear la orden:", JSON.stringify(orderData, null, 2));
-
   let total = 0;
   const updatedItems = [];
-
   const transaction = await sequelize.transaction();
 
   try {
-    // Buscar el usuario e incluir el DNI explícitamente
-    console.log("Buscando usuario con ID:", id_User);
-    const user = await User.findByPk(id_User, {
-      attributes: ["DNI"],
-      transaction,
-    });
+    console.info(">> Iniciando creación de la orden de servicio...");
 
-    if (!user) {
-      throw new Error(`El usuario con ID ${id_User} no existe`);
-    }
+    // Verificar usuario
+    const user = await User.findByPk(id_User, { attributes: ["DNI"], transaction });
+    if (!user) throw new Error(`Usuario con ID ${id_User} no encontrado`);
+    console.info(">> Usuario verificado:", user.toJSON());
 
-    const { DNI } = user;
-    console.log("DNI del usuario:", DNI);
-
-    if (!DNI) {
-      throw new Error(`El usuario con ID ${id_User} no tiene un DNI registrado`);
-    }
+    if (!user.DNI) throw new Error(`Usuario con ID ${id_User} no tiene un DNI registrado`);
 
     for (const item of items) {
-      console.log("Procesando item:", JSON.stringify(item, null, 2));
-      const excursion = await Service.findByPk(item.id_Service, {
-        transaction,
-      });
+      const { id_Service, date, time, adults, minors, seniors } = item;
+      console.info(`>> Procesando ítem con ID de servicio: ${id_Service}`);
 
-      if (!excursion) {
-        throw new Error(`La excursión con ID ${item.id_Service} no existe`);
+      // Verificar servicio
+      const excursion = await Service.findByPk(id_Service, { transaction });
+      if (!excursion) throw new Error(`Servicio con ID ${id_Service} no encontrado`);
+      console.info(">> Servicio encontrado:", excursion.toJSON());
+
+      const availability = excursion.availabilityDate.find(
+        (avail) => avail.date === date && avail.time === time
+      );
+      if (!availability) {
+        throw new Error(
+          `No hay disponibilidad para la fecha ${date} a las ${time} en ${excursion.title}`
+        );
       }
-
-      console.log("Excursión encontrada:", excursion.title);
-
-      const discountForMinors = Math.max(0, Math.min(100, excursion.discountForMinors || 0));
-      const discountForSeniors = Math.max(0, Math.min(100, excursion.discountForSeniors || 0));
-
-      const price = parseFloat(excursion.price || 0);
-      const adults = parseInt(item.adults || 0, 10);
-      const minors = parseInt(item.minors || 0, 10);
-      const seniors = parseInt(item.seniors || 0, 10);
 
       const totalReservations = adults + minors + seniors;
-      console.log("Reservas totales para el item:", totalReservations);
+      const availableStock = availability.stock - (availability.lockedStock || 0);
 
-      // Validar stock disponible
-      const newLockedStock = excursion.lockedStock + totalReservations;
-      if (newLockedStock > excursion.stock) {
-        throw new Error(`No hay suficiente stock para el servicio: ${excursion.title}`);
+      if (availableStock < totalReservations) {
+        throw new Error(
+          `Stock insuficiente para ${totalReservations} personas en ${excursion.title}`
+        );
       }
 
-      console.log("Actualizando lockedStock a:", newLockedStock);
-      await excursion.update({ lockedStock: newLockedStock }, { transaction });
+      // Bloquear stock
+availability.lockedStock = (availability.lockedStock || 0) + totalReservations;
 
-      const priceForAdults = price * adults;
-      const priceForMinors = price * (1 - discountForMinors / 100) * minors;
-      const priceForSeniors = price * (1 - discountForSeniors / 100) * seniors;
+// Actualizar disponibilidad y lockedStock en la base de datos
+excursion.set(
+  "availabilityDate",
+  excursion.availabilityDate.map((avail) =>
+    avail.date === date && avail.time === time ? availability : avail
+  )
+);
+excursion.lockedStock += totalReservations; // Incrementar el lockedStock general
+await excursion.save({ transaction }); // Guardar los cambios
+console.info(">> Disponibilidad y lockedStock actualizados para el servicio:", excursion.title);
 
-      const itemTotal = priceForAdults + priceForMinors + priceForSeniors;
+      // Calcular precios
+      const price = parseFloat(excursion.price || 0);
+      const itemTotal =
+        price * adults +
+        price * (1 - (excursion.discountForMinors || 0) / 100) * minors +
+        price * (1 - (excursion.discountForSeniors || 0) / 100) * seniors;
+
       total += itemTotal;
 
       updatedItems.push({
         title: excursion.title,
-        id_Service: item.id_Service,
+        id_Service,
+        date,
+        time,
         adults,
         minors,
         seniors,
-        price: parseFloat(price.toFixed(2)), // Mantén como número
-        //itemTotal: parseFloat(itemTotal.toFixed(2)), // Mantén como número
-        lockedStock: newLockedStock,
-        DNI,
-        totalPrice: parseFloat(itemTotal.toFixed(2)), // Agregar totalPrice
-        totalPeople: totalReservations, // Agregar totalPeople
+        price,
+        totalPrice: parseFloat(itemTotal.toFixed(2)),
+        totalPeople: totalReservations,
+        DNI: user.DNI,
+        lockedStock: availability.lockedStock,
       });
     }
 
-    console.log("Creando orden de servicio con items actualizados:", JSON.stringify(updatedItems, null, 2));
+    // Crear orden
     const newOrder = await ServiceOrder.create(
       {
         orderDate,
@@ -96,16 +96,16 @@ const createServiceOrderController = async (orderData) => {
       { transaction }
     );
 
-    const serviceIds = items.map((item) => item.id_Service);
-    await newOrder.addServices(serviceIds, { transaction });
+    // Asociar servicios
+    await newOrder.addServices(items.map((item) => item.id_Service), { transaction });
 
     await transaction.commit();
-    console.log("Orden creada exitosamente:", JSON.stringify(newOrder, null, 2));
+    console.info(">> Orden creada exitosamente:", newOrder.toJSON());
     return newOrder;
   } catch (error) {
-    console.error("Error al crear la orden de servicio:", error.message);
+    console.error(">> Error al crear la orden:", error.message);
     await transaction.rollback();
-    throw new Error(`Error al crear la orden de servicio: ${error.message}`);
+    throw new Error(`Error al crear la orden: ${error.message}`);
   }
 };
 

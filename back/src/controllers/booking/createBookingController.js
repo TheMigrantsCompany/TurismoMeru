@@ -21,7 +21,7 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
       console.log('[Controller] Datos del item recibido:', item);
       console.log('[Controller] id_ServiceOrder al crear booking:', id_ServiceOrder);
 
-      const { id_Service, lockedStock, totalPeople, totalPrice } = item;
+      const { id_Service, lockedStock, totalPeople, totalPrice, date, time } = item;
       const validatedTotalPeople = totalPeople || 0;
       const validatedTotalPrice = totalPrice || 0;
 
@@ -44,6 +44,10 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
 
       const lastSeatNumber = lastBooking ? lastBooking.seatNumber : 0;
 
+      // Formar el campo dateTime
+      const dateTime = `${date} ${time}`;
+      console.log('[Controller] Campo dateTime combinado:', dateTime);
+
       for (let i = 0; i < lockedStock; i++) {
         const seatNumber = lastSeatNumber + i + 1;
         console.log('[Controller] Creando booking con seatNumber:', seatNumber);
@@ -60,6 +64,7 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
           active: true,
           totalPeople: validatedTotalPeople,
           totalPrice: validatedTotalPrice,
+          dateTime, // Agregar el campo combinado
         }, { transaction });
 
         bookings.push(booking);
@@ -78,5 +83,6 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
     throw new Error(`Error en createBookingController: ${error.message}`);
   }
 };
+
 
 module.exports = createBookingController;
