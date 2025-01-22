@@ -43,7 +43,7 @@ module.exports = (sequelize) => {
       allowNull: true // Opcional: puede no ser necesario especificar la ubicación
     },
     availabilityDate: {
-      type: DataTypes.JSON,
+      type: DataTypes.JSONB,
       allowNull: false,
       defaultValue: [],
     },
