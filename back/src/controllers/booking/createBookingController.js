@@ -119,6 +119,7 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
         {
           availabilityDate: updatedAvailabilityDate,
           stock: service.stock,
+          lockedStock: 0, // Aquí se libera el lockedStock
         },
         { transaction }
       );
