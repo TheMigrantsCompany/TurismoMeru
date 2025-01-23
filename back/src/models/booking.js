@@ -44,6 +44,10 @@ module.exports = (sequelize) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
+    passengerName: {  // Nombre del pasajero
+      type: DataTypes.STRING,
+      allowNull: false // Es importante que el nombre siempre esté presente
+    },
     seatNumber: {
       type: DataTypes.INTEGER,
       allowNull: true // Opcional: el número de asiento puede no ser necesario

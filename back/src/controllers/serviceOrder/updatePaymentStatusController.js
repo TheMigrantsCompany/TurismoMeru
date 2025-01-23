@@ -35,6 +35,8 @@ const updatePaymentStatusController = async (id_ServiceOrder, paymentStatus, bod
           id_ServiceOrder,
           paymentStatus,
           paymentInformation: parsedPaymentInformation,
+          passengerName: item.passengerName || 'Desconocido' 
+          
         };
 
         console.log('[Controller] Datos para crear la reserva (booking):', bookingData);

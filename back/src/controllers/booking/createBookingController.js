@@ -150,6 +150,7 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
         totalPeople: validatedTotalPeople,
         totalPrice: validatedTotalPrice,
         dateTime: `${formattedDate} ${formattedTime}`,
+        passengerName: item.passengerName || 'Desconocido', 
       }));
 
       const createdBookings = await Booking.bulkCreate(newBookings, { transaction });
