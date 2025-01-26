@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { ChevronUpDownIcon, PencilIcon } from "@heroicons/react/24/outline";
-import { Card, CardHeader, Typography, CardBody, Chip, Tooltip, IconButton, CardFooter, Tabs, TabsHeader, Tab, Button } from "@material-tailwind/react";
-import ReservationModal from '../../../components/modals/admin-modal/ReservationModal';
+import { Card, CardHeader, Typography, CardBody, Chip, Tooltip, IconButton, Button } from "@material-tailwind/react";
+import ReservationModal from "../../../components/modals/admin-modal/ReservationModal";
 import Swal from "sweetalert2";
 
 const TABLE_HEAD = [
@@ -75,32 +75,50 @@ export function ReservationsTable() {
     if (status === "all") {
       setFilteredReservations(reservations);
     } else {
-      setFilteredReservations(reservations.filter(reservation => reservation.status === status));
+      setFilteredReservations(reservations.filter((reservation) => reservation.status === status));
     }
   };
 
   return (
-    <Card className="h-full w-full">
-      <CardHeader floated={false} shadow={false} className="rounded-none">
-        <Typography variant="h5" color="blue-gray">Gestión de Reservas</Typography>
-        
+    <Card className="h-full w-full mt-16 bg-[#f9f3e1] shadow-lg rounded-lg">
+      <CardHeader floated={false} shadow={false} className="p-6 bg-transparent">
         {/* Botones de filtrado */}
-        <div className="flex space-x-4 mt-4">
-          <Button onClick={() => filterReservations("all")} color="blue">Todas</Button>
-          <Button onClick={() => filterReservations("accepted")} color="green">Aceptadas</Button>
-          <Button onClick={() => filterReservations("pending")} color="yellow">Pendientes</Button>
-          <Button onClick={() => filterReservations("cancelled")} color="red">Canceladas</Button>
+        <div className="flex space-x-4">
+          <Button
+            className="bg-[#4256a6] text-white py-2 rounded-lg hover:bg-[#364d73] transition-colors"
+            onClick={() => filterReservations("all")}
+          >
+            Todas
+          </Button>
+          <Button
+            className="bg-[#f4925b] text-white py-2 rounded-lg hover:bg-[#d98248] transition-colors"
+            onClick={() => filterReservations("accepted")}
+          >
+            Aceptadas
+          </Button>
+          <Button
+            className="bg-[#152817] text-white py-2 rounded-lg hover:bg-[#0f1e11] transition-colors"
+            onClick={() => filterReservations("pending")}
+          >
+            Pendientes
+          </Button>
+          <Button
+            className="bg-[#f44336] text-white py-2 rounded-lg hover:bg-[#d32f2f] transition-colors"
+            onClick={() => filterReservations("cancelled")}
+          >
+            Canceladas
+          </Button>
         </div>
       </CardHeader>
 
-      <CardBody className="px-0">
+      <CardBody className="p-6">
         <table className="mt-4 w-full table-auto text-left">
           <thead>
             <tr>
               {TABLE_HEAD.map((head) => (
-                <th key={head} className="p-4 border-y border-blue-gray-100 bg-blue-gray-50/50">
-                  <Typography variant="small" color="blue-gray" className="flex items-center justify-between gap-2">
-                    {head} <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
+                <th key={head} className="p-4 border-y border-[#4256a6] bg-[#f0f5fc]">
+                  <Typography variant="small" color="blue-gray" className="text-[#4256a6]">
+                    {head}
                   </Typography>
                 </th>
               ))}
@@ -108,11 +126,14 @@ export function ReservationsTable() {
           </thead>
           <tbody>
             {filteredReservations.map((reservation) => (
-              <tr key={reservation.passengerName}>
-                <td className="p-4 border-b border-blue-gray-50">{reservation.passengerName}</td>
-                <td className="p-4 border-b border-blue-gray-50">{reservation.excursionName}</td>
-                <td className="p-4 border-b border-blue-gray-50">{reservation.seats}</td>
-                <td className="p-4 border-b border-blue-gray-50">
+              <tr
+                key={reservation.passengerName}
+                className="hover:bg-[#e1d4b0] transition-colors border-b border-[#4256a6]"
+              >
+                <td className="p-4 border-b border-[#4256a6]">{reservation.passengerName}</td>
+                <td className="p-4 border-b border-[#4256a6]">{reservation.excursionName}</td>
+                <td className="p-4 border-b border-[#4256a6]">{reservation.seats}</td>
+                <td className="p-4 border-b border-[#4256a6]">
                   <Chip
                     variant="ghost"
                     size="sm"
@@ -120,11 +141,11 @@ export function ReservationsTable() {
                     color={reservation.status === "accepted" ? "green" : reservation.status === "pending" ? "yellow" : "red"}
                   />
                 </td>
-                <td className="p-4 border-b border-blue-gray-50">{reservation.excursionDate}</td>
-                <td className="p-4 border-b border-blue-gray-50">
+                <td className="p-4 border-b border-[#4256a6]">{reservation.excursionDate}</td>
+                <td className="p-4 border-b border-[#4256a6]">
                   <Tooltip content="Editar Reserva">
                     <IconButton variant="text" onClick={() => handleEditReservation(reservation)}>
-                      <PencilIcon className="h-4 w-4" />
+                      <PencilIcon className="h-5 w-5 text-[#4256a6]" />
                     </IconButton>
                   </Tooltip>
                 </td>

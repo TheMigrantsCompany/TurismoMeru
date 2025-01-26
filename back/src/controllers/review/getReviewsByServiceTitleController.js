@@ -1,23 +1,20 @@
-const { Op } = require('sequelize'); // Asegúrate de importar Op
-const { Review, Service } = require('../../config/db');
+const { Op } = require('sequelize');
+const { Review } = require('../../config/db'); // No es necesario importar `Service` si estamos utilizando `serviceTitle` en `Review`
 
 const getReviewsByServiceTitle = async (title) => {
-  // Busca el servicio por título sin importar mayúsculas/minúsculas
-  const service = await Service.findOne({
+  // Buscar reseñas por el título del servicio (en `serviceTitle`)
+  const reviews = await Review.findAll({
     where: {
-      title: {
-        [Op.iLike]: title // Para PostgreSQL; usa 'like' para otros motores
+      serviceTitle: {
+        [Op.iLike]: title // Esto asegura que la búsqueda no distinga entre mayúsculas y minúsculas (funciona para PostgreSQL)
       }
     }
   });
-  
-  if (!service) {
-    throw new Error('Servicio no encontrado');
+
+  if (reviews.length === 0) {
+    throw new Error('No se encontraron reseñas para este título de servicio');
   }
 
-  // Busca las reseñas que correspondan al id del servicio encontrado
-  const reviews = await Review.findAll({ where: { id_Service: service.id_Service } });
-  
   return reviews;
 };
 

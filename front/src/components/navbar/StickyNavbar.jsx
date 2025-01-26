@@ -16,6 +16,7 @@ import ShoppingCartIcon from "@heroicons/react/24/outline/ShoppingCartIcon";
 import Swal from "sweetalert2";
 import { useCart } from "../../views/shopping-cart/CartContext";
 import { useNavigate } from "react-router-dom";
+import logoImage from "../../assets/images/logo/logo.jpg";
 
 export default function StickyNavbar() {
   const [user, setUser] = useState(null);
@@ -80,9 +81,9 @@ export default function StickyNavbar() {
 
       // Redirigir según el rol
       if (role === "admin") {
-        navigate("/admin"); // Redirige al dashboard de admin
+        navigate("/admin/reservas"); // Redirige al dashboard de admin
       } else {
-        navigate("/user"); // Redirige al dashboard de usuario
+        navigate("/user/profile"); // Redirige al dashboard de usuario
       }
     } catch (error) {
       console.error("Error al guardar el usuario en el backend:", error);
@@ -224,100 +225,107 @@ export default function StickyNavbar() {
   // Memorizar el renderizado de la navbar
   const renderedNavbar = useMemo(
     () => (
-      <nav className="bg-white shadow dark:bg-gray-200 sticky top-0 z-50">
-        <div className="container flex flex-wrap items-center justify-between p-4 mx-auto text-gray-900 capitalize dark:text-gray-300">
-          {/* Logo o Home */}
-          <a
-            href="/"
-            className="text-gray-800 text-lg font-bold transition-colors duration-300 transform dark:text-gray-200 border-b-2 border-blue-500 sm:mx-6"
-          >
-            Home
+      <nav className="bg-[#f9f3e1] shadow dark:bg-gray-200 sticky top-0 z-50">
+        <div className="container flex items-center justify-between px-4 py-2 mx-auto text-gray-900 capitalize dark:text-gray-300">
+          {/* Logo */}
+          <a href="/" className="flex items-center">
+            <img
+              src={logoImage}
+              alt="logo"
+              className="w-36 h-14 object-contain" // Tamaño del logo
+            />
           </a>
-
-          {/* Botón hamburguesa para mobile */}
-          <button
-            className="inline-flex items-center p-2 text-gray-800 rounded-lg md:hidden focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:focus:ring-gray-600"
-            aria-label="Toggle navigation"
-            onClick={() => {
-              const menu = document.querySelector("#mobile-menu");
-              menu.classList.toggle("hidden");
-            }}
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+  
+          {/* Contenido alineado a la derecha */}
+          <div className="flex items-center space-x-8"> {/* Separación más amplia */}
+            {/* Botón hamburguesa para mobile */}
+            <button
+              className="inline-flex items-center p-2 text-gray-800 rounded-lg md:hidden focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:focus:ring-gray-600"
+              aria-label="Toggle navigation"
+              onClick={() => {
+                const menu = document.querySelector("#mobile-menu");
+                menu.classList.toggle("hidden");
+              }}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h16m-7 6h7"
-              ></path>
-            </svg>
-          </button>
-
-          {/* Menú de navegación */}
-          <div
-            id="mobile-menu"
-            className="hidden w-full md:flex md:w-auto md:items-center md:justify-center space-y-4 md:space-y-0"
-          >
-            {/* Eliminar Features, Pricing, Blog */}
-            <a
-              href="/user/shopping-cart"
-              className="block md:inline flex items-center border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500 px-3 sm:mx-6"
-            >
-              <ShoppingCartIcon className="w-6 h-6" />
-            </a>
-
-            {/* Botón de Dashboard */}
-            <a
-              href={
-                localStorage.getItem("role") === "admin" ? "/admin" : "/user"
-              }
-              className="block md:inline border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500 px-3 sm:mx-6"
-            >
-              Dashboard
-            </a>
-          </div>
-
-          {/* Sección de usuario */}
-          <div className="relative inline-block text-left ml-auto">
-            {user ? (
-              <div className="flex items-center space-x-2">
-                {user.photoURL && (
-                  <img
-                    src={user.photoURL}
-                    alt="Foto de perfil"
-                    className="w-8 h-8 rounded-full"
-                  />
-                )}
-                <span className="hidden md:block">
-                  Hola, {user.displayName || user.email}
-                </span>
-                <button
-                  onClick={handleLogout}
-                  className="ml-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                >
-                  Cerrar Sesión
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={handleAuthAlert}
-                className="flex items-center text-gray-600 dark:text-gray-300 focus:outline-none px-3 py-1 bg-blue-50 rounded hover:bg-blue-600"
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                Iniciar Sesión
-              </button>
-            )}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h16m-7 6h7"
+                ></path>
+              </svg>
+            </button>
+  
+            {/* Menú de navegación */}
+            <div
+              id="mobile-menu"
+              className="hidden md:flex md:items-center space-x-8"
+            >
+              {/* Mostrar carrito solo si el usuario está logueado */}
+              {user && (
+                <a
+                  href="/user/shopping-cart"
+                  className="block md:inline items-center border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500"
+                >
+                  <ShoppingCartIcon className="w-6 h-6" />
+                </a>
+              )}
+
+              {/* Mostrar Dashboard solo si el usuario está logueado */}
+              {user && (
+                <a
+                  href={localStorage.getItem("role") === "admin" ? "/admin/reservas" : "/user"}
+                  className="block md:inline border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500"
+                >
+                  Dashboard
+                </a>
+              )}
+            </div>
+  
+            {/* Sección de usuario */}
+            <div className="relative inline-block text-left">
+              {user ? (
+                <div className="flex items-center space-x-6"> {/* Más espacio entre elementos */}
+                  {user.photoURL && (
+                    <img
+                      src={user.photoURL}
+                      alt="Foto de perfil"
+                      className="w-8 h-8 rounded-full"
+                    />
+                  )}
+                  <span className="hidden md:block">
+                    Hola, {user.displayName || user.email}
+                  </span>
+                  <button
+                    onClick={handleLogout}
+                    className="px-5 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow-md hover:from-red-600 hover:to-red-700 hover:shadow-lg transition-all duration-300 ease-in-out"
+                  >
+                    Cerrar Sesión
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={handleAuthAlert}
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  Iniciar Sesión
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </nav>
     ),
     [user]
-  ); // Solo se recalcula si el estado de user cambia
-
+  );
+  
   return renderedNavbar;
+  
 }

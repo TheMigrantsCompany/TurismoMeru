@@ -2,7 +2,6 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -10,7 +9,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #ffffff;
+  background-color: #dac9aa; /* Actualizado */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -28,16 +27,17 @@ a:hover {
 }
 
 body {
-  background-size: cover; /* Hace que la imagen cubra todo el fondo */
-  background-position: center; /* Centra la imagen */
-  background-attachment: fixed; /* Fija la imagen para que no se mueva */
+  background-size: cover; 
+  background-position: center; 
+  background-attachment: fixed; 
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  width: 100vw; /* Ajuste para ocupar todo el ancho */
-  height: 100vh; /* Ajuste para ocupar todo el alto */
-  padding: 0; /* Eliminar el padding para evitar márgenes innecesarios */
-  background-color: #ffffff; /* Mantén el color de fondo si es necesario */
+  width: 100vw; 
+  height: 100vh; 
+  padding: 0; 
+  background-color: #dac9aa; 
+  @apply font-sans;
 }
 
 h1 {
@@ -66,7 +66,7 @@ button:focus-visible {
 @media (prefers-color-scheme: light) {
   :root {
     color: #f0f5f8;
-    background-color: #ffffff;
+    background-color: #dac9aa; /* Actualizado */
   }
   a:hover {
     color: #747bff;

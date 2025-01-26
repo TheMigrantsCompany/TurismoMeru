@@ -1,31 +1,54 @@
-import { Carousel, Typography, } from "@material-tailwind/react";
+import { Carousel, Typography } from "@material-tailwind/react";
 import headerImages from "../../utils/headerImages.js";
 
 export default function CarouselWithContent() {
   const images = [headerImages.image1, headerImages.image2, headerImages.image3];
 
   return (
-    <Carousel className="rounded-l w-full h-[565px]">
+    <Carousel
+      className="w-full h-[900px] rounded-lg overflow-hidden"
+      navigation={({ setActiveIndex, activeIndex, length }) => (
+        <div className="absolute bottom-6 left-2/4 z-50 flex -translate-x-2/4 gap-3">
+          {new Array(length).fill("").map((_, i) => (
+            <span
+              key={i}
+              className={`block h-2 cursor-pointer rounded-full transition-all ${
+                activeIndex === i
+                  ? "w-8 bg-white shadow-md"
+                  : "w-4 bg-gray-400"
+              }`}
+              onClick={() => setActiveIndex(i)}
+            />
+          ))}
+        </div>
+      )}
+    >
       {images.map((image, index) => (
-        <div key={index} className="relative h-full w-full transition-style">
+        <div key={index} className="relative h-full w-full">
+          {/* Imagen */}
           <img
             src={image}
-            alt={`image ${index + 1}`}
-            className="h-full w-full object-cover"
+            alt={`Imagen del carrusel ${index + 1}`}
+            className="h-full w-full object-cover transition-all duration-500 ease-in-out"
           />
-          <div className="absolute inset-0 grid h-full w-full place-items-center bg-black/30">
+
+          {/* Filtro oscuro sobre la imagen */}
+          <div className="absolute inset-0 grid h-full w-full place-items-center bg-black/40">
+            {/* Contenido del carrusel */}
             <div className="w-3/4 text-center md:w-2/4">
               <Typography
                 variant="h1"
                 color="white"
-                className="mb-4 text-3xl md:text-4xl lg:text-5xl"
+                className="mb-6 text-4xl md:text-5xl lg:text-6xl font-bold drop-shadow-lg"
               >
-                The Beauty of Nature
+                Vivi una experiencia única en Ushuaia
               </Typography>
-              <Typography variant="lead" color="white" className="mb-12 opacity-80">
-                It is not so much for its beauty that the forest makes a claim upon men's hearts, as for that subtle
-                something, that quality of air that emanation from old trees, that so wonderfully changes and renews a
-                weary spirit.
+              <Typography
+                variant="lead"
+                color="white"
+                className="mb-16 opacity-90 text-lg md:text-xl drop-shadow-md"
+              >
+                Fin del Mundo, principio de todo
               </Typography>
             </div>
           </div>
