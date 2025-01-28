@@ -4,6 +4,7 @@ const reviewRouter = require("./reviewRouter");
 const serviceRouter = require("./serviceRouter");
 const serviceOrderRouter = require("./serviceOrderRouter"); 
 const userRouter = require("./userRouter");
+const paymentRouter = require("./paymentRouter");
 
 const router = Router();
 
@@ -17,7 +18,8 @@ router.use("/servicesOrder", serviceOrderRouter);
 router.use("/booking", bookingRouter);
 //Agregas las rutas de reseñas a la ruta principal
 router.use("/review", reviewRouter);
-
+// Agregas las rutas de pago
+router.use("/payment", paymentRouter);
 
 
 module.exports = router;

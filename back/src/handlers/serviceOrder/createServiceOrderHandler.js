@@ -1,15 +1,15 @@
 const createServiceOrderController = require('../../controllers/serviceOrder/createServiceOrderController');
 const createBookingHandler = require('../../handlers/booking/createBookingHandler');
 
-// Handler para la creación de la orden de servicio
 const createServiceOrderHandler = async (req, res) => {
   try {
+    console.info(">> Handler: Creando orden de servicio...");
     const orderData = req.body;
 
-    // Llamar al controlador para crear la orden de servicio
+    // Llamar al controlador
     const newOrder = await createServiceOrderController(orderData);
 
-    // Verificar el estado de pago y procesar reservas si es 'Pagado'
+    // Verificar estado de pago
     if (orderData.paymentStatus === 'Pagado') {
       const bookingData = {
         id_ServiceOrder: newOrder.dataValues.id_ServiceOrder,
@@ -19,18 +19,18 @@ const createServiceOrderHandler = async (req, res) => {
         paymentStatus: newOrder.dataValues.paymentStatus,
       };
 
-      // Llamar al handler que crea las reservas y manejar la respuesta
+      // Llamar al handler de reservas
       const bookingResponse = await createBookingHandler(bookingData);
-      console.log(bookingResponse.message); // O cualquier otra acción que desees
+      console.info(">> Reservas procesadas:", bookingResponse.message);
     }
 
     res.status(201).json({
       message: 'Orden de servicio creada exitosamente.',
-      order: newOrder
+      order: newOrder,
     });
   } catch (error) {
-    console.error('Error en el handler de creación de orden:', error.stack);
-    res.status(500).json({ error: 'No se pudo crear la orden de servicio.' });
+    console.error(">> Error en el handler de creación de orden:", error.message);
+    res.status(500).json({ error: `No se pudo crear la orden: ${error.message}` });
   }
 };
 

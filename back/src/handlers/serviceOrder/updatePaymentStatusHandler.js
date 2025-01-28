@@ -1,17 +1,26 @@
 const updatePaymentStatusController = require('../../controllers/serviceOrder/updatePaymentStatusController');
 
-const updatePaymentStatus = async (req, res) => {
+const updatePaymentStatusHandler = async (req, res) => {
   try {
-    const { id } = req.params;               // ID de la orden desde la URL
-    const { paymentStatus } = req.body;      // Estado de pago desde el cuerpo de la solicitud
+    const { id_ServiceOrder } = req.params;
+    const { paymentStatus, ...rest } = req.body;
 
-    // Llamar al controlador para actualizar el estado de pago
-    const updatedOrder = await updatePaymentStatusController(id, paymentStatus);
+    console.log('[Handler] Actualización de estado de pago iniciada.');
+    console.log('[Handler] Parámetros recibidos:', { id_ServiceOrder, paymentStatus });
+    console.log('[Handler] Body adicional recibido:', rest);
 
-    res.status(200).json(updatedOrder);  // Devolver la orden actualizada en la respuesta
+    if (!id_ServiceOrder || !paymentStatus) {
+      return res.status(400).json({ error: 'ID de la orden y estado de pago son requeridos.' });
+    }
+
+    const updatedOrder = await updatePaymentStatusController(id_ServiceOrder, paymentStatus, req.body);
+    console.log('[Handler] Orden actualizada exitosamente:', updatedOrder);
+
+    res.status(200).json(updatedOrder);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('[Handler] Error en la actualización del estado de pago:', error.stack);
+    res.status(400).json({ error: error.message });
   }
 };
 
-module.exports = updatePaymentStatus;
+module.exports = updatePaymentStatusHandler;

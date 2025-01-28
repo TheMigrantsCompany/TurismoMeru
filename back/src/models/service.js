@@ -78,6 +78,11 @@ module.exports = (sequelize) => {
       type: DataTypes.INTEGER,
       allowNull: false // Obligatorio: debe haber un número de cupos disponibles
     },
+    lockedStock: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      allowNull: false, // Por defecto, ningún stock está bloqueado
+    },
     active: {
       type: DataTypes.BOOLEAN,
       defaultValue: true, // Valor por defecto

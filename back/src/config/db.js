@@ -59,17 +59,19 @@ Service.belongsToMany(ServiceOrder, {
   otherKey: "id_ServiceOrder",
   as: "serviceOrders",
 });
+
 // Un usuario puede hacer muchas reservas
-User.hasMany(Booking);
-Booking.belongsTo(User);
+User.hasMany(Booking, { foreignKey: 'id_User', as: 'bookings' });
+Booking.belongsTo(User, { foreignKey: 'id_User', as: 'user' });
 
 // Un servicio puede ser reservado muchas veces
-Service.hasMany(Booking);
-Booking.belongsTo(Service);
+Service.hasMany(Booking, { foreignKey: 'id_Service', as: 'bookings' });
+Booking.belongsTo(Service, { foreignKey: 'id_Service', as: 'service' });
 
 // Una orden de servicio puede tener muchas reservas
-ServiceOrder.hasMany(Booking);
-Booking.belongsTo(ServiceOrder);
+ServiceOrder.hasMany(Booking, { foreignKey: 'id_ServiceOrder', as: 'bookings' });
+Booking.belongsTo(ServiceOrder, { foreignKey: 'id_ServiceOrder', as: 'serviceOrder' });
+
 
 // Relaciones Muchos a Uno
 Service.hasMany(Review, { foreignKey: 'id_Service', as: 'reviews' });

@@ -6,7 +6,7 @@ const getAllServicesOrderHandler = require('../handlers/serviceOrder/getServiceO
 const getServiceOrderById = require('../handlers/serviceOrder/getServiceOrderByIdHandler');
 const getServiceOrdersByUserHandler = require('../handlers/serviceOrder/getServiceOrdersByUserHandler');
 const searchServiceOrderHandler = require('../handlers/serviceOrder/searchServiceOrdersHandler');
-const updatePaymentStatus = require('../handlers/serviceOrder/updatePaymentStatusHandler');
+const updatePaymentStatusHandler = require('../handlers/serviceOrder/updatePaymentStatusHandler');
 const deleteServiceOrderHandler = require('../handlers/serviceOrder/deleteServiceOrderHandler');
 
 // Definicion de enrutador
@@ -29,7 +29,7 @@ serviceOrderRouter.get('/user/:id_User', getServiceOrdersByUserHandler);
 serviceOrderRouter.get('/search/:title', searchServiceOrderHandler);
 
 // Ruta para actualizar el estado de pago de una Orden y generar una reserva
-serviceOrderRouter.patch('/id/:id', updatePaymentStatus);
+serviceOrderRouter.patch('/id/:id_ServiceOrder', updatePaymentStatusHandler);
 
 // Ruta para eliminar una orden de servicio
 serviceOrderRouter.delete('/id/:id_ServiceOrder', deleteServiceOrderHandler);

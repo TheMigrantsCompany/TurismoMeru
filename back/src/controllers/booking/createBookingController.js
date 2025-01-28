@@ -1,82 +1,169 @@
-const { Console } = require('console');
-const { Booking, Service } = require('../../config/db'); // Importa los modelos
+const { Booking, Service, sequelize } = require('../../config/db');
 
-const createBookingController = async (userId, paymentStatus, paymentInformation, serviceOrderId) => {
+const createBookingController = async (id_User, paymentStatus, paymentInformation, id_ServiceOrder, DNI) => {
+  console.log('[Controller] paymentInformation recibido:', paymentInformation);
+  console.log('[Controller] id_ServiceOrder recibido:', id_ServiceOrder);
+
+  if (!DNI) {
+    console.error('[Controller] El campo DNI es obligatorio.');
+    throw new Error('El campo DNI es obligatorio.');
+  }
+
+  if (!Array.isArray(paymentInformation) || paymentInformation.length === 0) {
+    console.error('[Controller] paymentInformation debe ser un arreglo no vacío.');
+    throw new Error('paymentInformation debe ser un arreglo no vacío.');
+  }
+
+  const transaction = await sequelize.transaction({ autocommit: false });
   try {
     const bookings = [];
 
-    console.log('Inicio de la creación de reservas');
-    console.log('User ID:', userId);
-    console.log('Payment Status:', paymentStatus);
-    console.log('Payment Information:', paymentInformation);
-    
-    // Verifica que paymentInformation sea un arreglo
-    if (!Array.isArray(paymentInformation)) {
-      throw new Error('paymentInformation debe ser un arreglo');
-    }
+    for (const item of paymentInformation) {
+      console.log('[Controller] Datos del item recibido:', item);
 
-    for (const { ServiceId, quantity } of paymentInformation) {
-      console.log('Procesando servicio:', ServiceId, 'con cantidad:', quantity);
-      
-      const service = await Service.findByPk(ServiceId);
-  
-      // Verifica que el servicio exista y que tenga stock disponible
+      const { id_Service, lockedStock, totalPeople, totalPrice, date, time } = item;
+
+      const validatedTotalPeople = totalPeople || 0;
+      const validatedTotalPrice = totalPrice || 0;
+
+      if (validatedTotalPeople <= 0 || validatedTotalPrice <= 0) {
+        console.error('[Controller] Valores inválidos en item:', item);
+        throw new Error(
+          `Valores inválidos: totalPeople=${validatedTotalPeople}, totalPrice=${validatedTotalPrice}`
+        );
+      }
+
+      // Buscar el servicio por ID con bloqueo para evitar conflictos en transacciones concurrentes
+      console.log('[Controller] Buscando servicio con ID:', id_Service);
+      const service = await Service.findByPk(id_Service, {
+        transaction,
+        lock: transaction.LOCK.UPDATE,
+      });
       if (!service) {
-        console.log(`El servicio con ID ${ServiceId} no existe.`);
-        throw new Error(`El servicio con ID ${ServiceId} no existe.`);
+        throw new Error(`El servicio con ID ${id_Service} no existe.`);
       }
 
-      const service_ = service.dataValues;
+      console.log('[Controller] Servicio encontrado:', service);
 
-      console.log('Servicio encontrado:', service_);
-      
-      // Verifica el stock disponible
-      if (service_.stock < quantity) {
-        console.log(`No hay suficiente stock para el servicio ${service.title}.`);
-        throw new Error(`No hay suficiente stock para el servicio ${service.title}.`);
+      // Validar formato de availabilityDate
+      if (
+        !Array.isArray(service.availabilityDate) ||
+        !service.availabilityDate.every(
+          (slot) =>
+            typeof slot.date === 'string' &&
+            typeof slot.time === 'string' &&
+            typeof slot.stock === 'number'
+        )
+      ) {
+        console.error('[Controller] Formato inválido en availabilityDate del servicio:', service.availabilityDate);
+        throw new Error(`El campo availabilityDate en el servicio ${service.title} tiene un formato inválido.`);
       }
-      
-      // Encuentra el último número de asiento asignado para el servicio
-      const lastBooking = await Booking.findOne({
-        where: { serviceId: ServiceId },
-        order: [['seatNumber', 'DESC']],
+
+      if (service.stock < lockedStock) {
+        console.error('[Controller] Stock global insuficiente:', {
+          stockGlobal: service.stock,
+          lockedStock,
+        });
+        throw new Error(`Stock global insuficiente para el servicio ${service.title}.`);
+      }
+
+      // Buscar el slot específico en availabilityDate
+      const formattedDate = new Date(date).toISOString().split('T')[0];
+      const formattedTime = time.trim();
+      const availabilityItem = service.availabilityDate.find(
+        (slot) => slot.date === formattedDate && slot.time === formattedTime
+      );
+
+      if (!availabilityItem) {
+        console.error('[Controller] No se encontró disponibilidad para la fecha y hora especificadas:', {
+          date: formattedDate,
+          time: formattedTime,
+        });
+        throw new Error(
+          `No se encontró disponibilidad para la fecha ${formattedDate} a las ${formattedTime} en el servicio ${service.title}.`
+        );
+      }
+
+      if (availabilityItem.stock < lockedStock) {
+        console.error('[Controller] Stock insuficiente para el slot especificado:', {
+          slotStock: availabilityItem.stock,
+          lockedStock,
+        });
+        throw new Error(
+          `Stock insuficiente para la fecha ${formattedDate} a las ${formattedTime} en el servicio ${service.title}.`
+        );
+      }
+
+      console.log('[Controller] Reducción de stock. Antes:', {
+        globalStock: service.stock,
+        slotStock: availabilityItem.stock,
       });
 
+      // Actualizar el arreglo de availabilityDate con el nuevo stock
+      const updatedAvailabilityDate = service.availabilityDate.map((slot) =>
+        slot.date === formattedDate && slot.time === formattedTime
+          ? { ...slot, stock: slot.stock - lockedStock }
+          : slot
+      );
+
+      // Reducir el stock global del servicio
+      service.stock -= lockedStock;
+
+      console.log('[Controller] Reducción de stock. Después:', {
+        globalStock: service.stock,
+        updatedAvailabilityDate,
+      });
+
+      // Guardar los cambios en la base de datos
+      await service.update(
+        {
+          availabilityDate: updatedAvailabilityDate,
+          stock: service.stock,
+          lockedStock: 0, // Aquí se libera el lockedStock
+        },
+        { transaction }
+      );
+
+      console.log('[Controller] Stock actualizado en la base de datos.');
+
+      // Obtener último número de asiento
+      const lastBooking = await Booking.findOne({
+        where: { id_Service },
+        order: [['seatNumber', 'DESC']],
+        transaction,
+      });
       const lastSeatNumber = lastBooking ? lastBooking.seatNumber : 0;
 
-      console.log(`Último asiento asignado: ${lastSeatNumber}`);
+      console.log('[Controller] Último número de asiento:', lastSeatNumber);
 
-      // Descuenta el stock del servicio
-      await service.update({ stock: service_.stock - quantity });
-      console.log('Stock actualizado para el servicio:', service);
+      // Crear nuevas reservas
+      const newBookings = Array.from({ length: lockedStock }, (_, i) => ({
+        id_User,
+        id_Service,
+        serviceTitle: service.title,
+        id_ServiceOrder,
+        bookingDate: new Date(),
+        paymentStatus,
+        DNI,
+        seatNumber: lastSeatNumber + i + 1,
+        active: true,
+        totalPeople: validatedTotalPeople,
+        totalPrice: validatedTotalPrice,
+        dateTime: `${formattedDate} ${formattedTime}`,
+        passengerName: item.passengerName || 'Desconocido', 
+      }));
 
-      // Genera reservas para cada persona, asignando los números de asiento secuencialmente
-      for (let i = 0; i < quantity; i++) {
-        const seatNumber = lastSeatNumber + i + 1; // Asigna el siguiente número de asiento disponible
-
-        const booking = await Booking.create({
-          userId,
-          serviceId: ServiceId,
-          serviceTitle: service.title,
-          serviceOrderId,
-          bookingDate: new Date(),
-          paymentStatus,
-          DNI_Personal: "null", // Reemplaza esto con el valor real si es necesario
-          seatNumber,
-          active: true
-        });
-
-        console.log(`Reserva creada para asiento ${seatNumber}`);
-
-        bookings.push(booking);
-      }
+      const createdBookings = await Booking.bulkCreate(newBookings, { transaction });
+      bookings.push(...createdBookings);
     }
-    
+
+    await transaction.commit();
+    console.log('[Controller] Reservas creadas exitosamente:', bookings);
     return bookings;
-    
   } catch (error) {
-    console.error('Error en createBookingController:', error.message);
-    throw error; // Lanza el error para que pueda ser manejado en el controlador
+    await transaction.rollback();
+    console.error('[Controller] Error en createBookingController:', error.message);
+    throw new Error(`Error en createBookingController: ${error.message}`);
   }
 };
 

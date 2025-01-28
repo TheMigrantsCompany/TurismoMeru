@@ -3,10 +3,9 @@ const { ServiceOrder } = require('../../config/db'); // Importamos el modelo Ser
 
 const getServiceOrdersByUserController = async (id_User) => {
     try {
-        // Buscamos las órdenes de servicio donde userId coincide con el id_User proporcionado
         const serviceOrders = await ServiceOrder.findAll({
             where: {
-                userId: id_User, // Filtramos por userId
+                id_User, 
             },
         });
 
