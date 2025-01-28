@@ -15,7 +15,9 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
         excursion?.discountForMinors ??
         0,
     },
+    lockedStock: excursion?.lockedStock ?? 0,  
   });
+
   const [formErrors, setFormErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -64,9 +66,12 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setExcursionData((prevData) => ({ ...prevData, [name]: value }));
-  };
+  const { name, value } = e.target;
+  setExcursionData((prevData) => ({
+    ...prevData,
+    [name]: value,
+  }));
+};
 
   const handlePhotoChange = async (e) => {
     const files = Array.from(e.target.files);
@@ -185,6 +190,7 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
             discountForMinors: excursionData.discount.minorPercentage,
             discountForSeniors: excursionData.discount.seniorPercentage,
             availabilityDate: selectedDates.map((d) => d.date),
+            lockedStock: excursionData.lockedStock,  // Asegúrate de incluir el campo aquí
           }),
         }
       );
@@ -200,7 +206,7 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
       });
     }
   };
-
+  
   const handleDiscountChange = (type, value) => {
     setExcursionData((prev) => ({
       ...prev,
@@ -316,7 +322,21 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
             <p className="text-red-500 text-sm">{formErrors.stock}</p>
           )}
         </div>
-
+        <div>
+  <label className="block text-sm text-gray-600 font-medium mb-1">
+    Stock Bloqueado:
+  </label>
+  <input
+    type="number"
+    name="lockedStock"
+    value={excursionData.lockedStock || 0} // Asegúrate de que sea accesible en el estado
+    onChange={handleChange}
+    className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
+  />
+  {formErrors.lockedStock && (
+    <p className="text-red-500 text-sm">{formErrors.lockedStock}</p>
+  )}
+</div>
         <div>
           <label className="block text-sm text-gray-600 font-medium mb-1">
             Fotos:
