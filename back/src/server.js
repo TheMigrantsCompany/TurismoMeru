@@ -4,8 +4,14 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const cors = require("cors");
+const mercadopago = require("mercadopago"); 
 
 const server = express();
+
+
+mercadopago.configurations = {
+  access_token: process.env.MP_ACCESS_TOKEN
+};
 
 // Middleware para el tamaño de las solicitudes
 server.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
@@ -13,14 +19,13 @@ server.use(bodyParser.json({ limit: "50mb" }));
 server.use(cookieParser());
 server.use(morgan("dev"));
 
-
 // Middleware CORS con configuración personalizada
 server.use(cors({
-	origin: "http://localhost:5173", // Permite solo este dominio
-	credentials: true, // Permite el uso de cookies y autenticación
-	methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], // Métodos permitidos
- }));
-  
+  origin: "http://localhost:5173", // Permite solo este dominio
+  credentials: true, // Permite el uso de cookies y autenticación
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], // Métodos permitidos
+}));
+
 // Manejo de rutas
 server.use("/", router);
 

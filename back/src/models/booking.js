@@ -12,7 +12,7 @@ module.exports = (sequelize) => {
       type: DataTypes.DATE,
       allowNull: false // Obligatorio: necesita una fecha de reserva
     },
-    id_User: {
+    userId: {
       type: DataTypes.UUID,
       allowNull: false, // Obligatorio: debe asociarse a un usuario
       references: {
@@ -20,7 +20,7 @@ module.exports = (sequelize) => {
         key: 'id_User',
       }
     },
-    id_Service: {
+    serviceId: {
       type: DataTypes.UUID,
       allowNull: false, // Obligatorio: debe asociarse a un servicio
       references: {
@@ -28,9 +28,9 @@ module.exports = (sequelize) => {
         key: 'id_Service',
       }
     },
-    id_ServiceOrder: {
+    serviceOrderId: {
       type: DataTypes.UUID,
-      allowNull: false, // Opcional: puede no haber un pedido de servicio asociado
+      allowNull: true, // Opcional: puede no haber un pedido de servicio asociado
       references: {
         model: 'ServiceOrders',
         key: 'id_ServiceOrder',
@@ -40,13 +40,9 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false
     },
-    DNI: { // 
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    passengerName: {  // Nombre del pasajero
+    DNI_Personal: { // 
       type: DataTypes.STRING,
-      allowNull: false // Es importante que el nombre siempre esté presente
+      allowNull: false
     },
     seatNumber: {
       type: DataTypes.INTEGER,
@@ -56,18 +52,6 @@ module.exports = (sequelize) => {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
       allowNull: false // Obligatorio: aunque tiene un valor por defecto, se debe especificar
-    },
-    totalPeople: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    totalPrice: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    dateTime: {
-      type: DataTypes.STRING, // Guardará el valor combinado "YYYY-MM-DD HH:mm"
-      allowNull: false
     }
   }, {
     timestamps: true

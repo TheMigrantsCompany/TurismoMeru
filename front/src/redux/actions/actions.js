@@ -250,8 +250,6 @@ export const updateUserDetails = (id_User, updatedData) => async (dispatch) => {
 };
 
 //ORDENES DE SERVICIO
-//crear orden de servicio
-
 export const createServiceOrder = (orderData) => async (dispatch) => {
   try {
       console.log("Enviando datos al endpoint:", orderData);
@@ -274,6 +272,7 @@ export const createServiceOrder = (orderData) => async (dispatch) => {
           type: CREATE_ORDER_SUCCESS,
           payload: data,
       });
+      return data.order;
   } catch (error) {
       console.error("Error en createServiceOrder:", error);
       dispatch({
@@ -282,6 +281,7 @@ export const createServiceOrder = (orderData) => async (dispatch) => {
       });
   }
 };
+
 
 //GET todas las ordenes de servicio
 export const getAllOrders = () => async (dispatch) => {
