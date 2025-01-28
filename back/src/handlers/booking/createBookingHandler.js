@@ -1,14 +1,23 @@
 const createBookingController = require('../../controllers/booking/createBookingController');
 
-// Handler para crear una reserva
 const createBookingHandler = async (bookingData) => {
-  const { userId, paymentStatus, paymentInformation, id_ServiceOrder } = bookingData;
-
+  console.log("[Handler] Datos recibidos en createBookingHandler:", bookingData);
+  
   try {
-    const bookings = await createBookingController(userId, paymentStatus, paymentInformation, id_ServiceOrder);
-    return { message: 'Reserva(s) creada(s) exitosamente.', bookings }; // Devuelve la respuesta
+    const bookings = await createBookingController(
+      bookingData.id_User,
+      bookingData.paymentStatus,
+      bookingData.paymentInformation,
+      bookingData.id_ServiceOrder,
+      bookingData.DNI
+    );
+
+    console.log("[Handler] Reservas creadas exitosamente:", bookings);
+
+    return { message: 'Reserva(s) creada(s) exitosamente.', bookings };
   } catch (error) {
-    throw new Error(error.message); // Lanza un error para manejarlo más tarde
+    console.error(`[Handler] Error creando reservas: ${error.message}`);
+    throw new Error(`Error creando reservas: ${error.message}`);
   }
 };
 

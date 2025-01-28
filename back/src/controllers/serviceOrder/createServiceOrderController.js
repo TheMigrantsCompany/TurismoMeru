@@ -1,65 +1,112 @@
-const { ServiceOrder, Service } = require('../../config/db');
+const { ServiceOrder, Service, User, sequelize } = require("../../config/db");
 
-// Controlador para crear una nueva orden de servicio
 const createServiceOrderController = async (orderData) => {
   const { orderDate, id_User, paymentMethod, items, paymentStatus } = orderData;
 
   let total = 0;
   const updatedItems = [];
+  const transaction = await sequelize.transaction();
 
-  // Validar y calcular el total con descuentos
-  for (const item of items) {
-    const excursion = await Service.findByPk(item.id_Service);
+  try {
+    console.info(">> Iniciando creación de la orden de servicio...");
 
-    if (!excursion) {
-      throw new Error(`La excursión con ID ${item.id_Service} no existe`);
+    // Verificar usuario
+    const user = await User.findByPk(id_User, { attributes: ["DNI"], transaction });
+    if (!user) throw new Error(`Usuario con ID ${id_User} no encontrado`);
+    console.info(">> Usuario verificado:", user.toJSON());
+
+    if (!user.DNI) throw new Error(`Usuario con ID ${id_User} no tiene un DNI registrado`);
+
+    for (const item of items) {
+      const { id_Service, date, time, adults, minors, seniors } = item;
+      console.info(`>> Procesando ítem con ID de servicio: ${id_Service}`);
+
+      // Verificar servicio
+      const excursion = await Service.findByPk(id_Service, { transaction });
+      if (!excursion) throw new Error(`Servicio con ID ${id_Service} no encontrado`);
+      console.info(">> Servicio encontrado:", excursion.toJSON());
+
+      const availability = excursion.availabilityDate.find(
+        (avail) => avail.date === date && avail.time === time
+      );
+      if (!availability) {
+        throw new Error(
+          `No hay disponibilidad para la fecha ${date} a las ${time} en ${excursion.title}`
+        );
+      }
+
+      const totalReservations = adults + minors + seniors;
+      const availableStock = availability.stock - (availability.lockedStock || 0);
+
+      if (availableStock < totalReservations) {
+        throw new Error(
+          `Stock insuficiente para ${totalReservations} personas en ${excursion.title}`
+        );
+      }
+
+      // Bloquear stock
+availability.lockedStock = (availability.lockedStock || 0) + totalReservations;
+
+// Actualizar disponibilidad y lockedStock en la base de datos
+excursion.set(
+  "availabilityDate",
+  excursion.availabilityDate.map((avail) =>
+    avail.date === date && avail.time === time ? availability : avail
+  )
+);
+excursion.lockedStock += totalReservations; // Incrementar el lockedStock general
+await excursion.save({ transaction }); // Guardar los cambios
+console.info(">> Disponibilidad y lockedStock actualizados para el servicio:", excursion.title);
+
+      // Calcular precios
+      const price = parseFloat(excursion.price || 0);
+      const itemTotal =
+        price * adults +
+        price * (1 - (excursion.discountForMinors || 0) / 100) * minors +
+        price * (1 - (excursion.discountForSeniors || 0) / 100) * seniors;
+
+      total += itemTotal;
+
+      updatedItems.push({
+        title: excursion.title,
+        id_Service,
+        date,
+        time,
+        adults,
+        minors,
+        seniors,
+        price,
+        totalPrice: parseFloat(itemTotal.toFixed(2)),
+        totalPeople: totalReservations,
+        DNI: user.DNI,
+        lockedStock: availability.lockedStock,
+      });
     }
 
-    // Validar descuentos
-    const discountForMinors = Math.max(0, Math.min(100, excursion.discountForMinors || 0));
-    const discountForSeniors = Math.max(0, Math.min(100, excursion.discountForSeniors || 0));
+    // Crear orden
+    const newOrder = await ServiceOrder.create(
+      {
+        orderDate,
+        id_User,
+        paymentMethod,
+        paymentInformation: updatedItems,
+        total: total.toFixed(2),
+        paymentStatus: paymentStatus || "Pendiente",
+      },
+      { transaction }
+    );
 
-    // Validar que los valores sean números
-    const price = parseFloat(excursion.price || 0);
-    const adults = parseInt(item.adults || 0, 10);
-    const minors = parseInt(item.minors || 0, 10);
-    const seniors = parseInt(item.seniors || 0, 10);
+    // Asociar servicios
+    await newOrder.addServices(items.map((item) => item.id_Service), { transaction });
 
-    // Cálculos por tipo de cliente
-    const priceForAdults = price * adults;
-    const priceForMinors = price * (1 - discountForMinors / 100) * minors;
-    const priceForSeniors = price * (1 - discountForSeniors / 100) * seniors;
-
-    const itemTotal = priceForAdults + priceForMinors + priceForSeniors;
-    total += itemTotal;
-
-    // Actualizar información del ítem
-    updatedItems.push({
-      title: excursion.title,
-      id_Service: item.id_Service,
-      adults,
-      minors,
-      seniors,
-      price: price.toFixed(2), // Mostrar el precio con dos decimales
-      itemTotal: itemTotal.toFixed(2) // Mostrar el total con dos decimales
-    });
+    await transaction.commit();
+    console.info(">> Orden creada exitosamente:", newOrder.toJSON());
+    return newOrder;
+  } catch (error) {
+    console.error(">> Error al crear la orden:", error.message);
+    await transaction.rollback();
+    throw new Error(`Error al crear la orden: ${error.message}`);
   }
-
-  // Crear la nueva orden en la base de datos
-  const newOrder = await ServiceOrder.create({
-    orderDate,
-    id_User,
-    paymentMethod,
-    paymentInformation: updatedItems,
-    total: total.toFixed(2), // Mostrar el total con dos decimales
-    paymentStatus: paymentStatus || 'Pendiente'
-  });
-
-  // Asociar los servicios a la orden de servicio
-  const serviceIds = items.map(item => item.id_Service); // Extraer los IDs de los servicios
-  await newOrder.addServices(serviceIds); // Asociar los servicios a la orden
-
-  return newOrder; // Devolver los datos al handler
 };
 
 module.exports = createServiceOrderController;

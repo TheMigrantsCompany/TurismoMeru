@@ -32,11 +32,12 @@ module.exports = (sequelize) => {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
+    
     paymentStatus: {
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: 'Pendiente' // Puede ser "Pendiente" o "Pagado"
-    }
+    },
   }, {
     timestamps: true
   });

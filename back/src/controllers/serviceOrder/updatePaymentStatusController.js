@@ -1,36 +1,61 @@
-const { ServiceOrder, Booking } = require('../../config/db');
+const { ServiceOrder, Service, sequelize } = require('../../config/db');
 const createBookingHandler = require('../../handlers/booking/createBookingHandler');
 
-const updatePaymentStatusController = async (orderId, paymentStatus) => {
+const updatePaymentStatusController = async (id_ServiceOrder, paymentStatus, body) => {
+  const { DNI } = body;
+  const transaction = await sequelize.transaction();
+
   try {
-    // Encontrar la orden de servicio por ID
-    const order = await ServiceOrder.findByPk(orderId);
-    if (!order) throw new Error('Service order not found');
-    
-    // Extraer los valores de order.dataValues
-    const { id_ServiceOrder, userId, paymentMethod, paymentInformation } = order.dataValues;
+    console.log('[Controller] Inicio de actualización de estado de pago.');
+    console.log(`[Controller] Parámetros recibidos: id_ServiceOrder=${id_ServiceOrder}, paymentStatus=${paymentStatus}, body=`, body);
 
-    // Actualizar el estado de pago solo si no está ya pagado
-    if (paymentStatus === 'Pagado' && order.paymentStatus !== 'Pagado') {
-      await order.update({ paymentStatus: 'Pagado' });
+    const serviceOrder = await ServiceOrder.findByPk(id_ServiceOrder, { transaction });
+    console.log('[Controller] Orden de servicio obtenida:', serviceOrder ? serviceOrder.dataValues : 'No encontrada');
 
-      // Verificar el estado de pago y procesar reservas si es 'Pagado'
-      const bookingData = {
-        id_ServiceOrder: id_ServiceOrder,    // ID de la orden de servicio
-        userId: userId,                      // ID del usuario
-        paymentMethod: paymentMethod,        // Método de pago de la orden
-        paymentInformation: paymentInformation, // Información de pago
-        paymentStatus: 'Pagado',             // Estado de pago (Pagado)
-      };
+    if (!serviceOrder) throw new Error(`Orden de servicio no encontrada para id_ServiceOrder=${id_ServiceOrder}`);
 
-      /// Llamar al handler que crea las reservas y manejar la respuesta
-      const bookingResponse = await createBookingHandler(bookingData);
-      console.log(bookingResponse.message); // O cualquier otra acción que desees
+    const parsedPaymentInformation = serviceOrder.paymentInformation || [];
+    console.log('[Controller] Información de pago parseada:', parsedPaymentInformation);
+
+    if (paymentStatus === 'Pagado') {
+      for (const item of parsedPaymentInformation) {
+        console.log('[Controller] Procesando item de paymentInformation:', item);
+
+        const service = await Service.findByPk(item.id_Service, { transaction });
+        console.log('[Controller] Servicio obtenido:', service ? service.dataValues : 'No encontrado');
+
+        if (!service) throw new Error(`Servicio no encontrado para id_Service=${item.id_Service}`);
+
+        const bookingData = {
+          id_User: serviceOrder.id_User,
+          DNI: item.DNI || DNI,
+          id_Service: item.id_Service,
+          totalPeople: item.totalPeople || 0,
+          totalPrice: item.totalPrice || 0,
+          id_ServiceOrder,
+          paymentStatus,
+          paymentInformation: parsedPaymentInformation,
+          passengerName: item.passengerName || 'Desconocido' 
+          
+        };
+
+        console.log('[Controller] Datos para crear la reserva (booking):', bookingData);
+
+        await createBookingHandler(bookingData);
+      }
     }
 
-    return order;  // Devolver la orden actualizada
+    serviceOrder.paymentStatus = paymentStatus;
+    await serviceOrder.save({ transaction });
+
+    await transaction.commit();
+    console.log('[Controller] Estado de pago actualizado correctamente.');
+
+    return { message: 'Estado de pago actualizado correctamente.' };
   } catch (error) {
-    throw new Error('Error updating payment status');
+    await transaction.rollback();
+    console.error('[Controller] Error actualizando el estado de pago:', error.message);
+    throw new Error(`Error actualizando el estado de pago: ${error.message}`);
   }
 };
 

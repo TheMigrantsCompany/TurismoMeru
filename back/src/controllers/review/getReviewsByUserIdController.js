@@ -1,10 +1,10 @@
 const { Review } = require('../../config/db');
 
-const getReviewsByUserIdContoller = async (userId) => {
+const getReviewsByUserIdContoller = async (id_User) => {
   
   const reviews = await Review.findAll({
     where: {
-      userId,
+      id_User: id_User,
     },
   });
   return reviews;
