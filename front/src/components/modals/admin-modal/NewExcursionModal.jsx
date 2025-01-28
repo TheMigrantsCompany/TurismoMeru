@@ -26,6 +26,7 @@ const NewExcursionModal = ({ onClose }) => {
     additionalEquipment: '',
     guides: [],
     stock: 0,
+    lockedStock: 0,
     active: true,
   });
 
