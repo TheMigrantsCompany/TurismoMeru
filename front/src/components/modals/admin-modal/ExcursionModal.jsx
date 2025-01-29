@@ -25,6 +25,7 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
   const [newAvailability, setNewAvailability] = useState({
     date: new Date(),
     time: new Date(),
+    stock: 0,
   });
 
   useEffect(() => {
@@ -32,12 +33,13 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
       setImagePreviews([...excursion.photos]);
     }
     if (excursion.availabilityDate) {
-      setSelectedDates(
-        excursion.availabilityDate.map((dateStr) => {
-          const date = new Date(dateStr);
-          return { date, times: [] };
-        })
-      );
+      const formattedDates = excursion.availabilityDate.map((item) => ({
+        date: item.date, // Mantener la fecha como cadena
+        time: item.time, // Mantener la hora como cadena
+        stock: item.stock ?? 0,
+      }));
+  
+      setSelectedDates(formattedDates);
     }
   }, [excursion]);
 
@@ -122,63 +124,94 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
     }));
   };
 
-  const handleDateChange = (selectedDate) => {
+  const handleDateChange = (date) => {
     setNewAvailability((prev) => ({
       ...prev,
-      date: selectedDate,
+      date: date,
     }));
   };
 
-  const handleTimeChange = (selectedTime) => {
+  const handleTimeChange = (time) => {
     setNewAvailability((prev) => ({
       ...prev,
-      time: selectedTime,
+      time: time,
     }));
   };
 
+  const handleStockChange = (e) => {
+    setNewAvailability((prev) => ({
+      ...prev,
+      stock: Number(e.target.value),
+    }));
+  };
+
+  // Función para agregar una nueva disponibilidad
   const handleAddAvailability = () => {
-    const { date, time } = newAvailability;
-    if (!date || !time) {
-      alert("Debes seleccionar una fecha y una hora.");
+    const { date, time, stock } = newAvailability;
+  
+    // Validación de datos
+    if (!date || !time || stock <= 0) {
+      alert("Debes seleccionar una fecha, una hora y un stock válido.");
       return;
     }
-
-    const combinedDateTime = new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate(),
-      time.getHours(),
-      time.getMinutes()
-    ).toISOString();
-
-    setSelectedDates((prevDates) => [
-      ...prevDates,
-      { date: combinedDateTime, times: [time] },
-    ]);
+  
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+  
+    const selectedDate = new Date(date);
+    selectedDate.setHours(0, 0, 0, 0);
+  
+    if (selectedDate < today) {
+      alert("No puedes seleccionar una fecha pasada.");
+      return;
+    }
+  
+    // Formatear la fecha y la hora
+    const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const formattedTime = `${String(time.getHours()).padStart(2, '0')}:${String(time.getMinutes()).padStart(2, '0')}`;
+  
+    // Crear el nuevo objeto de disponibilidad con la fecha y hora seleccionadas
+    const newAvailabilityEntry = {
+      date: formattedDate,
+      time: formattedTime,
+      stock: Number(stock), // Asegúrate de que el stock sea un número
+    };
+  
+    // Actualizar la lista de fechas seleccionadas
+    setSelectedDates((prev) => [...prev, newAvailabilityEntry]);
+  
+    // Actualizar el stock global sumando el nuevo stock
+    setExcursionData((prevData) => ({
+      ...prevData,
+      stock: prevData.stock + Number(stock), // Asegurarse de sumar el stock como número
+      availabilityDate: [...prevData.availabilityDate, newAvailabilityEntry], // Agregar la nueva fecha y stock
+    }));
+  
+    // Resetear el formulario de nueva disponibilidad
     setNewAvailability({
       date: new Date(),
       time: new Date(),
+      stock: 0,
     });
   };
 
-  const handleRemoveAvailability = (index) => {
-    setSelectedDates((prev) => prev.filter((_, i) => i !== index));
-  };
+// Función para eliminar una disponibilidad
+const handleRemoveAvailability = (index) => {
+  const availabilityToRemove = selectedDates[index];
+
+  // Actualizar el stock global restando el stock de la fecha eliminada
+  setExcursionData((prevData) => ({
+    ...prevData,
+    stock: prevData.stock - availabilityToRemove.stock, // Restar el stock global
+    availabilityDate: prevData.availabilityDate.filter((_, i) => i !== index), // Eliminar la fecha de la lista
+  }));
+
+  // Eliminar la fecha seleccionada de la lista
+  setSelectedDates((prev) => prev.filter((_, i) => i !== index));
+};
+
 
   const handleSubmit = async () => {
-    console.log("Datos enviados:", excursionData);
-    if (
-      !excursionData.title ||
-      !excursionData.description ||
-      !excursionData.price ||
-      excursionData.discount.seniorPercentage < 0 ||
-      excursionData.discount.seniorPercentage > 100 ||
-      excursionData.discount.minorPercentage < 0 ||
-      excursionData.discount.minorPercentage > 100
-    ) {
-      setFormErrors({ general: "Todos los campos deben estar completos." });
-      return;
-    }
     try {
       const response = await fetch(
         `http://localhost:3001/service/id/${excursion.id_Service}`,
@@ -189,8 +222,7 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
             ...excursionData,
             discountForMinors: excursionData.discount.minorPercentage,
             discountForSeniors: excursionData.discount.seniorPercentage,
-            availabilityDate: selectedDates.map((d) => d.date),
-            lockedStock: excursionData.lockedStock,  // Asegúrate de incluir el campo aquí
+            availabilityDate: excursionData.availabilityDate, // Solo se envían las fechas con su stock
           }),
         }
       );
@@ -408,72 +440,72 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
         </div>
 
         <div className="mt-4">
-          <label className="block text-sm text-gray-600 font-medium mb-1">
-            Agregar Nueva Fecha:
-          </label>
+  <label className="block text-sm text-gray-600 font-medium mb-1">
+    Agregar Nueva Fecha:
+  </label>
 
-          <div className="relative mb-2">
-            <DatePicker
-              selected={newAvailability.date}
-              onChange={handleDateChange}
-              dateFormat="MMMM d, yyyy"
-              className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-            />
-          </div>
+  <div className="relative mb-2">
+    <DatePicker
+      selected={newAvailability.date}
+      onChange={handleDateChange}
+      dateFormat="MMMM d, yyyy"
+      className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
+    />
+  </div>
 
-          <div className="relative mb-2">
-            <DatePicker
-              selected={newAvailability.time}
-              onChange={handleTimeChange}
-              showTimeSelect
-              showTimeSelectOnly
-              timeIntervals={15}
-              timeCaption="Hora"
-              dateFormat="h:mm aa"
-              className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-            />
-          </div>
+  <div className="relative mb-2">
+    <DatePicker
+      selected={newAvailability.time}
+      onChange={handleTimeChange}
+      showTimeSelect
+      showTimeSelectOnly
+      timeIntervals={15}
+      timeCaption="Hora"
+      dateFormat="h:mm aa"
+      className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
+    />
+  </div>
 
-          <button
-            onClick={handleAddAvailability}
-            className="bg-blue-600 text-white px-2 py-2 text-xs rounded-md hover:bg-blue-700 transition"
-          >
-            Agregar Fecha
-          </button>
-        </div>
+  {/* Agregar campo para stock */}
+  <div className="relative mb-2">
+    <label className="block text-sm text-gray-600 font-medium mb-1">Stock Disponible:</label>
+    <input
+      type="number"
+      value={newAvailability.stock || ''}
+      onChange={(e) => setNewAvailability({ ...newAvailability, stock: e.target.value })}
+      className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
+      placeholder="Cantidad disponible"
+    />
+  </div>
 
-        {/* Fechas seleccionadas */}
-        <div className="mt-6">
-          <label className="block text-sm text-gray-600 font-medium mb-1">
-            Fechas Agregadas:
-          </label>
-          <ul className="space-y-2">
-            {selectedDates.map((availability, index) => {
-              const formattedDate = new Date(availability.date).toLocaleString(
-                "es-ES",
-                {
-                  weekday: "short",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }
-              );
-              return (
-                <li key={index} className="flex justify-between items-center">
-                  <span className="text-black">{formattedDate}</span>
-                  <button
-                    onClick={() => handleRemoveAvailability(index)}
-                    className="text-red-500 hover:text-red-700 text-xs px-2 py-1"
-                  >
-                    Eliminar
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+  <button
+    onClick={handleAddAvailability}
+    className="bg-blue-600 text-white px-2 py-2 text-xs rounded-md hover:bg-blue-700 transition"
+  >
+    Agregar Fecha
+  </button>
+</div>
+
+{/* Fechas seleccionadas */}
+<div className="mt-6">
+  <label className="block text-sm text-gray-600 font-medium mb-1">
+    Fechas Agregadas:
+  </label>
+  <ul className="space-y-2">
+    {selectedDates.map((availability, index) => (
+      <li key={index} className="flex justify-between items-center">
+        <span className="text-black">{availability.date} - {availability.time} - Stock: {availability.stock}</span>
+        <button
+          onClick={() => handleRemoveAvailability(index)}
+          className="text-red-500 hover:text-red-700 text-xs px-2 py-1"
+        >
+          Eliminar
+        </button>
+      </li>
+    ))}
+  </ul>
+</div>
+
 
         <div>
           <label className="block text-sm text-gray-600 font-medium mb-1">
