@@ -36,6 +36,11 @@ import {
   GET_ALL_ORDERS_REQUEST,
   GET_ALL_ORDERS_ERROR,
 
+  //bookings
+  GET_ALL_BOOKINGS,
+  GET_ALL_BOOKINGS_REQUEST,
+  GET_ALL_BOOKINGS_ERROR,
+
 
 } from "../actions/types";
 
@@ -58,6 +63,12 @@ const initialState = {
     order: null,
     error: null,
     ordersList: [],
+  },
+  bookings: {
+    loading: false,
+    booking: null,
+    error: null,
+    bookingsList: [],
   },
 };
 
@@ -454,6 +465,16 @@ const rootReducer = (state = initialState, action) => {
           error: action.payload, // Guarda el mensaje de error
         },
       };
+    
+      case GET_ALL_BOOKINGS:
+        return {
+          ...state,
+          bookings: {
+            ...state.bookings,
+            loading: false,
+            bookingsList: action.payload, // Aquí debes asegurar que se asignen los bookings a bookingsList
+          },
+        };
 
 
     default:

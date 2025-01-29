@@ -1,68 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllBookings } from "../../../redux/actions/actions";
 import { ChevronUpDownIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { Card, CardHeader, Typography, CardBody, Chip, Tooltip, IconButton, Button } from "@material-tailwind/react";
 import ReservationModal from "../../../components/modals/admin-modal/ReservationModal";
 import Swal from "sweetalert2";
 
-const TABLE_HEAD = [
-  "Cliente",
-  "Excursión",
-  "Cantidad de Personas",
-  "Estado",
-  "Fecha de Excursión",
-  "",
-];
-
-const initialReservations = [
-  {
-    passengerName: "Juan Pérez",
-    excursionName: "Excursión Glaciar",
-    seats: 4,
-    status: "accepted",
-    excursionDate: "2024-10-12",
-    passengerId: "12345678",
-    paymentMethod: "Tarjeta de Crédito",
-    totalPaid: "$400",
-  },
-  {
-    passengerName: "María López",
-    excursionName: "Tour de Ballenas",
-    seats: 2,
-    status: "pending",
-    excursionDate: "2024-11-25",
-    passengerId: "87654321",
-    paymentMethod: "Transferencia Bancaria",
-    totalPaid: "$200",
-  },
-  {
-    passengerName: "Carlos Ruiz",
-    excursionName: "Aventura en la Selva",
-    seats: 3,
-    status: "cancelled",
-    excursionDate: "2024-12-15",
-    passengerId: "12398765",
-    paymentMethod: "Efectivo",
-    totalPaid: "$300",
-  },
-];
+const TABLE_HEAD = ["Cliente", "Excursión", "Cantidad de Personas", "Estado", "Fecha de Excursión", ""];
 
 export function ReservationsTable() {
-  const [reservations, setReservations] = useState(initialReservations);
-  const [filteredReservations, setFilteredReservations] = useState(initialReservations);
+  const dispatch = useDispatch();
+  const reservationsState = useSelector((state) => state.bookings); // Asegúrate de que el estado esté bien definido
   const [selectedReservation, setSelectedReservation] = useState(null);
+  const [filter, setFilter] = useState("all");
 
+  useEffect(() => {
+    dispatch(getAllBookings());
+  }, [dispatch]);
+
+  // Asegúrate de que la respuesta de la API esté en el formato esperado
+  const filteredReservations = useMemo(() => {
+    if (!Array.isArray(reservationsState.bookingsList)) {
+      console.error("filteredReservations no es un array:", reservationsState);
+      return []; // Retorna un arreglo vacío si la estructura es incorrecta
+    }
+
+    const bookingsList = reservationsState.bookingsList || [];
+
+    console.log('Filtro actual:', filter); // Depura el filtro
+
+    if (filter === "all") return bookingsList;
+
+    return bookingsList.filter((reservation) => reservation.status === filter);
+  }, [reservationsState, filter]);
+
+  // Manejo de la edición de una reserva
   const handleEditReservation = (reservation) => {
     setSelectedReservation(reservation);
   };
 
-  const handleSaveReservation = (updatedReservation) => {
-    setReservations((prevReservations) =>
-      prevReservations.map((reservation) =>
-        reservation.passengerName === updatedReservation.passengerName
-          ? updatedReservation
-          : reservation
-      )
-    );
+  const handleSaveReservation = () => {
     Swal.fire({
       title: "¡Reserva modificada!",
       text: "La reserva fue actualizada exitosamente.",
@@ -71,43 +48,31 @@ export function ReservationsTable() {
     });
   };
 
-  const filterReservations = (status) => {
-    if (status === "all") {
-      setFilteredReservations(reservations);
-    } else {
-      setFilteredReservations(reservations.filter((reservation) => reservation.status === status));
-    }
-  };
+  // Verifica si la API está cargando o si ocurrió algún error
+  if (reservationsState.loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (reservationsState.error) {
+    return <div>Error: {reservationsState.error}</div>;
+  }
 
   return (
     <Card className="h-full w-full mt-16 bg-[#f9f3e1] shadow-lg rounded-lg">
       <CardHeader floated={false} shadow={false} className="p-6 bg-transparent">
-        {/* Botones de filtrado */}
         <div className="flex space-x-4">
-          <Button
-            className="bg-[#4256a6] text-white py-2 rounded-lg hover:bg-[#364d73] transition-colors"
-            onClick={() => filterReservations("all")}
-          >
-            Todas
-          </Button>
-          <Button
-            className="bg-[#f4925b] text-white py-2 rounded-lg hover:bg-[#d98248] transition-colors"
-            onClick={() => filterReservations("accepted")}
-          >
-            Aceptadas
-          </Button>
-          <Button
-            className="bg-[#152817] text-white py-2 rounded-lg hover:bg-[#0f1e11] transition-colors"
-            onClick={() => filterReservations("pending")}
-          >
-            Pendientes
-          </Button>
-          <Button
-            className="bg-[#f44336] text-white py-2 rounded-lg hover:bg-[#d32f2f] transition-colors"
-            onClick={() => filterReservations("cancelled")}
-          >
-            Canceladas
-          </Button>
+          {["all", "accepted", "pending", "cancelled"].map((status) => (
+            <Button
+              key={status}
+              className={
+                `py-2 rounded-lg transition-colors ` +
+                (filter === status ? "bg-[#364d73] text-white" : "bg-[#4256a6] text-white hover:bg-[#364d73]")
+              }
+              onClick={() => setFilter(status)}
+            >
+              {status.charAt(0).toUpperCase() + status.slice(1)}
+            </Button>
+          ))}
         </div>
       </CardHeader>
 
@@ -126,22 +91,14 @@ export function ReservationsTable() {
           </thead>
           <tbody>
             {filteredReservations.map((reservation) => (
-              <tr
-                key={reservation.passengerName}
-                className="hover:bg-[#e1d4b0] transition-colors border-b border-[#4256a6]"
-              >
-                <td className="p-4 border-b border-[#4256a6]">{reservation.passengerName}</td>
-                <td className="p-4 border-b border-[#4256a6]">{reservation.excursionName}</td>
-                <td className="p-4 border-b border-[#4256a6]">{reservation.seats}</td>
+              <tr key={reservation.id_Booking} className="hover:bg-[#e1d4b0] transition-colors border-b border-[#4256a6]">
+                <td className="p-4 border-b border-[#4256a6]">{reservation.DNI}</td>
+                <td className="p-4 border-b border-[#4256a6]">{reservation.serviceTitle}</td>
+                <td className="p-4 border-b border-[#4256a6]">{reservation.totalPeople}</td>
                 <td className="p-4 border-b border-[#4256a6]">
-                  <Chip
-                    variant="ghost"
-                    size="sm"
-                    value={reservation.status}
-                    color={reservation.status === "accepted" ? "green" : reservation.status === "pending" ? "yellow" : "red"}
-                  />
+                  <Chip variant="ghost" size="sm" value={reservation.status} color={reservation.status === "accepted" ? "green" : "red"} />
                 </td>
-                <td className="p-4 border-b border-[#4256a6]">{reservation.excursionDate}</td>
+                <td className="p-4 border-b border-[#4256a6]">{new Date(reservation.bookingDate).toLocaleDateString()}</td>
                 <td className="p-4 border-b border-[#4256a6]">
                   <Tooltip content="Editar Reserva">
                     <IconButton variant="text" onClick={() => handleEditReservation(reservation)}>
@@ -156,11 +113,7 @@ export function ReservationsTable() {
       </CardBody>
 
       {selectedReservation && (
-        <ReservationModal
-          reservation={selectedReservation}
-          onClose={() => setSelectedReservation(null)}
-          onSave={handleSaveReservation}
-        />
+        <ReservationModal reservation={selectedReservation} onClose={() => setSelectedReservation(null)} onSave={handleSaveReservation} />
       )}
     </Card>
   );

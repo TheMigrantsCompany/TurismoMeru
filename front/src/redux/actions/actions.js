@@ -35,6 +35,10 @@ import {
    GET_ALL_ORDERS,
    GET_ALL_ORDERS_REQUEST,
    GET_ALL_ORDERS_ERROR,
+
+   GET_ALL_BOOKINGS,
+   GET_ALL_BOOKINGS_REQUEST,
+   GET_ALL_BOOKINGS_ERROR,
 } from "./types";
 
 export const createExcursion = (excursionData) => async (dispatch) => {
@@ -291,6 +295,19 @@ export const getAllOrders = () => async (dispatch) => {
     dispatch({ type: GET_ALL_ORDERS, payload: response.data });
   } catch (error) {
     dispatch({ type: GET_ALL_ORDERS_ERROR, payload: error.message });
+  }
+};
+
+//ACTIONS BOOKINGS
+//todos los bookings
+
+export const getAllBookings = () => async (dispatch) => {
+  dispatch({ type: GET_ALL_BOOKINGS_REQUEST });
+  try {
+    const response = await axios.get('http://localhost:3001/booking/');
+    dispatch({ type: GET_ALL_BOOKINGS, payload: response.data });
+  } catch (error) {
+    dispatch({ type: GET_ALL_BOOKINGS_ERROR, payload: error.message });
   }
 };
 
