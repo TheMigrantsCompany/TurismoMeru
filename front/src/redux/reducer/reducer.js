@@ -3,6 +3,9 @@ import {
   CREATE_EXCURSION_REQUEST,
   CREATE_EXCURSION_SUCCESS,
   GET_ALL_SERVICES,
+  GET_BOOKINGS_BY_SERVICE_REQUEST,
+  GET_BOOKINGS_BY_SERVICE_SUCCESS,
+  GET_BOOKINGS_BY_SERVICE_FAILURE,
   DELETE_SERVICE,
   TOGGLE_SERVICE_STATUS_SUCCESS,
   // Users
@@ -48,6 +51,11 @@ const initialState = {
   excursion: {
     loading: false,
     excursion: [],
+    error: null,
+  },
+  bookingsByService: {
+    loading: false,
+    bookings: [],
     error: null,
   },
   users: {
@@ -110,6 +118,36 @@ const rootReducer = (state = initialState, action) => {
           ),
         },
       };
+    // Reducer para manejar la búsqueda de bookings por servicio, fecha y hora
+    case GET_BOOKINGS_BY_SERVICE_REQUEST:
+      return {
+        ...state,
+        bookingsByService: {
+          ...state.bookingsByService,
+          loading: true,
+          error: null,
+        },
+      };
+    case GET_BOOKINGS_BY_SERVICE_SUCCESS:
+      return {
+        ...state,
+        bookingsByService: {
+          ...state.bookingsByService,
+          loading: false,
+          bookings: action.payload,
+          error: null,
+        },
+      };
+    case GET_BOOKINGS_BY_SERVICE_FAILURE:
+      return {
+        ...state,
+        bookingsByService: {
+          ...state.bookingsByService,
+          loading: false,
+          error: action.payload,
+        },
+      };
+    
 
     //USERS
     case GET_USERS_REQUEST:
