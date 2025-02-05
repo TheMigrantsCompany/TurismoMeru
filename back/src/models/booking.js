@@ -44,6 +44,10 @@ module.exports = (sequelize) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
+    passengerName: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
     seatNumber: {
       type: DataTypes.INTEGER,
       allowNull: true // Opcional: el número de asiento puede no ser necesario
@@ -59,6 +63,10 @@ module.exports = (sequelize) => {
     },
     totalPrice: {
       type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    dateTime: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
   }, {

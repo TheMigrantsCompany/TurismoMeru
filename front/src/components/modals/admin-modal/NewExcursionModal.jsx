@@ -26,10 +26,8 @@ const NewExcursionModal = ({ onClose }) => {
     additionalEquipment: '',
     guides: [],
     stock: 0,
-    lockedStock: 0,
     active: true,
   });
-
 
   const [formErrors, setFormErrors] = useState({});
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -37,6 +35,7 @@ const NewExcursionModal = ({ onClose }) => {
   const [newAvailability, setNewAvailability] = useState({
     date: new Date(),
     time: new Date(),
+    stock: 0,
   });
   const [newGuide, setNewGuide] = useState({ name: '', experience: '' });
 
@@ -83,37 +82,65 @@ const NewExcursionModal = ({ onClose }) => {
     }));
   };
 
-
-  const handleAddAvailability = () => {
-    const { date, time } = newAvailability;
-    if (!date || !time) {
-      alert("Debes seleccionar una fecha y una hora.");
-      return;
-    }
-
-    const combinedDateTime = new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate(),
-      time.getHours(),
-      time.getMinutes()
-    ).toISOString();
-
-    setAvailabilities((prev) => [...prev, combinedDateTime]);
-    setNewAvailability({
-      date: new Date(),
-      time: new Date(),
-    });
-  };
-
-  const handleRemoveAvailability = (index) => {
-    setAvailabilities((prev) => prev.filter((_, i) => i !== index));
-    setExcursionData((prevData) => ({
-      ...prevData,
-      availabilityDate: prevData.availabilityDate.filter((_, i) => i !== index),
+  const handleStockChange = (e) => {
+    const { value } = e.target;
+    setNewAvailability((prev) => ({
+      ...prev,
+      stock: Number(value),
     }));
   };
 
+  const handleAddAvailability = () => {
+    const { date, time, stock } = newAvailability;
+  
+    if (!date || !time || stock <= 0) {
+      alert("Debes seleccionar una fecha, una hora y un stock válido.");
+      return;
+    }
+  
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Resetear horas para comparar solo la fecha
+  
+    const selectedDate = new Date(date);
+    selectedDate.setHours(0, 0, 0, 0);
+  
+    if (selectedDate < today) {
+      alert("No puedes seleccionar una fecha pasada.");
+      return;
+    }
+  
+    const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const formattedTime = `${String(time.getHours()).padStart(2, '0')}:${String(time.getMinutes()).padStart(2, '0')}`;
+  
+    const newAvailabilityEntry = {
+      date: formattedDate,
+      time: formattedTime,
+      stock: Number(stock),
+    };
+  
+    setAvailabilities((prev) => [...prev, newAvailabilityEntry]);
+  
+    setExcursionData((prevData) => ({
+      ...prevData,
+      stock: prevData.stock + stock,
+    }));
+  
+    setNewAvailability({
+      date: new Date(),
+      time: new Date(),
+      stock: 0,
+    });
+  };
+  
+
+  const handleRemoveAvailability = (index) => {
+    const removedAvailability = availabilities[index];
+    setAvailabilities((prev) => prev.filter((_, i) => i !== index));
+    setExcursionData((prevData) => ({
+      ...prevData,
+      stock: prevData.stock - removedAvailability.stock,
+    }));
+  };
 
   const handlePhotoChange = async (e) => {
     const files = Array.from(e.target.files);
@@ -153,6 +180,7 @@ const NewExcursionModal = ({ onClose }) => {
 
   const validateForm = () => {
     const errors = {};
+  
     if (!excursionData.title.trim()) errors.title = "El nombre es obligatorio.";
     if (!excursionData.description.trim()) errors.description = "La descripción es obligatoria.";
     if (!excursionData.price || excursionData.price <= 0) errors.price = "El precio debe ser mayor a 0.";
@@ -160,25 +188,40 @@ const NewExcursionModal = ({ onClose }) => {
     if (!excursionData.photos.length) errors.photos = "Debes subir al menos una foto.";
     if (!availabilities.length) errors.availabilityDate = "Debes agregar al menos una fecha.";
     if (excursionData.guides.length === 0) errors.guides = "Debes agregar al menos un guía.";
+  
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+  
+    availabilities.forEach((availability, index) => {
+      const selectedDate = new Date(availability.date);
+      selectedDate.setHours(0, 0, 0, 0);
+      if (selectedDate < today) {
+        errors[`availabilityDate${index}`] = "No puedes agregar fechas pasadas.";
+      }
+    });
+  
     return errors;
   };
 
-
   const handleSubmit = async () => {
     const errors = validateForm();
+    console.log("Errores de validación:", errors); // Verifica errores
+  
     if (Object.keys(errors).length) {
       setFormErrors(errors);
       return;
     }
-
+  
     setFormErrors({});
-
+  
     try {
       const excursionPayload = {
         ...excursionData,
-        availabilityDate: availabilities.map((date) => new Date(date).toISOString()),
+        availabilityDate: availabilities,
       };
-
+  
+      console.log("Enviando datos:", excursionPayload);
+  
       await dispatch(createExcursion(excursionPayload));
       dispatch(getAllServices());
       onClose();
@@ -186,8 +229,7 @@ const NewExcursionModal = ({ onClose }) => {
       console.error("Error al crear la excursión:", err);
     }
   };
-
-
+  
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#4256a6]/80">
       <div className="bg-[#dac9aa] p-8 rounded-lg max-w-md w-full relative z-10 overflow-y-auto max-h-[90vh] shadow-lg">
@@ -268,6 +310,7 @@ const NewExcursionModal = ({ onClose }) => {
               value={excursionData.stock}
               onChange={handleChange}
               className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
+              disabled
             />
             {formErrors.stock && <p className="text-red-500 text-sm">{formErrors.stock}</p>}
           </div>
@@ -362,6 +405,18 @@ const NewExcursionModal = ({ onClose }) => {
                 />
               </div>
 
+              {/* Selección del stock */}
+              <div className="relative mb-2">
+                <input
+                  type="number"
+                  name="stock"
+                  value={newAvailability.stock}
+                  onChange={handleStockChange}
+                  className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
+                  placeholder="Stock"
+                />
+              </div>
+
               {/* Botón para agregar */}
               <button
                 onClick={handleAddAvailability}
@@ -376,28 +431,22 @@ const NewExcursionModal = ({ onClose }) => {
           <div className="mt-6">
             <label className="block text-sm text-gray-600 font-medium mb-1">Fechas Agregadas:</label>
             <ul className="space-y-2">
-              {availabilities.map((availability, index) => {
-                const formattedDate = new Date(availability).toLocaleString("es-ES", {
-                  weekday: "short",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                });
-                return (
-                  <li key={index} className="flex justify-between items-center">
-                    <span className="text-black">{formattedDate}</span>
-                    <button
-                      onClick={() => handleRemoveAvailability(index)}
-                      className="text-red-500 hover:text-red-700 text-xs px-2 py-1"
-                    >
-                      Eliminar
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+  {availabilities.map((availability, index) => {
+    const formattedDate = new Date(availability.date).toLocaleDateString("es-ES", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    return (
+      <li key={index} className="flex items-center justify-between">
+        <span>
+          Fecha: {formattedDate} - Hora: {availability.time} - Stock: {availability.stock}
+        </span>
+      </li>
+    );
+  })}
+</ul>
 
           </div>
         </div>

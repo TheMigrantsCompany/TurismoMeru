@@ -16,7 +16,7 @@ const BookingForm = ({ serviceId, quantity, serviceTitle, userId }) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:3001/booking', {
+      const response = await axios.post('https://bearing-settled-consult-je.trycloudflare.com/booking', {
         userId,
         paymentStatus: 'Paid',
         paymentInformation: attendees.map((attendee, i) => ({

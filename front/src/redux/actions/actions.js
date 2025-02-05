@@ -4,6 +4,9 @@ import {
   CREATE_EXCURSION_REQUEST,
   CREATE_EXCURSION_SUCCESS,
   GET_ALL_SERVICES,
+  GET_BOOKINGS_BY_SERVICE_REQUEST,
+  GET_BOOKINGS_BY_SERVICE_SUCCESS,
+  GET_BOOKINGS_BY_SERVICE_FAILURE,
   DELETE_SERVICE,
   TOGGLE_SERVICE_STATUS_SUCCESS,
   //users
@@ -35,6 +38,10 @@ import {
    GET_ALL_ORDERS,
    GET_ALL_ORDERS_REQUEST,
    GET_ALL_ORDERS_ERROR,
+
+   GET_ALL_BOOKINGS,
+   GET_ALL_BOOKINGS_REQUEST,
+   GET_ALL_BOOKINGS_ERROR,
 } from "./types";
 
 export const createExcursion = (excursionData) => async (dispatch) => {
@@ -51,6 +58,25 @@ export const createExcursion = (excursionData) => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: CREATE_EXCURSION_FAILURE,
+      payload: error.message,
+    });
+  }
+};
+
+export const getBookingsByService = (id_Service, date, time, page = 1, limit = 10) => async (dispatch) => {
+  dispatch({ type: GET_BOOKINGS_BY_SERVICE_REQUEST });
+
+  try {
+    const response = await axios.get(
+      `http://localhost:3001/booking/service/${id_Service}?date=${date}&time=${time}&page=${page}&limit=${limit}`
+    );
+    dispatch({
+      type: GET_BOOKINGS_BY_SERVICE_SUCCESS,
+      payload: response.data.data, // Se espera que los datos de las reservas estén en data
+    });
+  } catch (error) {
+    dispatch({
+      type: GET_BOOKINGS_BY_SERVICE_FAILURE,
       payload: error.message,
     });
   }
@@ -294,3 +320,15 @@ export const getAllOrders = () => async (dispatch) => {
   }
 };
 
+//ACTIONS BOOKINGS
+//todos los bookings
+
+export const getAllBookings = () => async (dispatch) => {
+  dispatch({ type: GET_ALL_BOOKINGS_REQUEST });
+  try {
+    const response = await axios.get('http://localhost:3001/booking/');
+    dispatch({ type: GET_ALL_BOOKINGS, payload: response.data });
+  } catch (error) {
+    dispatch({ type: GET_ALL_BOOKINGS_ERROR, payload: error.message });
+  }
+};

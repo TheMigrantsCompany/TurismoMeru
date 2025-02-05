@@ -1,4 +1,4 @@
-const { Op } = require('sequelize'); // Importa operadores de Sequelize
+const { Op } = require('sequelize');
 const { Booking } = require('../../config/db');
 
 const getBookingsByServiceController = async (id_Service, date, time, page = 1, limit = 10) => {
@@ -12,15 +12,15 @@ const getBookingsByServiceController = async (id_Service, date, time, page = 1, 
 
     const offset = (page - 1) * limit;
 
-    // Construye el valor combinado de fecha y hora
+    // Construir dateTime en el mismo formato que la base de datos
     const dateTime = `${date} ${time}`;
 
-    // Busca las reservas filtrando por id_Service y dateTime
+    // Buscar bookings por id_Service y dateTime exacto
     const { count, rows } = await Booking.findAndCountAll({
         where: {
             id_Service,
             dateTime: {
-                [Op.eq]: dateTime, // Filtro exacto por fecha y hora
+                [Op.eq]: dateTime, // Comparación exacta
             },
         },
         order: [['createdAt', 'ASC']],

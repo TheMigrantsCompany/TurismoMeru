@@ -24,10 +24,10 @@ function App() {
       <StickyNavbar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/detail/:id_Service" element={<Detail />} />
-        
+        <Route path="/detail/:id_Service" element={<Detail />} /> 
+       
         {/* Ruta para el Administrador */}
-        <Route path="/admin" element={<DashboardAdmin />}>
+        <Route path="/admin" element={<DashboardAdmin />}>  
           {/* Subrutas dentro de la administración */}
           <Route path="reservas" element={<ReservationManagement />} />
           <Route path="usuarios" element={<UserManagement />} />

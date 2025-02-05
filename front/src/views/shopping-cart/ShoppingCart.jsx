@@ -7,11 +7,17 @@ const ShoppingCart = () => {
   const { cartItems, removeFromCart } = useCart();
   const [showCheckout, setShowCheckout] = useState(false);
   const navigate = useNavigate();
-  const subtotal = cartItems.reduce(
-    (acc, item) => acc + (typeof item.totalPrice === "number" ? item.totalPrice : 0),
-    0
-  );
 
+  const subtotal = cartItems.reduce((acc, item) => {
+    const { price, discountForMinors = 0, discountForSeniors = 0, quantities } = item;
+  
+    const adultsTotal = price * (quantities?.adults || 0);
+    const minorsTotal = (price - (price * discountForMinors) / 100) * (quantities?.children || 0);
+    const seniorsTotal = (price - (price * discountForSeniors) / 100) * (quantities?.seniors || 0);
+  
+    return acc + adultsTotal + minorsTotal + seniorsTotal;
+  }, 0);
+  
   const total = subtotal;
 
   return (
@@ -67,7 +73,7 @@ const ShoppingCart = () => {
                   </p>
                   <p
                     className="text-sm text-red-500 underline cursor-pointer hover:text-red-700 transition"
-                    onClick={() => removeFromCart(item.id_Service)} 
+                    onClick={() => removeFromCart(item.id_Service)}
                   >
                     Eliminar
                   </p>
