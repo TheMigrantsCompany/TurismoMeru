@@ -39,6 +39,10 @@ import {
    GET_ALL_ORDERS_REQUEST,
    GET_ALL_ORDERS_ERROR,
 
+   GET_ORDERS_BY_USER_REQUEST,
+   GET_ORDERS_BY_USER_SUCCESS,
+   GET_ORDERS_BY_USER_FAILURE,
+
    GET_ALL_BOOKINGS,
    GET_ALL_BOOKINGS_REQUEST,
    GET_ALL_BOOKINGS_ERROR,
@@ -63,24 +67,7 @@ export const createExcursion = (excursionData) => async (dispatch) => {
   }
 };
 
-export const getBookingsByService = (id_Service, date, time, page = 1, limit = 10) => async (dispatch) => {
-  dispatch({ type: GET_BOOKINGS_BY_SERVICE_REQUEST });
 
-  try {
-    const response = await axios.get(
-      `http://localhost:3001/booking/service/${id_Service}?date=${date}&time=${time}&page=${page}&limit=${limit}`
-    );
-    dispatch({
-      type: GET_BOOKINGS_BY_SERVICE_SUCCESS,
-      payload: response.data.data, // Se espera que los datos de las reservas estén en data
-    });
-  } catch (error) {
-    dispatch({
-      type: GET_BOOKINGS_BY_SERVICE_FAILURE,
-      payload: error.message,
-    });
-  }
-};
 
 export const getAllServices = () => async (dispatch) => {
   try {
@@ -320,6 +307,18 @@ export const getAllOrders = () => async (dispatch) => {
   }
 };
 
+//GET ordenes de servicio por usuario
+export const getOrdersByUser = (id_User) => async (dispatch) => {
+  try {
+    const response = await axios.get(`http://localhost:3001/servicesOrder/user/${id_User}`);
+    console.log("Respuesta del backend:", response);
+    dispatch({ type: "GET_ORDERS_BY_USER_SUCCESS", payload: response.data });
+    console.log("Respuesta del backend:", response.data);
+  } catch (error) {
+    dispatch({ type: "GET_ORDERS_BY_USER_FAILURE", payload: error.message });
+  }
+};
+
 //ACTIONS BOOKINGS
 //todos los bookings
 
@@ -333,3 +332,21 @@ export const getAllBookings = () => async (dispatch) => {
   }
 };
 
+export const getBookingsByService = (id_Service, date, time, page = 1, limit = 10) => async (dispatch) => {
+  dispatch({ type: GET_BOOKINGS_BY_SERVICE_REQUEST });
+
+  try {
+    const response = await axios.get(
+      `http://localhost:3001/booking/service/${id_Service}?date=${date}&time=${time}&page=${page}&limit=${limit}`
+    );
+    dispatch({
+      type: GET_BOOKINGS_BY_SERVICE_SUCCESS,
+      payload: response.data.data, // Se espera que los datos de las reservas estén en data
+    });
+  } catch (error) {
+    dispatch({
+      type: GET_BOOKINGS_BY_SERVICE_FAILURE,
+      payload: error.message,
+    });
+  }
+};

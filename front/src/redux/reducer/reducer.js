@@ -38,6 +38,9 @@ import {
   GET_ALL_ORDERS,
   GET_ALL_ORDERS_REQUEST,
   GET_ALL_ORDERS_ERROR,
+  GET_ORDERS_BY_USER_REQUEST,
+  GET_ORDERS_BY_USER_SUCCESS,
+  GET_ORDERS_BY_USER_FAILURE,
 
   //bookings
   GET_ALL_BOOKINGS,
@@ -503,6 +506,29 @@ const rootReducer = (state = initialState, action) => {
           error: action.payload, // Guarda el mensaje de error
         },
       };
+
+      case GET_ORDERS_BY_USER_REQUEST:
+        return {
+          ...state,
+          loading: true, // Activamos el estado de carga
+        };
+      
+      case GET_ORDERS_BY_USER_SUCCESS:
+      console.log("Órdenes obtenidas:", action.payload);
+      return {
+        ...state,
+        loading: false,
+        ordersList: Array.isArray(action.payload) ? action.payload : [],
+        error: null,
+      };
+      
+      case GET_ORDERS_BY_USER_FAILURE:
+        return {
+          ...state,
+          loading: false, // Desactivamos `loading`
+          error: action.payload, // Guardamos el error
+        };
+   
     
       case GET_ALL_BOOKINGS:
         return {

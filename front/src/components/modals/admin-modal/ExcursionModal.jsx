@@ -356,7 +356,7 @@ const handleRemoveAvailability = (index) => {
         </div>
         <div>
   <label className="block text-sm text-gray-600 font-medium mb-1">
-    Stock Bloqueado:
+    Stock Bloqueado (Reservas en proceso):
   </label>
   <input
     type="number"
