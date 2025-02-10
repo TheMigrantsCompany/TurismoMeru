@@ -1,10 +1,11 @@
 import React from "react";
 
 const ReservationModal = ({ reservation, onClose, onSave }) => {
-  if (!reservation) return null; // Evita errores si la reserva es null
-  // Si se ha pasado la información de la orden, extraemos sus datos
+  if (!reservation) return null;
+
+  // Extraemos los datos de la reserva y la orden de servicio
   const serviceOrder = reservation.serviceOrder;
-  const paymentInfo = serviceOrder?.paymentInformation?.[0]; // asumiendo que siempre hay un objeto en el array
+  const paymentInfo = serviceOrder?.paymentInformation?.[0];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#000000cc] pointer-events-auto">
@@ -15,56 +16,84 @@ const ReservationModal = ({ reservation, onClose, onSave }) => {
 
         {/* Información de la reserva (booking) */}
         <div className="mb-4">
-          <label className="block font-semibold text-[#152817]">Nombre del Pasajero:</label>
+          <label className="block font-semibold text-[#152817]">
+            Nombre del Pasajero:
+          </label>
           <p className="text-[#4256a6]">{reservation.passengerName}</p>
         </div>
 
         <div className="mb-4">
-          <label className="block font-semibold text-[#152817]">Documento de Identidad:</label>
+          <label className="block font-semibold text-[#152817]">
+            Documento de Identidad:
+          </label>
           <p className="text-[#4256a6]">{reservation.DNI}</p>
         </div>
 
         <div className="mb-4">
-          <label className="block font-semibold text-[#152817]">Nombre del Servicio:</label>
+          <label className="block font-semibold text-[#152817]">
+            Nombre del Servicio:
+          </label>
           <p className="text-[#4256a6]">{reservation.serviceTitle}</p>
         </div>
 
         <div className="mb-4">
-          <label className="block font-semibold text-[#152817]">Fecha y Horario del Servicio:</label>
+          <label className="block font-semibold text-[#152817]">
+            Fecha y Horario del Servicio:
+          </label>
           <p className="text-[#4256a6]">{reservation.dateTime}</p>
+        </div>
+
+        <div className="mb-4">
+          <label className="block font-semibold text-[#152817]">
+            Cantidad Total de Pasajeros:
+          </label>
+          <p className="text-[#4256a6]">{reservation.totalPeople}</p>
         </div>
 
         {/* Información adicional de la orden de servicio */}
         {serviceOrder && (
           <>
             <hr className="my-4" />
-            <h3 className="text-xl font-semibold text-[#4256a6] mb-4">Detalles de la Orden de Servicio</h3>
+            <h3 className="text-xl font-semibold text-[#4256a6] mb-4">
+              Detalles de la Orden de Servicio
+            </h3>
 
             <div className="mb-4">
-              <label className="block font-semibold text-[#152817]">ID Orden de Servicio:</label>
+              <label className="block font-semibold text-[#152817]">
+                ID Orden de Servicio:
+              </label>
               <p className="text-[#4256a6]">{serviceOrder.id_ServiceOrder}</p>
             </div>
 
             <div className="mb-4">
-              <label className="block font-semibold text-[#152817]">Estado de Pago:</label>
+              <label className="block font-semibold text-[#152817]">
+                Estado de Pago:
+              </label>
               <p className="text-[#4256a6]">{serviceOrder.paymentStatus}</p>
             </div>
 
             <div className="mb-4">
-              <label className="block font-semibold text-[#152817]">Método de Pago:</label>
+              <label className="block font-semibold text-[#152817]">
+                Método de Pago:
+              </label>
               <p className="text-[#4256a6]">{serviceOrder.paymentMethod}</p>
             </div>
 
             <div className="mb-4">
-              <label className="block font-semibold text-[#152817]">Total:</label>
+              <label className="block font-semibold text-[#152817]">
+                Total:
+              </label>
               <p className="text-[#4256a6]">${serviceOrder.total}</p>
             </div>
 
             {paymentInfo && (
               <div className="mb-4">
-                <label className="block font-semibold text-[#152817]">Cantidad de Pasajeros:</label>
+                <label className="block font-semibold text-[#152817]">
+                  Cantidad de Pasajeros:
+                </label>
                 <p className="text-[#4256a6]">
-                  Adultos: {paymentInfo.adults} | Menores: {paymentInfo.minors} | Jubilados: {paymentInfo.seniors}
+                  Adultos: {paymentInfo.adults} | Menores: {paymentInfo.minors}{" "}
+                  | Jubilados: {paymentInfo.seniors}
                 </p>
               </div>
             )}
@@ -79,7 +108,6 @@ const ReservationModal = ({ reservation, onClose, onSave }) => {
           >
             Cerrar
           </button>
-          
         </div>
       </div>
     </div>

@@ -211,25 +211,52 @@ export function ReservationsTable({ reservations: propReservations, onEdit }) {
 
   const handleEditReservation = (reservation) => {
     console.log("Reserva seleccionada para editar:", reservation);
-    console.log("Órdenes disponibles:", ordersState.ordersList);
 
-    // Verificar si id_ServiceOrder está presente en la reserva
-    if (!reservation.id_ServiceOrder) {
-      console.warn("No se ha encontrado id_ServiceOrder en la reserva.");
+    if (!reservation) {
+      console.warn("No se proporcionó una reserva para editar");
       return;
     }
 
-    // Buscar la orden que corresponde al id_ServiceOrder de la reserva
+    // Determinar qué array de reservas usar
+    const reservationsArray =
+      propReservations || reservationsState.bookingsList;
+
+    if (!reservationsArray || !Array.isArray(reservationsArray)) {
+      console.warn("No hay reservas disponibles para buscar");
+      return;
+    }
+
+    if (!ordersState.ordersList) {
+      console.warn("No hay órdenes disponibles");
+      return;
+    }
+
+    // Buscar la reserva completa
+    const fullReservation = reservationsArray.find(
+      (booking) => booking.id_Booking === reservation.id_Booking
+    );
+
+    if (!fullReservation) {
+      console.warn("No se encontró la reserva completa");
+      return;
+    }
+
+    // Buscar la orden correspondiente
     const serviceOrder = ordersState.ordersList.find(
-      (order) =>
-        String(order.id_ServiceOrder) === String(reservation.id_ServiceOrder)
+      (order) => order.id_ServiceOrder === fullReservation.id_ServiceOrder
     );
 
     if (!serviceOrder) {
-      console.warn("No se encontró una orden para esta reserva.");
+      console.warn("No se encontró una orden para esta reserva");
+      return;
     }
 
-    const reservationWithOrder = { ...reservation, serviceOrder };
+    const reservationWithOrder = {
+      ...fullReservation,
+      serviceOrder,
+    };
+
+    console.log("Reserva con orden:", reservationWithOrder);
     setSelectedReservation(reservationWithOrder);
   };
 
@@ -509,9 +536,10 @@ export function ReservationsTable({ reservations: propReservations, onEdit }) {
       {/* Modal */}
       {selectedReservation && (
         <ReservationModal
+          isOpen={!!selectedReservation}
+          onClose={() => setSelectedReservation(null)}
           reservation={selectedReservation}
           onSave={handleSaveReservation}
-          onClose={() => setSelectedReservation(null)}
         />
       )}
     </Card>
