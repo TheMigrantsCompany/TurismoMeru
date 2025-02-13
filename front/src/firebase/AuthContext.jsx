@@ -1,50 +1,82 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 export const AuthContext = createContext();
+
+// Hook personalizado para usar el contexto de autenticación
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth debe ser usado dentro de un AuthProvider');
+    }
+    return context;
+};
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [id_User, setId_User] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const auth = getAuth();
 
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            if (firebaseUser) {
-                setUser(firebaseUser);
-                try {
-                    // Obtener el correo del usuario autenticado
+            try {
+                if (firebaseUser) {
+                    setUser(firebaseUser);
                     const email = firebaseUser.email;
                     if (email) {
-                        // Hacer la petición al backend para obtener el id_User
-                        const response = await fetch(`http://localhost:3001/user/email/${email}`);
+                        const token = await firebaseUser.getIdToken();
+                        const response = await fetch(`${API_URL}/user/email/${email}`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+                        
                         if (!response.ok) {
-                            throw new Error('Error al obtener el ID de usuario desde el backend');
+                            throw new Error(`Error ${response.status}: ${response.statusText}`);
                         }
+                        
                         const data = await response.json();
-                        setId_User(data.id_User); // Guardar el ID del usuario en el estado
+                        setId_User(data.id_User);
                     }
-                } catch (error) {
-                    console.error('Error al obtener el ID de usuario:', error);
+                } else {
+                    setUser(null);
+                    setId_User(null);
                 }
-            } else {
-                setUser(null);
-                setId_User(null);
+            } catch (error) {
+                console.error('Error en la autenticación:', error);
+                setError(error.message);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         });
 
         return () => unsubscribe();
     }, []);
 
     if (loading) {
-        return <div>Cargando...</div>;
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+                <p className="ml-2">Cargando...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="text-red-500 p-4 text-center">
+                Error: {error}
+            </div>
+        );
     }
 
     return (
-        <AuthContext.Provider value={{ user, id_User }}>
+        <AuthContext.Provider value={{ user, id_User, error }}>
             {children}
         </AuthContext.Provider>
     );

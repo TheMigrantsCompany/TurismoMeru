@@ -20,8 +20,9 @@ const OrderForm = () => {
     address: "",
     city: "",
     state: "",
-    postalCode: "",
+    postalCode: "",     
     email: "",
+    phone: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -59,6 +60,7 @@ const OrderForm = () => {
       "state",
       "postalCode",
       "email",
+      "phone",
     ];
     return requiredFields.every((field) => formData[field]?.trim());
   };
@@ -190,14 +192,14 @@ const OrderForm = () => {
   };
   
   return (
-    <div className="flex flex-col lg:flex-row gap-12 mt-10">
+    <div className="flex flex-col lg:flex-row gap-12 mt-10 px-8 max-w-[1600px] mx-auto">
       <form
         ref={formRef}
         onSubmit={handleSubmit}
         id="orderForm"
-        className="flex-1 text-gray-900 p-8 rounded-lg shadow-md border border-gray-300"
+        className="flex-1 text-gray-900 p-8 rounded-lg shadow-md border-2 border-[#d98248]"
       >
-        <h2 className="text-xl font-bold text-gray-700 mb-6">Detalles de Facturación</h2>
+        <h2 className="text-3xl font-bold text-[#4256a6] mb-6 font-poppins">Detalles de Facturación</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[
             { label: 'Nombre *', name: 'firstName', required: true },
@@ -206,7 +208,7 @@ const OrderForm = () => {
             { label: 'DNI / Pasaporte *', name: 'dni', required: true }
           ].map((field) => (
             <div key={field.name}>
-              <label className="block text-sm font-medium text-gray-700">{field.label}</label>
+              <label className="block text-sm font-medium text-[#4256a6]">{field.label}</label>
               <input
                 type="text"
                 name={field.name}
@@ -218,12 +220,12 @@ const OrderForm = () => {
             </div>
           ))}
           <div>
-            <label className="block text-sm font-medium text-gray-700">País / Región *</label>
+            <label className="block text-sm font-medium text-[#4256a6] mb-1">País / Región *</label>
             <select
               name="country"
               value={formData.country}
               onChange={handleChange}
-              className="w-full mt-1 p-3 border text-gray-700 rounded-md"
+              className="w-full p-3 border border-[#425a66]/20 text-[#425a66] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all duration-300 bg-white"
               required
             >
               <option value="">Selecciona un país</option>
@@ -235,9 +237,21 @@ const OrderForm = () => {
                 ))}
             </select>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-[#4256a6] mb-1">Teléfono *</label>
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="+54 9 11 1234-5678"
+              className="w-full p-3 border border-[#425a66]/20 text-[#425a66] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all duration-300 bg-white"
+              required
+            />
+          </div>
         </div>
         <div className="mt-6">
-          <label className="block text-sm font-medium text-gray-700">Dirección de la calle *</label>
+          <label className="block text-sm font-medium text-[#4256a6]">Dirección de la calle *</label>
           <input
             type="text"
             name="address"
@@ -246,7 +260,7 @@ const OrderForm = () => {
             className="w-full mt-1 p-3 border border-gray-300 rounded-md"
             required
           />
-          <label className="block text-sm font-medium text-gray-700 mt-4">Apartamento</label>
+          <label className="block text-sm font-medium text-[#4256a6] mt-4">Apartamento</label>
           <input
             type="text"
             name="apartment"
@@ -262,7 +276,7 @@ const OrderForm = () => {
             { label: 'Código Postal *', name: 'postalCode', required: true }
           ].map((field) => (
             <div key={field.name}>
-              <label className="block text-sm font-medium text-gray-700">{field.label}</label>
+              <label className="block text-sm font-medium text-[#4256a6]">{field.label}</label>
               <input
                 type="text"
                 name={field.name}
@@ -275,90 +289,86 @@ const OrderForm = () => {
           ))}
         </div>
       </form>
-      <div className="flex-1 bg-white p-6 rounded-lg shadow-lg max-w-lg mx-auto">
-        <h2 className="text-2xl font-semibold text-gray-900 border-b pb-2 mb-4">
-          Resumen de la Orden
-        </h2>
-        <div className="space-y-4">
-          {cartItems.map((item, index) => {
-            const adultsTotal = (item.quantities?.adults || 0) * item.price;
-            const childrenTotal = (item.quantities?.children || 0) * item.price * ((100 - (item.discountForMinors || 0)) / 100);
-            const seniorsTotal = (item.quantities?.seniors || 0) * item.price * ((100 - (item.discountForSeniors || 0)) / 100);
+      <div className="flex-1 max-w-lg mx-auto p-8 bg-[#dac9aa]/20 rounded-xl">
+        <div className="bg-[#f9f3e1] rounded-xl shadow-lg space-y-4 border border-[#425a66]/10">
+          <div className="p-6">
+            <h2 className="text-2xl font-semibold text-[#4256a6] border-b border-[#425a66]/10 pb-4 mb-4 font-poppins">
+              Resumen de la Orden
+            </h2>
+            <div className="space-y-4">
+              {cartItems.map((item, index) => {
+                const adultsTotal = (item.quantities?.adults || 0) * item.price;
+                const childrenTotal = (item.quantities?.children || 0) * item.price * ((100 - (item.discountForMinors || 0)) / 100);
+                const seniorsTotal = (item.quantities?.seniors || 0) * item.price * ((100 - (item.discountForSeniors || 0)) / 100);
+                const totalItemPrice = adultsTotal + childrenTotal + seniorsTotal;
 
-            const totalItemPrice = adultsTotal + childrenTotal + seniorsTotal;
+                return (
+                  <div
+                    key={`order-item-${item.id_Service}-${index}`}
+                    className="bg-white p-4 rounded-lg shadow-sm border border-[#425a66]/10 hover:shadow-md transition-shadow duration-300"
+                  >
+                    <p className="text-lg font-medium text-[#4256a6] mb-2 font-poppins">{item.title}</p>
+                    <div className="space-y-1 text-[#425a66]">
+                      {item.quantities?.adults > 0 && (
+                        <p className="text-sm">
+                          Adultos: {item.quantities?.adults} x ${item.price.toLocaleString()} = ${adultsTotal.toFixed(2)}
+                        </p>
+                      )}
+                      {item.quantities?.children > 0 && (
+                        <p className="text-sm">
+                          Menores: {item.quantities?.children} x ${(
+                            item.price * ((100 - (item.discountForMinors || 0)) / 100)
+                          ).toFixed(2)} = ${childrenTotal.toFixed(2)}
+                        </p>
+                      )}
+                      {item.quantities?.seniors > 0 && (
+                        <p className="text-sm">
+                          Jubilados: {item.quantities?.seniors} x ${(
+                            item.price * ((100 - (item.discountForSeniors || 0)) / 100)
+                          ).toFixed(2)} = ${seniorsTotal.toFixed(2)}
+                        </p>
+                      )}
+                    </div>
+                    <div className="mt-2 text-xs text-[#425a66] border-t border-[#425a66]/10 pt-2">
+                      <p>Fecha: {item.selectedDate || 'Fecha no seleccionada'}</p>
+                      <p>Hora: {item.selectedTime || 'Hora no seleccionada'}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
 
-            return (
-              <div
-                key={`order-item-${item.id_Service}-${index}`}
-                className="p-4 border rounded-md shadow-sm text-gray-900"
-              >
-                <p className="text-lg font-medium">{item.title}</p>
-                {item.quantities?.adults > 0 && (
-                  <p className="text-sm text-gray-900">
-                    Adultos: {item.quantities?.adults} x ${item.price.toLocaleString()} = ${adultsTotal.toFixed(2)}
-                  </p>
-                )}
-                {item.quantities?.children > 0 && (
-                  <p className="text-sm text-gray-900">
-                    Menores: {item.quantities?.children} x ${(
-                      item.price * ((100 - (item.discountForMinors || 0)) / 100)
-                    ).toFixed(2)} = ${childrenTotal.toFixed(2)}
-                  </p>
-                )}
-                {item.quantities?.seniors > 0 && (
-                  <p className="text-sm text-gray-900">
-                    Jubilados: {item.quantities?.seniors} x ${(
-                      item.price * ((100 - (item.discountForSeniors || 0)) / 100)
-                    ).toFixed(2)} = ${seniorsTotal.toFixed(2)}
-                  </p>
-                )}
-                <p className="text-xs text-gray-900">
-                  Fecha: {item.selectedDate || 'Fecha no seleccionada'}
-                </p>
-                <p className="text-xs text-gray-900">
-                  Hora: {item.selectedTime || 'Hora no seleccionada'}
-                </p>
+            <div className="bg-white p-4 rounded-lg mt-4">
+              <div className="flex justify-between text-[#425a66] text-lg font-semibold">
+                <p>Subtotal</p>
+                <p>${cartItems.reduce((acc, item) => {
+                  const totalItemPrice =
+                    (item.quantities?.adults * item.price) +
+                    (item.quantities?.children * item.price * ((100 - (item.discountForMinors || 0)) / 100)) +
+                    (item.quantities?.seniors * item.price * ((100 - (item.discountForSeniors || 0)) / 100));
+                  return acc + totalItemPrice;
+                }, 0).toFixed(2)}</p>
               </div>
-            );
-          })}
-          <div className="flex justify-between text-gray-900 text-lg font-semibold mt-4">
-            <p>Subtotal</p>
-            <p>
-              ${cartItems
-                .reduce((acc, item) => {
+              <div className="flex justify-between text-[#4256a6] text-xl font-bold mt-2 pt-2 border-t border-[#425a66]/10">
+                <p>Total</p>
+                <p>${cartItems.reduce((acc, item) => {
                   const totalItemPrice =
                     (item.quantities?.adults * item.price) +
                     (item.quantities?.children * item.price * ((100 - (item.discountForMinors || 0)) / 100)) +
-                    (item.quantities?.seniors * item.price * ((100 - (item.discountForSeniors || 0)) / 100)) +
-                    (item.additionalEquipment ? item.additionalEquipmentPrice || 0 : 0);
+                    (item.quantities?.seniors * item.price * ((100 - (item.discountForSeniors || 0)) / 100));
                   return acc + totalItemPrice;
-                }, 0)
-                .toFixed(2)}
-            </p>
-          </div>
-          <div className="flex justify-between text-gray-900 text-xl font-bold mt-4">
-            <p>Total</p>
-            <p>
-              ${cartItems
-                .reduce((acc, item) => {
-                  const totalItemPrice =
-                    (item.quantities?.adults * item.price) +
-                    (item.quantities?.children * item.price * ((100 - (item.discountForMinors || 0)) / 100)) +
-                    (item.quantities?.seniors * item.price * ((100 - (item.discountForSeniors || 0)) / 100)) +
-                    (item.additionalEquipment ? item.additionalEquipmentPrice || 0 : 0);
-                  return acc + totalItemPrice;
-                }, 0)
-                .toFixed(2)}
-            </p>
+                }, 0).toFixed(2)}</p>
+              </div>
+            </div>
           </div>
         </div>
         <div className="mt-6">
-          <label className="block text-sm font-medium text-gray-900 mb-1">Método de Pago</label>
+          <label className="block text-sm font-medium text-[#4256a6] mb-1">Método de Pago</label>
           <select
             name="paymentMethod"
             value={formData.paymentMethod}
             onChange={handleChange}
-            className="w-full p-3 border text-gray-900 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-[#425a66]/20 text-[#425a66] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all duration-300 bg-white"
             required
           >
             <option value="">Selecciona un método</option>
@@ -367,12 +377,46 @@ const OrderForm = () => {
           </select>
         </div>
         {formData.paymentMethod === "Pagos desde Argentina" && preferenceId && (
-          <Wallet initialization={{ preferenceId }} />
+          <div className="mt-4">
+            <Wallet initialization={{ preferenceId }} />
+          </div>
+        )}
+        {formData.paymentMethod === "Pagos desde el exterior" && (
+          <a
+            href={`https://wa.me/+541169084059?text=${encodeURIComponent(
+              `¡Hola! Quisiera realizar una reserva con pago desde el exterior.\n\nDetalles de la reserva:\n${cartItems
+                .map(
+                  item => `• ${item.title}
+- Fecha: ${item.selectedDate}
+- Hora: ${item.selectedTime}
+- Personas: ${item.quantities?.adults || 0} adultos, ${item.quantities?.children || 0} menores, ${item.quantities?.seniors || 0} jubilados`
+                )
+                .join('\n\n')}\n\nTotal a pagar: $${cartItems
+                .reduce((acc, item) => {
+                  const totalItemPrice =
+                    (item.quantities?.adults * item.price) +
+                    (item.quantities?.children * item.price * ((100 - (item.discountForMinors || 0)) / 100)) +
+                    (item.quantities?.seniors * item.price * ((100 - (item.discountForSeniors || 0)) / 100));
+                  return acc + totalItemPrice;
+                }, 0)
+                .toFixed(2)}`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full py-3 bg-[#25D366] text-white rounded-lg hover:bg-[#128C7E] shadow-md hover:shadow-lg transition-all duration-300 mt-4 font-poppins"
+          >
+            <img
+              src="https://img.icons8.com/fluent/24/000000/whatsapp.png"
+              alt="WhatsApp"
+              className="filter brightness-0 invert"
+            />
+            Contactar por WhatsApp para pago
+          </a>
         )}
         <div className="mt-4">
           <button
             type="submit"
-            className="w-full py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="w-full py-3 bg-[#4256a6] text-white rounded-lg hover:bg-[#2a3875] shadow-md hover:shadow-lg transition-all duration-300 font-poppins"
             onClick={handleSubmit}
             disabled={loading}
           >
