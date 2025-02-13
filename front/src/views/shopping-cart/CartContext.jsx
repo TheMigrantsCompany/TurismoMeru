@@ -8,7 +8,6 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [userId, setUserId] = useState(null);
 
- 
   useEffect(() => {
     if (userId) {
       const storedCart = localStorage.getItem(`cartItems_${userId}`);
@@ -18,7 +17,6 @@ export const CartProvider = ({ children }) => {
     }
   }, [userId]);
 
-  
   useEffect(() => {
     if (userId) {
       localStorage.setItem(`cartItems_${userId}`, JSON.stringify(cartItems));
@@ -71,7 +69,7 @@ export const CartProvider = ({ children }) => {
         updateQuantity,
         removeFromCart,
         clearCart,
-        setUserId, 
+        setUserId,
       }}
     >
       {children}

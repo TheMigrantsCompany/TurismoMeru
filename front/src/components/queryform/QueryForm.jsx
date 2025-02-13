@@ -1,106 +1,145 @@
-import React, { useState } from 'react';
-import emailjs from 'emailjs-com';
+import React, { useState } from "react";
+import { Typography, Button } from "@material-tailwind/react";
+import { motion } from "framer-motion";
+import axios from "axios";
 
-export default function QueryForm() {
+const QueryForm = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: ''
+    name: "",
+    email: "",
+    message: "",
+  });
+
+  const [status, setStatus] = useState({
+    type: "",
+    message: "",
   });
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const form = e.target;
-
-    console.log(new FormData(form));
-
-    emailjs
-      .sendForm(
-        'service_e16n55p',
-        'template_jx63lkb',
-        form,
-        'jc-fU38g2VvhTbgs8'
-      )
-      .then(
-        (result) => {
-          alert('¡Consulta enviada exitosamente!');
-        },
-        (error) => {
-          alert('Error al enviar consulta, intenta nuevamente.');
-        }
-      );
-
     setFormData({
-      name: '',
-      email: '',
-      message: ''
+      ...formData,
+      [e.target.name]: e.target.value,
     });
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      setStatus({ type: "loading", message: "Enviando consulta..." });
+      await axios.post("http://localhost:3001/query", formData);
+      setStatus({
+        type: "success",
+        message: "¡Gracias por tu consulta! Te responderemos a la brevedad.",
+      });
+      setFormData({ name: "", email: "", message: "" });
+    } catch (error) {
+      setStatus({
+        type: "error",
+        message: "Hubo un error al enviar tu consulta. Por favor, intenta nuevamente.",
+      });
+    }
+  };
+
   return (
-    <div className="max-w-4xl mx-auto bg-white bg-opacity-80 p-8 rounded-lg shadow-xl backdrop-blur-sm">
-      <h2 className="text-3xl font-bold mb-6 text-center text-[#4256a6]">Consulta</h2>
-      <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
-        <input
-          type="hidden"
-          name="subject"
-          value={`Consulta de ${formData.name || "Cliente"}`} 
-        />
-        <div>
-          <label className="block text-[#152817] text-sm font-medium mb-2" htmlFor="name">
-            Nombre
-          </label>
-          <input
-            id="name"
-            name="from_name" 
-            type="text"
-            className="w-full px-4 py-3 border border-[#dac9aa] rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-[#4256a6] transition duration-200 ease-in-out"
-            placeholder="Escribe tu nombre"
-            value={formData.name}
-            onChange={handleChange}
-          />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="bg-[#f9f3e1] rounded-xl shadow-lg p-6 max-w-4xl mx-auto"
+    >
+      <div className="text-center mb-6">
+        <Typography variant="h3" className="text-[#d98248] mb-2 font-poppins">
+          ¿Tienes alguna consulta?
+        </Typography>
+        <Typography className="text-[#425a66]">
+          Estamos aquí para ayudarte a planificar tu próxima aventura
+        </Typography>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-[#4256a6] mb-1" htmlFor="name">
+              Nombre completo
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white text-[#425a66]"
+              placeholder="Tu nombre"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[#4256a6] mb-1" htmlFor="email">
+              Correo electrónico
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white text-[#425a66]"
+              placeholder="tu@email.com"
+            />
+          </div>
         </div>
+
         <div>
-          <label className="block text-[#152817] text-sm font-medium mb-2" htmlFor="email">
-            Email
-          </label>
-          <input
-            id="email"
-            name="from_email"
-            type="email"
-            className="w-full px-4 py-3 border border-[#dac9aa] rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-[#4256a6] transition duration-200 ease-in-out"
-            placeholder="Escribe tu email"
-            value={formData.email}
-            onChange={handleChange}
-          />
-        </div>
-        <div className="md:col-span-2">
-          <label className="block text-[#152817] text-sm font-medium mb-2" htmlFor="message">
-            Consulta
+          <label className="block text-sm font-medium text-[#4256a6] mb-1" htmlFor="message">
+            Tu consulta
           </label>
           <textarea
             id="message"
-            name="message" 
-            className="w-full px-4 py-3 border border-[#dac9aa] rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-[#4256a6] transition duration-200 ease-in-out"
-            rows="4"
-            placeholder="Escribe tu consulta"
+            name="message"
             value={formData.message}
             onChange={handleChange}
-          ></textarea>
+            required
+            rows="3"
+            className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white text-[#425a66] resize-none"
+            placeholder="¿En qué podemos ayudarte?"
+          />
         </div>
-        <div className="md:col-span-2">
-          <button
-            type="submit"
-            className="w-full bg-[#4256a6] text-white font-semibold py-3 rounded-lg hover:bg-[#f4925b] focus:outline-none focus:ring-2 focus:ring-[#f4925b] transition duration-200 ease-in-out"
+
+        {status.message && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`p-3 rounded-lg ${
+              status.type === "success"
+                ? "bg-green-100 text-green-700"
+                : status.type === "error"
+                ? "bg-red-100 text-red-700"
+                : "bg-[#dac9aa]/20 text-[#4256a6]"
+            }`}
           >
-            Enviar
-          </button>
+            {status.message}
+          </motion.div>
+        )}
+
+        <div className="flex justify-center">
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Button
+              type="submit"
+              disabled={status.type === "loading"}
+              className="bg-[#4256a6] text-white px-12 py-2 rounded-lg hover:bg-[#2a3875] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {status.type === "loading" ? "Enviando..." : "Enviar consulta"}
+            </Button>
+          </motion.div>
         </div>
       </form>
-    </div>
+    </motion.div>
   );
-}
+};
+
+export default QueryForm;
