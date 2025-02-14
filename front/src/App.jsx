@@ -17,6 +17,7 @@ import { ExcursionManagement } from './views/dashboardAdmin/dashAdminViews/Excur
 import { ReviewsManagement } from './views/dashboardAdmin/dashAdminViews/ReviewManagement';
 import { ServiceOrderManagement } from './views/dashboardAdmin/dashAdminViews/ServiceOrderManagement';
 import { CartProvider } from './views/shopping-cart/CartContext';
+import { AdminRoute, UserRoute } from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -26,9 +27,12 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/detail/:id_Service" element={<Detail />} />
         
-        {/* Ruta para el Administrador */}
-        <Route path="/admin" element={<DashboardAdmin />}>
-          {/* Subrutas dentro de la administración */}
+        {/* Rutas protegidas para el Administrador */}
+        <Route path="/admin" element={
+          <AdminRoute>
+            <DashboardAdmin />
+          </AdminRoute>
+        }>
           <Route path="reservas" element={<ReservationManagement />} />
           <Route path="usuarios" element={<UserManagement />} />
           <Route path="excursiones" element={<ExcursionManagement />} />
@@ -36,15 +40,28 @@ function App() {
           <Route path="ordenes" element={<ServiceOrderManagement />} />
         </Route>
 
-        {/* Rutas para el usuario */}
-        <Route path="/user" element={<DashboardUser />}>
+        {/* Rutas protegidas para el usuario */}
+        <Route path="/user" element={
+          <UserRoute>
+            <DashboardUser />
+          </UserRoute>
+        }>
           <Route path="profile" element={<ProfileForm />} />
           <Route path="reviews" element={<Reviews />} />
           <Route path="shopping-cart" element={<ShoppingCart />} />
           <Route path="compras" element={<Purchases />} />
         </Route>
-        <Route path="/orderform" element={<OrderForm />} />
-        <Route path="/bookingform" element={<BookingForm />} />
+        
+        <Route path="/orderform" element={
+          <UserRoute>
+            <OrderForm />
+          </UserRoute>
+        } />
+        <Route path="/bookingform" element={
+          <UserRoute>
+            <BookingForm />
+          </UserRoute>
+        } />
       </Routes>
     </CartProvider>
   );
