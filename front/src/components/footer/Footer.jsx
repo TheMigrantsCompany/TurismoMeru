@@ -1,50 +1,51 @@
 import React from "react";
-
+import { Typography } from "@material-tailwind/react";
+import { useNavigate } from "react-router-dom";
 
 export default function Footer() {
+  const navigate = useNavigate();
+
+  const handleNavigation = (section) => {
+    navigate('/#' + section);
+    setTimeout(() => {
+      const element = document.getElementById(section);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
+  };
+
   return (
     <footer className="bg-[#dac9aa] flex flex-col items-center justify-center py-10 px-6">
-     
-      <nav className="flex justify-center flex-wrap gap-6 text-gray-500 font-medium mb-6">
+      {/* Enlaces de navegación */}
+      <nav className="flex justify-center flex-wrap gap-8 mb-8">
         <a
-          className="hover:text-gray-900 dark:hover:text-gray-300"
-          href="#"
+          onClick={() => handleNavigation('home')}
+          className="text-[#4256a6] hover:text-[#2a3875] cursor-pointer font-poppins text-sm uppercase tracking-wider transition-all duration-300"
         >
-          Home
+          Inicio
         </a>
         <a
-          className="hover:text-gray-900 dark:hover:text-gray-300"
-          href="#"
+          onClick={() => handleNavigation('about')}
+          className="text-[#4256a6] hover:text-[#2a3875] cursor-pointer font-poppins text-sm uppercase tracking-wider transition-all duration-300"
         >
-          About
+          Nosotros
         </a>
         <a
-          className="hover:text-gray-900 dark:hover:text-gray-300"
-          href="#"
+          onClick={() => handleNavigation('services')}
+          className="text-[#4256a6] hover:text-[#2a3875] cursor-pointer font-poppins text-sm uppercase tracking-wider transition-all duration-300"
         >
-          Services
+          Servicios
         </a>
         <a
-          className="hover:text-gray-900 dark:hover:text-gray-300"
-          href="#"
+          onClick={() => handleNavigation('contact')}
+          className="text-[#4256a6] hover:text-[#2a3875] cursor-pointer font-poppins text-sm uppercase tracking-wider transition-all duration-300"
         >
-          Media
-        </a>
-        <a
-          className="hover:text-gray-900 dark:hover:text-gray-300"
-          href="#"
-        >
-          Gallery
-        </a>
-        <a
-          className="hover:text-gray-900 dark:hover:text-gray-300"
-          href="#"
-        >
-          Contac
+          Contacto
         </a>
       </nav>
 
-      
+      {/* Redes sociales */}
       <div className="flex justify-center space-x-5 mb-6">
         <a
           href="https://www.facebook.com/profile.php?id=61554232542930"
@@ -88,14 +89,14 @@ export default function Footer() {
         </a>
       </div>
 
-      
+      {/* Información de contacto */}
       <div className="text-center text-gray-700 dark:text-gray-300 mb-6">
         <p className="font-medium flex items-center justify-center gap-2">
           <img
             src="https://img.icons8.com/ios-filled/20/000000/marker.png"
             alt="Ubicación"
           />
-          9410 Ushuaia, Provincia de Tierra del Fuego, Antártida e Islas del Atlántico Sur, Argentina
+          9410 Ushuaia, Tierra del Fuego, Argentina
         </p>
         <p className="font-medium">Email: meruevt@gmail.com</p>
         <p className="font-medium">Teléfono: +54 9 1169084059</p>

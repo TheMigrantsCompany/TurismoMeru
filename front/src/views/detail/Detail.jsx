@@ -2,73 +2,48 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Typography, Avatar, Rating } from "@material-tailwind/react";
 import BookingCard from "../../components/bookingcard/BookingCard";
+import { motion } from "framer-motion";
 
-const Review = ({ review, rating, userImage, userName }) => {
+const Review = ({ review, rating, userImage, userName, date }) => {
   return (
-    <div className="bg-[#dac9aa] text-[#152917] p-4 rounded-lg max-w-sm shadow-lg border-2 border-[#425a66]">
-      <Typography variant="h6" color="blue-gray" className="text-center font-semibold text-[#152917]">
-        &quot;{review}&quot;
-      </Typography>
-      <div className="flex justify-center items-center space-x-4">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="bg-[#f9f3e1] p-6 rounded-xl shadow-lg border border-[#425a66]/20 hover:shadow-xl transition-all duration-300"
+    >
+      <div className="flex items-start space-x-4">
         <Avatar
           src={userImage}
           alt={userName}
           size="lg"
+          className="border-2 border-[#4256a6]"
         />
-        <div className="text-center">
-          <Typography variant="body1" color="blue-gray" className="mt-2 text-lg font-medium text-[#152917]">
+        <div className="flex-1">
+          <Typography variant="h6" className="text-[#4256a6] font-semibold">
             {userName}
           </Typography>
-          <Rating value={rating} readonly size="sm" className="mt-2" />
+          <div className="flex items-center space-x-2 mt-1">
+            <Rating value={rating} readonly className="text-[#4256a6]" />
+            <span className="text-sm text-[#425a66]">
+              {new Date(date).toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+      <Typography className="mt-4 text-[#425a66] italic">
+        "{review}"
+      </Typography>
+    </motion.div>
   );
 };
 
-export function Detail() {
-  const { id_Service } = useParams();
-  const [excursion, setExcursion] = useState(null);
-  const [reviews, setReviews] = useState([]);
+const PhotoGallery = ({ photos, title }) => {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-
-  useEffect(() => {
-    fetch(`http://localhost:3001/service/id/${id_Service}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setExcursion(data);
-      })
-      .catch((error) => console.error("Error al obtener los detalles de la excursión:", error));
-  }, [id_Service]);
-
-  useEffect(() => {
-    fetch("http://localhost:3001/review/")
-      .then((response) => response.json())
-      .then((data) => {
-        const approvedReviews = data.filter(
-          (review) => review.active === true && review.id_Service === id_Service
-        );
-        fetch("http://localhost:3001/user/")
-          .then((userResponse) => userResponse.json())
-          .then((users) => {
-            const reviewsWithUserData = approvedReviews.map((review) => {
-              const user = users.find((u) => u.id_User === review.id_User);
-              return {
-                ...review,
-                userName: user?.name || "Usuario Anónimo",
-                userImage: user?.image || "https://via.placeholder.com/50",
-              };
-            });
-            setReviews(reviewsWithUserData);
-          })
-          .catch((userError) => console.error("Error al obtener los usuarios:", userError));
-      })
-      .catch((error) => console.error("Error al obtener las reseñas:", error));
-  }, [id_Service]);
-
-  if (!excursion) return <p>Loading...</p>;
-
-  const photos = excursion.photos || [];
 
   const handleNextPhoto = () => {
     setCurrentPhotoIndex((prevIndex) =>
@@ -83,113 +58,275 @@ export function Detail() {
   };
 
   return (
-    <section className="py-16 px-4 bg-[#dac9aa]">
-    <div className="w-full px-4 lg:px-6">
-      <Typography variant="h3" className="font-semibold text-gray-800 text-center mb-16 hover:text-f4925b transition-colors duration-300">
-  {excursion.title}
-</Typography>
-      <div className="grid lg:grid-cols-3 gap-12">
-        {/* Contenedor de fotos y descripción */}
-        <div className="lg:col-span-2 flex flex-col lg:flex-row gap-12 items-start">
-          {/* Fotos */}
-          <div className="relative w-full lg:w-2/5">
-            {photos.length > 0 ? (
-              <div className="relative aspect-[3/2]">
-                <img
-                  src={photos[currentPhotoIndex]}
-                  alt={`Foto ${currentPhotoIndex + 1} de la excursión ${excursion.title}`}
-                  className="w-full h-full object-cover rounded-lg shadow-lg transition-transform duration-300 hover:scale-105"
-                  onError={(e) => (e.target.src = "default_image_url.png")}
-                />
-                {photos.length > 1 && (
-                  <>
-                    <button
-                      onClick={handlePreviousPhoto}
-                      aria-label="Foto anterior"
-                      className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                    >
-                      ❮
-                    </button>
-                    <button
-                      onClick={handleNextPhoto}
-                      aria-label="Foto siguiente"
-                      className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                    >
-                      ❯
-                    </button>
-                  </>
-                )}
-              </div>
-            ) : (
-              <div className="relative aspect-[3/2]">
-                <img
-                  src="default_image_url.png"
-                  alt="Imagen por defecto"
-                  className="w-full h-full object-cover rounded-lg shadow-lg"
-                />
-              </div>
-            )}
+    <div className="relative aspect-[16/9] rounded-xl overflow-hidden shadow-xl">
+      <motion.img
+        key={currentPhotoIndex}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        src={photos[currentPhotoIndex]}
+        alt={`Foto ${currentPhotoIndex + 1} de ${title}`}
+        className="w-full h-full object-cover"
+        onError={(e) => {
+          e.target.src = "https://images.unsplash.com/photo-1469474968028-56623f02e42e";
+        }}
+      />
+      {photos.length > 1 && (
+        <>
+          <button
+            onClick={handlePreviousPhoto}
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+            aria-label="Foto anterior"
+          >
+            ❮
+          </button>
+          <button
+            onClick={handleNextPhoto}
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+            aria-label="Siguiente foto"
+          >
+            ❯
+          </button>
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+            {photos.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentPhotoIndex(index)}
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  index === currentPhotoIndex ? 'bg-white' : 'bg-white/50'
+                }`}
+                aria-label={`Ir a foto ${index + 1}`}
+              />
+            ))}
           </div>
-          {/* Descripción */}
-          <div className="flex-1 text-gray-700 lg:pl-8">
-            <Typography variant="paragraph" className="text-justify mb-8 text-lg">
-              {excursion.description}
-            </Typography>
-            
-            {excursion.location && (
-              <Typography variant="small" color="gray" className="text-lg mb-6">
-                <strong>Ubicación:</strong> {excursion.location}
-              </Typography>
-            )}
-            {excursion.duration && (
-              <Typography variant="small" color="gray" className="text-lg mb-6">
-                <strong>Duración:</strong> {excursion.duration} horas
-              </Typography>
-            )}
-            {excursion.difficulty && (
-              <Typography variant="small" color="gray" className="text-lg mb-6">
-                <strong>Dificultad:</strong> {excursion.difficulty}
-              </Typography>
-            )}
-          </div>
-        </div>
-  
-        {/* BookingCard */}
-        <div className="lg:col-span-1 mt-12 lg:mt-0">
-          <BookingCard id_Service={id_Service} price={excursion.price} />
+        </>
+      )}
+    </div>
+  );
+};
+
+export function Detail() {
+  const { id_Service } = useParams();
+  const [excursion, setExcursion] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchExcursionDetails = async () => {
+      try {
+        const response = await fetch(`http://localhost:3001/service/id/${id_Service}`);
+        if (!response.ok) throw new Error('Error al cargar la excursión');
+        const data = await response.json();
+        setExcursion(data);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    const fetchReviews = async () => {
+      try {
+        const [reviewsResponse, usersResponse] = await Promise.all([
+          fetch("http://localhost:3001/review/"),
+          fetch("http://localhost:3001/user/")
+        ]);
+
+        const [reviewsData, usersData] = await Promise.all([
+          reviewsResponse.json(),
+          usersResponse.json()
+        ]);
+
+        const approvedReviews = reviewsData
+          .filter(review => review.active && review.id_Service === id_Service)
+          .map(review => {
+            const user = usersData.find(u => u.id_User === review.id_User);
+            return {
+              ...review,
+              userName: user?.name || "Usuario Anónimo",
+              userImage: user?.image || "https://via.placeholder.com/50",
+            };
+          });
+
+        setReviews(approvedReviews);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExcursionDetails();
+    fetchReviews();
+  }, [id_Service]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f9f3e1]">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#4256a6]"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f9f3e1]">
+        <div className="text-center">
+          <Typography variant="h4" className="text-[#4256a6] mb-4">
+            Oops! Algo salió mal
+          </Typography>
+          <Typography className="text-[#425a66]">
+            {error}
+          </Typography>
         </div>
       </div>
-  
-      {/* Reseñas */}
-      <div className="mt-20">
-  <Typography variant="h4" className="font-bold text-center text-gray-800 mb-12">
-    Reseñas
-  </Typography>
-  {reviews && reviews.length > 0 ? (
-    <div className="flex flex-wrap gap-8 justify-center">
-      {reviews.map((review, index) => (
-        <div key={index} className="w-full sm:w-1/2 lg:w-1/3">
-          <Review
-            review={review.content}
-            rating={review.rating}
-            userImage={review.userImage}
-            userName={review.userName}
-          >
-            <Typography variant="small" color="gray" className="text-sm mt-2">
-              {new Date(review.date).toLocaleDateString()}
-            </Typography>
-          </Review>
+    );
+  }
+
+  if (!excursion) return null;
+
+  const photos = excursion.photos || [];
+
+  const renderDiscounts = () => {
+    const hasDiscounts = excursion.discountForMinors > 0 || excursion.discountForSeniors > 0;
+    if (!hasDiscounts) return null;
+
+    return (
+      <div className="bg-[#f9f3e1] rounded-xl p-8 shadow-lg">
+        <Typography variant="h4" className="text-[#4256a6] mb-4">
+          Descuentos Disponibles
+        </Typography>
+        <div className="grid md:grid-cols-2 gap-4">
+          {excursion.discountForMinors > 0 && (
+            <div className="bg-[#dac9aa]/30 p-4 rounded-lg">
+              <Typography variant="h6" className="text-[#4256a6]">
+                Menores de edad
+              </Typography>
+              <Typography className="text-[#425a66]">
+                {excursion.discountForMinors}% de descuento
+              </Typography>
+            </div>
+          )}
+          {excursion.discountForSeniors > 0 && (
+            <div className="bg-[#dac9aa]/30 p-4 rounded-lg">
+              <Typography variant="h6" className="text-[#4256a6]">
+                Adultos mayores
+              </Typography>
+              <Typography className="text-[#425a66]">
+                {excursion.discountForSeniors}% de descuento
+              </Typography>
+            </div>
+          )}
         </div>
-      ))}
-    </div>
-  ) : (
-    <Typography variant="small" color="gray">
-      No hay reseñas disponibles para esta excursión.
-    </Typography>
-  )}
-</div>
-    </div>
-  </section>
+      </div>
+    );
+  };
+
+  return (
+    <motion.section
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-[#dac9aa] py-16 px-4"
+    >
+      <div className="container mx-auto max-w-7xl">
+        {/* Encabezado */}
+        <div className="text-center mb-12">
+          <motion.h1
+            initial={{ y: -20 }}
+            animate={{ y: 0 }}
+            className="text-4xl md:text-5xl font-bold text-[#4256a6] mb-4"
+          >
+            {excursion.title}
+          </motion.h1>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Contenido principal */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Galería de fotos */}
+            <PhotoGallery photos={photos} title={excursion.title} />
+
+            {/* Información básica */}
+            <div className="bg-[#f9f3e1] rounded-xl p-8 shadow-lg">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {excursion.location && (
+                  <div className="flex flex-col items-center p-4 bg-[#dac9aa]/20 rounded-lg">
+                    <i className="fas fa-map-marker-alt text-2xl text-[#4256a6] mb-2"></i>
+                    <Typography variant="h6" className="text-[#4256a6] text-center text-sm font-semibold">
+                      Ubicación
+                    </Typography>
+                    <Typography className="text-[#425a66] text-center mt-1">
+                      {excursion.location}
+                    </Typography>
+                  </div>
+                )}
+                {excursion.duration && (
+                  <div className="flex flex-col items-center p-4 bg-[#dac9aa]/20 rounded-lg">
+                    <i className="fas fa-clock text-2xl text-[#4256a6] mb-2"></i>
+                    <Typography variant="h6" className="text-[#4256a6] text-center text-sm font-semibold">
+                      Duración
+                    </Typography>
+                    <Typography className="text-[#425a66] text-center mt-1">
+                      {excursion.duration} horas
+                    </Typography>
+                  </div>
+                )}
+                {excursion.difficulty && (
+                  <div className="flex flex-col items-center p-4 bg-[#dac9aa]/20 rounded-lg">
+                    <i className="fas fa-mountain text-2xl text-[#4256a6] mb-2"></i>
+                    <Typography variant="h6" className="text-[#4256a6] text-center text-sm font-semibold">
+                      Dificultad
+                    </Typography>
+                    <Typography className="text-[#425a66] text-center mt-1">
+                      {excursion.difficulty}
+                    </Typography>
+                  </div>
+                )}
+              </div>
+
+              <Typography variant="h4" className="text-[#4256a6] mb-4">
+                Sobre esta excursión
+              </Typography>
+              <Typography className="text-[#425a66] text-lg leading-relaxed">
+                {excursion.description}
+              </Typography>
+            </div>
+
+            {/* Reseñas */}
+            <div className="bg-[#f9f3e1] rounded-xl p-8 shadow-lg">
+              <Typography variant="h4" className="text-[#4256a6] mb-6">
+                Opiniones de viajeros
+              </Typography>
+              {reviews.length > 0 ? (
+                <div className="grid gap-6">
+                  {reviews.map((review, index) => (
+                    <Review
+                      key={review.id_Review || index}
+                      review={review.content}
+                      rating={review.rating}
+                      userImage={review.userImage}
+                      userName={review.userName}
+                      date={review.date}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <Typography className="text-center text-[#425a66] italic">
+                  Aún no hay reseñas para esta excursión. ¡Sé el primero en compartir tu experiencia!
+                </Typography>
+              )}
+            </div>
+          </div>
+
+          {/* Tarjeta de reserva */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-8">
+              <BookingCard id_Service={id_Service} price={excursion.price} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.section>
   );
 }
 

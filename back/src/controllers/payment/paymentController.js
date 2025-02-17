@@ -1,6 +1,7 @@
 const { MercadoPagoConfig, Preference, Payment } = require("mercadopago");
 const dotenv = require("dotenv");
 const updatePaymentStatusController = require("../serviceOrder/updatePaymentStatusController");
+const axios = require('axios');
 
 dotenv.config();
 
@@ -57,8 +58,9 @@ exports.createPaymentPreference = async (req, res) => {
     const { paymentInformation, id_User, DNI, email } = req.body;
 
     validateRequestBody({ paymentInformation, id_User, DNI, email });
-
+    console.log('ID de la orden de servicio:', req.body.id_ServiceOrder);
     const preference = {
+      external_reference: req.body.id_ServiceOrder,
       items: paymentInformation.map(item => ({
         title: item.title,
         description: item.description || "Sin descripción",
@@ -74,18 +76,28 @@ exports.createPaymentPreference = async (req, res) => {
         },
       },
       back_urls: {
-        success: "http://localhost:5173/success",
-        failure: "http://localhost:5173/failure",
-        pending: "http://localhost:5173/pending",
+        success: "https://self-brad-cz-previously.trycloudflare.com/bookingform",
+        failure: "https://wv3wcgtirjoybtyoqzr1km.hooks.webhookrelay.com/failure",
+        pending: "https://wv3wcgtirjoybtyoqzr1km.hooks.webhookrelay.com/pending",
       },
       auto_return: "approved",
+      notification_url: "https://wv3wcgtirjoybtyoqzr1km.hooks.webhookrelay.com/webhook",  // para recibir y reenviar las notificaciones de mervado pago webhookrelay.com
+      metadata: {
+        id_ServiceOrder: req.body.id_ServiceOrder, 
+        id_Service: paymentInformation[0].id_Service,  
+        totalPeople: paymentInformation[0].totalPeople,
+        DNI: DNI,
+        totalPrice: paymentInformation.reduce((total, item) => total + (item.unit_price * item.totalPeople), 0),  
+        lockedStock: paymentInformation[0].totalPeople  
+      },
     };
+    
 
     const paymentPreference = await preferenceAPI.create({ body: preference });
 
     console.log("Respuesta completa de Mercado Pago:", paymentPreference);
 
-    // Validación corregida
+    
     if (!paymentPreference || !paymentPreference.id) {
       throw new Error("No se pudo obtener el ID de la preferencia de pago. Revisa la configuración.");
     }
@@ -97,32 +109,73 @@ exports.createPaymentPreference = async (req, res) => {
   }
 };
 
-// Procesar las notificaciones del webhook
 exports.processPaymentWebhook = async (req, res) => {
   try {
+    console.log("Webhook recibido:", req.body);
+
     const { type, data } = req.body;
-    const payment = await paymentAPI.findById(data.id);
-    
-    console.log("Notificación recibida:", req.body); // Log para depuración
 
-    if (type === "payment") {
-      const payment = await paymentAPI.findById(data.id);
-
-      if (payment.body) {
-        const id_ServiceOrder = payment.body.metadata.id_ServiceOrder;
-        const paymentStatus = payment.body.status === "approved" ? "Pagado" : "Pendiente";
-        const paymentMethod = payment.body.payment_method_id;  // Aquí obtenemos el método de pago
-      
-        await updatePaymentStatusController(id_ServiceOrder, paymentStatus, {
-          DNI: payment.body.metadata.DNI || null,
-          paymentMethod,  // Pasamos el método de pago
-        });
-      }
+    if (type !== "payment" || !data || !data.id) {
+      console.error("Tipo de notificación no soportado o ID no válido.");
+      return res.status(400).send("Tipo de notificación inválido.");
     }
 
-    res.status(200).send("OK");
+    // Obtener la información del pago desde Mercado Pago
+    const paymentResponse = await paymentAPI.get({ id: data.id });
+    const paymentData = paymentResponse.body || paymentResponse;
+
+    if (!paymentData) {
+      console.error("Error: No se obtuvo información del pago.");
+      return res.status(500).send("Error al obtener el pago.");
+    }
+
+    console.log("Respuesta de MercadoPago:", paymentData);
+
+    // Intentar obtener metadata desde diferentes fuentes
+    const metadata = paymentData.metadata || paymentData.additional_info?.payer || {};
+
+    // Extraer los valores de metadata con los nombres correctos
+    const serviceOrderId = metadata?.id_service_order || metadata?.id_ServiceOrder;
+    const id_Service = metadata?.id_service || metadata?.id_Service;
+    const dniValue = metadata?.dni || metadata?.DNI;
+    const totalPeople = metadata?.total_people;
+    const totalPrice = metadata?.total_price;
+    const lockedStock = metadata?.locked_stock;
+
+    console.log("Metadata obtenida:", metadata);
+
+    if (!serviceOrderId || !id_Service) {
+      console.error("Error: Metadata no encontrada o sin ID de orden o servicio.");
+      return res.status(500).send("Error en el pago: Metadata incompleta.");
+    }
+
+    if (paymentData.status === "approved") {
+      const updateData = {
+        id_ServiceOrder: serviceOrderId,
+        paymentStatus: "Pagado",
+        paymentInformation: [
+          {
+            id_Service: id_Service,
+            totalPeople: totalPeople,
+            DNI: dniValue,
+            totalPrice: totalPrice,
+            lockedStock: lockedStock,
+          },
+        ],
+      };
+
+      console.log("Actualizando orden con datos:", updateData);
+
+      await updatePaymentStatusController(updateData.id_ServiceOrder, updateData.paymentStatus, { paymentInformation: updateData.paymentInformation });
+      console.log("Estado de pago actualizado a 'Pagado' en la base de datos.");
+      return res.status(200).send("OK");
+    } else {
+      console.log(`Pago ${paymentData.status} - No se actualiza la orden.`);
+      return res.status(200).send("Pago no aprobado.");
+    }
   } catch (error) {
-    console.error("Error al procesar el webhook:", error.message); // Log del error
-    res.status(500).send("Error al procesar la notificación del pago.");
+    console.error("Error al procesar la notificación:", error);
+    return res.status(500).send("Error al procesar la notificación.");
   }
 };
+
