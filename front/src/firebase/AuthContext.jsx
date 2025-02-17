@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext();
 
@@ -11,6 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const checkUserInBackend = async (firebaseUser) => {
     try {
@@ -42,10 +43,12 @@ export const AuthProvider = ({ children }) => {
         setUser(firebaseUser);
         const userRole = await checkUserInBackend(firebaseUser);
 
-        if (userRole === "admin") {
-          navigate("/admin/reservas");
-        } else if (userRole) {
-          navigate("/user/profile");
+        if (location.pathname === '/') {
+          if (userRole === "admin") {
+            navigate("/admin/reservas");
+          } else if (userRole) {
+            navigate("/user/profile");
+          }
         }
       } else {
         setUser(null);
@@ -53,13 +56,16 @@ export const AuthProvider = ({ children }) => {
         setRole(null);
         localStorage.removeItem("role");
         delete axios.defaults.headers.common["Authorization"];
-        navigate("/");
+        
+        if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/user')) {
+          navigate("/");
+        }
       }
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [navigate]);
+  }, [navigate, location.pathname]);
 
   const value = {
     user,
