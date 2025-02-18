@@ -15,15 +15,16 @@ import axios from "axios";
 import ShoppingCartIcon from "@heroicons/react/24/outline/ShoppingCartIcon";
 import Swal from "sweetalert2";
 import { useCart } from "../../views/shopping-cart/CartContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import logoImage from "../../assets/images/logo/logo.jpg";
 import { motion } from "framer-motion";
 import { AuthContext } from "../../firebase/AuthContext";
 
 export default function StickyNavbar() {
-  const { user, role } = useContext(AuthContext);
-  const { clearCart, setUserId } = useCart();
+  const { user, role, setAllowHomeNavigation } = useContext(AuthContext);
+  const { clearCart } = useCart();
   const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogin = async (userData) => {
     try {
@@ -37,7 +38,6 @@ export default function StickyNavbar() {
       if (response.data) {
         localStorage.setItem("uuid", response.data.id_User);
         localStorage.setItem("role", response.data.role);
-        setUserId(userData.uid);
 
         if (response.data.role === "admin") {
           navigate("/admin/reservas");
@@ -87,7 +87,16 @@ export default function StickyNavbar() {
     }
   };
 
-  // Mostrar el formulario de inicio de sesión o registro
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      clearCart();
+      navigate("/");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+  };
+
   const handleAuthAlert = () => {
     Swal.fire({
       title: "Iniciar Sesión o Registrarse",
@@ -170,126 +179,76 @@ export default function StickyNavbar() {
     });
   };
 
-  // Manejo de cierre de sesión
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      clearCart();
-      Swal.fire("Sesión cerrada exitosamente", "", "success");
-      navigate("/"); // Redirige al Home
-    } catch (error) {
-      Swal.fire("Error al cerrar sesión", error.message, "error");
-    }
+  const handleLogoClick = () => {
+    setAllowHomeNavigation(true);
+    navigate("/");
   };
 
-  // Memorizar el renderizado de la navbar
   const renderedNavbar = useMemo(
     () => (
       <nav className="bg-[#f9f3e1] shadow-md sticky top-0 z-50">
-        <div className="container mx-auto px-2">
+        <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-20">
-            {/* Logo - Ahora más a la izquierda */}
-            <div className="flex-shrink-0 -ml-12">
-              <a href="/" className="flex items-center">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <button onClick={handleLogoClick} className="flex items-center">
                 <img
                   src={logoImage}
                   alt="logo"
                   className="w-36 h-14 object-contain"
                 />
-              </a>
+              </button>
             </div>
 
-            {/* Contenido alineado a la derecha */}
+            {/* Menú de navegación y botones */}
             <div className="flex items-center space-x-8">
               {/* Botón hamburguesa para mobile */}
               <button
                 className="inline-flex items-center p-2 text-[#4256a6] rounded-lg md:hidden hover:bg-[#dac9aa]/20 transition-all duration-300"
-                aria-label="Toggle navigation"
-                onClick={() => {
-                  const menu = document.querySelector("#mobile-menu");
-                  menu.classList.toggle("hidden");
-                }}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
+                <span className="sr-only">Abrir menú</span>
                 <svg
                   className="w-6 h-6"
                   fill="none"
-                  stroke="currentColor"
                   viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+                  stroke="currentColor"
                 >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth="2"
                     d="M4 6h16M4 12h16m-7 6h7"
-                  ></path>
+                  />
                 </svg>
               </button>
 
               {/* Menú de navegación */}
               <div
-                id="mobile-menu"
-                className="hidden md:flex md:items-center space-x-8"
+                className={`${
+                  isMobileMenuOpen ? "block" : "hidden"
+                } md:flex md:items-center space-x-8`}
               >
-                {/* Mostrar carrito solo si el usuario está logueado */}
                 {user && (
-                  <a
-                    href="/user/shopping-cart"
-                    className="flex items-center text-[#4256a6] hover:text-[#2a3875] transition-all duration-300"
-                  >
-                    <ShoppingCartIcon className="w-6 h-6" />
-                  </a>
-                )}
+                  <>
+                    {/* Carrito */}
+                    <Link
+                      to="/user/shopping-cart"
+                      className="flex items-center text-[#4256a6] hover:text-[#2a3875] transition-all duration-300"
+                    >
+                      <ShoppingCartIcon className="w-6 h-6" />
+                    </Link>
 
-              {/* Mostrar Dashboard solo si el usuario está logueado */}
-              {user && (
-                <a
-                  href={role === "admin" ? "/admin/reservas" : "/user/profile"}
-                  className="block md:inline border-b-2 border-transparent hover:text-gray-800 transition-colors duration-300 transform dark:hover:text-gray-200 hover:border-blue-500"
-                >
-                  Dashboard
-                </a>
-              )}
-            </div>
-            {/* Sección de usuario */}
-            <div className="relative inline-block text-left">
-              {user ? (
-                <div className="flex items-center space-x-6">
-                  {" "}
-                  {/* Más espacio entre elementos */}
-                  {user.photoURL && (
-                    <img
-                      src={user.photoURL}
-                      alt="Foto de perfil"
-                      className="w-8 h-8 rounded-full"
-                    />
-                  )}
-                  <span className="hidden md:block">
-                    Hola, {user.displayName || user.email}
-                  </span>
-                  <button
-                    onClick={handleLogout}
-                    className="px-5 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow-md hover:from-red-600 hover:to-red-700 hover:shadow-lg transition-all duration-300 ease-in-out"
-                  >
-                    Cerrar Sesión
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={handleAuthAlert}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  Iniciar Sesión
-                </button>
-              )}
-                {/* Mostrar Dashboard solo si el usuario está logueado */}
-                {user && (
-                  <a
-                    href={localStorage.getItem("role") === "admin" ? "/admin/reservas" : "/user"}
-                    className="text-[#4256a6] hover:text-[#2a3875] transition-all duration-300 font-poppins text-lg"
-                  >
-                    Dashboard
-                  </a>
+                    {/* Dashboard */}
+                    <Link
+                      to={
+                        role === "admin" ? "/admin/reservas" : "/user/profile"
+                      }
+                      className="text-[#4256a6] hover:text-[#2a3875] transition-all duration-300 font-poppins text-lg"
+                    >
+                      Dashboard
+                    </Link>
+                  </>
                 )}
               </div>
 
@@ -332,7 +291,7 @@ export default function StickyNavbar() {
         </div>
       </nav>
     ),
-    [user, role]
+    [user, role, isMobileMenuOpen]
   );
 
   return renderedNavbar;

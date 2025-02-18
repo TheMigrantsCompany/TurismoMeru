@@ -7,15 +7,13 @@ import {
 } from "../../../redux/actions/actions";
 import { PencilIcon } from "@heroicons/react/24/outline";
 import {
-  Card,
-  CardBody,
   Typography,
   IconButton,
   Select,
   Option,
   Tooltip,
 } from "@material-tailwind/react";
-import ReservationModal from "../../../components/modals/admin-modal/ReservationModal";
+import ReservationModal from "../../modals/admin-modal/ReservationModal";
 import Swal from "sweetalert2";
 
 const TABLE_HEAD = [
@@ -348,25 +346,43 @@ export function ReservationsTable({ reservations: propReservations, onEdit }) {
   };
 
   if (reservationsState.loading || ordersState.loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="text-center py-8">
+        <p className="text-[#4256a6] font-poppins text-lg">
+          Cargando reservas...
+        </p>
+      </div>
+    );
   }
 
   if (reservationsState.error || ordersState.error) {
-    return <div>Error: {reservationsState.error || ordersState.error}</div>;
+    return (
+      <div className="text-center py-8">
+        <p className="text-[#4256a6] font-poppins text-lg">
+          Error: {reservationsState.error || ordersState.error}
+        </p>
+      </div>
+    );
   }
 
   return (
-    <Card className="h-full w-full mt-16 bg-[#f9f3e1] shadow-lg rounded-lg">
-      <CardBody className="p-6">
-        <div className="mb-6">
-          <div className="flex flex-wrap justify-center gap-4">
+    <div className="w-full bg-[#f9f3e1]">
+      <div className="p-4">
+        {/* Contenedor de filtros con títulos */}
+        <div className="flex justify-center gap-8 mb-6">
+          <div className="flex flex-col items-center">
+            <Typography className="mb-2 font-poppins font-medium text-[#4256a6]">
+              Seleccionar Servicio
+            </Typography>
             <div className="w-72">
               <Select
-                label="Seleccionar Servicio"
                 value={selectedService}
                 onChange={(e) => setSelectedService(e)}
-                className="bg-white"
+                className="bg-white border border-[#425a66]/20 focus:border-[#4256a6]"
                 containerProps={{ className: "min-w-[200px]" }}
+                labelProps={{
+                  className: "hidden", // Oculta el label flotante
+                }}
               >
                 <Option value="">Todos los Servicios</Option>
                 {Array.from(
@@ -382,14 +398,21 @@ export function ReservationsTable({ reservations: propReservations, onEdit }) {
                 ))}
               </Select>
             </div>
+          </div>
 
+          <div className="flex flex-col items-center">
+            <Typography className="mb-2 font-poppins font-medium text-[#4256a6]">
+              Seleccionar Fecha
+            </Typography>
             <div className="w-72">
               <Select
-                label="Seleccionar Fecha"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e)}
-                className="bg-white"
+                className="bg-white border border-[#425a66]/20 focus:border-[#4256a6]"
                 containerProps={{ className: "min-w-[200px]" }}
+                labelProps={{
+                  className: "hidden",
+                }}
               >
                 <Option value="">Todas las Fechas</Option>
                 {availableDates.map((date) => (
@@ -399,14 +422,21 @@ export function ReservationsTable({ reservations: propReservations, onEdit }) {
                 ))}
               </Select>
             </div>
+          </div>
 
+          <div className="flex flex-col items-center">
+            <Typography className="mb-2 font-poppins font-medium text-[#4256a6]">
+              Seleccionar Hora
+            </Typography>
             <div className="w-72">
               <Select
-                label="Seleccionar Hora"
                 value={selectedTime}
                 onChange={(e) => setSelectedTime(e)}
-                className="bg-white"
+                className="bg-white border border-[#425a66]/20 focus:border-[#4256a6]"
                 containerProps={{ className: "min-w-[200px]" }}
+                labelProps={{
+                  className: "hidden",
+                }}
               >
                 <Option value="">Todas las Horas</Option>
                 {availableTimes.map((time) => (
@@ -417,123 +447,103 @@ export function ReservationsTable({ reservations: propReservations, onEdit }) {
               </Select>
             </div>
           </div>
-
-          {/* Mostrar filtros activos */}
-          {renderActiveFilters()}
         </div>
 
-        {/* Tabla */}
-        <div className="overflow-x-auto">
-          {displayReservations.length > 0 ? (
-            <table className="mt-4 w-full table-auto text-center">
-              <thead>
-                <tr>
-                  {TABLE_HEAD.map((head) => (
-                    <th
-                      key={head}
-                      className="border-b border-blue-gray-100 bg-blue-gray-50 p-4"
-                    >
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-normal leading-none opacity-70"
-                      >
-                        {head}
+        {renderActiveFilters()}
+      </div>
+
+      <div className="overflow-x-auto bg-[#f9f3e1]">
+        <table className="w-full min-w-max table-auto text-left bg-[#f9f3e1]">
+          <thead>
+            <tr>
+              {TABLE_HEAD.map((header) => (
+                <th
+                  key={header}
+                  className="border-b border-[#425a66] bg-[#dac9aa] p-4"
+                >
+                  <Typography
+                    variant="small"
+                    className="font-poppins font-bold text-[#4256a6] opacity-90"
+                  >
+                    {header}
+                  </Typography>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="bg-[#f9f3e1]">
+            {displayReservations.length > 0 ? (
+              displayReservations.map(
+                ({
+                  id_Booking,
+                  id_User,
+                  id_Service,
+                  dateTime,
+                  totalPeople,
+                  passengerName,
+                }) => (
+                  <tr
+                    key={id_Booking}
+                    className="hover:bg-[#dac9aa]/30 transition-colors border-b border-[#425a66]/20"
+                  >
+                    <td className="p-4">
+                      <Typography className="font-poppins text-[#425a66]">
+                        {passengerName}
                       </Typography>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {displayReservations.map(
-                  (
-                    {
-                      id_Booking,
-                      id_User,
-                      id_Service,
-                      dateTime,
-                      totalPeople,
-                      passengerName,
-                    },
-                    index
-                  ) => {
-                    const isLast = index === displayReservations.length - 1;
-                    const classes = isLast
-                      ? "p-4"
-                      : "p-4 border-b border-blue-gray-50";
+                    </td>
+                    <td className="p-4">
+                      <Typography className="font-poppins text-[#425a66]">
+                        {getServiceTitle(id_Service)}
+                      </Typography>
+                    </td>
+                    <td className="p-4">
+                      <Typography className="font-poppins text-[#425a66]">
+                        {totalPeople}
+                      </Typography>
+                    </td>
+                    <td className="p-4">
+                      <Typography className="font-poppins text-[#425a66]">
+                        {dateTime}
+                      </Typography>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex gap-3">
+                        <Tooltip content="Editar Reserva">
+                          <IconButton
+                            variant="text"
+                            onClick={() =>
+                              handleEditReservation({
+                                id_Booking,
+                                id_User,
+                                id_Service,
+                                dateTime,
+                                totalPeople,
+                                passengerName,
+                              })
+                            }
+                            className="text-[#4256a6] hover:bg-[#4256a6]/10"
+                          >
+                            <PencilIcon className="h-5 w-5" />
+                          </IconButton>
+                        </Tooltip>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              )
+            ) : (
+              <tr>
+                <td colSpan="5" className="p-4 text-center">
+                  <Typography className="font-poppins text-[#4256a6]">
+                    No se encontraron reservas para mostrar
+                  </Typography>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
-                    return (
-                      <tr key={id_Booking}>
-                        <td className={classes}>
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-normal"
-                          >
-                            {passengerName}
-                          </Typography>
-                        </td>
-                        <td className={classes}>
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-normal"
-                          >
-                            {getServiceTitle(id_Service)}
-                          </Typography>
-                        </td>
-                        <td className={classes}>
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-normal"
-                          >
-                            {totalPeople}
-                          </Typography>
-                        </td>
-                        <td className={classes}>
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-normal"
-                          >
-                            {dateTime}
-                          </Typography>
-                        </td>
-                        <td className={classes}>
-                          <Tooltip content="Editar Reserva">
-                            <IconButton
-                              variant="text"
-                              onClick={() =>
-                                handleEditReservation({
-                                  id_Booking,
-                                  id_User,
-                                  id_Service,
-                                  dateTime,
-                                  totalPeople,
-                                  passengerName,
-                                })
-                              }
-                            >
-                              <PencilIcon className="h-4 w-4" />
-                            </IconButton>
-                          </Tooltip>
-                        </td>
-                      </tr>
-                    );
-                  }
-                )}
-              </tbody>
-            </table>
-          ) : (
-            <div className="text-center py-4 text-gray-600">
-              No se encontraron reservas para mostrar
-            </div>
-          )}
-        </div>
-      </CardBody>
-
-      {/* Modal */}
       {selectedReservation && (
         <ReservationModal
           isOpen={!!selectedReservation}
@@ -542,6 +552,6 @@ export function ReservationsTable({ reservations: propReservations, onEdit }) {
           onSave={handleSaveReservation}
         />
       )}
-    </Card>
+    </div>
   );
 }

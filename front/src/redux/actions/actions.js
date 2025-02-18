@@ -7,9 +7,6 @@ import {
   GET_BOOKINGS_BY_SERVICE_REQUEST,
   GET_BOOKINGS_BY_SERVICE_SUCCESS,
   GET_BOOKINGS_BY_SERVICE_FAILURE,
-  GET_BOOKINGS_BY_SERVICE_REQUEST,
-  GET_BOOKINGS_BY_SERVICE_SUCCESS,
-  GET_BOOKINGS_BY_SERVICE_FAILURE,
   DELETE_SERVICE,
   TOGGLE_SERVICE_STATUS_SUCCESS,
   //users
@@ -34,25 +31,17 @@ import {
   UPDATE_USER_REQUEST,
   UPDATE_USER_SUCCESS,
   UPDATE_USER_FAILURE,
-
-  
-   CREATE_ORDER_SUCCESS,
-   CREATE_ORDER_FAILURE,
-   GET_ALL_ORDERS,
-   GET_ALL_ORDERS_REQUEST,
-   GET_ALL_ORDERS_ERROR,
-
-   GET_ORDERS_BY_USER_REQUEST,
-   GET_ORDERS_BY_USER_SUCCESS,
-   GET_ORDERS_BY_USER_FAILURE,
-
-   GET_ALL_BOOKINGS,
-   GET_ALL_BOOKINGS_REQUEST,
-   GET_ALL_BOOKINGS_ERROR,
-
-   GET_ALL_BOOKINGS,
-   GET_ALL_BOOKINGS_REQUEST,
-   GET_ALL_BOOKINGS_ERROR,
+  CREATE_ORDER_SUCCESS,
+  CREATE_ORDER_FAILURE,
+  GET_ALL_ORDERS,
+  GET_ALL_ORDERS_REQUEST,
+  GET_ALL_ORDERS_ERROR,
+  GET_ORDERS_BY_USER_REQUEST,
+  GET_ORDERS_BY_USER_SUCCESS,
+  GET_ORDERS_BY_USER_FAILURE,
+  GET_ALL_BOOKINGS,
+  GET_ALL_BOOKINGS_REQUEST,
+  GET_ALL_BOOKINGS_ERROR,
 } from "./types";
 
 export const createExcursion = (excursionData) => async (dispatch) => {
@@ -74,26 +63,26 @@ export const createExcursion = (excursionData) => async (dispatch) => {
   }
 };
 
-export const getBookingsByService = (id_Service, date, time, page = 1, limit = 10) => async (dispatch) => {
-  dispatch({ type: GET_BOOKINGS_BY_SERVICE_REQUEST });
+export const getBookingsByService =
+  (id_Service, date, time, page = 1, limit = 10) =>
+  async (dispatch) => {
+    dispatch({ type: GET_BOOKINGS_BY_SERVICE_REQUEST });
 
-  try {
-    const response = await axios.get(
-      `http://localhost:3001/booking/service/${id_Service}?date=${date}&time=${time}&page=${page}&limit=${limit}`
-    );
-    dispatch({
-      type: GET_BOOKINGS_BY_SERVICE_SUCCESS,
-      payload: response.data.data, // Se espera que los datos de las reservas estén en data
-    });
-  } catch (error) {
-    dispatch({
-      type: GET_BOOKINGS_BY_SERVICE_FAILURE,
-      payload: error.message,
-    });
-  }
-};
-
-
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/booking/service/${id_Service}?date=${date}&time=${time}&page=${page}&limit=${limit}`
+      );
+      dispatch({
+        type: GET_BOOKINGS_BY_SERVICE_SUCCESS,
+        payload: response.data.data,
+      });
+    } catch (error) {
+      dispatch({
+        type: GET_BOOKINGS_BY_SERVICE_FAILURE,
+        payload: error.message,
+      });
+    }
+  };
 
 export const getAllServices = () => async (dispatch) => {
   try {
@@ -212,7 +201,7 @@ export const getUserDetails = (id_User) => async (dispatch) => {
     const response = await axios.get(
       `http://localhost:3001/user/id/${id_User}`
     );
-    console.log(id_User)
+    console.log(id_User);
     console.log(
       "Actions - getUserDetails: Detalles del usuario obtenidos:",
       response.data
@@ -261,8 +250,6 @@ export const getUserByDni = (dni) => async (dispatch) => {
   }
 };
 
-
-
 //UPDATE user por ID
 export const updateUserDetails = (id_User, updatedData) => async (dispatch) => {
   console.log(
@@ -291,42 +278,41 @@ export const updateUserDetails = (id_User, updatedData) => async (dispatch) => {
 //ORDENES DE SERVICIO
 export const createServiceOrder = (orderData) => async (dispatch) => {
   try {
-      console.log("Enviando datos al endpoint:", orderData);
-      const response = await fetch('http://localhost:3001/servicesOrder/', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(orderData),
-      });
+    console.log("Enviando datos al endpoint:", orderData);
+    const response = await fetch("http://localhost:3001/servicesOrder/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(orderData),
+    });
 
-      const data = await response.json();
-      console.log("Respuesta del backend:", data);
+    const data = await response.json();
+    console.log("Respuesta del backend:", data);
 
-      if (!response.ok) {
-          throw new Error(data.message || "Error al crear la orden");
-      }
+    if (!response.ok) {
+      throw new Error(data.message || "Error al crear la orden");
+    }
 
-      dispatch({
-          type: CREATE_ORDER_SUCCESS,
-          payload: data,
-      });
-      return data.order;
+    dispatch({
+      type: CREATE_ORDER_SUCCESS,
+      payload: data,
+    });
+    return data.order;
   } catch (error) {
-      console.error("Error en createServiceOrder:", error);
-      dispatch({
-          type: CREATE_ORDER_FAILURE,
-          payload: error.message,
-      });
+    console.error("Error en createServiceOrder:", error);
+    dispatch({
+      type: CREATE_ORDER_FAILURE,
+      payload: error.message,
+    });
   }
 };
-
 
 //GET todas las ordenes de servicio
 export const getAllOrders = () => async (dispatch) => {
   dispatch({ type: GET_ALL_ORDERS_REQUEST });
   try {
-    const response = await axios.get('http://localhost:3001/servicesOrder/');
+    const response = await axios.get("http://localhost:3001/servicesOrder/");
     dispatch({ type: GET_ALL_ORDERS, payload: response.data });
   } catch (error) {
     dispatch({ type: GET_ALL_ORDERS_ERROR, payload: error.message });
@@ -339,52 +325,21 @@ export const getAllOrders = () => async (dispatch) => {
 export const getAllBookings = () => async (dispatch) => {
   dispatch({ type: GET_ALL_BOOKINGS_REQUEST });
   try {
-    const response = await axios.get('http://localhost:3001/booking/');
+    const response = await axios.get("http://localhost:3001/booking/");
     dispatch({ type: GET_ALL_BOOKINGS, payload: response.data });
   } catch (error) {
     dispatch({ type: GET_ALL_BOOKINGS_ERROR, payload: error.message });
   }
 };
+
 //GET ordenes de servicio por usuario
 export const getOrdersByUser = (id_User) => async (dispatch) => {
   try {
-    const response = await axios.get(`http://localhost:3001/servicesOrder/user/${id_User}`);
-    console.log("Respuesta del backend:", response);
-    dispatch({ type: "GET_ORDERS_BY_USER_SUCCESS", payload: response.data });
-    console.log("Respuesta del backend:", response.data);
-  } catch (error) {
-    dispatch({ type: "GET_ORDERS_BY_USER_FAILURE", payload: error.message });
-  }
-};
-
-//ACTIONS BOOKINGS
-//todos los bookings
-
-export const getAllBookings = () => async (dispatch) => {
-  dispatch({ type: GET_ALL_BOOKINGS_REQUEST });
-  try {
-    const response = await axios.get('http://localhost:3001/booking/');
-    dispatch({ type: GET_ALL_BOOKINGS, payload: response.data });
-  } catch (error) {
-    dispatch({ type: GET_ALL_BOOKINGS_ERROR, payload: error.message });
-  }
-};
-
-export const getBookingsByService = (id_Service, date, time, page = 1, limit = 10) => async (dispatch) => {
-  dispatch({ type: GET_BOOKINGS_BY_SERVICE_REQUEST });
-
-  try {
     const response = await axios.get(
-      `http://localhost:3001/booking/service/${id_Service}?date=${date}&time=${time}&page=${page}&limit=${limit}`
+      `http://localhost:3001/servicesOrder/user/${id_User}`
     );
-    dispatch({
-      type: GET_BOOKINGS_BY_SERVICE_SUCCESS,
-      payload: response.data.data, // Se espera que los datos de las reservas estén en data
-    });
+    dispatch({ type: GET_ORDERS_BY_USER_SUCCESS, payload: response.data });
   } catch (error) {
-    dispatch({
-      type: GET_BOOKINGS_BY_SERVICE_FAILURE,
-      payload: error.message,
-    });
+    dispatch({ type: GET_ORDERS_BY_USER_FAILURE, payload: error.message });
   }
 };

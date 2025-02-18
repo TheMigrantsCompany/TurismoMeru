@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getUsers, toggleUserActiveStatus, deleteUser } from "../../../redux/actions/actions";
+import {
+  getUsers,
+  toggleUserActiveStatus,
+  deleteUser,
+} from "../../../redux/actions/actions";
 import SearchInput from "../../../components/inputs/SearchInput";
 import UserTable from "../../../components/tables/admin/UsersTable";
 import UserModal from "../../../components/modals/admin-modal/UserModal";
@@ -11,27 +15,25 @@ export function UserManagement() {
   const userList = useSelector((state) => state.users.userList);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [filterStatus, setFilterStatus] = useState("all"); // Estado para filtro
-  const [searchLoading, setSearchLoading] = useState(false); // Estado para mostrar cargando
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [searchLoading, setSearchLoading] = useState(false);
 
-  // Carga inicial de usuarios
   useEffect(() => {
     dispatch(getUsers());
   }, [dispatch]);
 
-  // Actualizar filtrados al cambiar la lista de usuarios o el filtro
   useEffect(() => {
     let filtered = userList;
     if (filterStatus !== "all") {
-      filtered = userList.filter((user) => user.active === (filterStatus === "active"));
+      filtered = userList.filter(
+        (user) => user.active === (filterStatus === "active")
+      );
     }
     setFilteredUsers(filtered);
   }, [userList, filterStatus]);
 
-  // Filtrar usuarios por búsqueda
   const handleSearch = async (query) => {
     if (!query) {
-      // Si no hay búsqueda, mostrar todos los usuarios
       setFilteredUsers(userList);
       return;
     }
@@ -41,49 +43,68 @@ export function UserManagement() {
     try {
       let response;
       if (/^\d+$/.test(query)) {
-        // Si el query son solo números, buscar por DNI
         response = await axios.get(`http://localhost:3001/user/DNI/${query}`);
       } else {
-        // Si no, buscar por nombre
         response = await axios.get(`http://localhost:3001/user/name/${query}`);
       }
 
       setFilteredUsers(response.data);
     } catch (error) {
       console.error("Error al buscar usuarios:", error);
-      setFilteredUsers([]); // Limpiar la lista si ocurre un error
+      setFilteredUsers([]);
     } finally {
       setSearchLoading(false);
     }
   };
 
-  // Cambiar estado activo/inactivo
   const handleToggleActive = (id_User) => {
     dispatch(toggleUserActiveStatus(id_User));
   };
 
-  // Eliminar usuario
   const handleDeleteUser = (id_User) => {
     dispatch(deleteUser(id_User)).then(() => {
-      dispatch(getUsers()); // Recarga los usuarios desde el backend
+      dispatch(getUsers());
     });
   };
 
   return (
-    <div className="top-5 gap-5 flex flex-col w-full h-full p-6 bg-[#f9f3e1]">
-      <h2 className="text-2xl text-[#4256a6] font-semibold mb-4">Gestión de Usuarios</h2>
-      <SearchInput onSearch={handleSearch} />
-      {searchLoading ? (
-        <p className="text-[#4256a6] text-center">Buscando...</p>
-      ) : (
-        <UserTable
-          users={filteredUsers}
-          onFilterChange={setFilterStatus} // Actualizar filtro
-          onViewDetails={setSelectedUser}
-          onDelete={handleDeleteUser}
-          onToggleActive={handleToggleActive}
-        />
-      )}
+    <div className="container mx-auto p-6 bg-[#f9f3e1] rounded-lg shadow-lg">
+      <h1 className="text-3xl font-bold mb-6 text-[#4256a6] font-poppins">
+        Gestión de Usuarios
+      </h1>
+
+      <div className="space-y-6">
+        <div className="bg-[#f9f3e1]">
+          <div className="mb-6">
+            <SearchInput onSearch={handleSearch} type="user" />
+          </div>
+
+          {searchLoading ? (
+            <div className="text-center py-8">
+              <p className="text-[#4256a6] font-poppins text-lg">
+                Buscando usuarios...
+              </p>
+            </div>
+          ) : filteredUsers.length > 0 ? (
+            <div className="bg-[#f9f3e1]">
+              <UserTable
+                users={filteredUsers}
+                onFilterChange={setFilterStatus}
+                onViewDetails={setSelectedUser}
+                onDelete={handleDeleteUser}
+                onToggleActive={handleToggleActive}
+              />
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-[#4256a6] font-poppins text-lg">
+                No se encontraron usuarios.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
       {selectedUser && (
         <UserModal
           user={selectedUser}

@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import React from "react";
 import {
   Card,
   Typography,
@@ -13,69 +13,117 @@ import {
   ClipboardDocumentCheckIcon,
   CalendarIcon,
 } from "@heroicons/react/24/solid";
+import { useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 
 export function AdminSideBar() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const isActiveRoute = (path) => {
+    return location.pathname === path;
+  };
+
+  const handleContactClick = () => {
+    window.open(
+      "https://wa.me/+541169084059?text=Soporte técnico administrador",
+      "_blank"
+    );
+  };
+
   const menuItems = [
     {
+      title: "Gestión de Reservas",
       path: "/admin/reservas",
       icon: CalendarIcon,
-      text: "Gestión de Reservas",
     },
     {
+      title: "Gestión de Usuarios",
       path: "/admin/usuarios",
       icon: UserGroupIcon,
-      text: "Gestión de Usuarios",
     },
     {
+      title: "Gestión de Excursiones",
       path: "/admin/excursiones",
       icon: GlobeAltIcon,
-      text: "Gestión de Excursiones",
     },
     {
+      title: "Gestión de Reviews",
       path: "/admin/reviews",
       icon: StarIcon,
-      text: "Gestión de Reviews",
     },
     {
+      title: "Gestión de Órdenes",
       path: "/admin/ordenes",
       icon: ClipboardDocumentCheckIcon,
-      text: "Gestión de Órdenes de Servicio",
     },
   ];
 
   return (
-    <Card className="h-[calc(100vh-2rem)] w-full max-w-[20rem] p-4 shadow-xl shadow-[#425a66]/5 bg-[#f9f3e1]">
-      <div className="mb-2 p-4">
+    <Card className="min-h-screen w-full max-w-[20rem] p-6 shadow-lg bg-[#f9f3e1] border-r border-[#425a66]/10">
+      <div className="mb-10 p-4">
         <Typography
-          variant="h5"
-          color="blue-gray"
-          className="text-[#4256a6] font-semibold text-2xl font-poppins"
+          variant="h4"
+          className="text-[#4256a6] font-semibold font-poppins"
         >
           Panel de Control
         </Typography>
+        <Typography className="text-[#425a66] mt-2 font-poppins text-base">
+          Administración del sistema
+        </Typography>
       </div>
-      <List>
-        {menuItems.map((item) => (
-          <NavLink
+
+      <List className="space-y-3">
+        {menuItems.map((item, index) => (
+          <motion.div
             key={item.path}
-            to={item.path}
-            className={({ isActive }) =>
-              `block ${
-                isActive
-                  ? "bg-[#e0d7c6] text-white border-l-4 border-[#425a66]"
-                  : "text-[#4256a6]"
-              }`
-            }
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.1 }}
           >
-            <ListItem className="cursor-pointer hover:bg-[#e0d7c6] hover:text-white hover:border-l-4 hover:border-[#425a66] transition-all duration-200 py-3 text-lg font-poppins">
+            <ListItem
+              onClick={() => navigate(item.path)}
+              className={`${
+                isActiveRoute(item.path)
+                  ? "bg-[#4256a6] text-white shadow-md"
+                  : "text-[#425a66] hover:bg-[#dac9aa]/20"
+              } cursor-pointer transition-all duration-300 rounded-lg font-poppins text-lg py-4`}
+            >
               <ListItemPrefix>
-                <item.icon className="h-5 w-5" />
+                <item.icon
+                  className={`h-6 w-6 ${
+                    isActiveRoute(item.path) ? "text-white" : "text-[#4256a6]"
+                  }`}
+                />
               </ListItemPrefix>
-              {item.text}
+              {item.title}
             </ListItem>
-          </NavLink>
+          </motion.div>
         ))}
       </List>
+
+      <div className="mt-auto pt-8 px-4">
+        <motion.div
+          className="p-4 bg-[#dac9aa]/20 rounded-lg hover:bg-[#dac9aa]/30 transition-all duration-300 cursor-pointer"
+          onClick={handleContactClick}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <Typography className="text-[#425a66] font-poppins text-center text-base">
+            ¿Necesitas soporte técnico?
+          </Typography>
+          <div className="flex items-center justify-center gap-2 mt-2">
+            <img
+              src="https://img.icons8.com/fluent/24/000000/whatsapp.png"
+              alt="WhatsApp"
+              className="w-5 h-5"
+            />
+            <Typography className="text-[#4256a6] font-poppins text-base font-medium">
+              Contactar soporte
+            </Typography>
+          </div>
+        </motion.div>
+      </div>
     </Card>
   );
 }

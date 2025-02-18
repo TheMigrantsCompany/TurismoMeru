@@ -29,16 +29,16 @@ const ProfileForm = () => {
   useEffect(() => {
     const uuid = localStorage.getItem("uuid");
     if (uuid) {
-      dispatch(getUserDetails(uuid)); 
+      dispatch(getUserDetails(uuid));
     }
   }, [dispatch]);
 
   useEffect(() => {
     if (userDetails) {
-      console.log('Datos del usuario recibidos:', userDetails); // Para debug
-      
+      console.log("Datos del usuario recibidos:", userDetails); // Para debug
+
       // Intentar obtener datos adicionales del localStorage
-      const savedProfile = localStorage.getItem('userProfile');
+      const savedProfile = localStorage.getItem("userProfile");
       const parsedProfile = savedProfile ? JSON.parse(savedProfile) : null;
 
       setProfile({
@@ -59,27 +59,27 @@ const ProfileForm = () => {
         },
         medicalInfo: parsedProfile?.medicalInfo || "",
         experienceLevel: parsedProfile?.experienceLevel || "",
-        interests: parsedProfile?.interests || []
+        interests: parsedProfile?.interests || [],
       });
     }
   }, [userDetails]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setProfile(prev => ({
+
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
+      setProfile((prev) => ({
         ...prev,
         [parent]: {
           ...prev[parent],
-          [child]: value
-        }
+          [child]: value,
+        },
       }));
     } else {
-      setProfile(prev => ({
+      setProfile((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
   };
@@ -105,54 +105,63 @@ const ProfileForm = () => {
       if (data.secure_url) {
         setProfile((prev) => ({
           ...prev,
-          image: data.secure_url, 
+          image: data.secure_url,
         }));
-        Swal.fire("Imagen subida", "La imagen se ha cargado correctamente.", "success");
+        Swal.fire(
+          "Imagen subida",
+          "La imagen se ha cargado correctamente.",
+          "success"
+        );
       } else {
         Swal.fire("Error", "Error al subir la imagen a Cloudinary.", "error");
       }
     } catch (error) {
       console.error("Error al subir la imagen:", error);
-      Swal.fire("Error", "No se pudo subir la imagen. Inténtalo de nuevo.", "error");
+      Swal.fire(
+        "Error",
+        "No se pudo subir la imagen. Inténtalo de nuevo.",
+        "error"
+      );
     }
   };
 
   const handleSave = () => {
     const uuid = localStorage.getItem("uuid");
     if (!profile.name || !profile.email) {
-      Swal.fire("Error", "Por favor completa los campos obligatorios.", "error");
+      Swal.fire(
+        "Error",
+        "Por favor completa los campos obligatorios.",
+        "error"
+      );
       return;
     }
 
-    // Solo incluir los campos que existen en el modelo para enviar al backend
+    // Incluir todos los campos en el objeto a enviar al backend
     const backendProfile = {
       name: profile.name,
       email: profile.email,
-      phone: profile.phone || userDetails?.phone,
-      image: profile.image || userDetails?.image,
-      address: profile.address || userDetails?.address,
-      DNI: profile.DNI || userDetails?.DNI,
-      active: true
+      phone: profile.phone,
+      image: profile.image,
+      address: profile.address,
+      DNI: profile.DNI,
+      birthDate: profile.birthDate,
+      gender: profile.gender,
+      nationality: profile.nationality,
+      emergencyContact: profile.emergencyContact,
+      medicalInfo: profile.medicalInfo,
+      experienceLevel: profile.experienceLevel,
+      interests: profile.interests,
+      active: true,
     };
-
-    console.log('Datos a guardar en backend:', backendProfile); // Para debug
 
     if (uuid) {
       dispatch(updateUserDetails(uuid, backendProfile))
         .then((response) => {
-          console.log('Respuesta del servidor:', response); // Para debug
-          
-          // Guardamos los datos en localStorage para persistencia
-          const localStorageProfile = {
-            ...profile, // Mantenemos todos los datos adicionales
-            ...backendProfile // Actualizamos los datos del backend
-          };
-          localStorage.setItem('userProfile', JSON.stringify(localStorageProfile));
-          
-          // Actualizamos el estado manteniendo todos los datos
-          setProfile(localStorageProfile);
-          
-          Swal.fire("Perfil actualizado", "Los datos han sido guardados.", "success");
+          Swal.fire(
+            "Perfil actualizado",
+            "Los datos han sido guardados.",
+            "success"
+          );
         })
         .catch((error) => {
           console.error("Error al actualizar el perfil:", error);
@@ -164,7 +173,7 @@ const ProfileForm = () => {
   const experienceLevels = [
     { value: "principiante", label: "Principiante" },
     { value: "intermedio", label: "Intermedio" },
-    { value: "avanzado", label: "Avanzado" }
+    { value: "avanzado", label: "Avanzado" },
   ];
 
   const interestOptions = [
@@ -173,15 +182,15 @@ const ProfileForm = () => {
     "Camping",
     "Fotografía",
     "Observación de aves",
-    "Escalada"
+    "Escalada",
   ];
 
   const handleInterestChange = (interest) => {
-    setProfile(prev => ({
+    setProfile((prev) => ({
       ...prev,
       interests: prev.interests.includes(interest)
-        ? prev.interests.filter(i => i !== interest)
-        : [...prev.interests, interest]
+        ? prev.interests.filter((i) => i !== interest)
+        : [...prev.interests, interest],
     }));
   };
 
@@ -191,8 +200,12 @@ const ProfileForm = () => {
         <div className="max-w-3xl mx-auto">
           <div className="bg-[#f9f3e1] rounded-2xl shadow-lg overflow-hidden">
             <div className="p-8 border-b border-[#425a66]/10">
-              <h2 className="text-3xl font-bold text-[#4256a6] font-poppins">Mi Perfil</h2>
-              <p className="mt-2 text-[#425a66]">Gestiona tu información personal</p>
+              <h2 className="text-3xl font-bold text-[#4256a6] font-poppins">
+                Mi Perfil
+              </h2>
+              <p className="mt-2 text-[#425a66]">
+                Gestiona tu información personal
+              </p>
             </div>
 
             <div className="p-8">
@@ -293,7 +306,9 @@ const ProfileForm = () => {
               </div>
 
               <div className="mb-8">
-                <h3 className="text-xl font-semibold text-[#4256a6] mb-4">Información Personal</h3>
+                <h3 className="text-xl font-semibold text-[#4256a6] mb-4">
+                  Información Personal
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-[#425a66] mb-2">
@@ -322,7 +337,9 @@ const ProfileForm = () => {
                       <option value="masculino">Masculino</option>
                       <option value="femenino">Femenino</option>
                       <option value="otro">Otro</option>
-                      <option value="prefiero_no_decir">Prefiero no decir</option>
+                      <option value="prefiero_no_decir">
+                        Prefiero no decir
+                      </option>
                     </select>
                   </div>
 
@@ -343,7 +360,9 @@ const ProfileForm = () => {
               </div>
 
               <div className="mb-8">
-                <h3 className="text-xl font-semibold text-[#4256a6] mb-4">Información de Emergencia</h3>
+                <h3 className="text-xl font-semibold text-[#4256a6] mb-4">
+                  Información de Emergencia
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-[#425a66] mb-2">
@@ -390,7 +409,9 @@ const ProfileForm = () => {
               </div>
 
               <div className="mb-8">
-                <h3 className="text-xl font-semibold text-[#4256a6] mb-4">Preferencias de Excursiones</h3>
+                <h3 className="text-xl font-semibold text-[#4256a6] mb-4">
+                  Preferencias de Excursiones
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-[#425a66] mb-2">
@@ -403,7 +424,7 @@ const ProfileForm = () => {
                       className="w-full px-4 py-3 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white text-black"
                     >
                       <option value="">Seleccionar nivel</option>
-                      {experienceLevels.map(level => (
+                      {experienceLevels.map((level) => (
                         <option key={level.value} value={level.value}>
                           {level.label}
                         </option>
@@ -416,15 +437,20 @@ const ProfileForm = () => {
                       Intereses
                     </label>
                     <div className="grid grid-cols-2 gap-2">
-                      {interestOptions.map(interest => (
-                        <label key={interest} className="flex items-center space-x-2">
+                      {interestOptions.map((interest) => (
+                        <label
+                          key={interest}
+                          className="flex items-center space-x-2"
+                        >
                           <input
                             type="checkbox"
                             checked={profile.interests.includes(interest)}
                             onChange={() => handleInterestChange(interest)}
                             className="rounded border-[#425a66]/20 text-[#4256a6] focus:ring-[#4256a6]"
                           />
-                          <span className="text-sm text-[#425a66]">{interest}</span>
+                          <span className="text-sm text-[#425a66]">
+                            {interest}
+                          </span>
                         </label>
                       ))}
                     </div>

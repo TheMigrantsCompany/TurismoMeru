@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const SearchInput = ({ onSearch, showSelect }) => {
+const SearchInput = ({ onSearch, showSelect, type = "service" }) => {
   const [query, setQuery] = useState("");
   const [searchType, setSearchType] = useState("service");
 
@@ -50,7 +50,9 @@ const SearchInput = ({ onSearch, showSelect }) => {
                 onChange={handleInputChange}
                 className="w-full h-12 pl-6 pr-16 border shadow-sm rounded-full text-gray-800 border-gray-300 bg-white focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20"
                 placeholder={
-                  searchType === "service"
+                  type === "user"
+                    ? "Buscar usuario..."
+                    : searchType === "service"
                     ? "Buscar por servicio..."
                     : "Buscar por pasajero..."
                 }

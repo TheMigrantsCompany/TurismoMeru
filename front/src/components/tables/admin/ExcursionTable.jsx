@@ -6,10 +6,7 @@ import {
   deleteService,
   toggleServiceActiveStatus,
 } from "../../../redux/actions/actions";
-import {
-  PencilIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
+import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import {
   Card,
   CardHeader,
@@ -128,95 +125,107 @@ const ExcursionTable = () => {
   };
 
   return (
-    <Card className="h-full w-full mt-2 bg-[#f9f3e1] shadow-lg rounded-lg">
-      <CardHeader floated={false} shadow={false} className="rounded-none">
-        {/* Botones de filtrado */}
-        <div className="flex justify-start space-x-4 p-4 bg-[#f9f3e1]">
-          <Button
-            onClick={() => filterExcursions("all")}
-            className="bg-[#4256a6] text-white py-2 rounded-lg hover:bg-[#364d73] transition-colors"
-          >
-            Todas
-          </Button>
-          <Button
-            onClick={() => filterExcursions("active")}
-            className="bg-[#f4925b] text-white py-2 rounded-lg hover:bg-[#d98248] transition-colors"
-          >
-            Activas
-          </Button>
-          <Button
-            onClick={() => filterExcursions("inactive")}
-            className="bg-[#152817] text-white py-2 rounded-lg hover:bg-[#0f1e11] transition-colors"
-          >
-            Inactivas
-          </Button>
-        </div>
-      </CardHeader>
+    <div className="w-full bg-[#f9f3e1]">
+      <div className="flex justify-start gap-4 p-4">
+        <Button
+          onClick={() => filterExcursions("all")}
+          className="bg-[#4256a6] text-white px-6 py-2 rounded-lg hover:bg-[#334477] transition-colors font-poppins"
+        >
+          Todas
+        </Button>
+        <Button
+          onClick={() => filterExcursions("active")}
+          className="bg-[#f4925b] text-white px-6 py-2 rounded-lg hover:bg-[#d98248] transition-colors font-poppins"
+        >
+          Activas
+        </Button>
+        <Button
+          onClick={() => filterExcursions("inactive")}
+          className="bg-[#425a66] text-white px-6 py-2 rounded-lg hover:bg-[#2f4047] transition-colors font-poppins"
+        >
+          Inactivas
+        </Button>
+      </div>
 
-      <CardBody className="p-0">
-        <SearchInput onSearch={handleSearchChange} />
-        <table className="mt-4 w-full table-auto text-left">
+      <div className="px-4 mb-6">
+        <SearchInput
+          onSearch={handleSearchChange}
+          className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white"
+        />
+      </div>
+
+      <div className="overflow-x-auto bg-[#f9f3e1]">
+        <table className="w-full min-w-max table-auto text-left bg-[#f9f3e1]">
           <thead>
             <tr>
-              {[
-                "Nombre",
-                "Capacidad",
-                "Precio",
-                "Estado",
-                "Acciones",
-              ].map((header) => (
-                <th
-                  key={header}
-                  className="p-4 border-y border-[#4256a6] bg-[#f0f5fc]"
-                >
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="text-[#4256a6]"
+              {["Nombre", "Capacidad", "Precio", "Estado", "Acciones"].map(
+                (header) => (
+                  <th
+                    key={header}
+                    className="border-b border-[#425a66] bg-[#dac9aa] p-4"
                   >
-                    {header}
-                  </Typography>
-                </th>
-              ))}
+                    <Typography
+                      variant="small"
+                      className="font-poppins font-bold text-[#4256a6] opacity-90"
+                    >
+                      {header}
+                    </Typography>
+                  </th>
+                )
+              )}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="bg-[#f9f3e1]">
             {filteredExcursions.length > 0 ? (
               filteredExcursions.map((excursion) => (
                 <tr
                   key={excursion.id_Service}
-                  className="hover:bg-[#e1d4b0] transition-colors border-b border-[#4256a6]"
+                  className="hover:bg-[#dac9aa]/30 transition-colors border-b border-[#425a66]/20"
                 >
-                  <td className="p-4 text-[#4256a6]">{excursion.title}</td>
-                  <td className="p-4 text-[#4256a6]">{excursion.stock}</td>
-                  <td className="p-4 text-[#4256a6]">{excursion.price}</td>
-                  <td className="p-4 text-[#4256a6]">
-                    <Chip
-                      variant="ghost"
-                      size="sm"
-                      value={excursion.active ? "Activa" : "Inactiva"}
-                      color={excursion.active ? "green" : "red"}
-                      className="text-[#4256a6]"
-                    />
+                  <td className="p-4">
+                    <Typography className="font-poppins text-[#425a66]">
+                      {excursion.title}
+                    </Typography>
                   </td>
-                  <td className="p-4 text-[#4256a6]">
-                    <div className="flex gap-2">
+                  <td className="p-4">
+                    <Typography className="font-poppins text-[#425a66]">
+                      {excursion.stock}
+                    </Typography>
+                  </td>
+                  <td className="p-4">
+                    <Typography className="font-poppins text-[#425a66]">
+                      {excursion.price}
+                    </Typography>
+                  </td>
+                  <td className="p-4">
+                    <span
+                      className={`px-3 py-1 rounded-full font-poppins ${
+                        excursion.active
+                          ? "bg-green-100 text-green-600"
+                          : "bg-red-100 text-red-600"
+                      }`}
+                    >
+                      {excursion.active ? "Activa" : "Inactiva"}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex gap-3">
                       <Tooltip content="Editar Excursión">
                         <IconButton
                           variant="text"
                           onClick={() => handleEditClick(excursion)}
-                          className="text-[#4256a6]"
+                          className="text-[#4256a6] hover:bg-[#4256a6]/10"
                         >
-                          <PencilIcon className="h-4 w-4" />
+                          <PencilIcon className="h-5 w-5" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip content="Eliminar Excursión">
                         <IconButton
                           variant="text"
                           onClick={() => handleDeleteExcursion(excursion.title)}
-                          className="text-[#e53935]"
+                          className="text-red-500 hover:bg-red-100"
                         >
-                          <TrashIcon className="h-4 w-4" />
+                          <TrashIcon className="h-5 w-5" />
                         </IconButton>
                       </Tooltip>
                     </div>
@@ -225,17 +234,16 @@ const ExcursionTable = () => {
               ))
             ) : (
               <tr>
-                <td
-                  colSpan="5"
-                  className="p-4 text-center text-[#4256a6]"
-                >
-                  No se encontraron resultados.
+                <td colSpan="5" className="p-4 text-center">
+                  <Typography className="font-poppins text-[#4256a6]">
+                    No se encontraron resultados.
+                  </Typography>
                 </td>
               </tr>
             )}
           </tbody>
         </table>
-      </CardBody>
+      </div>
 
       {showModal && (
         <ExcursionModal
@@ -245,7 +253,7 @@ const ExcursionTable = () => {
           onUpdate={updateExcursionLocally}
         />
       )}
-    </Card>
+    </div>
   );
 };
 

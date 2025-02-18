@@ -5,17 +5,27 @@ import "react-datepicker/dist/react-datepicker.css";
 const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
   const [excursionData, setExcursionData] = useState({
     ...excursion,
+    title: excursion.title || "",
+    description: excursion.description || "",
+    price: excursion.price || 0,
+    duration: excursion.duration || "",
+    difficulty: excursion.difficulty || "",
+    location: excursion.location || "",
+    category: excursion.category || "",
+    meetingPoint: excursion.meetingPoint || "",
+    requirements: excursion.requirements || "",
+    cancellationPolicy: excursion.cancellationPolicy || "",
+    additionalEquipment: excursion.additionalEquipment || "",
+    guides: excursion.guides || [],
+    stock: excursion.stock || 0,
+    active: excursion.active || false,
+    photos: excursion.photos || [],
+    availabilityDate: excursion.availabilityDate || [],
     discount: {
-      seniorPercentage:
-        excursion?.discount?.seniorPercentage ??
-        excursion?.discountForSeniors ??
-        0,
-      minorPercentage:
-        excursion?.discount?.minorPercentage ??
-        excursion?.discountForMinors ??
-        0,
+      seniorPercentage: excursion.discountForSeniors || 0,
+      minorPercentage: excursion.discountForMinors || 0,
     },
-    lockedStock: excursion?.lockedStock ?? 0,  
+    lockedStock: excursion.lockedStock || 0,
   });
 
   const [formErrors, setFormErrors] = useState({});
@@ -27,53 +37,40 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
     time: new Date(),
     stock: 0,
   });
+  const [newGuide, setNewGuide] = useState({
+    name: "",
+  });
 
   useEffect(() => {
-    if (excursion.photos) {
-      setImagePreviews([...excursion.photos]);
+    if (excursion.photos && excursion.photos.length > 0) {
+      setImagePreviews(excursion.photos);
     }
-    if (excursion.availabilityDate) {
-      const formattedDates = excursion.availabilityDate.map((item) => ({
-        date: item.date, // Mantener la fecha como cadena
-        time: item.time, // Mantener la hora como cadena
-        stock: item.stock ?? 0,
-      }));
-  
-      setSelectedDates(formattedDates);
-    }
-  }, [excursion]);
+  }, [excursion.photos]);
 
   useEffect(() => {
-    if (excursion) {
-      setExcursionData({
-        ...excursion,
-        discount: {
-          seniorPercentage:
-            excursion.discount?.seniorPercentage ??
-            excursion.discountForSeniors ??
-            0,
-          minorPercentage:
-            excursion.discount?.minorPercentage ??
-            excursion.discountForMinors ??
-            0,
-        },
-      });
+    if (excursion.availabilityDate && excursion.availabilityDate.length > 0) {
+      setSelectedDates(
+        excursion.availabilityDate.map((date) => ({
+          date: date.date,
+          time: date.time,
+          stock: date.stock || 0,
+        }))
+      );
     }
-  }, [excursion]);
+  }, [excursion.availabilityDate]);
 
-  const handleStatusChange = () => {
-    const newActiveStatus = !excursionData.active;
+  const handleStatusChange = (active) => {
     onToggleActive(excursion.id_Service);
-    setExcursionData((prevData) => ({ ...prevData, active: newActiveStatus }));
+    setExcursionData((prevData) => ({ ...prevData, active }));
   };
 
   const handleChange = (e) => {
-  const { name, value } = e.target;
-  setExcursionData((prevData) => ({
-    ...prevData,
-    [name]: value,
-  }));
-};
+    const { name, value } = e.target;
+    setExcursionData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
 
   const handlePhotoChange = async (e) => {
     const files = Array.from(e.target.files);
@@ -145,49 +142,46 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
     }));
   };
 
-  // Función para agregar una nueva disponibilidad
   const handleAddAvailability = () => {
     const { date, time, stock } = newAvailability;
-  
-    // Validación de datos
+
     if (!date || !time || stock <= 0) {
       alert("Debes seleccionar una fecha, una hora y un stock válido.");
       return;
     }
-  
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-  
+
     const selectedDate = new Date(date);
     selectedDate.setHours(0, 0, 0, 0);
-  
+
     if (selectedDate < today) {
       alert("No puedes seleccionar una fecha pasada.");
       return;
     }
-  
-    // Formatear la fecha y la hora
-    const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    const formattedTime = `${String(time.getHours()).padStart(2, '0')}:${String(time.getMinutes()).padStart(2, '0')}`;
-  
-    // Crear el nuevo objeto de disponibilidad con la fecha y hora seleccionadas
+
+    const formattedDate = `${date.getFullYear()}-${String(
+      date.getMonth() + 1
+    ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    const formattedTime = `${String(time.getHours()).padStart(2, "0")}:${String(
+      time.getMinutes()
+    ).padStart(2, "0")}`;
+
     const newAvailabilityEntry = {
       date: formattedDate,
       time: formattedTime,
-      stock: Number(stock), // Asegúrate de que el stock sea un número
+      stock: Number(stock),
     };
-  
-    // Actualizar la lista de fechas seleccionadas
+
     setSelectedDates((prev) => [...prev, newAvailabilityEntry]);
-  
-    // Actualizar el stock global sumando el nuevo stock
+
     setExcursionData((prevData) => ({
       ...prevData,
-      stock: prevData.stock + Number(stock), // Asegurarse de sumar el stock como número
-      availabilityDate: [...prevData.availabilityDate, newAvailabilityEntry], // Agregar la nueva fecha y stock
+      stock: prevData.stock + Number(stock),
+      availabilityDate: [...prevData.availabilityDate, newAvailabilityEntry],
     }));
-  
-    // Resetear el formulario de nueva disponibilidad
+
     setNewAvailability({
       date: new Date(),
       time: new Date(),
@@ -195,21 +189,17 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
     });
   };
 
-// Función para eliminar una disponibilidad
-const handleRemoveAvailability = (index) => {
-  const availabilityToRemove = selectedDates[index];
+  const handleRemoveAvailability = (index) => {
+    const availabilityToRemove = selectedDates[index];
 
-  // Actualizar el stock global restando el stock de la fecha eliminada
-  setExcursionData((prevData) => ({
-    ...prevData,
-    stock: prevData.stock - availabilityToRemove.stock, // Restar el stock global
-    availabilityDate: prevData.availabilityDate.filter((_, i) => i !== index), // Eliminar la fecha de la lista
-  }));
+    setExcursionData((prevData) => ({
+      ...prevData,
+      stock: prevData.stock - availabilityToRemove.stock,
+      availabilityDate: prevData.availabilityDate.filter((_, i) => i !== index),
+    }));
 
-  // Eliminar la fecha seleccionada de la lista
-  setSelectedDates((prev) => prev.filter((_, i) => i !== index));
-};
-
+    setSelectedDates((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async () => {
     try {
@@ -222,7 +212,7 @@ const handleRemoveAvailability = (index) => {
             ...excursionData,
             discountForMinors: excursionData.discount.minorPercentage,
             discountForSeniors: excursionData.discount.seniorPercentage,
-            availabilityDate: excursionData.availabilityDate, // Solo se envían las fechas con su stock
+            availabilityDate: excursionData.availabilityDate,
           }),
         }
       );
@@ -238,396 +228,492 @@ const handleRemoveAvailability = (index) => {
       });
     }
   };
-  
+
   const handleDiscountChange = (type, value) => {
     setExcursionData((prev) => ({
       ...prev,
       discount: {
         ...prev.discount,
-        [type]: value, // Actualiza dinámicamente seniorPercentage o minorPercentage
+        [type]: value,
       },
     }));
   };
 
+  const handleAddGuide = () => {
+    if (!newGuide.name.trim()) {
+      setFormErrors({
+        ...formErrors,
+        guides: "Por favor, ingresa el nombre del guía.",
+      });
+      return;
+    }
+
+    setFormErrors({
+      ...formErrors,
+      guides: undefined,
+    });
+
+    setExcursionData((prevData) => ({
+      ...prevData,
+      guides: [...prevData.guides, { name: newGuide.name }],
+    }));
+
+    setNewGuide({ name: "" });
+  };
+
+  const handleRemoveGuide = (index) => {
+    const guidesToRemove = excursionData.guides.filter((_, i) => i !== index);
+    setExcursionData((prevData) => ({
+      ...prevData,
+      guides: guidesToRemove,
+    }));
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 pointer-events-auto">
-      <div className="bg-[#dac9aa] p-6 rounded-lg max-w-lg w-full relative z-10 overflow-y-auto max-h-[90vh] shadow-lg">
-        <h2 className="text-2xl font-semibold mb-4 text-[#152817]">Actualizar Excursión</h2>
-  
-        <div>
-          <label className="block text-sm text-[#4256a6] font-medium mb-1">
-            Nombre de la Excursión:
-          </label>
-          <input
-            type="text"
-            name="title"
-            value={excursionData.title || ""}
-            onChange={handleChange}
-            className="w-full border border-[#4256a6] px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#f4925b] transition text-[#152817]"
-          />
-          {formErrors.title && (
-            <p className="text-red-600 text-sm">{formErrors.title}</p>
-          )}
-        </div>
-  
-        <div>
-          <label className="block text-sm text-[#4256a6] font-medium mb-1">
-            Descripción:
-          </label>
-          <textarea
-            name="description"
-            value={excursionData.description}
-            onChange={handleChange}
-            className="w-full border border-[#4256a6] px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#f4925b] transition text-[#152817] resize-none h-28"
-            rows="5"
-            placeholder="Escribe una descripción detallada aquí..."
-          ></textarea>
-          {formErrors.description && (
-            <p className="text-red-600 text-sm">{formErrors.description}</p>
-          )}
-        </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#000000cc]">
+      <div className="bg-[#f9f3e1] p-8 rounded-xl max-w-4xl w-full relative z-10 overflow-y-auto max-h-[90vh] shadow-xl">
+        <h2 className="text-2xl font-bold text-[#4256a6] mb-6 font-poppins">
+          Editar Excursión: {excursionData.title}
+        </h2>
 
-        <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">
-            Precio:
-          </label>
-          <input
-            type="number"
-            name="price"
-            value={excursionData.price}
-            onChange={handleChange}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-          />
-          {formErrors.price && (
-            <p className="text-red-500 text-sm">{formErrors.price}</p>
-          )}
-        </div>
+        <div className="grid grid-cols-2 gap-6">
+          {/* Columna izquierda */}
+          <div className="space-y-4">
+            {/* Información básica */}
+            <div className="bg-white p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-[#4256a6] mb-4 font-poppins">
+                Información Básica
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                    Nombre:
+                  </label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={excursionData.title}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
+                  />
+                </div>
 
-        <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">
-            Descuento para Jubilados (%):
-          </label>
-          <input
-            type="number"
-            name="seniorPercentage"
-            value={excursionData.discount.seniorPercentage}
-            onChange={(e) =>
-              handleDiscountChange(
-                "seniorPercentage",
-                parseFloat(e.target.value)
-              )
-            }
-            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-          />
-        </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                    Descripción:
+                  </label>
+                  <textarea
+                    name="description"
+                    value={excursionData.description}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66] resize-none h-32"
+                  />
+                </div>
 
-        <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">
-            Descuento para Menores (%):
-          </label>
-          <input
-            type="number"
-            name="minorPercentage"
-            value={excursionData.discount.minorPercentage}
-            onChange={(e) =>
-              handleDiscountChange(
-                "minorPercentage",
-                parseFloat(e.target.value)
-              )
-            }
-            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-          />
-        </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                    Duración:
+                  </label>
+                  <input
+                    type="text"
+                    name="duration"
+                    value={excursionData.duration}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
+                  />
+                </div>
 
-        <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">
-            Stock:
-          </label>
-          <input
-            type="number"
-            name="stock"
-            value={excursionData.stock}
-            onChange={handleChange}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-          />
-          {formErrors.stock && (
-            <p className="text-red-500 text-sm">{formErrors.stock}</p>
-          )}
-        </div>
-        <div>
-  <label className="block text-sm text-gray-600 font-medium mb-1">
-    Stock Bloqueado (Reservas en proceso):
-  </label>
-  <input
-    type="number"
-    name="lockedStock"
-    value={excursionData.lockedStock || 0} // Asegúrate de que sea accesible en el estado
-    onChange={handleChange}
-    className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-  />
-  {formErrors.lockedStock && (
-    <p className="text-red-500 text-sm">{formErrors.lockedStock}</p>
-  )}
-</div>
-        <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">
-            Fotos:
-          </label>
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={handlePhotoChange}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-          />
-        </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                    Dificultad:
+                  </label>
+                  <input
+                    type="text"
+                    name="difficulty"
+                    value={excursionData.difficulty}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
+                  />
+                </div>
 
-        <div className="flex flex-wrap gap-4 mt-4">
-          {imagePreviews.map((preview, index) => (
-            <div key={index} className="relative">
-              <img
-                src={preview}
-                alt={`Preview ${index}`}
-                className="w-20 h-20 object-cover rounded-md mb-2"
-              />
-              <button
-                onClick={() => handleRemoveImage(index)}
-                className="absolute top-1 right-1 bg-red-500 text-white text-sm rounded-full p-1 opacity-100 shadow-md transition-opacity duration-200"
-                aria-label="Remove image"
-              >
-                ×
-              </button>
+                <div>
+                  <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                    Ubicación:
+                  </label>
+                  <input
+                    type="text"
+                    name="location"
+                    value={excursionData.location}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                    Stock Total:
+                  </label>
+                  <input
+                    type="number"
+                    name="stock"
+                    value={excursionData.stock}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
+                  />
+                </div>
+              </div>
             </div>
-          ))}
+
+            {/* Precios y descuentos */}
+            <div className="bg-white p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-[#4256a6] mb-4 font-poppins">
+                Precios y Descuentos
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                    Precio:
+                  </label>
+                  <input
+                    type="number"
+                    name="price"
+                    value={excursionData.price}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                    Descuento para Jubilados (%):
+                  </label>
+                  <input
+                    type="number"
+                    name="discount.seniorPercentage"
+                    value={excursionData.discount.seniorPercentage}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                    Descuento para Menores (%):
+                  </label>
+                  <input
+                    type="number"
+                    name="discount.minorPercentage"
+                    value={excursionData.discount.minorPercentage}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Información Adicional */}
+            <div className="bg-white p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-[#4256a6] mb-4 font-poppins">
+                Información Adicional
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                    Categoría:
+                  </label>
+                  <input
+                    type="text"
+                    name="category"
+                    value={excursionData.category}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                    Punto de Encuentro:
+                  </label>
+                  <input
+                    type="text"
+                    name="meetingPoint"
+                    value={excursionData.meetingPoint}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                    Requisitos:
+                  </label>
+                  <textarea
+                    name="requirements"
+                    value={excursionData.requirements}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66] resize-none h-24"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                    Política de Cancelación:
+                  </label>
+                  <textarea
+                    name="cancellationPolicy"
+                    value={excursionData.cancellationPolicy}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66] resize-none h-24"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                    Equipo Adicional:
+                  </label>
+                  <textarea
+                    name="additionalEquipment"
+                    value={excursionData.additionalEquipment}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66] resize-none h-24"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Guías */}
+            <div className="bg-white p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-[#4256a6] mb-4 font-poppins">
+                Guías
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                    Nombre del Guía:
+                  </label>
+                  <input
+                    type="text"
+                    value={newGuide.name}
+                    onChange={(e) => setNewGuide({ name: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
+                  />
+                </div>
+
+                <button
+                  onClick={handleAddGuide}
+                  className="px-4 py-2 bg-[#4256a6] text-white rounded-lg hover:bg-[#334477] transition-colors font-poppins"
+                >
+                  Agregar Guía
+                </button>
+
+                {/* Lista de guías agregados */}
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                    Guías Agregados:
+                  </h4>
+                  <ul className="space-y-2">
+                    {excursionData.guides.map((guide, index) => (
+                      <li
+                        key={index}
+                        className="flex justify-between items-center bg-gray-50 p-2 rounded-lg"
+                      >
+                        <span className="text-[#425a66] font-poppins">
+                          {guide.name}
+                        </span>
+                        <button
+                          onClick={() => handleRemoveGuide(index)}
+                          className="text-red-500 hover:text-red-700 text-xs px-2 py-1 font-poppins"
+                        >
+                          Eliminar
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Columna derecha */}
+          <div className="space-y-4">
+            {/* Galería de imágenes */}
+            <div className="bg-white p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-[#4256a6] mb-4 font-poppins">
+                Galería de Imágenes
+              </h3>
+              <button
+                onClick={() => document.getElementById("edit-photos").click()}
+                className="px-6 py-2 bg-[#4256a6] text-white rounded-lg hover:bg-[#334477] transition-colors font-poppins flex items-center justify-center gap-2 mb-4"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Agregar Fotos
+              </button>
+              <input
+                id="edit-photos"
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handlePhotoChange}
+                className="hidden"
+              />
+              <div className="grid grid-cols-3 gap-4">
+                {imagePreviews.map((preview, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={preview}
+                      alt={`Excursión ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-lg"
+                    />
+                    <button
+                      onClick={() => handleRemoveImage(index)}
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Disponibilidad */}
+            <div className="bg-white p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-[#4256a6] mb-4 font-poppins">
+                Disponibilidad
+              </h3>
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                  Agregar Nueva Fecha:
+                </label>
+
+                <div className="relative mb-2">
+                  <DatePicker
+                    selected={newAvailability.date}
+                    onChange={handleDateChange}
+                    dateFormat="MMMM d, yyyy"
+                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
+                  />
+                </div>
+
+                <div className="relative mb-2">
+                  <DatePicker
+                    selected={newAvailability.time}
+                    onChange={handleTimeChange}
+                    showTimeSelect
+                    showTimeSelectOnly
+                    timeIntervals={15}
+                    timeCaption="Hora"
+                    dateFormat="h:mm aa"
+                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
+                  />
+                </div>
+
+                <div className="relative mb-2">
+                  <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                    Stock Disponible:
+                  </label>
+                  <input
+                    type="number"
+                    value={newAvailability.stock || ""}
+                    onChange={(e) =>
+                      setNewAvailability({
+                        ...newAvailability,
+                        stock: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
+                    placeholder="Cantidad disponible"
+                  />
+                </div>
+
+                <button
+                  onClick={handleAddAvailability}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-poppins"
+                >
+                  Agregar Fecha
+                </button>
+              </div>
+
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                  Fechas Agregadas:
+                </label>
+                <ul className="space-y-2">
+                  {selectedDates.map((availability, index) => (
+                    <li
+                      key={index}
+                      className="flex justify-between items-center"
+                    >
+                      <span className="text-black">
+                        {availability.date} - {availability.time} - Stock:{" "}
+                        {availability.stock}
+                      </span>
+                      <button
+                        onClick={() => handleRemoveAvailability(index)}
+                        className="text-red-500 hover:text-red-700 text-xs px-2 py-1"
+                      >
+                        Eliminar
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
-        <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">
-            Duración:
-          </label>
-          <input
-            type="text"
-            name="duration"
-            value={excursionData.duration}
-            onChange={handleChange}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-          />
+
+        {/* Botones de acción */}
+        <div className="flex justify-between mt-8">
+          <div className="flex gap-4">
+            <button
+              onClick={() => handleStatusChange(true)}
+              className={`px-6 py-2 rounded-lg font-poppins transition-colors ${
+                excursionData.active
+                  ? "bg-green-600 text-white"
+                  : "bg-gray-200 text-gray-700"
+              }`}
+            >
+              Activa
+            </button>
+            <button
+              onClick={() => handleStatusChange(false)}
+              className={`px-6 py-2 rounded-lg font-poppins transition-colors ${
+                !excursionData.active
+                  ? "bg-red-600 text-white"
+                  : "bg-gray-200 text-gray-700"
+              }`}
+            >
+              Inactiva
+            </button>
+          </div>
+          <div className="flex gap-4">
+            <button
+              onClick={onClose}
+              className="px-6 py-2 bg-[#f4925b] text-white rounded-lg hover:bg-[#d98248] transition-colors font-poppins"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="px-6 py-2 bg-[#4256a6] text-white rounded-lg hover:bg-[#334477] transition-colors font-poppins"
+            >
+              Guardar Cambios
+            </button>
+          </div>
         </div>
-
-        <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">
-            Dificultad:
-          </label>
-          <input
-            type="text"
-            name="difficulty"
-            value={excursionData.difficulty}
-            onChange={handleChange}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">
-            Ubicación:
-          </label>
-          <input
-            type="text"
-            name="location"
-            value={excursionData.location}
-            onChange={handleChange}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-          />
-        </div>
-
-        <div className="mt-4">
-  <label className="block text-sm text-gray-600 font-medium mb-1">
-    Agregar Nueva Fecha:
-  </label>
-
-  <div className="relative mb-2">
-    <DatePicker
-      selected={newAvailability.date}
-      onChange={handleDateChange}
-      dateFormat="MMMM d, yyyy"
-      className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-    />
-  </div>
-
-  <div className="relative mb-2">
-    <DatePicker
-      selected={newAvailability.time}
-      onChange={handleTimeChange}
-      showTimeSelect
-      showTimeSelectOnly
-      timeIntervals={15}
-      timeCaption="Hora"
-      dateFormat="h:mm aa"
-      className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-    />
-  </div>
-
-  {/* Agregar campo para stock */}
-  <div className="relative mb-2">
-    <label className="block text-sm text-gray-600 font-medium mb-1">Stock Disponible:</label>
-    <input
-      type="number"
-      value={newAvailability.stock || ''}
-      onChange={(e) => setNewAvailability({ ...newAvailability, stock: e.target.value })}
-      className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-      placeholder="Cantidad disponible"
-    />
-  </div>
-
-  <button
-    onClick={handleAddAvailability}
-    className="bg-blue-600 text-white px-2 py-2 text-xs rounded-md hover:bg-blue-700 transition"
-  >
-    Agregar Fecha
-  </button>
-</div>
-
-{/* Fechas seleccionadas */}
-<div className="mt-6">
-  <label className="block text-sm text-gray-600 font-medium mb-1">
-    Fechas Agregadas:
-  </label>
-  <ul className="space-y-2">
-    {selectedDates.map((availability, index) => (
-      <li key={index} className="flex justify-between items-center">
-        <span className="text-black">{availability.date} - {availability.time} - Stock: {availability.stock}</span>
-        <button
-          onClick={() => handleRemoveAvailability(index)}
-          className="text-red-500 hover:text-red-700 text-xs px-2 py-1"
-        >
-          Eliminar
-        </button>
-      </li>
-    ))}
-  </ul>
-</div>
-
-
-        <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">
-            Categoría:
-          </label>
-          <input
-            type="text"
-            name="category"
-            value={excursionData.category}
-            onChange={handleChange}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">
-            Punto de Encuentro:
-          </label>
-          <input
-            type="text"
-            name="meetingPoint"
-            value={excursionData.meetingPoint}
-            onChange={handleChange}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">
-            Requisitos:
-          </label>
-          <input
-            type="text"
-            name="requirements"
-            value={excursionData.requirements}
-            onChange={handleChange}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">
-            Política de Cancelación:
-          </label>
-          <input
-            type="text"
-            name="cancellationPolicy"
-            value={excursionData.cancellationPolicy}
-            onChange={handleChange}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">
-            Equipo Adicional:
-          </label>
-          <input
-            type="text"
-            name="additionalEquipment"
-            value={excursionData.additionalEquipment}
-            onChange={handleChange}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm text-gray-600 font-medium mb-1">
-            Guías:
-          </label>
-          <input
-            type="text"
-            name="guides"
-            value={excursionData.guides}
-            onChange={handleChange}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-black"
-          />
-        </div>
-
-        <div className="flex justify-center space-x-4 mb-4 mt-4">
-          <button
-            onClick={handleStatusChange}
-            className={`p-2 rounded ${
-              excursionData.active
-                ? "bg-green-500 text-white"
-                : "bg-gray-300 text-black"
-            }`}
-          >
-            Activa
-          </button>
-          <button
-            onClick={handleStatusChange}
-            className={`p-2 rounded ${
-              !excursionData.active
-                ? "bg-red-500 text-white"
-                : "bg-gray-300 text-black"
-            }`}
-          >
-            Inactiva
-          </button>
-        </div>
-        <div className="flex justify-center gap-4 mt-6">
-        <button
-          onClick={handleSubmit}
-          className="py-2 px-4 rounded-md bg-[#4256a6] text-white hover:bg-[#f4925b] transition font-medium"
-        >
-          Guardar
-        </button>
-        <button
-          onClick={onClose}
-          className="py-2 px-4 rounded-md bg-[#f4925b] text-white hover:bg-[#4256a6] transition font-medium"
-        >
-          Cancelar
-        </button>
       </div>
-
-      {formErrors.general && (
-        <p className="text-red-600 text-sm mt-4">{formErrors.general}</p>
-      )}
     </div>
-  </div>
-);
+  );
 };
 
 export default ExcursionModal;
