@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useContext } from "react";
 import {
   auth,
   googleProvider,
@@ -15,103 +15,66 @@ import axios from "axios";
 import ShoppingCartIcon from "@heroicons/react/24/outline/ShoppingCartIcon";
 import Swal from "sweetalert2";
 import { useCart } from "../../views/shopping-cart/CartContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import logoImage from "../../assets/images/logo/logo.jpg";
 import { motion } from "framer-motion";
+import { AuthContext } from "../../firebase/AuthContext";
 
 export default function StickyNavbar() {
-  const [user, setUser] = useState(null);
-  const { clearCart, setUserId } = useCart();
+  const { user, role, setAllowHomeNavigation, isUserActive } =
+    useContext(AuthContext);
+  const { clearCart } = useCart();
   const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    // Intentamos recuperar el usuario desde localStorage
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
-      setUserId(parsedUser.uid); // Sincronizamos el UUID del carrito con el localStorage
-    }
-
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        setUserId(currentUser.uid); // Vinculamos el UID del usuario al carrito
-        localStorage.setItem("user", JSON.stringify(currentUser)); // Guardamos al usuario en localStorage
-      } else {
-        setUser(null);
-        setUserId(null); // Limpiamos el UUID del carrito
-        clearCart(); // Limpia el carrito cuando no hay usuario
-        localStorage.removeItem("user"); // Si no hay usuario, lo eliminamos del localStorage
-        localStorage.removeItem("uuid"); // También eliminamos el UUID
-      }
-      //console.log("Estado de autenticación cambiado:", currentUser);
-    });
-
-    return () => unsubscribe();
-  }, [setUserId, clearCart]); // Incluimos setUserId y clearCart en las dependencias
-
-  const saveUserToBackend = async (userData, password, navigate) => {
+  const handleLogin = async (userData) => {
     try {
-      if (!userData)
-        throw new Error("No se pudo obtener los datos del usuario.");
+      const token = await userData.getIdToken(true);
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-      const token = await userData.getIdToken();
-      if (!token)
-        throw new Error("No se pudo obtener el token de autenticación.");
-
-      const response = await axios.post(
-        "http://localhost:3001/user/",
-        {
-          name: userData.displayName || userData.name || "",
-          email: userData.email,
-          image: userData.photoURL || "",
-          active: true,
-          password,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
+      const response = await axios.get(
+        `http://localhost:3001/user/email/${userData.email}`
       );
 
-      const { id_User, role } = response.data;
-      localStorage.setItem("uuid", id_User);
-      localStorage.setItem("role", role); // Guarda el rol en localStorage
+      if (response.data) {
+        localStorage.setItem("uuid", response.data.id_User);
+        localStorage.setItem("role", response.data.role);
 
-      console.log("Usuario registrado con UUID:", id_User);
+        // Cerrar cualquier SweetAlert abierto
+        Swal.close();
 
-      setUserId(userData.uid); // Vincular UID al carrito
-
-      // Redirigir según el rol
-      if (role === "admin") {
-        navigate("/admin/reservas"); // Redirige al dashboard de admin
-      } else {
-        navigate("/user/profile"); // Redirige al dashboard de usuario
+        if (response.data.role === "admin") {
+          navigate("/admin/reservas");
+        } else {
+          navigate("/user/profile");
+        }
       }
     } catch (error) {
-      console.error("Error al guardar el usuario en el backend:", error);
-      Swal.fire("Error al guardar usuario", error.message, "error");
+      console.error("Error al verificar usuario:", error);
+      Swal.fire("Error", "No se pudo verificar el usuario", "error");
     }
   };
 
-  // Actualiza handleGoogleLogin y handleEmailLogin para pasar navigate
+  // Actualiza handleGoogleLogin
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      await saveUserToBackend(result.user, null, navigate); // Pasa navigate como argumento
-      Swal.fire("Inicio de sesión con Google exitoso", "", "success");
+      await handleLogin(result.user);
     } catch (error) {
       Swal.fire("Error al iniciar sesión con Google", error.message, "error");
     }
   };
 
+  // Actualiza handleEmailLogin
   const handleEmailLogin = async (email, password) => {
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
-      await saveUserToBackend(result.user, password, navigate); // Pasa navigate como argumento
-      Swal.fire("Inicio de sesión exitoso", "", "success");
+      await handleLogin(result.user);
     } catch (error) {
       Swal.fire("Error al iniciar sesión", error.message, "error");
     }
   };
+
   // Manejo de registro con email
   const handleEmailSignUp = async (email, password, displayName) => {
     try {
@@ -121,14 +84,23 @@ export default function StickyNavbar() {
         password
       );
       await updateProfile(result.user, { displayName });
-      await saveUserToBackend(result.user, password, navigate); // Pasa navigate aquí
+      await handleLogin(result.user);
       Swal.fire("Registro exitoso", "", "success");
     } catch (error) {
       Swal.fire("Error al registrarse", error.message, "error");
     }
   };
 
-  // Mostrar el formulario de inicio de sesión o registro
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      clearCart();
+      navigate("/");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+  };
+
   const handleAuthAlert = () => {
     Swal.fire({
       title: "Iniciar Sesión o Registrarse",
@@ -211,85 +183,76 @@ export default function StickyNavbar() {
     });
   };
 
-  // Manejo de cierre de sesión
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      clearCart();
-      Swal.fire("Sesión cerrada exitosamente", "", "success");
-      navigate("/"); // Redirige al Home
-    } catch (error) {
-      Swal.fire("Error al cerrar sesión", error.message, "error");
-    }
+  const handleLogoClick = () => {
+    setAllowHomeNavigation(true);
+    navigate("/");
   };
 
-  // Memorizar el renderizado de la navbar
   const renderedNavbar = useMemo(
     () => (
       <nav className="bg-[#f9f3e1] shadow-md sticky top-0 z-50">
-        <div className="container mx-auto px-2">
+        <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-20">
-            {/* Logo - Ahora más a la izquierda */}
-            <div className="flex-shrink-0 -ml-12">
-              <a href="/" className="flex items-center">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <button onClick={handleLogoClick} className="flex items-center">
                 <img
                   src={logoImage}
                   alt="logo"
                   className="w-36 h-14 object-contain"
                 />
-              </a>
+              </button>
             </div>
 
-            {/* Contenido alineado a la derecha */}
+            {/* Menú de navegación y botones */}
             <div className="flex items-center space-x-8">
               {/* Botón hamburguesa para mobile */}
               <button
                 className="inline-flex items-center p-2 text-[#4256a6] rounded-lg md:hidden hover:bg-[#dac9aa]/20 transition-all duration-300"
-                aria-label="Toggle navigation"
-                onClick={() => {
-                  const menu = document.querySelector("#mobile-menu");
-                  menu.classList.toggle("hidden");
-                }}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
+                <span className="sr-only">Abrir menú</span>
                 <svg
                   className="w-6 h-6"
                   fill="none"
-                  stroke="currentColor"
                   viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+                  stroke="currentColor"
                 >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth="2"
                     d="M4 6h16M4 12h16m-7 6h7"
-                  ></path>
+                  />
                 </svg>
               </button>
 
               {/* Menú de navegación */}
               <div
-                id="mobile-menu"
-                className="hidden md:flex md:items-center space-x-8"
+                className={`${
+                  isMobileMenuOpen ? "block" : "hidden"
+                } md:flex md:items-center space-x-8`}
               >
-                {/* Mostrar carrito solo si el usuario está logueado */}
-                {user && (
-                  <a
-                    href="/user/shopping-cart"
-                    className="flex items-center text-[#4256a6] hover:text-[#2a3875] transition-all duration-300"
-                  >
-                    <ShoppingCartIcon className="w-6 h-6" />
-                  </a>
-                )}
+                {user && isUserActive && (
+                  <>
+                    {/* Carrito */}
+                    <Link
+                      to="/user/shopping-cart"
+                      className="flex items-center text-[#4256a6] hover:text-[#2a3875] transition-all duration-300"
+                    >
+                      <ShoppingCartIcon className="w-6 h-6" />
+                    </Link>
 
-                {/* Mostrar Dashboard solo si el usuario está logueado */}
-                {user && (
-                  <a
-                    href={localStorage.getItem("role") === "admin" ? "/admin/reservas" : "/user"}
-                    className="text-[#4256a6] hover:text-[#2a3875] transition-all duration-300 font-poppins text-lg"
-                  >
-                    Dashboard
-                  </a>
+                    {/* Dashboard */}
+                    <Link
+                      to={
+                        role === "admin" ? "/admin/reservas" : "/user/profile"
+                      }
+                      className="text-[#4256a6] hover:text-[#2a3875] transition-all duration-300 font-poppins text-lg"
+                    >
+                      Dashboard
+                    </Link>
+                  </>
                 )}
               </div>
 
@@ -332,7 +295,7 @@ export default function StickyNavbar() {
         </div>
       </nav>
     ),
-    [user]
+    [user, role, isMobileMenuOpen, isUserActive]
   );
 
   return renderedNavbar;

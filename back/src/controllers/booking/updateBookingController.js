@@ -23,8 +23,17 @@ const updateBookingController = async (id_Booking, updateData) => {
     }
   }
 
-  // Actualiza la reserva
+  // Si se intenta actualizar el DNI o el nombre del pasajero
+  if (updateData.DNI || updateData.passengerName) {
+    if (!updateData.DNI || !updateData.passengerName) {
+      throw new Error('Es necesario proporcionar tanto el DNI como el nombre del pasajero.');
+    }
+  }
+
+  // Actualiza la reserva con los nuevos datos
   await booking.update(updateData);
+
+  // Retorna la reserva actualizada
   return booking;
 };
 

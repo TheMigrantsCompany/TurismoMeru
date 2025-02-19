@@ -28,6 +28,7 @@ function App() {
     <CartProvider>
       <StickyNavbar />
       <Routes>
+        {/* Rutas públicas */}
         <Route path="/" element={<Home />} />
         <Route path="/detail/:id_Service" element={<Detail />} /> 
        

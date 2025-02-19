@@ -3,6 +3,9 @@ import {
   CREATE_EXCURSION_REQUEST,
   CREATE_EXCURSION_SUCCESS,
   GET_ALL_SERVICES,
+  GET_BOOKINGS_BY_SERVICE_REQUEST,
+  GET_BOOKINGS_BY_SERVICE_SUCCESS,
+  GET_BOOKINGS_BY_SERVICE_FAILURE,
   DELETE_SERVICE,
   TOGGLE_SERVICE_STATUS_SUCCESS,
   // Users
@@ -35,6 +38,14 @@ import {
   GET_ALL_ORDERS,
   GET_ALL_ORDERS_REQUEST,
   GET_ALL_ORDERS_ERROR,
+  GET_ORDERS_BY_USER_REQUEST,
+  GET_ORDERS_BY_USER_SUCCESS,
+  GET_ORDERS_BY_USER_FAILURE,
+
+  //bookings
+  GET_ALL_BOOKINGS,
+  GET_ALL_BOOKINGS_REQUEST,
+  GET_ALL_BOOKINGS_ERROR,
 
 
 } from "../actions/types";
@@ -43,6 +54,11 @@ const initialState = {
   excursion: {
     loading: false,
     excursion: [],
+    error: null,
+  },
+  bookingsByService: {
+    loading: false,
+    bookings: [],
     error: null,
   },
   users: {
@@ -58,6 +74,12 @@ const initialState = {
     order: null,
     error: null,
     ordersList: [],
+  },
+  bookings: {
+    loading: false,
+    booking: null,
+    error: null,
+    bookingsList: [],
   },
 };
 
@@ -99,6 +121,36 @@ const rootReducer = (state = initialState, action) => {
           ),
         },
       };
+    // Reducer para manejar la búsqueda de bookings por servicio, fecha y hora
+    case GET_BOOKINGS_BY_SERVICE_REQUEST:
+      return {
+        ...state,
+        bookingsByService: {
+          ...state.bookingsByService,
+          loading: true,
+          error: null,
+        },
+      };
+    case GET_BOOKINGS_BY_SERVICE_SUCCESS:
+      return {
+        ...state,
+        bookingsByService: {
+          ...state.bookingsByService,
+          loading: false,
+          bookings: action.payload,
+          error: null,
+        },
+      };
+    case GET_BOOKINGS_BY_SERVICE_FAILURE:
+      return {
+        ...state,
+        bookingsByService: {
+          ...state.bookingsByService,
+          loading: false,
+          error: action.payload,
+        },
+      };
+    
 
     //USERS
     case GET_USERS_REQUEST:
@@ -454,6 +506,39 @@ const rootReducer = (state = initialState, action) => {
           error: action.payload, // Guarda el mensaje de error
         },
       };
+
+      case GET_ORDERS_BY_USER_REQUEST:
+        return {
+          ...state,
+          loading: true, // Activamos el estado de carga
+        };
+      
+      case GET_ORDERS_BY_USER_SUCCESS:
+      console.log("Órdenes obtenidas:", action.payload);
+      return {
+        ...state,
+        loading: false,
+        ordersList: Array.isArray(action.payload) ? action.payload : [],
+        error: null,
+      };
+      
+      case GET_ORDERS_BY_USER_FAILURE:
+        return {
+          ...state,
+          loading: false, // Desactivamos `loading`
+          error: action.payload, // Guardamos el error
+        };
+   
+    
+      case GET_ALL_BOOKINGS:
+        return {
+          ...state,
+          bookings: {
+            ...state.bookings,
+            loading: false,
+            bookingsList: action.payload, // Aquí debes asegurar que se asignen los bookings a bookingsList
+          },
+        };
 
 
     default:

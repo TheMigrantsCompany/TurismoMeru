@@ -10,73 +10,99 @@ import {
   CardBody,
 } from "@material-tailwind/react";
 
-const UserTable = ({ users = [], onFilterChange, onDelete, onToggleActive, onViewDetails }) => {
+const UserTable = ({
+  users = [],
+  onFilterChange,
+  onDelete,
+  onToggleActive,
+  onViewDetails,
+}) => {
   return (
-    <Card className="h-full w-full mt-16 bg-[#f9f3e1] shadow-lg rounded-lg">
+    <div className="w-full bg-[#f9f3e1]">
       {/* Botones de filtrado */}
-      <div className="flex justify-start space-x-4 p-4 bg-[#f9f3e1]">
+      <div className="flex justify-start gap-4 p-4">
         <Button
           onClick={() => onFilterChange("all")}
-          className="bg-[#4256a6] text-white py-2 rounded-lg hover:bg-[#364d73] transition-colors"
+          className="bg-[#4256a6] text-white px-6 py-2 rounded-lg hover:bg-[#334477] transition-colors font-poppins"
         >
           Todos
         </Button>
         <Button
           onClick={() => onFilterChange("active")}
-          className="bg-[#f4925b] text-white py-2 rounded-lg hover:bg-[#d98248] transition-colors"
+          className="bg-[#f4925b] text-white px-6 py-2 rounded-lg hover:bg-[#d98248] transition-colors font-poppins"
         >
           Activos
         </Button>
         <Button
           onClick={() => onFilterChange("inactive")}
-          className="bg-[#152817] text-white py-2 rounded-lg hover:bg-[#0f1e11] transition-colors"
+          className="bg-[#425a66] text-white px-6 py-2 rounded-lg hover:bg-[#2f4047] transition-colors font-poppins"
         >
           Inactivos
         </Button>
       </div>
 
-      <CardBody className="p-0">
-        <table className="w-full table-auto text-left">
+      <div className="overflow-x-auto bg-[#f9f3e1]">
+        <table className="w-full min-w-max table-auto text-left bg-[#f9f3e1]">
           <thead>
             <tr>
-              {["Nombre", "Documento", "Email", "Estado", "Acciones"].map((header) => (
-                <th
-                  key={header}
-                  className="p-4 border-y border-[#4256a6] bg-[#f0f5fc]"
-                >
-                  <Typography variant="small" color="blue-gray" className="text-[#4256a6]">
-                    {header}
-                  </Typography>
-                </th>
-              ))}
+              {["Nombre", "Documento", "Email", "Estado", "Acciones"].map(
+                (header) => (
+                  <th
+                    key={header}
+                    className="border-b border-[#425a66] bg-[#dac9aa] p-4"
+                  >
+                    <Typography
+                      variant="small"
+                      className="font-poppins font-bold text-[#4256a6] opacity-90"
+                    >
+                      {header}
+                    </Typography>
+                  </th>
+                )
+              )}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="bg-[#f9f3e1]">
             {users.length > 0 ? (
               users.map((user) => (
                 <tr
                   key={user.id_User}
-                  className="hover:bg-[#e1d4b0] transition-colors border-b border-[#4256a6]"
+                  className="hover:bg-[#dac9aa]/30 transition-colors border-b border-[#425a66]/20"
                 >
-                  <td className="p-4 text-[#4256a6]">{user.name}</td>
-                  <td className="p-4 text-[#4256a6]">{user.DNI}</td>
-                  <td className="p-4 text-[#4256a6]">{user.email}</td>
-                  <td className="p-4 text-[#4256a6]">
+                  <td className="p-4">
+                    <Typography className="font-poppins text-[#425a66]">
+                      {user.name}
+                    </Typography>
+                  </td>
+                  <td className="p-4">
+                    <Typography className="font-poppins text-[#425a66]">
+                      {user.DNI}
+                    </Typography>
+                  </td>
+                  <td className="p-4">
+                    <Typography className="font-poppins text-[#425a66]">
+                      {user.email}
+                    </Typography>
+                  </td>
+                  <td className="p-4">
                     <Chip
                       variant="ghost"
                       size="sm"
                       value={user.active ? "Activo" : "Inactivo"}
-                      color={user.active ? "green" : "red"}
-                      className="text-[#4256a6]"
+                      className={`font-poppins ${
+                        user.active
+                          ? "text-green-600 bg-green-100"
+                          : "text-red-600 bg-red-100"
+                      }`}
                     />
                   </td>
-                  <td className="p-4 text-[#4256a6]">
-                    <div className="flex gap-2">
+                  <td className="p-4">
+                    <div className="flex gap-3">
                       <Tooltip content="Ver Detalles">
                         <IconButton
                           variant="text"
                           onClick={() => onViewDetails(user)}
-                          className="text-[#4256a6]"
+                          className="text-[#4256a6] hover:bg-[#4256a6]/10"
                         >
                           <EyeIcon className="h-5 w-5" />
                         </IconButton>
@@ -85,21 +111,27 @@ const UserTable = ({ users = [], onFilterChange, onDelete, onToggleActive, onVie
                         <IconButton
                           variant="text"
                           onClick={() => onDelete(user.id_User)}
-                          className="text-[#4256a6]"
+                          className="text-red-500 hover:bg-red-100"
                         >
                           <TrashIcon className="h-5 w-5" />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip content={user.active ? "Desactivar Usuario" : "Activar Usuario"}>
-                        <IconButton
-                          variant="text"
+                      <Tooltip
+                        content={
+                          user.active ? "Desactivar Usuario" : "Activar Usuario"
+                        }
+                      >
+                        <Button
+                          size="sm"
                           onClick={() => onToggleActive(user.id_User)}
-                          className="text-[#4256a6]"
+                          className={`px-3 py-1 rounded font-poppins ${
+                            user.active
+                              ? "bg-red-100 text-red-600 hover:bg-red-200"
+                              : "bg-green-100 text-green-600 hover:bg-green-200"
+                          }`}
                         >
-                          <Typography className="text-sm">
-                            {user.active ? "D" : "A"}
-                          </Typography>
-                        </IconButton>
+                          {user.active ? "Desactivar" : "Activar"}
+                        </Button>
                       </Tooltip>
                     </div>
                   </td>
@@ -107,15 +139,17 @@ const UserTable = ({ users = [], onFilterChange, onDelete, onToggleActive, onVie
               ))
             ) : (
               <tr>
-                <td colSpan="5" className="p-4 text-center text-[#4256a6]">
-                  No se encontraron resultados.
+                <td colSpan="5" className="p-4 text-center">
+                  <Typography className="font-poppins text-[#4256a6]">
+                    No se encontraron resultados.
+                  </Typography>
                 </td>
               </tr>
             )}
           </tbody>
         </table>
-      </CardBody>
-    </Card>
+      </div>
+    </div>
   );
 };
 

@@ -1,64 +1,264 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllBookings, getBookingsByService } from "../../../redux/actions/actions";
-import { PencilIcon } from "@heroicons/react/24/outline";
-import { Card, CardHeader, Typography, CardBody, Tooltip, IconButton, Button, Select, Option } from "@material-tailwind/react";
-
-import ReservationModal from "../../../components/modals/admin-modal/ReservationModal";
+import {
+  getAllBookings,
+  getBookingsByService,
+  getAllOrders,
+} from "../../../redux/actions/actions";
+import { EyeIcon } from "@heroicons/react/24/solid";
+import {
+  Typography,
+  IconButton,
+  Select,
+  Option,
+  Tooltip,
+} from "@material-tailwind/react";
+import ReservationModal from "../../modals/admin-modal/ReservationModal";
 import Swal from "sweetalert2";
 
-const TABLE_HEAD = ["Cliente", "DNI", "Excursión", "Fecha y Hora", ""];
+const TABLE_HEAD = [
+  "Cliente",
+  "Excursión",
+  "Cantidad de pasajeros",
+  "Fecha y Hora",
+  "",
+];
 
-export function ReservationsTable() {
+export function ReservationsTable({
+  reservations: propReservations,
+  onViewDetail,
+}) {
   const dispatch = useDispatch();
-  const reservationsState = useSelector((state) => state.bookings);
-  const [selectedReservation, setSelectedReservation] = useState(null);
 
-  // Estado para los filtros
-  const [selectedService, setSelectedService] = useState(""); // ID del servicio
+  // Obtener id_User desde el estado global de autenticación
+  const id_User = useSelector((state) => state.user?.id_User);
+  const reservationsState = useSelector((state) => state.bookings);
+  const ordersState = useSelector((state) => state.orders);
+
+  const [selectedReservation, setSelectedReservation] = useState(null);
+  const [selectedService, setSelectedService] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
 
-  // Cargar todas las reservas al inicio
+  // Obtener todas las reservas solo si no hay búsqueda activa
   useEffect(() => {
-    dispatch(getAllBookings());
+    if (propReservations === null) {
+      console.log("Cargando todas las reservas...");
+      dispatch(getAllBookings());
+    }
+  }, [dispatch, propReservations]);
+
+  // Obtener todas las órdenes desde el principio (si no se obtienen de otra manera)
+  useEffect(() => {
+    console.log("Obteniendo todas las órdenes...");
+    dispatch(getAllOrders());
   }, [dispatch]);
 
-  // Filtrar las reservas al aplicar filtros
+  // Obtener las órdenes solo cuando se selecciona una reserva
+  useEffect(() => {
+    if (selectedReservation && selectedReservation.id_User) {
+      console.log(
+        "Obteniendo órdenes del usuario con ID:",
+        selectedReservation.id_User
+      );
+      // No es necesario obtener las órdenes de nuevo si ya están disponibles
+    }
+  }, [dispatch, selectedReservation]);
+
+  // Buscar la orden correspondiente a la reserva seleccionada
+  useEffect(() => {
+    if (
+      Array.isArray(ordersState.ordersList) &&
+      ordersState.ordersList.length > 0 &&
+      selectedReservation
+    ) {
+      console.log("Órdenes disponibles:", ordersState.ordersList);
+
+      // Verifica si ya está asociada la orden con la reserva
+      if (selectedReservation.serviceOrder) {
+        return; // No hacer nada si la reserva ya tiene una orden asociada
+      }
+
+      // Buscar la orden correspondiente
+      const matchingOrder = ordersState.ordersList.find(
+        (order) =>
+          String(order.id_ServiceOrder) ===
+          String(selectedReservation.id_ServiceOrder)
+      );
+
+      if (matchingOrder) {
+        console.log("Orden encontrada:", matchingOrder);
+        setSelectedReservation((prevState) => ({
+          ...prevState,
+          serviceOrder: matchingOrder,
+        }));
+      } else {
+        console.log("No se encontró una orden para esta reserva.");
+      }
+    } else if (selectedReservation) {
+      console.log("Órdenes aún no disponibles o lista vacía.");
+    }
+  }, [ordersState.ordersList, selectedReservation]);
+
+  // Cargar reservas filtradas por servicio, fecha o hora
   useEffect(() => {
     if (selectedService || selectedDate || selectedTime) {
-      dispatch(getBookingsByService(selectedService, selectedDate, selectedTime));
+      console.log(
+        `Filtrando reservas con servicio: ${selectedService}, fecha: ${selectedDate}, hora: ${selectedTime}`
+      );
+      dispatch(
+        getBookingsByService(selectedService, selectedDate, selectedTime)
+      );
     }
   }, [dispatch, selectedService, selectedDate, selectedTime]);
 
-  // Filtrar reservas (si no hay filtros aplicados)
-  const filteredReservations = useMemo(() => {
-    if (!Array.isArray(reservationsState.bookingsList)) {
-      console.error("filteredReservations no es un array:", reservationsState);
+  // Determinar qué reservas mostrar y aplicar filtros
+  const displayReservations = useMemo(() => {
+    // Si hay resultados de búsqueda, usar esos
+    const baseReservations =
+      propReservations || reservationsState.bookingsList || [];
+
+    if (!Array.isArray(baseReservations)) {
       return [];
     }
 
-    let filtered = reservationsState.bookingsList;
+    let filtered = baseReservations;
 
-    if (selectedService) {
-      filtered = filtered.filter(
-        (booking) => booking.id_Service === selectedService // Usar id_Service en lugar de serviceId
-      );
+    // Aplicar filtros solo si no hay una búsqueda activa
+    if (!propReservations) {
+      if (selectedService) {
+        filtered = filtered.filter(
+          (booking) => booking.id_Service === selectedService
+        );
+      }
+
+      if (selectedDate) {
+        filtered = filtered.filter((booking) =>
+          booking.dateTime.includes(selectedDate)
+        );
+      }
+
+      if (selectedTime) {
+        filtered = filtered.filter((booking) =>
+          booking.dateTime.includes(selectedTime)
+        );
+      }
+
+      // Mostrar mensaje si no hay resultados después de aplicar los filtros
+      if (
+        filtered.length === 0 &&
+        (selectedService || selectedDate || selectedTime)
+      ) {
+        Swal.fire({
+          title: "Sin resultados",
+          text: "No se encontraron reservas con los filtros seleccionados.",
+          icon: "info",
+          confirmButtonText: "OK",
+          background: "#f9f3e1",
+          confirmButtonColor: "#4256a6",
+        });
+      }
     }
 
-    if (selectedDate) {
-      filtered = filtered.filter((booking) => booking.dateTime.includes(selectedDate));
-    }
-
-    if (selectedTime) {
-      filtered = filtered.filter((booking) => booking.dateTime.includes(selectedTime));
-    }
-
+    console.log("Reservas filtradas:", filtered);
     return filtered;
-  }, [reservationsState.bookingsList, selectedService, selectedDate, selectedTime]);
+  }, [
+    propReservations,
+    reservationsState.bookingsList,
+    selectedService,
+    selectedDate,
+    selectedTime,
+  ]);
+
+  // Calcular fechas disponibles basadas en el servicio seleccionado
+  const availableDates = useMemo(() => {
+    const reservations =
+      propReservations || reservationsState.bookingsList || [];
+    if (!selectedService || !Array.isArray(reservations)) return [];
+
+    return Array.from(
+      new Set(
+        reservations
+          .filter((reservation) => reservation.id_Service === selectedService)
+          .map((reservation) => reservation.dateTime.split(" ")[0])
+      )
+    );
+  }, [propReservations, reservationsState.bookingsList, selectedService]);
+
+  // Calcular horas disponibles basadas en el servicio y fecha seleccionados
+  const availableTimes = useMemo(() => {
+    const reservations =
+      propReservations || reservationsState.bookingsList || [];
+    if (!selectedService || !selectedDate || !Array.isArray(reservations))
+      return [];
+
+    return Array.from(
+      new Set(
+        reservations
+          .filter(
+            (reservation) =>
+              reservation.id_Service === selectedService &&
+              reservation.dateTime.includes(selectedDate)
+          )
+          .map((reservation) => reservation.dateTime.split(" ")[1])
+      )
+    );
+  }, [
+    propReservations,
+    reservationsState.bookingsList,
+    selectedService,
+    selectedDate,
+  ]);
 
   const handleEditReservation = (reservation) => {
-    setSelectedReservation(reservation);
+    console.log("Reserva seleccionada para editar:", reservation);
+
+    if (!reservation) {
+      console.warn("No se proporcionó una reserva para editar");
+      return;
+    }
+
+    // Determinar qué array de reservas usar
+    const reservationsArray =
+      propReservations || reservationsState.bookingsList;
+
+    if (!reservationsArray || !Array.isArray(reservationsArray)) {
+      console.warn("No hay reservas disponibles para buscar");
+      return;
+    }
+
+    if (!ordersState.ordersList) {
+      console.warn("No hay órdenes disponibles");
+      return;
+    }
+
+    // Buscar la reserva completa
+    const fullReservation = reservationsArray.find(
+      (booking) => booking.id_Booking === reservation.id_Booking
+    );
+
+    if (!fullReservation) {
+      console.warn("No se encontró la reserva completa");
+      return;
+    }
+
+    // Buscar la orden correspondiente
+    const serviceOrder = ordersState.ordersList.find(
+      (order) => order.id_ServiceOrder === fullReservation.id_ServiceOrder
+    );
+
+    if (!serviceOrder) {
+      console.warn("No se encontró una orden para esta reserva");
+      return;
+    }
+
+    const reservationWithOrder = {
+      ...fullReservation,
+      serviceOrder,
+    };
+
+    console.log("Reserva con orden:", reservationWithOrder);
+    setSelectedReservation(reservationWithOrder);
   };
 
   const handleSaveReservation = () => {
@@ -70,99 +270,291 @@ export function ReservationsTable() {
     });
   };
 
-  if (reservationsState.loading) {
-    return <div>Loading...</div>;
+  const handleResetFilters = () => {
+    setSelectedService("");
+    setSelectedDate("");
+    setSelectedTime("");
+  };
+
+  // Función para obtener el título del servicio
+  const getServiceTitle = (serviceId) => {
+    const service = reservationsState.bookingsList?.find(
+      (booking) => booking.id_Service === serviceId
+    );
+    return service?.serviceTitle || serviceId;
+  };
+
+  // Función para formatear la fecha
+  const formatDate = (date) => {
+    if (!date) return "";
+    const [year, month, day] = date.split("-");
+    return `${day}/${month}/${year}`;
+  };
+
+  // Función para mostrar los filtros activos
+  const renderActiveFilters = () => {
+    const activeFilters = [];
+
+    if (selectedService) {
+      activeFilters.push(`Servicio: ${getServiceTitle(selectedService)}`);
+    }
+    if (selectedDate) {
+      activeFilters.push(`Fecha: ${formatDate(selectedDate)}`);
+    }
+    if (selectedTime) {
+      activeFilters.push(`Hora: ${selectedTime}`);
+    }
+
+    if (activeFilters.length === 0) return null;
+
+    return (
+      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-medium text-blue-800 mb-2">
+              Filtros activos:
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {activeFilters.map((filter, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+                >
+                  {filter}
+                </span>
+              ))}
+            </div>
+          </div>
+          <button
+            onClick={handleResetFilters}
+            className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Limpiar filtros
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  if (reservationsState.loading || ordersState.loading) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-[#4256a6] font-poppins text-lg">
+          Cargando reservas...
+        </p>
+      </div>
+    );
   }
 
-  if (reservationsState.error) {
-    return <div>Error: {reservationsState.error}</div>;
+  if (reservationsState.error || ordersState.error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-[#4256a6] font-poppins text-lg">
+          Error: {reservationsState.error || ordersState.error}
+        </p>
+      </div>
+    );
   }
 
   return (
-    <Card className="h-full w-full mt-16 bg-[#f9f3e1] shadow-lg rounded-lg">
-      <CardBody className="p-6">
-        <div className="mb-4 flex justify-between items-center">
-          {/* Filtros */}
-          <Select
-            label="Seleccionar Servicio"
-            value={selectedService}
-            onChange={(value) => setSelectedService(value)}
-          >
-            <Option value="">Todos los Servicios</Option>
-            {reservationsState.bookingsList.map((reservation) => (
-              <Option key={reservation.id_Booking} value={reservation.id_Service}> {/* Usamos id_Service */}
-                {reservation.serviceTitle}
-              </Option>
-            ))}
-          </Select>
+    <div className="w-full bg-[#f9f3e1]">
+      <div className="p-4">
+        {/* Contenedor de filtros con títulos */}
+        <div className="flex justify-center gap-8 mb-6">
+          <div className="flex flex-col items-center">
+            <Typography className="mb-2 font-poppins font-medium text-[#4256a6]">
+              Seleccionar Servicio
+            </Typography>
+            <div className="w-72">
+              <Select
+                value={selectedService}
+                onChange={(e) => setSelectedService(e)}
+                className="bg-white border border-[#425a66]/20 focus:border-[#4256a6]"
+                containerProps={{ className: "min-w-[200px]" }}
+                labelProps={{
+                  className: "hidden", // Oculta el label flotante
+                }}
+              >
+                <Option value="">Todos los Servicios</Option>
+                {Array.from(
+                  new Set(
+                    reservationsState.bookingsList?.map(
+                      (reservation) => reservation.id_Service
+                    ) || []
+                  )
+                ).map((serviceId) => (
+                  <Option key={serviceId} value={serviceId}>
+                    {getServiceTitle(serviceId)}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+          </div>
 
-          <Select
-            label="Seleccionar Fecha"
-            value={selectedDate}
-            onChange={(value) => setSelectedDate(value)}
-          >
-            <Option value="">Todas las Fechas</Option>
-            {Array.from(new Set(reservationsState.bookingsList.map((reservation) => reservation.dateTime.split(" ")[0]))).map((date) => (
-              <Option key={date} value={date}>
-                {date}
-              </Option>
-            ))}
-          </Select>
+          <div className="flex flex-col items-center">
+            <Typography className="mb-2 font-poppins font-medium text-[#4256a6]">
+              Seleccionar Fecha
+            </Typography>
+            <div className="w-72">
+              <Select
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e)}
+                className="bg-white border border-[#425a66]/20 focus:border-[#4256a6]"
+                containerProps={{ className: "min-w-[200px]" }}
+                labelProps={{
+                  className: "hidden",
+                }}
+              >
+                <Option value="">Todas las Fechas</Option>
+                {availableDates.map((date) => (
+                  <Option key={date} value={date}>
+                    {formatDate(date)}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+          </div>
 
-          <Select
-            label="Seleccionar Hora"
-            value={selectedTime}
-            onChange={(value) => setSelectedTime(value)}
-          >
-            <Option value="">Todas las Horas</Option>
-            {Array.from(new Set(reservationsState.bookingsList.map((reservation) => reservation.dateTime.split(" ")[1]))).map((time) => (
-              <Option key={time} value={time}>
-                {time}
-              </Option>
-            ))}
-          </Select>
+          <div className="flex flex-col items-center">
+            <Typography className="mb-2 font-poppins font-medium text-[#4256a6]">
+              Seleccionar Hora
+            </Typography>
+            <div className="w-72">
+              <Select
+                value={selectedTime}
+                onChange={(e) => setSelectedTime(e)}
+                className="bg-white border border-[#425a66]/20 focus:border-[#4256a6]"
+                containerProps={{ className: "min-w-[200px]" }}
+                labelProps={{
+                  className: "hidden",
+                }}
+              >
+                <Option value="">Todas las Horas</Option>
+                {availableTimes.map((time) => (
+                  <Option key={time} value={time}>
+                    {time}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+          </div>
         </div>
 
-        <table className="mt-4 w-full table-auto text-left">
+        {renderActiveFilters()}
+      </div>
+
+      <div className="overflow-x-auto bg-[#f9f3e1]">
+        <table className="w-full min-w-max table-auto text-left bg-[#f9f3e1]">
           <thead>
             <tr>
-              {TABLE_HEAD.map((head) => (
-                <th key={head} className="p-4 border-y border-[#4256a6] bg-[#f0f5fc]">
-                  <Typography variant="small" color="blue-gray" className="text-[#4256a6]">
-                    {head}
+              {TABLE_HEAD.map((header) => (
+                <th
+                  key={header}
+                  className="border-b border-[#425a66] bg-[#dac9aa] p-4"
+                >
+                  <Typography
+                    variant="small"
+                    className="font-poppins font-bold text-[#4256a6] opacity-90"
+                  >
+                    {header}
                   </Typography>
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody>
-            {filteredReservations.map((reservation) => (
-              <tr key={reservation.id_Booking} className="hover:bg-[#e1d4b0] transition-colors border-b border-[#4256a6]">
-                <td className="p-4 border-b border-[#4256a6]">{reservation.DNI}</td>
-                <td className="p-4 border-b border-[#4256a6]">{reservation.serviceTitle}</td>
-                <td className="p-4 border-b border-[#4256a6]">{reservation.totalPeople}</td>
-                <td className="p-4 border-b border-[#4256a6]">{reservation.dateTime}</td>
-                <td className="p-4 border-b border-[#4256a6]">
-                  <Tooltip content="Editar Reserva">
-                    <IconButton variant="text" onClick={() => handleEditReservation(reservation)}>
-                      <PencilIcon className="h-5 w-5 text-blue-gray-500" />
-                    </IconButton>
-                  </Tooltip>
+          <tbody className="bg-[#f9f3e1]">
+            {displayReservations.length > 0 ? (
+              displayReservations.map(
+                ({
+                  id_Booking,
+                  id_User,
+                  id_Service,
+                  dateTime,
+                  totalPeople,
+                  passengerName,
+                }) => (
+                  <tr
+                    key={id_Booking}
+                    className="hover:bg-[#dac9aa]/30 transition-colors border-b border-[#425a66]/20"
+                  >
+                    <td className="p-4">
+                      <Typography className="font-poppins text-[#425a66]">
+                        {passengerName}
+                      </Typography>
+                    </td>
+                    <td className="p-4">
+                      <Typography className="font-poppins text-[#425a66]">
+                        {getServiceTitle(id_Service)}
+                      </Typography>
+                    </td>
+                    <td className="p-4">
+                      <Typography className="font-poppins text-[#425a66]">
+                        {totalPeople}
+                      </Typography>
+                    </td>
+                    <td className="p-4">
+                      <Typography className="font-poppins text-[#425a66]">
+                        {dateTime}
+                      </Typography>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex justify-center">
+                        <Tooltip content="Ver Detalle">
+                          <IconButton
+                            variant="text"
+                            onClick={() =>
+                              onViewDetail({
+                                id_Booking,
+                                id_User,
+                                id_Service,
+                                dateTime,
+                                totalPeople,
+                                passengerName,
+                              })
+                            }
+                            className="text-[#4256a6] hover:bg-[#4256a6]/10"
+                          >
+                            <EyeIcon className="h-5 w-5" />
+                          </IconButton>
+                        </Tooltip>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              )
+            ) : (
+              <tr>
+                <td colSpan="5" className="p-4 text-center">
+                  <Typography className="font-poppins text-[#4256a6]">
+                    No se encontraron reservas para mostrar
+                  </Typography>
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
+      </div>
 
-        {/* Modal para editar la reserva */}
-        {selectedReservation && (
-          <ReservationModal
-            reservation={selectedReservation}
-            onSave={handleSaveReservation}
-            onClose={() => setSelectedReservation(null)}
-          />
-        )}
-      </CardBody>
-    </Card>
+      {selectedReservation && (
+        <ReservationModal
+          isOpen={!!selectedReservation}
+          onClose={() => setSelectedReservation(null)}
+          reservation={selectedReservation}
+          onSave={handleSaveReservation}
+        />
+      )}
+    </div>
   );
 }

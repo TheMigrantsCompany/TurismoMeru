@@ -1,14 +1,21 @@
-const getUserByEmailController = require('../../controllers/user/getUserByEmailController');
+const getUserByEmailController = require("../../controllers/user/getUserByEmailController");
+const verifyToken = require("../../middlewares/verifyToken");
 
 const getUserByEmailHandler = async (req, res) => {
   try {
-    const { email } = req.params; // Captura el parámetro "email" desde la ruta
+    const { email } = req.params;
 
-    const user = await getUserByEmailController(email);
-
-    res.status(200).json(user);
+    // Primero verificamos el token
+    await verifyToken(req, res, async () => {
+      try {
+        const user = await getUserByEmailController(email);
+        res.status(200).json(user);
+      } catch (error) {
+        res.status(404).json({ message: error.message });
+      }
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(401).json({ message: error.message });
   }
 };
 
