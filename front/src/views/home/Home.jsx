@@ -16,7 +16,11 @@ const Home = () => {
     axios
       .get("http://localhost:3001/service")
       .then((response) => {
-        setExcursions(response.data);
+        // Filtrar solo las excursiones activas
+        const activeExcursions = response.data.filter(
+          (excursion) => excursion.active === true
+        );
+        setExcursions(activeExcursions);
       })
       .catch((error) => {
         console.error("Error fetching excursions:", error);
@@ -38,7 +42,10 @@ const Home = () => {
       <div className="flex-grow mt-12 md:mt-16">
         {/* Cards Grid */}
         <div id="services" className="container mx-auto px-4 mb-12">
-          <Typography variant="h2" className="text-[#d98248] text-center mb-8 font-poppins">
+          <Typography
+            variant="h2"
+            className="text-[#d98248] text-center mb-8 font-poppins"
+          >
             Nuestras Excursiones
           </Typography>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

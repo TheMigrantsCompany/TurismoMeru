@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
@@ -42,11 +43,28 @@ export const AuthProvider = ({ children }) => {
             );
 
             if (response.data) {
+              if (!response.data.active) {
+                Swal.fire({
+                  title: "Cuenta Deshabilitada",
+                  text: "Tu cuenta ha sido deshabilitada. Por favor, contacta al administrador para más información.",
+                  icon: "warning",
+                  confirmButtonText: "Entendido",
+                });
+
+                setId_User(null);
+                setRole(null);
+                localStorage.removeItem("role");
+
+                if (location.pathname !== "/") {
+                  navigate("/");
+                }
+                return;
+              }
+
               setId_User(response.data.id_User);
               setRole(response.data.role);
               localStorage.setItem("role", response.data.role);
 
-              // Solo redirigir si estamos en la página principal y no se ha permitido la navegación al home
               if (location.pathname === "/" && !allowHomeNavigation) {
                 if (response.data.role === "admin") {
                   navigate("/admin/reservas");
@@ -66,7 +84,6 @@ export const AuthProvider = ({ children }) => {
           localStorage.removeItem("role");
           delete axios.defaults.headers.common["Authorization"];
 
-          // Redirigir al home solo si está en rutas protegidas
           if (
             location.pathname.startsWith("/admin") ||
             location.pathname.startsWith("/user")
@@ -100,6 +117,7 @@ export const AuthProvider = ({ children }) => {
     error,
     allowHomeNavigation,
     setAllowHomeNavigation,
+    isUserActive: id_User !== null,
   };
 
   if (loading) {

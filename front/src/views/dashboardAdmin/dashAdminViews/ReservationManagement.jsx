@@ -67,26 +67,13 @@ export function ReservationManagement() {
     setIsSearchActive(false);
   };
 
-  const handleEditReservation = (reservation) => {
+  const handleViewReservationDetail = (reservation) => {
     setSelectedReservation(reservation);
     setIsModalOpen(true);
   };
 
-  const handleSaveReservation = (updatedReservation) => {
-    setSelectedReservation(null);
-    setIsModalOpen(false);
-    Swal.fire({
-      title: "Reserva actualizada",
-      text: "La reserva ha sido modificada correctamente.",
-      icon: "success",
-      confirmButtonText: "OK",
-      background: "#f9f3e1", // Fondo beige claro
-      confirmButtonColor: "#4256a6", // Azul
-      iconColor: "#4256a6", // Azul
-    });
-  };
-
   const handleCloseModal = () => {
+    setSelectedReservation(null);
     setIsModalOpen(false);
   };
 
@@ -124,7 +111,7 @@ export function ReservationManagement() {
 
           <ReservationsTable
             reservations={reservations}
-            onEdit={handleEditReservation}
+            onViewDetail={handleViewReservationDetail}
             isSearchActive={isSearchActive}
           />
         </div>
@@ -134,7 +121,6 @@ export function ReservationManagement() {
         <ReservationModal
           reservation={selectedReservation}
           onClose={handleCloseModal}
-          onSave={handleSaveReservation}
         />
       )}
     </div>

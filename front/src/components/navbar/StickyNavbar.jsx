@@ -21,7 +21,8 @@ import { motion } from "framer-motion";
 import { AuthContext } from "../../firebase/AuthContext";
 
 export default function StickyNavbar() {
-  const { user, role, setAllowHomeNavigation } = useContext(AuthContext);
+  const { user, role, setAllowHomeNavigation, isUserActive } =
+    useContext(AuthContext);
   const { clearCart } = useCart();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -38,6 +39,9 @@ export default function StickyNavbar() {
       if (response.data) {
         localStorage.setItem("uuid", response.data.id_User);
         localStorage.setItem("role", response.data.role);
+
+        // Cerrar cualquier SweetAlert abierto
+        Swal.close();
 
         if (response.data.role === "admin") {
           navigate("/admin/reservas");
@@ -229,7 +233,7 @@ export default function StickyNavbar() {
                   isMobileMenuOpen ? "block" : "hidden"
                 } md:flex md:items-center space-x-8`}
               >
-                {user && (
+                {user && isUserActive && (
                   <>
                     {/* Carrito */}
                     <Link
@@ -291,7 +295,7 @@ export default function StickyNavbar() {
         </div>
       </nav>
     ),
-    [user, role, isMobileMenuOpen]
+    [user, role, isMobileMenuOpen, isUserActive]
   );
 
   return renderedNavbar;

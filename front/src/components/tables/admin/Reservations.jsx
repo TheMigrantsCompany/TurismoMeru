@@ -5,7 +5,7 @@ import {
   getBookingsByService,
   getAllOrders,
 } from "../../../redux/actions/actions";
-import { PencilIcon } from "@heroicons/react/24/outline";
+import { EyeIcon } from "@heroicons/react/24/solid";
 import {
   Typography,
   IconButton,
@@ -24,7 +24,10 @@ const TABLE_HEAD = [
   "",
 ];
 
-export function ReservationsTable({ reservations: propReservations, onEdit }) {
+export function ReservationsTable({
+  reservations: propReservations,
+  onViewDetail,
+}) {
   const dispatch = useDispatch();
 
   // Obtener id_User desde el estado global de autenticación
@@ -507,12 +510,12 @@ export function ReservationsTable({ reservations: propReservations, onEdit }) {
                       </Typography>
                     </td>
                     <td className="p-4">
-                      <div className="flex gap-3">
-                        <Tooltip content="Editar Reserva">
+                      <div className="flex justify-center">
+                        <Tooltip content="Ver Detalle">
                           <IconButton
                             variant="text"
                             onClick={() =>
-                              handleEditReservation({
+                              onViewDetail({
                                 id_Booking,
                                 id_User,
                                 id_Service,
@@ -523,7 +526,7 @@ export function ReservationsTable({ reservations: propReservations, onEdit }) {
                             }
                             className="text-[#4256a6] hover:bg-[#4256a6]/10"
                           >
-                            <PencilIcon className="h-5 w-5" />
+                            <EyeIcon className="h-5 w-5" />
                           </IconButton>
                         </Tooltip>
                       </div>

@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState, useContext } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Typography, Avatar, Rating } from "@material-tailwind/react";
 import BookingCard from "../../components/bookingcard/BookingCard";
 import { motion } from "framer-motion";
+import { AuthContext } from "../../firebase/AuthContext";
 
 const Review = ({ review, rating, userImage, userName, date }) => {
   return (
@@ -26,18 +27,16 @@ const Review = ({ review, rating, userImage, userName, date }) => {
           <div className="flex items-center space-x-2 mt-1">
             <Rating value={rating} readonly className="text-[#4256a6]" />
             <span className="text-sm text-[#425a66]">
-              {new Date(date).toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
+              {new Date(date).toLocaleDateString("es-ES", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
               })}
             </span>
           </div>
         </div>
       </div>
-      <Typography className="mt-4 text-[#425a66] italic">
-        "{review}"
-      </Typography>
+      <Typography className="mt-4 text-[#425a66] italic">"{review}"</Typography>
     </motion.div>
   );
 };
@@ -68,7 +67,8 @@ const PhotoGallery = ({ photos, title }) => {
         alt={`Foto ${currentPhotoIndex + 1} de ${title}`}
         className="w-full h-full object-cover"
         onError={(e) => {
-          e.target.src = "https://images.unsplash.com/photo-1469474968028-56623f02e42e";
+          e.target.src =
+            "https://images.unsplash.com/photo-1469474968028-56623f02e42e";
         }}
       />
       {photos.length > 1 && (
@@ -93,7 +93,7 @@ const PhotoGallery = ({ photos, title }) => {
                 key={index}
                 onClick={() => setCurrentPhotoIndex(index)}
                 className={`w-2 h-2 rounded-full transition-colors ${
-                  index === currentPhotoIndex ? 'bg-white' : 'bg-white/50'
+                  index === currentPhotoIndex ? "bg-white" : "bg-white/50"
                 }`}
                 aria-label={`Ir a foto ${index + 1}`}
               />
@@ -111,12 +111,16 @@ export function Detail() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user, isUserActive } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchExcursionDetails = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/service/id/${id_Service}`);
-        if (!response.ok) throw new Error('Error al cargar la excursión');
+        const response = await fetch(
+          `http://localhost:3001/service/id/${id_Service}`
+        );
+        if (!response.ok) throw new Error("Error al cargar la excursión");
         const data = await response.json();
         setExcursion(data);
       } catch (err) {
@@ -128,18 +132,18 @@ export function Detail() {
       try {
         const [reviewsResponse, usersResponse] = await Promise.all([
           fetch("http://localhost:3001/review/"),
-          fetch("http://localhost:3001/user/")
+          fetch("http://localhost:3001/user/"),
         ]);
 
         const [reviewsData, usersData] = await Promise.all([
           reviewsResponse.json(),
-          usersResponse.json()
+          usersResponse.json(),
         ]);
 
         const approvedReviews = reviewsData
-          .filter(review => review.active && review.id_Service === id_Service)
-          .map(review => {
-            const user = usersData.find(u => u.id_User === review.id_User);
+          .filter((review) => review.active && review.id_Service === id_Service)
+          .map((review) => {
+            const user = usersData.find((u) => u.id_User === review.id_User);
             return {
               ...review,
               userName: user?.name || "Usuario Anónimo",
@@ -159,6 +163,10 @@ export function Detail() {
     fetchReviews();
   }, [id_Service]);
 
+  const handleAuthAlert = () => {
+    navigate("/");
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f9f3e1]">
@@ -174,9 +182,7 @@ export function Detail() {
           <Typography variant="h4" className="text-[#4256a6] mb-4">
             Oops! Algo salió mal
           </Typography>
-          <Typography className="text-[#425a66]">
-            {error}
-          </Typography>
+          <Typography className="text-[#425a66]">{error}</Typography>
         </div>
       </div>
     );
@@ -187,7 +193,8 @@ export function Detail() {
   const photos = excursion.photos || [];
 
   const renderDiscounts = () => {
-    const hasDiscounts = excursion.discountForMinors > 0 || excursion.discountForSeniors > 0;
+    const hasDiscounts =
+      excursion.discountForMinors > 0 || excursion.discountForSeniors > 0;
     if (!hasDiscounts) return null;
 
     return (
@@ -252,7 +259,10 @@ export function Detail() {
                 {excursion.location && (
                   <div className="flex flex-col items-center p-4 bg-[#dac9aa]/20 rounded-lg">
                     <i className="fas fa-map-marker-alt text-2xl text-[#4256a6] mb-2"></i>
-                    <Typography variant="h6" className="text-[#4256a6] text-center text-sm font-semibold">
+                    <Typography
+                      variant="h6"
+                      className="text-[#4256a6] text-center text-sm font-semibold"
+                    >
                       Ubicación
                     </Typography>
                     <Typography className="text-[#425a66] text-center mt-1">
@@ -263,7 +273,10 @@ export function Detail() {
                 {excursion.duration && (
                   <div className="flex flex-col items-center p-4 bg-[#dac9aa]/20 rounded-lg">
                     <i className="fas fa-clock text-2xl text-[#4256a6] mb-2"></i>
-                    <Typography variant="h6" className="text-[#4256a6] text-center text-sm font-semibold">
+                    <Typography
+                      variant="h6"
+                      className="text-[#4256a6] text-center text-sm font-semibold"
+                    >
                       Duración
                     </Typography>
                     <Typography className="text-[#425a66] text-center mt-1">
@@ -274,7 +287,10 @@ export function Detail() {
                 {excursion.difficulty && (
                   <div className="flex flex-col items-center p-4 bg-[#dac9aa]/20 rounded-lg">
                     <i className="fas fa-mountain text-2xl text-[#4256a6] mb-2"></i>
-                    <Typography variant="h6" className="text-[#4256a6] text-center text-sm font-semibold">
+                    <Typography
+                      variant="h6"
+                      className="text-[#4256a6] text-center text-sm font-semibold"
+                    >
                       Dificultad
                     </Typography>
                     <Typography className="text-[#425a66] text-center mt-1">
@@ -312,7 +328,8 @@ export function Detail() {
                 </div>
               ) : (
                 <Typography className="text-center text-[#425a66] italic">
-                  Aún no hay reseñas para esta excursión. ¡Sé el primero en compartir tu experiencia!
+                  Aún no hay reseñas para esta excursión. ¡Sé el primero en
+                  compartir tu experiencia!
                 </Typography>
               )}
             </div>
@@ -321,7 +338,34 @@ export function Detail() {
           {/* Tarjeta de reserva */}
           <div className="lg:col-span-1">
             <div className="sticky top-8">
-              <BookingCard id_Service={id_Service} price={excursion.price} />
+              {user && isUserActive ? (
+                <BookingCard id_Service={id_Service} price={excursion.price} />
+              ) : (
+                <div className="bg-[#dac9aa] text-[#152917] p-6 rounded-lg max-w-sm shadow-lg border-2 border-[#425a66]">
+                  <h3 className="text-lg font-bold text-[#4256a6] mb-4">
+                    ¿Quieres reservar esta excursión?
+                  </h3>
+                  {!user ? (
+                    <p className="text-[#425a66] mb-4">
+                      Para realizar una reserva, necesitas iniciar sesión o
+                      crear una cuenta.
+                    </p>
+                  ) : (
+                    <p className="text-[#425a66] mb-4">
+                      Tu cuenta está deshabilitada. Por favor, contacta al
+                      administrador para más información.
+                    </p>
+                  )}
+                  {!user && (
+                    <button
+                      onClick={handleAuthAlert}
+                      className="bg-[#4256a6] text-white w-full py-2 rounded hover:bg-[#2a3875] transition-colors duration-300"
+                    >
+                      Iniciar Sesión
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
