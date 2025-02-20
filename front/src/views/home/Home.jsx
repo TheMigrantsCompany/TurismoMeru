@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../../components/footer/Footer";
-import Header from "../../components/header/loquita";
+import Header from "../../components/header/Header";
 import Card from "../../components/cards/Cards";
 import QueryForm from "../../components/queryform/QueryForm";
 import AboutUs from "../../components/about-us/AboutUs";
@@ -21,6 +21,7 @@ const Home = () => {
           (excursion) => excursion.active === true
         );
         setExcursions(activeExcursions);
+
       })
       .catch((error) => {
         console.error("Error fetching excursions:", error);
