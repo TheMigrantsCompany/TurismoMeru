@@ -21,6 +21,7 @@ const Home = () => {
           (excursion) => excursion.active === true
         );
         setExcursions(activeExcursions);
+
       })
       .catch((error) => {
         console.error("Error fetching excursions:", error);
