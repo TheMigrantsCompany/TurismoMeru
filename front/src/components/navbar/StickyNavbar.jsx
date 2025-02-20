@@ -195,13 +195,13 @@ export default function StickyNavbar() {
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <div className="flex-shrink-0">
-              <button onClick={handleLogoClick} className="flex items-center">
+              <Link to="/" onClick={handleLogoClick} className="flex items-center bg-[#f9f3e1]">
                 <img
                   src={logoImage}
                   alt="logo"
                   className="w-36 h-14 object-contain"
                 />
-              </button>
+              </Link>
             </div>
 
             {/* Menú de navegación y botones */}
