@@ -39,8 +39,7 @@ body {
   background-color: #DAC9AA;
   background-position: center;
   background-attachment: fixed;
-  @apply font-sans;
-}
+ 
 
 h1 {
   font-size: 3.2em;
@@ -75,4 +74,5 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
 }
