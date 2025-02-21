@@ -5,7 +5,7 @@ import Header from "../../components/header/Header";
 import Card from "../../components/cards/Cards";
 import QueryForm from "../../components/queryform/QueryForm";
 import AboutUs from "../../components/about-us/AboutUs";
-import axios from "axios";
+import api from "../../config/axios";
 import { Typography } from "@material-tailwind/react";
 
 const Home = () => {
@@ -13,8 +13,8 @@ const Home = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/service")
+    api
+      .get("/service")
       .then((response) => {
         // Filtrar solo las excursiones activas
         const activeExcursions = response.data.filter(

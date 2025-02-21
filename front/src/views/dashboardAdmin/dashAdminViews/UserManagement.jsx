@@ -8,7 +8,7 @@ import {
 import SearchInput from "../../../components/inputs/SearchInput";
 import UserTable from "../../../components/tables/admin/UsersTable";
 import UserModal from "../../../components/modals/admin-modal/UserModal";
-import axios from "axios";
+import api from "../../../config/axios";
 
 export function UserManagement() {
   const dispatch = useDispatch();
@@ -43,9 +43,9 @@ export function UserManagement() {
     try {
       let response;
       if (/^\d+$/.test(query)) {
-        response = await axios.get(`http://localhost:3001/user/DNI/${query}`);
+        response = await api.get(`/user/DNI/${query}`);
       } else {
-        response = await axios.get(`http://localhost:3001/user/name/${query}`);
+        response = await api.get(`/user/name/${query}`);
       }
 
       setFilteredUsers(response.data);

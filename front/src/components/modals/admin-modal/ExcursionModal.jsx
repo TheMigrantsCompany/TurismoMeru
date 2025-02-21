@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useDispatch } from "react-redux";
+
+import api from "../../../config/axios";
 
 const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
   const [excursionData, setExcursionData] = useState({
@@ -40,6 +43,8 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
   const [newGuide, setNewGuide] = useState({
     name: "",
   });
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (excursion.photos && excursion.photos.length > 0) {
@@ -203,21 +208,14 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:3001/service/id/${excursion.id_Service}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...excursionData,
-            discountForMinors: excursionData.discount.minorPercentage,
-            discountForSeniors: excursionData.discount.seniorPercentage,
-            availabilityDate: excursionData.availabilityDate,
-          }),
-        }
-      );
-      if (!response.ok) throw new Error("Error al actualizar el servicio");
-      const updatedExcursion = await response.json();
+      const response = await api.put(`/service/id/${excursion.id_Service}`, {
+        ...excursionData,
+        discountForMinors: excursionData.discount.minorPercentage,
+        discountForSeniors: excursionData.discount.seniorPercentage,
+        availabilityDate: excursionData.availabilityDate,
+      });
+
+      const updatedExcursion = response.data;
       console.log("Excursión actualizada:", updatedExcursion);
       onUpdate(updatedExcursion);
       onClose();
