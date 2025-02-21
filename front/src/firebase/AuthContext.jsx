@@ -1,10 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import axios from "axios";
+import api from "../config/axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 export const AuthContext = createContext();
 
@@ -35,12 +33,18 @@ export const AuthProvider = ({ children }) => {
         if (firebaseUser) {
           setUser(firebaseUser);
           const token = await firebaseUser.getIdToken(true);
-          axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+          // Configurar el token en api
+          api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
           try {
-            const response = await axios.get(
-              `${API_URL}/user/email/${firebaseUser.email}`
-            );
+            console.log(
+              "Verificando usuario con URL:",
+              import.meta.env.VITE_API_URL
+            ); // Debug
+            console.log("Email:", firebaseUser.email);
+
+            const response = await api.get(`/user/email/${firebaseUser.email}`);
 
             if (response.data) {
               if (!response.data.active) {
@@ -82,7 +86,7 @@ export const AuthProvider = ({ children }) => {
           setId_User(null);
           setRole(null);
           localStorage.removeItem("role");
-          delete axios.defaults.headers.common["Authorization"];
+          delete api.defaults.headers.common["Authorization"];
 
           if (
             location.pathname.startsWith("/admin") ||

@@ -6,6 +6,7 @@ import {
 } from "../../../redux/actions/actions";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import api from "../../../config/axios";
 
 const NewExcursionModal = ({ onClose, onSave }) => {
   const dispatch = useDispatch();
@@ -270,7 +271,7 @@ const NewExcursionModal = ({ onClose, onSave }) => {
 
       console.log("Enviando datos:", excursionPayload);
 
-      await dispatch(createExcursion(excursionPayload));
+      const response = await api.post("/service", excursionPayload);
       dispatch(getAllServices());
       onSave();
     } catch (err) {

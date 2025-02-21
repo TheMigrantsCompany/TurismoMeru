@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Typography, Button } from "@material-tailwind/react";
 import { motion } from "framer-motion";
-import axios from "axios";
+import api from "../../config/axios";
 
 const QueryForm = () => {
   const [formData, setFormData] = useState({
@@ -26,7 +26,7 @@ const QueryForm = () => {
     e.preventDefault();
     try {
       setStatus({ type: "loading", message: "Enviando consulta..." });
-      await axios.post("http://localhost:3001/query", formData);
+      await api.post("/query", formData);
       setStatus({
         type: "success",
         message: "¡Gracias por tu consulta! Te responderemos a la brevedad.",
@@ -35,7 +35,8 @@ const QueryForm = () => {
     } catch (error) {
       setStatus({
         type: "error",
-        message: "Hubo un error al enviar tu consulta. Por favor, intenta nuevamente.",
+        message:
+          "Hubo un error al enviar tu consulta. Por favor, intenta nuevamente.",
       });
     }
   };
@@ -59,7 +60,10 @@ const QueryForm = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-[#4256a6] mb-1" htmlFor="name">
+            <label
+              className="block text-sm font-medium text-[#4256a6] mb-1"
+              htmlFor="name"
+            >
               Nombre completo
             </label>
             <input
@@ -75,7 +79,10 @@ const QueryForm = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#4256a6] mb-1" htmlFor="email">
+            <label
+              className="block text-sm font-medium text-[#4256a6] mb-1"
+              htmlFor="email"
+            >
               Correo electrónico
             </label>
             <input
@@ -92,7 +99,10 @@ const QueryForm = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-[#4256a6] mb-1" htmlFor="message">
+          <label
+            className="block text-sm font-medium text-[#4256a6] mb-1"
+            htmlFor="message"
+          >
             Tu consulta
           </label>
           <textarea
@@ -124,10 +134,7 @@ const QueryForm = () => {
         )}
 
         <div className="flex justify-center">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button
               type="submit"
               disabled={status.type === "loading"}
