@@ -4,13 +4,13 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const cors = require("cors");
-const mercadopago = require("mercadopago");
+const { MercadoPagoConfig } = require("mercadopago");
 
 const server = express();
 
-// Configurar MercadoPago con la variable de entorno
-mercadopago.configure({
-  access_token: process.env.MP_ACCESS_TOKEN,
+// Configuración de Mercado Pago
+const client = new MercadoPagoConfig({
+  accessToken: process.env.MP_ACCESS_TOKEN,
 });
 
 // Middleware para el tamaño de las solicitudes
@@ -22,10 +22,14 @@ server.use(morgan("dev"));
 // Middleware CORS con configuración personalizada
 server.use(
   cors({
-    origin: [
-      "https://www.meruviajes.tur.ar",
-      "https://meruviajes.tur.ar"
-    ],
+    origin:
+      process.env.NODE_ENV === "production"
+        ? ["https://www.meruviajes.tur.ar", "https://meruviajes.tur.ar"]
+        : [
+            "http://localhost:5173",
+            "https://www.meruviajes.tur.ar",
+            "https://meruviajes.tur.ar",
+          ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],

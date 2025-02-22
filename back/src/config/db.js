@@ -5,23 +5,16 @@ const fs = require("fs");
 const path = require("path");
 const { DB_USER, DB_PASSWORD, DB_HOST } = process.env;
 
-const sequelize = new Sequelize(
-  process.env.DATABASE_URL ||
-    `postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/turismomeru`,
-  {
-    logging: false,
-    native: false,
-    dialectOptions:
-      process.env.NODE_ENV === "production"
-        ? {
-            ssl: {
-              require: true,
-              rejectUnauthorized: false,
-            },
-          }
-        : {},
-  }
-);
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  logging: false,
+  native: false,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
+    },
+  },
+});
 
 const basename = path.basename(__filename);
 

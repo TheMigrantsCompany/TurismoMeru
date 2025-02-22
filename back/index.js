@@ -1,3 +1,4 @@
+process.env.NODE_ENV = process.env.NODE_ENV || "production";
 require("dotenv").config();
 const server = require("./src/server");
 const { sequelize } = require("./src/config/db");

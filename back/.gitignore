@@ -3,3 +3,5 @@ node_modules/
 .env.local
 .env.test
 package-lock.json
+src/config/meruvyt-firebase-adminsdk-nyqwo-111d27bd49.json
+.DS_Store
