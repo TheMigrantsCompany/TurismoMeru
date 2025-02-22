@@ -15,21 +15,15 @@ console.log("Configuración DB:", {
 console.log("DATABASE_URL:", process.env.DATABASE_URL || "no está definida");
 console.log("NODE_ENV:", process.env.NODE_ENV);
 
-const sequelize = new Sequelize(
-  process.env.NODE_ENV === "production"
-    ? process.env.DATABASE_URL
-    : `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/turismomeru`,
-  {
-    logging: true, // Temporalmente para ver los logs
-    native: false,
-    dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false,
-      },
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  logging: false, // Desactivar logging en producción
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
     },
-  }
-);
+  },
+});
 
 const basename = path.basename(__filename);
 
