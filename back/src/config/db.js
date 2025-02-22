@@ -5,11 +5,23 @@ const fs = require("fs");
 const path = require("path");
 const { DB_USER, DB_PASSWORD, DB_HOST } = process.env;
 
+console.log("Configuración DB:", {
+  user: DB_USER,
+  host: DB_HOST,
+  database: "turismomeru",
+});
+
 const sequelize = new Sequelize(
-  `postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/turismomeru`,
+  `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/turismomeru`,
   {
     logging: false,
     native: false,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },
   }
 );
 
@@ -61,24 +73,29 @@ Service.belongsToMany(ServiceOrder, {
 });
 
 // Un usuario puede hacer muchas reservas
-User.hasMany(Booking, { foreignKey: 'id_User', as: 'bookings' });
-Booking.belongsTo(User, { foreignKey: 'id_User', as: 'user' });
+User.hasMany(Booking, { foreignKey: "id_User", as: "bookings" });
+Booking.belongsTo(User, { foreignKey: "id_User", as: "user" });
 
 // Un servicio puede ser reservado muchas veces
-Service.hasMany(Booking, { foreignKey: 'id_Service', as: 'bookings' });
-Booking.belongsTo(Service, { foreignKey: 'id_Service', as: 'service' });
+Service.hasMany(Booking, { foreignKey: "id_Service", as: "bookings" });
+Booking.belongsTo(Service, { foreignKey: "id_Service", as: "service" });
 
 // Una orden de servicio puede tener muchas reservas
-ServiceOrder.hasMany(Booking, { foreignKey: 'id_ServiceOrder', as: 'bookings' });
-Booking.belongsTo(ServiceOrder, { foreignKey: 'id_ServiceOrder', as: 'serviceOrder' });
-
+ServiceOrder.hasMany(Booking, {
+  foreignKey: "id_ServiceOrder",
+  as: "bookings",
+});
+Booking.belongsTo(ServiceOrder, {
+  foreignKey: "id_ServiceOrder",
+  as: "serviceOrder",
+});
 
 // Relaciones Muchos a Uno
-Service.hasMany(Review, { foreignKey: 'id_Service', as: 'reviews' });
-Review.belongsTo(Service, { foreignKey: 'id_Service', as: 'services' });
+Service.hasMany(Review, { foreignKey: "id_Service", as: "reviews" });
+Review.belongsTo(Service, { foreignKey: "id_Service", as: "services" });
 
-User.hasMany(Review, { foreignKey: 'id_User', as: 'reviews' });
-Review.belongsTo(User, { foreignKey: 'id_User', as: 'user' });
+User.hasMany(Review, { foreignKey: "id_User", as: "reviews" });
+Review.belongsTo(User, { foreignKey: "id_User", as: "user" });
 
 module.exports = {
   ...sequelize.models, // Exportamos todos los modelos
