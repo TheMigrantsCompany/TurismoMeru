@@ -204,7 +204,7 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
   const handleSubmit = async () => {
     try {
       const response = await fetch(
-        `http://localhost:3001/service/id/${excursion.id_Service}`,
+        `${import.meta.env.VITE_API_URL}/service/id/${excursion.id_Service}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

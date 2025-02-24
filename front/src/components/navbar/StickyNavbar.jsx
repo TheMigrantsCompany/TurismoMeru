@@ -33,7 +33,7 @@ export default function StickyNavbar() {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
       const response = await axios.get(
-        `http://localhost:3001/user/email/${userData.email}`
+        `${import.meta.env.VITE_API_URL}/user/email/${userData.email}`
       );
 
       if (response.data) {
@@ -195,7 +195,11 @@ export default function StickyNavbar() {
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <div className="flex-shrink-0">
-              <Link to="/" onClick={handleLogoClick} className="flex items-center bg-[#f9f3e1]">
+              <Link
+                to="/"
+                onClick={handleLogoClick}
+                className="flex items-center bg-[#f9f3e1]"
+              >
                 <img
                   src={logoImage}
                   alt="logo"

@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { Rating } from '@material-tailwind/react';
-import { motion } from 'framer-motion';
-import axios from 'axios';
-import { useDispatch, useSelector } from 'react-redux';
-import { getAllOrders, getAllServices } from '../../redux/actions/actions';
+import React, { useEffect, useState } from "react";
+import { Rating } from "@material-tailwind/react";
+import { motion } from "framer-motion";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllOrders, getAllServices } from "../../redux/actions/actions";
 import { useAuth } from "../../firebase/AuthContext";
 
 // Imagen por defecto para excursiones sin foto
-const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=2074&auto=format&fit=crop";
+const DEFAULT_IMAGE =
+  "https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=2074&auto=format&fit=crop";
 
 const Reviews = () => {
   const dispatch = useDispatch();
@@ -16,32 +17,34 @@ const Reviews = () => {
   const services = useSelector((state) => state.excursions);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [reviews, setReviews] = useState({});  // Objeto para almacenar todas las reseñas por id_ServiceOrder
+  const [reviews, setReviews] = useState({}); // Objeto para almacenar todas las reseñas por id_ServiceOrder
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         await Promise.all([
           dispatch(getAllOrders()),
-          dispatch(getAllServices())
+          dispatch(getAllServices()),
         ]);
 
         // Obtener todas las reseñas existentes
-        const response = await axios.get('http://localhost:3001/review');
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/review`
+        );
         const reviewsData = response.data;
-        
+
         // Crear un objeto con las reseñas indexadas por id_ServiceOrder
         const reviewsMap = {};
-        reviewsData.forEach(review => {
+        reviewsData.forEach((review) => {
           if (review.id_User === id_User) {
             reviewsMap[review.id_ServiceOrder] = review;
           }
         });
-        
+
         setReviews(reviewsMap);
         setLoading(false);
       } catch (err) {
-        setError('Error al cargar las excursiones');
+        setError("Error al cargar las excursiones");
         setLoading(false);
       }
     };
@@ -51,8 +54,8 @@ const Reviews = () => {
   // Agregar useEffect para depuración
   useEffect(() => {
     if (services && orders) {
-      console.log('Estado de Redux - Servicios:', services);
-      console.log('Estado de Redux - Órdenes:', orders);
+      console.log("Estado de Redux - Servicios:", services);
+      console.log("Estado de Redux - Órdenes:", orders);
     }
   }, [services, orders]);
 
@@ -62,8 +65,10 @@ const Reviews = () => {
   };
 
   // Filtrar órdenes pasadas del usuario
-  const pastOrders = orders?.filter(order => {
-    const excursionDate = new Date(order.paymentInformation?.[0]?.bookingDateTime || order.orderDate);
+  const pastOrders = orders?.filter((order) => {
+    const excursionDate = new Date(
+      order.paymentInformation?.[0]?.bookingDateTime || order.orderDate
+    );
     return order.id_User === id_User && isExcursionPast(excursionDate);
   });
 
@@ -103,22 +108,29 @@ const Reviews = () => {
           ) : (
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {pastOrders.map((order) => {
-                const serviceId = order.paymentInformation?.[0]?.ServiceId || 
-                                order.paymentInformation?.[0]?.id_Service ||
-                                order.Services?.[0]?.id_Service;
-                
-                const service = services?.find(s => s.id_Service === serviceId);
-                const photos = Array.isArray(service?.photos) ? service.photos : [];
+                const serviceId =
+                  order.paymentInformation?.[0]?.ServiceId ||
+                  order.paymentInformation?.[0]?.id_Service ||
+                  order.Services?.[0]?.id_Service;
+
+                const service = services?.find(
+                  (s) => s.id_Service === serviceId
+                );
+                const photos = Array.isArray(service?.photos)
+                  ? service.photos
+                  : [];
                 const photoUrl = photos.length > 0 ? photos[0] : DEFAULT_IMAGE;
                 const existingReview = reviews[order.id_ServiceOrder];
-                
+
                 return (
                   <Review
                     key={order.id_ServiceOrder}
-                    excursionTitle={order.paymentInformation?.[0]?.serviceTitle || 
-                                  order.paymentInformation?.[0]?.title ||
-                                  service?.title || 
-                                  'Excursión'}
+                    excursionTitle={
+                      order.paymentInformation?.[0]?.serviceTitle ||
+                      order.paymentInformation?.[0]?.title ||
+                      service?.title ||
+                      "Excursión"
+                    }
                     excursionPhoto={photoUrl}
                     idService={serviceId}
                     idServiceOrder={order.id_ServiceOrder}
@@ -126,9 +138,9 @@ const Reviews = () => {
                     orderDate={order.orderDate}
                     existingReview={existingReview}
                     onReviewSubmitted={(newReview) => {
-                      setReviews(prev => ({
+                      setReviews((prev) => ({
                         ...prev,
-                        [order.id_ServiceOrder]: newReview
+                        [order.id_ServiceOrder]: newReview,
                       }));
                     }}
                   />
@@ -142,8 +154,17 @@ const Reviews = () => {
   );
 };
 
-const Review = ({ excursionTitle, excursionPhoto, idService, idServiceOrder, idUser, orderDate, existingReview, onReviewSubmitted }) => {
-  const [review, setReview] = useState('');
+const Review = ({
+  excursionTitle,
+  excursionPhoto,
+  idService,
+  idServiceOrder,
+  idUser,
+  orderDate,
+  existingReview,
+  onReviewSubmitted,
+}) => {
+  const [review, setReview] = useState("");
   const [rating, setRating] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(null);
@@ -159,30 +180,33 @@ const Review = ({ excursionTitle, excursionPhoto, idService, idServiceOrder, idU
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3001/review/', {
-        id_User: idUser,
-        id_Service: idService,
-        id_ServiceOrder: idServiceOrder,
-        content: review,
-        rating,
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/review/`,
+        {
+          id_User: idUser,
+          id_Service: idService,
+          id_ServiceOrder: idServiceOrder,
+          content: review,
+          rating,
+        }
+      );
 
       if (response.status === 201) {
         setSubmitted(true);
         onReviewSubmitted(response.data);
-        console.log('Reseña guardada:', response.data);
+        console.log("Reseña guardada:", response.data);
       }
     } catch (err) {
-      setError('Hubo un problema al guardar la reseña. Inténtalo de nuevo.');
-      console.error('Error al guardar la reseña:', err);
+      setError("Hubo un problema al guardar la reseña. Inténtalo de nuevo.");
+      console.error("Error al guardar la reseña:", err);
     }
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("es-ES", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -205,10 +229,23 @@ const Review = ({ excursionTitle, excursionPhoto, idService, idServiceOrder, idU
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
           <div className="absolute bottom-0 left-0 right-0 p-6">
-            <h3 className="text-white font-semibold text-xl mb-2 line-clamp-1">{excursionTitle}</h3>
+            <h3 className="text-white font-semibold text-xl mb-2 line-clamp-1">
+              {excursionTitle}
+            </h3>
             <div className="flex items-center text-white/90 text-sm space-x-2">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
               </svg>
               <span>{formatDate(orderDate)}</span>
             </div>
@@ -267,9 +304,7 @@ const Review = ({ excursionTitle, excursionPhoto, idService, idServiceOrder, idU
           >
             <div className="bg-[#f9f3e1]/30 rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
-                <p className="text-[#4256a6] font-semibold">
-                  Reseña enviada
-                </p>
+                <p className="text-[#4256a6] font-semibold">Reseña enviada</p>
                 <Rating value={rating} readonly className="text-[#4256a6]" />
               </div>
               <p className="text-[#425a66] text-sm italic bg-white/50 p-4 rounded-lg border border-[#425a66]/10">

@@ -118,7 +118,7 @@ export function Detail() {
     const fetchExcursionDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3001/service/id/${id_Service}`
+          `${import.meta.env.VITE_API_URL}/service/id/${id_Service}`
         );
         if (!response.ok) throw new Error("Error al cargar la excursión");
         const data = await response.json();
@@ -131,8 +131,8 @@ export function Detail() {
     const fetchReviews = async () => {
       try {
         const [reviewsResponse, usersResponse] = await Promise.all([
-          fetch("http://localhost:3001/review/"),
-          fetch("http://localhost:3001/user/"),
+          fetch(`${import.meta.env.VITE_API_URL}/review/`),
+          fetch(`${import.meta.env.VITE_API_URL}/user/`),
         ]);
 
         const [reviewsData, usersData] = await Promise.all([

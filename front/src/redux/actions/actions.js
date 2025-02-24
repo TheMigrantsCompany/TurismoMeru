@@ -48,7 +48,7 @@ export const createExcursion = (excursionData) => async (dispatch) => {
   dispatch({ type: CREATE_EXCURSION_REQUEST });
   try {
     const response = await axios.post(
-      "http://localhost:3001/service/",
+      `${import.meta.env.VITE_API_URL}/service/`,
       excursionData
     );
     dispatch({
@@ -70,7 +70,9 @@ export const getBookingsByService =
 
     try {
       const response = await axios.get(
-        `http://localhost:3001/booking/service/${id_Service}?date=${date}&time=${time}&page=${page}&limit=${limit}`
+        `${
+          import.meta.env.VITE_API_URL
+        }/booking/service/${id_Service}?date=${date}&time=${time}&page=${page}&limit=${limit}`
       );
       dispatch({
         type: GET_BOOKINGS_BY_SERVICE_SUCCESS,
@@ -86,7 +88,7 @@ export const getBookingsByService =
 
 export const getAllServices = () => async (dispatch) => {
   try {
-    const response = await axios.get("http://localhost:3001/service");
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/service`);
     dispatch({
       type: GET_ALL_SERVICES,
       payload: response.data,
@@ -99,7 +101,7 @@ export const getAllServices = () => async (dispatch) => {
 export const deleteService = (title) => async (dispatch) => {
   try {
     const response = await axios.delete(
-      `http://localhost:3001/service/name/${title}`
+      `${import.meta.env.VITE_API_URL}/service/name/${title}`
     );
     dispatch({ type: DELETE_SERVICE, payload: title });
     return response.data;
@@ -112,7 +114,7 @@ export const deleteService = (title) => async (dispatch) => {
 export const toggleServiceActiveStatus = (id_Service) => async (dispatch) => {
   try {
     const response = await axios.patch(
-      `http://localhost:3001/service/${id_Service}/toggle`
+      `${import.meta.env.VITE_API_URL}/service/${id_Service}/toggle`
     );
     dispatch({
       type: TOGGLE_SERVICE_STATUS_SUCCESS,
@@ -133,7 +135,7 @@ export const getUsers = () => async (dispatch) => {
   console.log("Actions - getUsers: Iniciando solicitud para obtener usuarios");
   dispatch({ type: GET_USERS_REQUEST });
   try {
-    const response = await axios.get("http://localhost:3001/user");
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/user`);
     console.log(
       "Actions - getUsers: Usuarios obtenidos con éxito:",
       response.data
@@ -156,7 +158,7 @@ export const toggleUserActiveStatus = (id_User) => async (dispatch) => {
   dispatch({ type: TOGGLE_USER_STATUS_REQUEST }); // Inicio del proceso
   try {
     const response = await axios.patch(
-      `http://localhost:3001/user/${id_User}/active`
+      `${import.meta.env.VITE_API_URL}/user/${id_User}/active`
     );
     console.log(
       "Actions - toggleUserActiveStatus: Estado cambiado con éxito para usuario:",
@@ -178,7 +180,7 @@ export const deleteUser = (id_User) => async (dispatch) => {
   dispatch({ type: DELETE_USER_REQUEST }); // Inicio del proceso
   try {
     const response = await axios.delete(
-      `http://localhost:3001/user/id/${id_User}`
+      `${import.meta.env.VITE_API_URL}/user/id/${id_User}`
     );
     console.log("Actions - deleteUser: Usuario eliminado con éxito:", id_User);
     dispatch({ type: DELETE_USER_SUCCESS, payload: id_User }); // Éxito
@@ -199,7 +201,7 @@ export const getUserDetails = (id_User) => async (dispatch) => {
   dispatch({ type: GET_USER_DETAILS_REQUEST });
   try {
     const response = await axios.get(
-      `http://localhost:3001/user/id/${id_User}`
+      `${import.meta.env.VITE_API_URL}/user/id/${id_User}`
     );
     console.log(id_User);
     console.log(
@@ -221,7 +223,9 @@ export const getUserByName = (name) => async (dispatch) => {
   console.log(`Actions - getUserByName: Buscando usuario por nombre: ${name}`);
   dispatch({ type: GET_USER_BY_NAME_REQUEST });
   try {
-    const response = await axios.get(`http://localhost:3001/user/name/${name}`);
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/user/name/${name}`
+    );
     console.log("Actions - getUserByName: Usuario encontrado:", response.data);
     dispatch({ type: GET_USER_BY_NAME_SUCCESS, payload: response.data });
   } catch (error) {
@@ -238,7 +242,9 @@ export const getUserByDni = (dni) => async (dispatch) => {
   console.log(`Actions - getUserByDni: Buscando usuario por DNI: ${dni}`);
   dispatch({ type: GET_USER_BY_DNI_REQUEST });
   try {
-    const response = await axios.get(`http://localhost:3001/user/DNI/${dni}`);
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/user/DNI/${dni}`
+    );
     console.log("Actions - getUserByDni: Usuario encontrado:", response.data);
     dispatch({ type: GET_USER_BY_DNI_SUCCESS, payload: response.data });
   } catch (error) {
@@ -258,7 +264,7 @@ export const updateUserDetails = (id_User, updatedData) => async (dispatch) => {
   dispatch({ type: UPDATE_USER_REQUEST });
   try {
     const response = await axios.put(
-      `http://localhost:3001/user/id/${id_User}`,
+      `${import.meta.env.VITE_API_URL}/user/id/${id_User}`,
       updatedData
     );
     console.log(
@@ -279,13 +285,16 @@ export const updateUserDetails = (id_User, updatedData) => async (dispatch) => {
 export const createServiceOrder = (orderData) => async (dispatch) => {
   try {
     console.log("Enviando datos al endpoint:", orderData);
-    const response = await fetch("http://localhost:3001/servicesOrder/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(orderData),
-    });
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/servicesOrder/`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderData),
+      }
+    );
 
     const data = await response.json();
     console.log("Respuesta del backend:", data);
@@ -312,7 +321,9 @@ export const createServiceOrder = (orderData) => async (dispatch) => {
 export const getAllOrders = () => async (dispatch) => {
   dispatch({ type: GET_ALL_ORDERS_REQUEST });
   try {
-    const response = await axios.get("http://localhost:3001/servicesOrder/");
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/servicesOrder/`
+    );
     dispatch({ type: GET_ALL_ORDERS, payload: response.data });
   } catch (error) {
     dispatch({ type: GET_ALL_ORDERS_ERROR, payload: error.message });
@@ -325,7 +336,9 @@ export const getAllOrders = () => async (dispatch) => {
 export const getAllBookings = () => async (dispatch) => {
   dispatch({ type: GET_ALL_BOOKINGS_REQUEST });
   try {
-    const response = await axios.get("http://localhost:3001/booking/");
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/booking/`
+    );
     dispatch({ type: GET_ALL_BOOKINGS, payload: response.data });
   } catch (error) {
     dispatch({ type: GET_ALL_BOOKINGS_ERROR, payload: error.message });
@@ -336,7 +349,7 @@ export const getAllBookings = () => async (dispatch) => {
 export const getOrdersByUser = (id_User) => async (dispatch) => {
   try {
     const response = await axios.get(
-      `http://localhost:3001/servicesOrder/user/${id_User}`
+      `${import.meta.env.VITE_API_URL}/servicesOrder/user/${id_User}`
     );
     dispatch({ type: GET_ORDERS_BY_USER_SUCCESS, payload: response.data });
   } catch (error) {

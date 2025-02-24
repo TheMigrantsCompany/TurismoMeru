@@ -43,9 +43,13 @@ export function UserManagement() {
     try {
       let response;
       if (/^\d+$/.test(query)) {
-        response = await axios.get(`http://localhost:3001/user/DNI/${query}`);
+        response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/user/DNI/${query}`
+        );
       } else {
-        response = await axios.get(`http://localhost:3001/user/name/${query}`);
+        response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/user/name/${query}`
+        );
       }
 
       setFilteredUsers(response.data);

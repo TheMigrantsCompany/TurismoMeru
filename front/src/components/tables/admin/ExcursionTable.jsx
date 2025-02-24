@@ -68,7 +68,7 @@ const ExcursionTable = () => {
       if (query.trim().length >= 3) {
         try {
           const response = await axios.get(
-            `http://localhost:3001/service/name/${query}`
+            `${import.meta.env.VITE_API_URL}/service/name/${query}`
           );
           const searchResults = response.data || [];
           setFilteredExcursions(searchResults);

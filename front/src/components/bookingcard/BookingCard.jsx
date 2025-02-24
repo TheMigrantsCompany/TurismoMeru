@@ -26,7 +26,7 @@ const BookingCard = ({ id_Service, price }) => {
     const fetchExcursionDetails = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/service/id/${id_Service}`
+          `${import.meta.env.VITE_API_URL}/service/id/${id_Service}`
         );
         setExcursion(response.data);
 

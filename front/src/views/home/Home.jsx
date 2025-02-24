@@ -14,14 +14,13 @@ const Home = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3001/service")
+      .get(`${import.meta.env.VITE_API_URL}/service`)
       .then((response) => {
         // Filtrar solo las excursiones activas
         const activeExcursions = response.data.filter(
           (excursion) => excursion.active === true
         );
         setExcursions(activeExcursions);
-
       })
       .catch((error) => {
         console.error("Error fetching excursions:", error);

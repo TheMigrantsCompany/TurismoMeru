@@ -4,8 +4,6 @@ import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
-
 export const AuthContext = createContext();
 
 // Hook personalizado para usar el contexto de autenticación
@@ -39,7 +37,7 @@ export const AuthProvider = ({ children }) => {
 
           try {
             const response = await axios.get(
-              `${API_URL}/user/email/${firebaseUser.email}`
+              `${import.meta.env.VITE_API_URL}/user/email/${firebaseUser.email}`
             );
 
             if (response.data) {
