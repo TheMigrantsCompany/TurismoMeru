@@ -33,11 +33,22 @@ export const AuthProvider = ({ children }) => {
         if (firebaseUser) {
           setUser(firebaseUser);
           const token = await firebaseUser.getIdToken(true);
+
+          // Asegurarnos de que el token se configura correctamente
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
           try {
+            // Modificar la petición para incluir explícitamente el header
             const response = await axios.get(
-              `${import.meta.env.VITE_API_URL}/user/email/${firebaseUser.email}`
+              `${import.meta.env.VITE_API_URL}/user/email/${
+                firebaseUser.email
+              }`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+              }
             );
 
             if (response.data) {
@@ -73,6 +84,10 @@ export const AuthProvider = ({ children }) => {
             }
           } catch (error) {
             console.error("Error al verificar usuario en el backend:", error);
+            if (error.response) {
+              console.error("Detalles del error:", error.response.data);
+              console.error("Status:", error.response.status);
+            }
             setError("Error al verificar usuario en el backend");
           }
         } else {
