@@ -13,7 +13,7 @@ const ProfileForm = () => {
     DNI: "",
     phone: "",
     address: "",
-    image: "https://via.placeholder.com/150",
+    image: "",
     birthDate: "",
     gender: "",
     nationality: "",
