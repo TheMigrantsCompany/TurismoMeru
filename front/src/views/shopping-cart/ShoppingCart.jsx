@@ -24,7 +24,7 @@ const ShoppingCart = () => {
   const handlePurchaseSuccess = () => {
     clearCart();
     setShowCheckout(false);
-    navigate('/user/compras');
+    navigate('/user/orderform');
   };
 
   return (
