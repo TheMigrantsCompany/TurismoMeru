@@ -38,7 +38,7 @@ server.get("/", (req, res) => {
 });
 
 // Manejo de rutas
-server.use("/api", router); // Mover las rutas a /api
+server.use("/", router); // Montar las rutas en la raíz
 
 // Manejo de errores
 server.use((err, req, res, next) => {
