@@ -38,7 +38,9 @@ export const AuthProvider = ({ children }) => {
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
           try {
-            // Modificar la petición para incluir explícitamente el header
+            // Agregar este console.log
+            console.log("API URL:", import.meta.env.VITE_API_URL);
+
             const response = await axios.get(
               `${import.meta.env.VITE_API_URL}/user/email/${
                 firebaseUser.email
