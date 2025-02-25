@@ -8,24 +8,49 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [userId, setUserId] = useState(null);
 
+  // Al iniciar, intentamos leer el ID de usuario (por ejemplo, "uuid") desde localStorage.
+  useEffect(() => {
+    const storedUserId = localStorage.getItem("uuid"); // Ajusta esto según cómo almacenes el ID
+    if (storedUserId) {
+      setUserId(storedUserId);
+    } else {
+      // Si no hay usuario logueado, nos aseguramos de vaciar el carrito.
+      setCartItems([]);
+    }
+  }, []);
+
+  // Función que retorna la clave de almacenamiento en localStorage para usuarios logueados.
+  const getCartKey = () => {
+    return userId ? `cartItems_${userId}` : null;
+  };
+
+  // Cargar el carrito desde localStorage solo si el usuario está logueado.
   useEffect(() => {
     if (userId) {
-      const storedCart = localStorage.getItem(`cartItems_${userId}`);
+      const key = getCartKey();
+      const storedCart = localStorage.getItem(key);
       if (storedCart) {
         setCartItems(JSON.parse(storedCart));
       }
+    } else {
+      // Si no hay usuario, el carrito se mantiene vacío (o se reinicia).
+      setCartItems([]);
     }
   }, [userId]);
 
+  // Guardar el carrito en localStorage solo si el usuario está logueado.
   useEffect(() => {
     if (userId) {
-      localStorage.setItem(`cartItems_${userId}`, JSON.stringify(cartItems));
+      const key = getCartKey();
+      localStorage.setItem(key, JSON.stringify(cartItems));
     }
   }, [cartItems, userId]);
 
   const addToCart = (item) => {
     setCartItems((prev) => {
-      const existingItem = prev.find((cartItem) => cartItem.id_Service === item.id_Service);
+      const existingItem = prev.find(
+        (cartItem) => cartItem.id_Service === item.id_Service
+      );
       if (existingItem) {
         return prev.map((cartItem) =>
           cartItem.id_Service === item.id_Service
@@ -54,7 +79,9 @@ export const CartProvider = ({ children }) => {
   };
 
   const removeFromCart = (id_Service) => {
-    setCartItems((prev) => prev.filter((item) => item.id_Service !== id_Service));
+    setCartItems((prev) =>
+      prev.filter((item) => item.id_Service !== id_Service)
+    );
   };
 
   const clearCart = () => {
