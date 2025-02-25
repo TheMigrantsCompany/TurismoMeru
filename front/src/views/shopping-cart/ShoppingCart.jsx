@@ -22,7 +22,7 @@ const ShoppingCart = () => {
   const total = subtotal;
 
   const handlePurchaseSuccess = () => {
-    clearCart();
+    
     setShowCheckout(false);
     navigate('/orderform');
   };
