@@ -8,23 +8,22 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [userId, setUserId] = useState(null);
 
-  // Al iniciar, intentamos leer el ID de usuario (por ejemplo, "uuid") desde localStorage.
   useEffect(() => {
-    const storedUserId = localStorage.getItem("uuid"); // Ajusta esto según cómo almacenes el ID
+    const storedUserId = localStorage.getItem("uuid");
     if (storedUserId) {
       setUserId(storedUserId);
     } else {
-      // Si no hay usuario logueado, nos aseguramos de vaciar el carrito.
+      // Si no hay usuario logueado, se inicia con carrito vacío.
       setCartItems([]);
     }
   }, []);
 
-  // Función que retorna la clave de almacenamiento en localStorage para usuarios logueados.
+  // Función que retorna la clave para guardar/leer el carrito
   const getCartKey = () => {
     return userId ? `cartItems_${userId}` : null;
   };
 
-  // Cargar el carrito desde localStorage solo si el usuario está logueado.
+  // Cargar el carrito desde localStorage solo si el usuario está logueado
   useEffect(() => {
     if (userId) {
       const key = getCartKey();
@@ -33,18 +32,19 @@ export const CartProvider = ({ children }) => {
         setCartItems(JSON.parse(storedCart));
       }
     } else {
-      // Si no hay usuario, el carrito se mantiene vacío (o se reinicia).
+      // Si no hay usuario, el carrito se reinicia
       setCartItems([]);
     }
   }, [userId]);
 
-  // Guardar el carrito en localStorage solo si el usuario está logueado.
+  // Guardar el carrito en localStorage solo si el usuario está logueado
   useEffect(() => {
     if (userId) {
       const key = getCartKey();
       localStorage.setItem(key, JSON.stringify(cartItems));
     }
   }, [cartItems, userId]);
+  
 
   const addToCart = (item) => {
     setCartItems((prev) => {
