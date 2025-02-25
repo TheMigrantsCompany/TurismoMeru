@@ -16,7 +16,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-[#dac9aa] flex flex-col items-center justify-center py-10 px-6">
+    <footer className="bg-[#dac9aa] flex flex-col items-center justify-center py-10 px-6 h-70">
       {/* Enlaces de navegación */}
       <nav className="flex justify-center flex-wrap gap-8 mb-8">
         <a
