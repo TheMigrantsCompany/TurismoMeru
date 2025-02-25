@@ -5,14 +5,25 @@ const fs = require("fs");
 const path = require("path");
 const { DB_USER, DB_PASSWORD, DB_HOST } = process.env;
 
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  logging: false,
-  native: false,
+console.log("Configuración DB:", {
+  user: DB_USER,
+  host: DB_HOST,
+  database: "turismomeru",
+});
+
+// Agregar log para debug
+console.log("DATABASE_URL:", process.env.DATABASE_URL || "no está definida");
+console.log("NODE_ENV:", process.env.NODE_ENV);
+
+const sequelize = new Sequelize({
+  database: "turismomeru",
+  username: DB_USER,
+  password: DB_PASSWORD,
+  host: DB_HOST,
+  dialect: "postgres",
+  logging: false, // Desactivar logging en producción
   dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false,
-    },
+    ssl: false, // Desactivar SSL
   },
 });
 
