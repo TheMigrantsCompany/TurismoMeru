@@ -1,4 +1,4 @@
-import api from "../../config/axios";
+import axios from "../../config/axios";
 import {
   CREATE_EXCURSION_FAILURE,
   CREATE_EXCURSION_REQUEST,
@@ -47,7 +47,7 @@ import {
 export const createExcursion = (excursionData) => async (dispatch) => {
   dispatch({ type: CREATE_EXCURSION_REQUEST });
   try {
-    const response = await api.post("/service/", excursionData);
+    const response = await axios.post("/service/", excursionData);
     dispatch({
       type: CREATE_EXCURSION_SUCCESS,
       payload: response.data,
@@ -66,7 +66,7 @@ export const getBookingsByService =
     dispatch({ type: GET_BOOKINGS_BY_SERVICE_REQUEST });
 
     try {
-      const response = await api.get(
+      const response = await axios.get(
         `/booking/service/${id_Service}?date=${date}&time=${time}&page=${page}&limit=${limit}`
       );
       dispatch({
@@ -83,7 +83,7 @@ export const getBookingsByService =
 
 export const getAllServices = () => async (dispatch) => {
   try {
-    const response = await api.get("/service");
+    const response = await axios.get("/service");
     dispatch({
       type: GET_ALL_SERVICES,
       payload: response.data,
@@ -95,7 +95,7 @@ export const getAllServices = () => async (dispatch) => {
 
 export const deleteService = (title) => async (dispatch) => {
   try {
-    const response = await api.delete(`/service/name/${title}`);
+    const response = await axios.delete(`/service/name/${title}`);
     dispatch({ type: DELETE_SERVICE, payload: title });
     return response.data;
   } catch (error) {
@@ -106,7 +106,7 @@ export const deleteService = (title) => async (dispatch) => {
 
 export const toggleServiceActiveStatus = (id_Service) => async (dispatch) => {
   try {
-    const response = await api.patch(`/service/${id_Service}/toggle`);
+    const response = await axios.patch(`/service/${id_Service}/toggle`);
     dispatch({
       type: TOGGLE_SERVICE_STATUS_SUCCESS,
       payload: {
@@ -126,7 +126,7 @@ export const getUsers = () => async (dispatch) => {
   console.log("Actions - getUsers: Iniciando solicitud para obtener usuarios");
   dispatch({ type: GET_USERS_REQUEST });
   try {
-    const response = await api.get("/user");
+    const response = await axios.get("/user");
     console.log(
       "Actions - getUsers: Usuarios obtenidos con éxito:",
       response.data
@@ -148,7 +148,7 @@ export const toggleUserActiveStatus = (id_User) => async (dispatch) => {
   );
   dispatch({ type: TOGGLE_USER_STATUS_REQUEST }); // Inicio del proceso
   try {
-    const response = await api.patch(`/user/${id_User}/active`);
+    const response = await axios.patch(`/user/${id_User}/active`);
     console.log(
       "Actions - toggleUserActiveStatus: Estado cambiado con éxito para usuario:",
       response.data
@@ -168,7 +168,7 @@ export const deleteUser = (id_User) => async (dispatch) => {
   console.log(`Actions - deleteUser: Eliminando usuario con ID: ${id_User}`);
   dispatch({ type: DELETE_USER_REQUEST }); // Inicio del proceso
   try {
-    const response = await api.delete(`/user/id/${id_User}`);
+    const response = await axios.delete(`/user/id/${id_User}`);
     console.log("Actions - deleteUser: Usuario eliminado con éxito:", id_User);
     dispatch({ type: DELETE_USER_SUCCESS, payload: id_User }); // Éxito
   } catch (error) {
@@ -187,7 +187,7 @@ export const getUserDetails = (id_User) => async (dispatch) => {
   );
   dispatch({ type: GET_USER_DETAILS_REQUEST });
   try {
-    const response = await api.get(`/user/id/${id_User}`);
+    const response = await axios.get(`/user/id/${id_User}`);
     console.log(id_User);
     console.log(
       "Actions - getUserDetails: Detalles del usuario obtenidos:",
@@ -208,7 +208,7 @@ export const getUserByName = (name) => async (dispatch) => {
   console.log(`Actions - getUserByName: Buscando usuario por nombre: ${name}`);
   dispatch({ type: GET_USER_BY_NAME_REQUEST });
   try {
-    const response = await api.get(`/user/name/${name}`);
+    const response = await axios.get(`/user/name/${name}`);
     console.log("Actions - getUserByName: Usuario encontrado:", response.data);
     dispatch({ type: GET_USER_BY_NAME_SUCCESS, payload: response.data });
   } catch (error) {
@@ -225,7 +225,7 @@ export const getUserByDni = (dni) => async (dispatch) => {
   console.log(`Actions - getUserByDni: Buscando usuario por DNI: ${dni}`);
   dispatch({ type: GET_USER_BY_DNI_REQUEST });
   try {
-    const response = await api.get(`/user/DNI/${dni}`);
+    const response = await axios.get(`/user/DNI/${dni}`);
     console.log("Actions - getUserByDni: Usuario encontrado:", response.data);
     dispatch({ type: GET_USER_BY_DNI_SUCCESS, payload: response.data });
   } catch (error) {
@@ -244,7 +244,7 @@ export const updateUserDetails = (id_User, updatedData) => async (dispatch) => {
   );
   dispatch({ type: UPDATE_USER_REQUEST });
   try {
-    const response = await api.put(`/user/id/${id_User}`, updatedData);
+    const response = await axios.put(`/user/id/${id_User}`, updatedData);
     console.log(
       "Actions - updateUserDetails: Usuario actualizado con éxito:",
       response.data
@@ -263,14 +263,26 @@ export const updateUserDetails = (id_User, updatedData) => async (dispatch) => {
 export const createServiceOrder = (orderData) => async (dispatch) => {
   try {
     console.log("Enviando datos al endpoint:", orderData);
-    const response = await api.post("/servicesOrder/", orderData);
-    console.log("Respuesta del backend:", response.data);
+    const response = await fetch("http://localhost:3001/servicesOrder/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(orderData),
+    });
+
+    const data = await response.json();
+    console.log("Respuesta del backend:", data);
+
+    if (!response.ok) {
+      throw new Error(data.message || "Error al crear la orden");
+    }
 
     dispatch({
       type: CREATE_ORDER_SUCCESS,
-      payload: response.data,
+      payload: data,
     });
-    return response.data.order;
+    return data.order;
   } catch (error) {
     console.error("Error en createServiceOrder:", error);
     dispatch({
@@ -284,7 +296,7 @@ export const createServiceOrder = (orderData) => async (dispatch) => {
 export const getAllOrders = () => async (dispatch) => {
   dispatch({ type: GET_ALL_ORDERS_REQUEST });
   try {
-    const response = await api.get("/servicesOrder/");
+    const response = await axios.get("/servicesOrder/");
     dispatch({ type: GET_ALL_ORDERS, payload: response.data });
   } catch (error) {
     dispatch({ type: GET_ALL_ORDERS_ERROR, payload: error.message });
@@ -297,7 +309,7 @@ export const getAllOrders = () => async (dispatch) => {
 export const getAllBookings = () => async (dispatch) => {
   dispatch({ type: GET_ALL_BOOKINGS_REQUEST });
   try {
-    const response = await api.get("/booking/");
+    const response = await axios.get("/booking/");
     dispatch({ type: GET_ALL_BOOKINGS, payload: response.data });
   } catch (error) {
     dispatch({ type: GET_ALL_BOOKINGS_ERROR, payload: error.message });
@@ -307,7 +319,7 @@ export const getAllBookings = () => async (dispatch) => {
 //GET ordenes de servicio por usuario
 export const getOrdersByUser = (id_User) => async (dispatch) => {
   try {
-    const response = await api.get(`/servicesOrder/user/${id_User}`);
+    const response = await axios.get(`/servicesOrder/user/${id_User}`);
     dispatch({ type: GET_ORDERS_BY_USER_SUCCESS, payload: response.data });
   } catch (error) {
     dispatch({ type: GET_ORDERS_BY_USER_FAILURE, payload: error.message });

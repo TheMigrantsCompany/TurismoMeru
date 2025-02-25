@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import api from "../../config/axios";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../views/shopping-cart/CartContext";
 import { AuthContext } from "../../firebase/AuthContext";
@@ -25,7 +25,9 @@ const BookingCard = ({ id_Service, price }) => {
   useEffect(() => {
     const fetchExcursionDetails = async () => {
       try {
-        const response = await api.get(`/service/id/${id_Service}`);
+        const response = await axios.get(
+          `http://localhost:3001/service/id/${id_Service}`
+        );
         setExcursion(response.data);
 
         const rawDates = response.data.availabilityDate || [];

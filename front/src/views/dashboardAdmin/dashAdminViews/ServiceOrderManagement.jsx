@@ -8,6 +8,7 @@ export function ServiceOrderManagement() {
   const dispatch = useDispatch();
   const { ordersList, loading, error } = useSelector((state) => state.orders);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [filteredOrders, setFilteredOrders] = useState([]);
 
   const transformOrders = (orders) => {
     return orders.map((order) => {
@@ -30,8 +31,26 @@ export function ServiceOrderManagement() {
     dispatch(getAllOrders());
   }, [dispatch]);
 
+  useEffect(() => {
+    if (ordersList) {
+      const transformedOrders = transformOrders(ordersList);
+      setFilteredOrders(transformedOrders);
+    }
+  }, [ordersList]);
+
   const handleEditOrder = (order) => {
     setSelectedOrder(order);
+  };
+
+  const handleFilterOrders = (status) => {
+    const transformedOrders = transformOrders(ordersList);
+    if (status === "all") {
+      setFilteredOrders(transformedOrders);
+    } else {
+      setFilteredOrders(
+        transformedOrders.filter((order) => order.status === status)
+      );
+    }
   };
 
   return (
@@ -56,8 +75,9 @@ export function ServiceOrderManagement() {
             </div>
           ) : (
             <ServiceOrdersTable
-              orders={transformOrders(ordersList)}
+              orders={filteredOrders}
               onEdit={handleEditOrder}
+              onFilter={handleFilterOrders}
             />
           )}
         </div>
@@ -67,7 +87,9 @@ export function ServiceOrderManagement() {
         <ServiceOrderModal
           order={selectedOrder}
           onClose={() => setSelectedOrder(null)}
-          onChangeStatus={() => {}}
+          onChangeStatus={(newStatus) => {
+            handleFilterOrders(newStatus);
+          }}
         />
       )}
     </div>

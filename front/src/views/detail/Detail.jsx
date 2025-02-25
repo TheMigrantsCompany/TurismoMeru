@@ -4,7 +4,6 @@ import { Typography, Avatar, Rating } from "@material-tailwind/react";
 import BookingCard from "../../components/bookingcard/BookingCard";
 import { motion } from "framer-motion";
 import { AuthContext } from "../../firebase/AuthContext";
-import api from "../../config/axios";
 
 const Review = ({ review, rating, userImage, userName, date }) => {
   return (
@@ -118,8 +117,12 @@ export function Detail() {
   useEffect(() => {
     const fetchExcursionDetails = async () => {
       try {
-        const response = await api.get(`/service/id/${id_Service}`);
-        setExcursion(response.data);
+        const response = await fetch(
+          `http://localhost:3001/service/id/${id_Service}`
+        );
+        if (!response.ok) throw new Error("Error al cargar la excursión");
+        const data = await response.json();
+        setExcursion(data);
       } catch (err) {
         setError(err.message);
       }
@@ -128,11 +131,14 @@ export function Detail() {
     const fetchReviews = async () => {
       try {
         const [reviewsResponse, usersResponse] = await Promise.all([
-          api.get("/review/"),
-          api.get("/user/"),
+          fetch("http://localhost:3001/review/"),
+          fetch("http://localhost:3001/user/"),
         ]);
-        const reviewsData = reviewsResponse.data;
-        const usersData = usersResponse.data;
+
+        const [reviewsData, usersData] = await Promise.all([
+          reviewsResponse.json(),
+          usersResponse.json(),
+        ]);
 
         const approvedReviews = reviewsData
           .filter((review) => review.active && review.id_Service === id_Service)

@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useMemo, useContext } from "react";
-import { auth } from "../../firebase/config";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  auth,
+  googleProvider,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from "../../firebase/config";
 import {
   signOut,
   onAuthStateChanged,
   signInWithPopup,
   updateProfile,
 } from "firebase/auth";
+import axios from "axios";
 import ShoppingCartIcon from "@heroicons/react/24/outline/ShoppingCartIcon";
 import Swal from "sweetalert2";
 import { useCart } from "../../views/shopping-cart/CartContext";
@@ -14,27 +19,27 @@ import { useNavigate, Link } from "react-router-dom";
 import logoImage from "../../assets/images/logo/logo.jpg";
 import { motion } from "framer-motion";
 import { AuthContext } from "../../firebase/AuthContext";
-import api from "../../config/axios";
 
 export default function StickyNavbar() {
   const { user, role, setAllowHomeNavigation, isUserActive } =
     useContext(AuthContext);
-  const { clearCart, setUserId } = useCart();
+  const { clearCart } = useCart();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogin = async (userData) => {
     try {
       const token = await userData.getIdToken(true);
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-      const response = await api.get(`/user/email/${userData.email}`);
+      const response = await axios.get(
+        `http://localhost:3001/user/email/${userData.email}`
+      );
 
       if (response.data) {
         localStorage.setItem("uuid", response.data.id_User);
         localStorage.setItem("role", response.data.role);
 
-        setUserId(response.data.id_User);
         // Cerrar cualquier SweetAlert abierto
         Swal.close();
 
@@ -45,7 +50,7 @@ export default function StickyNavbar() {
         }
       }
     } catch (error) {
-      console.error("Error al obtener datos del usuario:", error);
+      console.error("Error al verificar usuario:", error);
       Swal.fire("Error", "No se pudo verificar el usuario", "error");
     }
   };
@@ -89,7 +94,7 @@ export default function StickyNavbar() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      setUserId(null);
+      clearCart();
       navigate("/");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);

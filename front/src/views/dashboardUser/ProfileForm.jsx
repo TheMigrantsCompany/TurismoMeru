@@ -13,7 +13,7 @@ const ProfileForm = () => {
     DNI: "",
     phone: "",
     address: "",
-    image: "",
+    image: "https://via.placeholder.com/150",
     birthDate: "",
     gender: "",
     nationality: "",
@@ -26,9 +26,8 @@ const ProfileForm = () => {
     interests: [],
   });
 
-  // Se sigue usando el uuid para identificar al usuario, pero solo para llamar al backend.
   useEffect(() => {
-    const uuid = localStorage.getItem("uuid"); 
+    const uuid = localStorage.getItem("uuid");
     if (uuid) {
       dispatch(getUserDetails(uuid));
     }
@@ -36,29 +35,38 @@ const ProfileForm = () => {
 
   useEffect(() => {
     if (userDetails) {
-      console.log("Datos del usuario recibidos:", userDetails);
-      // Se setea el estado directamente a partir de la respuesta del backend
+      console.log("Datos del usuario recibidos:", userDetails); // Para debug
+
+      // Intentar obtener datos adicionales del localStorage
+      const savedProfile = localStorage.getItem("userProfile");
+      const parsedProfile = savedProfile ? JSON.parse(savedProfile) : null;
+
       setProfile({
-        ...userDetails,
+        ...userDetails, // Datos base del backend
         name: userDetails.name || "",
         email: userDetails.email || "",
         DNI: userDetails.DNI || "",
         phone: userDetails.phone || "",
         address: userDetails.address || "",
         image: userDetails.image || "https://via.placeholder.com/150",
-        birthDate: userDetails.birthDate || "",
-        gender: userDetails.gender || "",
-        nationality: userDetails.nationality || "",
-        emergencyContact: userDetails.emergencyContact || { name: "", phone: "" },
-        medicalInfo: userDetails.medicalInfo || "",
-        experienceLevel: userDetails.experienceLevel || "",
-        interests: userDetails.interests || [],
+        // Usar datos guardados en localStorage si existen, si no usar valores por defecto
+        birthDate: parsedProfile?.birthDate || "",
+        gender: parsedProfile?.gender || "",
+        nationality: parsedProfile?.nationality || "",
+        emergencyContact: {
+          name: parsedProfile?.emergencyContact?.name || "",
+          phone: parsedProfile?.emergencyContact?.phone || "",
+        },
+        medicalInfo: parsedProfile?.medicalInfo || "",
+        experienceLevel: parsedProfile?.experienceLevel || "",
+        interests: parsedProfile?.interests || [],
       });
     }
   }, [userDetails]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     if (name.includes(".")) {
       const [parent, child] = name.split(".");
       setProfile((prev) => ({
@@ -92,6 +100,7 @@ const ProfileForm = () => {
           body: formData,
         }
       );
+
       const data = await response.json();
       if (data.secure_url) {
         setProfile((prev) => ({
@@ -127,7 +136,7 @@ const ProfileForm = () => {
       return;
     }
 
-    // Se arma el objeto a enviar al backend con todos los campos
+    // Incluir todos los campos en el objeto a enviar al backend
     const backendProfile = {
       name: profile.name,
       email: profile.email,
@@ -147,7 +156,7 @@ const ProfileForm = () => {
 
     if (uuid) {
       dispatch(updateUserDetails(uuid, backendProfile))
-        .then(() => {
+        .then((response) => {
           Swal.fire(
             "Perfil actualizado",
             "Los datos han sido guardados.",

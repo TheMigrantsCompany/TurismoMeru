@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import api from "../../config/axios";
+import axios from "axios";
 
 const UserBookings = ({ id_User }) => {
   const [bookings, setBookings] = useState([]);
   const [formData, setFormData] = useState({});
   const [updateMessage, setUpdateMessage] = useState({
     show: false,
-    message: "",
-    isError: false,
+    message: '',
+    isError: false
   });
 
   console.log("ID del usuario recibido en UserBookings:", id_User);
@@ -17,7 +17,7 @@ const UserBookings = ({ id_User }) => {
 
     const fetchBookings = async () => {
       try {
-        const response = await api.get(`/booking/user/${id_User}`);
+        const response = await axios.get(`http://localhost:3001/booking/user/${id_User}`);
         console.log("Reservas obtenidas:", response.data);
         setBookings(response.data);
       } catch (error) {
@@ -33,22 +33,20 @@ const UserBookings = ({ id_User }) => {
   useEffect(() => {
     console.log("Inicializando formData con bookings:", bookings);
     const initialFormData = {};
-    bookings.forEach((booking) => {
+    bookings.forEach(booking => {
       // Para el primer pasajero, usamos los datos existentes
-      const passengers = Array(booking.totalPeople || 1)
-        .fill()
-        .map((_, index) => {
-          if (index === 0) {
-            return {
-              DNI: booking.DNI || "",
-              passengerName: booking.passengerName || "",
-            };
-          }
+      const passengers = Array(booking.totalPeople || 1).fill().map((_, index) => {
+        if (index === 0) {
           return {
-            DNI: "",
-            passengerName: "",
+            DNI: booking.DNI || '',
+            passengerName: booking.passengerName || ''
           };
-        });
+        }
+        return {
+          DNI: '',
+          passengerName: ''
+        };
+      });
 
       initialFormData[booking.id_Booking] = passengers;
     });
@@ -58,19 +56,12 @@ const UserBookings = ({ id_User }) => {
 
   // Maneja el cambio en los inputs
   const handleInputChange = (bookingId, index, field, value) => {
-    console.log(
-      `handleInputChange para booking ${bookingId}, index ${index}, campo ${field}, valor ${value}`
-    );
-    setFormData((prevData) => {
+    console.log(`handleInputChange para booking ${bookingId}, index ${index}, campo ${field}, valor ${value}`);
+    setFormData(prevData => {
       const updatedPassengers = prevData[bookingId].map((passenger, i) =>
         i === index ? { ...passenger, [field]: value } : passenger
       );
-      console.log(
-        "Pasajeros actualizados para booking",
-        bookingId,
-        ":",
-        updatedPassengers
-      );
+      console.log("Pasajeros actualizados para booking", bookingId, ":", updatedPassengers);
       return { ...prevData, [bookingId]: updatedPassengers };
     });
   };
@@ -79,48 +70,44 @@ const UserBookings = ({ id_User }) => {
   const handleUpdate = async (bookingId, passengerIndex) => {
     try {
       const passenger = formData[bookingId][passengerIndex];
-
-      console.log("URL:", `/booking/id/${bookingId}`);
-      console.log("Datos a enviar:", {
+      
+      console.log('URL:', `http://localhost:3001/booking/id/${bookingId}`);
+      console.log('Datos a enviar:', {
         DNI: passenger.DNI,
-        passengerName: passenger.passengerName,
+        passengerName: passenger.passengerName
       });
 
       const formattedDNI = passenger.DNI ? parseInt(passenger.DNI) : null;
-
+      
       // Cambiamos put por patch que es el método correcto para updates parciales
-      const response = await api.patch(`/booking/id/${bookingId}`, {
+      const response = await axios.patch(`http://localhost:3001/booking/id/${bookingId}`, {
         DNI: formattedDNI,
-        passengerName: passenger.passengerName,
+        passengerName: passenger.passengerName
       });
 
       if (response.status === 200) {
         setUpdateMessage({
           show: true,
-          message: `Datos del pasajero ${
-            passengerIndex + 1
-          } actualizados correctamente`,
-          isError: false,
+          message: `Datos del pasajero ${passengerIndex + 1} actualizados correctamente`,
+          isError: false
         });
-
+        
         setTimeout(() => {
-          setUpdateMessage({ show: false, message: "", isError: false });
+          setUpdateMessage({ show: false, message: '', isError: false });
         }, 3000);
       }
     } catch (error) {
       console.error("Error al actualizar la reserva:", error);
       console.log("Detalles del error:", error.response);
-
+      
       setUpdateMessage({
         show: true,
-        message: `Error al actualizar los datos del pasajero ${
-          passengerIndex + 1
-        }`,
-        isError: true,
+        message: `Error al actualizar los datos del pasajero ${passengerIndex + 1}`,
+        isError: true
       });
 
       setTimeout(() => {
-        setUpdateMessage({ show: false, message: "", isError: false });
+        setUpdateMessage({ show: false, message: '', isError: false });
       }, 3000);
     }
   };
@@ -129,16 +116,16 @@ const UserBookings = ({ id_User }) => {
   const formatDate = (dateString) => {
     if (!dateString) return "No disponible";
     const date = new Date(dateString);
-
+    
     // Formatear fecha
-    const dia = date.getDate().toString().padStart(2, "0");
-    const mes = (date.getMonth() + 1).toString().padStart(2, "0");
+    const dia = date.getDate().toString().padStart(2, '0');
+    const mes = (date.getMonth() + 1).toString().padStart(2, '0');
     const año = date.getFullYear();
-
+    
     // Formatear hora
-    const hora = date.getHours().toString().padStart(2, "0");
-    const minutos = date.getMinutes().toString().padStart(2, "0");
-
+    const hora = date.getHours().toString().padStart(2, '0');
+    const minutos = date.getMinutes().toString().padStart(2, '0');
+    
     return `${dia}/${mes}/${año} - ${hora}:${minutos}hs`;
   };
 
@@ -153,19 +140,15 @@ const UserBookings = ({ id_User }) => {
 
   return (
     <div className="container mx-auto p-6 mt-16 bg-[#f9f3e1] border-l-4 border-[#425a66] rounded-lg shadow-lg">
-      <h1 className="text-3xl font-bold mb-6 text-[#4256a6] font-poppins">
-        Mis Reservas
-      </h1>
+      <h1 className="text-3xl font-bold mb-6 text-[#4256a6] font-poppins">Mis Reservas</h1>
 
       {/* Mostrar mensaje si existe */}
       {updateMessage.show && (
-        <div
-          className={`p-3 rounded-md mb-4 ${
-            updateMessage.isError
-              ? "bg-red-100 text-red-700 border border-red-300"
-              : "bg-green-100 text-green-700 border border-green-300"
-          }`}
-        >
+        <div className={`p-3 rounded-md mb-4 ${
+          updateMessage.isError 
+            ? 'bg-red-100 text-red-700 border border-red-300' 
+            : 'bg-green-100 text-green-700 border border-green-300'
+        }`}>
           {updateMessage.message}
         </div>
       )}
@@ -176,7 +159,7 @@ const UserBookings = ({ id_User }) => {
             <div
               key={booking.id_Booking}
               className={`bg-[#dac9aa] shadow-md rounded-lg p-6 border border-[#425a66] hover:shadow-lg transition-shadow ${
-                isBookingPast(booking.bookingDate) ? "opacity-60" : ""
+                isBookingPast(booking.bookingDate) ? 'opacity-60' : ''
               }`}
             >
               <div className="mb-4">
@@ -188,25 +171,16 @@ const UserBookings = ({ id_User }) => {
                     <span className="font-semibold">Fecha y Hora:</span>
                     <p className="mt-1">{formatDate(booking.bookingDate)}</p>
                     {isBookingPast(booking.bookingDate) && (
-                      <p className="text-red-500 text-sm mt-1">
-                        Esta reserva ya ha pasado
-                      </p>
+                      <p className="text-red-500 text-sm mt-1">Esta reserva ya ha pasado</p>
                     )}
                   </div>
                   <div className="bg-[#f9f3e1] p-3 rounded-lg">
                     <span className="font-semibold">Estado:</span>
-                    <p
-                      className={`mt-1 font-medium ${
-                        booking.status === "Completada"
-                          ? "text-green-600"
-                          : isBookingPast(booking.bookingDate)
-                          ? "text-red-600"
-                          : "text-yellow-600"
-                      }`}
-                    >
-                      {isBookingPast(booking.bookingDate)
-                        ? "Finalizada"
-                        : booking.status}
+                    <p className={`mt-1 font-medium ${
+                      booking.status === "Completada" ? "text-green-600" : 
+                      isBookingPast(booking.bookingDate) ? "text-red-600" : "text-yellow-600"
+                    }`}>
+                      {isBookingPast(booking.bookingDate) ? "Finalizada" : booking.status}
                     </p>
                   </div>
                 </div>
@@ -220,8 +194,8 @@ const UserBookings = ({ id_User }) => {
                   <div className="flex flex-row gap-4 overflow-x-auto pb-2">
                     {formData[booking.id_Booking] &&
                       formData[booking.id_Booking].map((passenger, index) => (
-                        <div
-                          key={index}
+                        <div 
+                          key={index} 
                           className="min-w-[300px] p-4 bg-[#dac9aa] rounded-lg border border-[#425a66]/20 shadow-sm hover:shadow-md transition-shadow"
                         >
                           <p className="text-sm font-semibold text-[#425a66] mb-3 border-b border-[#425a66]/20 pb-2">
@@ -254,21 +228,14 @@ const UserBookings = ({ id_User }) => {
                               type="text"
                               value={passenger.DNI}
                               onChange={(e) =>
-                                handleInputChange(
-                                  booking.id_Booking,
-                                  index,
-                                  "DNI",
-                                  e.target.value
-                                )
+                                handleInputChange(booking.id_Booking, index, "DNI", e.target.value)
                               }
                               className="w-full p-2 border rounded-md text-black bg-white/90 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent"
                               placeholder="Ingrese DNI"
                             />
                           </div>
                           <button
-                            onClick={() =>
-                              handleUpdate(booking.id_Booking, index)
-                            }
+                            onClick={() => handleUpdate(booking.id_Booking, index)}
                             className="w-full bg-[#4256a6] text-white px-4 py-2 rounded-md hover:bg-[#2c3d8f] transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-[#4256a6]"
                           >
                             Actualizar Pasajero {index + 1}
@@ -282,9 +249,7 @@ const UserBookings = ({ id_User }) => {
           ))}
         </div>
       ) : (
-        <p className="text-[#4256a6] font-poppins">
-          No tienes reservas recientes.
-        </p>
+        <p className="text-[#4256a6] font-poppins">No tienes reservas recientes.</p>
       )}
     </div>
   );

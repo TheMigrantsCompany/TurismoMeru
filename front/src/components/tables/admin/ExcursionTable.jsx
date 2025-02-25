@@ -19,7 +19,7 @@ import {
 } from "@material-tailwind/react";
 import ExcursionModal from "../../modals/admin-modal/ExcursionModal";
 import SearchInput from "../../inputs/SearchInput";
-import api from "../../../config/axios";
+import axios from "axios";
 
 const selectExcursions = createSelector(
   (state) => state.excursions,
@@ -60,12 +60,16 @@ const ExcursionTable = () => {
 
   const handleSearchChange = (query) => {
     setSearchQuery(query);
-    if (timeoutId) clearTimeout(timeoutId);
 
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
     const newTimeoutId = setTimeout(async () => {
       if (query.trim().length >= 3) {
         try {
-          const response = await api.get(`/service/name/${query}`);
+          const response = await axios.get(
+            `http://localhost:3001/service/name/${query}`
+          );
           const searchResults = response.data || [];
           setFilteredExcursions(searchResults);
         } catch (error) {

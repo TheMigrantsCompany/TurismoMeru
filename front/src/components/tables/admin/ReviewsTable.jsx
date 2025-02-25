@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { IconButton } from "@material-tailwind/react";
 import { CheckIcon, XMarkIcon, PencilIcon } from "@heroicons/react/24/outline";
-import api from "../../../config/axios";
 
 const ReviewsTable = ({ reviews, onReviewStatusChange, onViewDetails }) => {
   const [userMap, setUserMap] = useState({});
@@ -10,8 +9,9 @@ const ReviewsTable = ({ reviews, onReviewStatusChange, onViewDetails }) => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await api.get("/user");
-        const users = response.data;
+        const response = await fetch("http://localhost:3001/user");
+        if (!response.ok) throw new Error("Error al cargar los usuarios");
+        const users = await response.json();
         const map = users.reduce((acc, user) => {
           acc[user.id_User] = user.name;
           return acc;
@@ -31,22 +31,16 @@ const ReviewsTable = ({ reviews, onReviewStatusChange, onViewDetails }) => {
         <table className="w-full table-auto text-left">
           <thead>
             <tr className="bg-[#f0f5fc]">
-              {[
-                "Usuario",
-                "Título de Excursión",
-                "Puntuación",
-                "Comentario",
-                "Estado",
-                "Fecha",
-                "Acciones",
-              ].map((header) => (
-                <th
-                  key={header}
-                  className="p-4 text-sm font-medium text-[#4256a6] border-b border-[#4256a6]"
-                >
-                  {header}
-                </th>
-              ))}
+              {["Usuario", "Título de Excursión", "Puntuación", "Comentario", "Estado", "Fecha", "Acciones"].map(
+                (header) => (
+                  <th
+                    key={header}
+                    className="p-4 text-sm font-medium text-[#4256a6] border-b border-[#4256a6]"
+                  >
+                    {header}
+                  </th>
+                )
+              )}
             </tr>
           </thead>
           <tbody>
@@ -90,10 +84,7 @@ const ReviewsTable = ({ reviews, onReviewStatusChange, onViewDetails }) => {
                     <IconButton
                       onClick={async () => {
                         setLoadingReviewId(review.id_Review);
-                        await onReviewStatusChange(
-                          review.id_Review,
-                          "approved"
-                        );
+                        await onReviewStatusChange(review.id_Review, "approved");
                         setLoadingReviewId(null);
                       }}
                       disabled={loadingReviewId === review.id_Review}
@@ -104,10 +95,7 @@ const ReviewsTable = ({ reviews, onReviewStatusChange, onViewDetails }) => {
                     <IconButton
                       onClick={async () => {
                         setLoadingReviewId(review.id_Review);
-                        await onReviewStatusChange(
-                          review.id_Review,
-                          "rejected"
-                        );
+                        await onReviewStatusChange(review.id_Review, "rejected");
                         setLoadingReviewId(null);
                       }}
                       disabled={loadingReviewId === review.id_Review}

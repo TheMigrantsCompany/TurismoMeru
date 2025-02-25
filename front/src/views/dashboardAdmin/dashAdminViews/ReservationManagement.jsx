@@ -3,7 +3,7 @@ import SearchInput from "../../../components/inputs/SearchInput";
 import { ReservationsTable } from "../../../components/tables/admin/Reservations";
 import ReservationModal from "../../../components/modals/admin-modal/ReservationModal";
 import Swal from "sweetalert2";
-import api from "../../../config/axios";
+import axios from "axios";
 
 export function ReservationManagement() {
   const [selectedReservation, setSelectedReservation] = useState(null);
@@ -22,12 +22,16 @@ export function ReservationManagement() {
     try {
       let url = "";
       if (searchType === "service") {
-        url = `/booking/serviceName/${encodeURIComponent(query)}`;
+        url = `http://localhost:3001/booking/serviceName/${encodeURIComponent(
+          query
+        )}`;
       } else if (searchType === "passenger") {
-        url = `/booking/passenger-name/${encodeURIComponent(query)}`;
+        url = `http://localhost:3001/booking/passenger-name/${encodeURIComponent(
+          query
+        )}`;
       }
 
-      const response = await api.get(url);
+      const response = await axios.get(url);
       console.log("Resultados de búsqueda:", response.data);
 
       if (!response.data.data || response.data.data.length === 0) {

@@ -7,46 +7,34 @@ import {
   Tooltip,
 } from "@material-tailwind/react";
 
-const ServiceOrdersTable = ({ orders, onEdit }) => {
-  const [filteredOrders, setFilteredOrders] = useState(orders);
-
-  useEffect(() => {
-    setFilteredOrders(orders);
-  }, [orders]);
-
-  const filterOrdersByStatus = (status) => {
-    if (status === "all") {
-      setFilteredOrders(orders);
-    } else {
-      setFilteredOrders(orders.filter((order) => order.status === status));
-    }
-  };
+const ServiceOrdersTable = ({ orders, onEdit, onFilter }) => {
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleSearchByName = (name) => {
-    setFilteredOrders(
-      orders.filter((order) =>
-        order.excursionName.toLowerCase().includes(name.toLowerCase())
-      )
-    );
+    setSearchTerm(name);
   };
+
+  const filteredBySearch = orders.filter((order) =>
+    order.excursionName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="w-full bg-[#f9f3e1]">
       <div className="flex justify-start gap-4 p-4">
         <Button
-          onClick={() => filterOrdersByStatus("all")}
+          onClick={() => onFilter("all")}
           className="bg-[#4256a6] text-white px-6 py-2 rounded-lg hover:bg-[#334477] transition-colors font-poppins"
         >
           Todas
         </Button>
         <Button
-          onClick={() => filterOrdersByStatus("pending")}
+          onClick={() => onFilter("pending")}
           className="bg-[#f4925b] text-white px-6 py-2 rounded-lg hover:bg-[#d98248] transition-colors font-poppins"
         >
           Pendientes
         </Button>
         <Button
-          onClick={() => filterOrdersByStatus("completed")}
+          onClick={() => onFilter("completed")}
           className="bg-[#425a66] text-white px-6 py-2 rounded-lg hover:bg-[#2f4047] transition-colors font-poppins"
         >
           Completadas
@@ -88,8 +76,8 @@ const ServiceOrdersTable = ({ orders, onEdit }) => {
             </tr>
           </thead>
           <tbody className="bg-[#f9f3e1]">
-            {filteredOrders.length > 0 ? (
-              filteredOrders.map((order) => (
+            {filteredBySearch.length > 0 ? (
+              filteredBySearch.map((order) => (
                 <tr
                   key={order.id}
                   className="hover:bg-[#dac9aa]/30 transition-colors border-b border-[#425a66]/20"
