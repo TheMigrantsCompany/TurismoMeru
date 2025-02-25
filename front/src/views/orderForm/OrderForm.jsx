@@ -24,6 +24,7 @@ const OrderForm = () => {
     postalCode: "",
     email: "",
     phone: "",
+    apartment: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -34,9 +35,19 @@ const OrderForm = () => {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // Inicializar el SDK de Mercado Pago solo una vez
+    console.log("cartItems en OrderForm:", cartItems);
+  }, [cartItems]);
+
+  
+  useEffect(() => {
+  
     if (!mercadoPago && !sdkLoaded) {
-      const mp = initMercadoPago("TEST-2a1e59bd-9273-4211-8a0e-95896b3bea36", {
+      const mpKey = import.meta.env.VITE_MERCADOPAGO_KEY;
+      if (!mpKey) {
+        console.error("Mercado Pago key no definida en las variables de entorno.");
+        return;
+      }
+      const mp = initMercadoPago(mpKey, {
         locale: "es-AR",
       });
       setMercadoPago(mp);
@@ -80,6 +91,7 @@ const OrderForm = () => {
     try {
       // Preparación de los datos de la orden
       const items = cartItems.map((item) => {
+        // Puedes ver en la consola el contenido actual del carrito
         console.log("Contenido del carrito:", cartItems);
         const basePrice = parseFloat(item.price || 0);
         const adults = parseInt(item.quantities?.adults || 0, 10);
@@ -99,9 +111,6 @@ const OrderForm = () => {
 
         const minorPrice = basePrice - (basePrice * discountForMinors) / 100;
         const seniorPrice = basePrice - (basePrice * discountForSeniors) / 100;
-
-        const totalPrice =
-          adults * basePrice + minors * minorPrice + seniors * seniorPrice;
 
         return {
           id_Service: item.id_Service,
@@ -135,29 +144,42 @@ const OrderForm = () => {
 
       let data;
 
-      // Crear preferencia de pago
+      // Crear preferencia de pago si se selecciona "Pagos desde Argentina"
       if (formData.paymentMethod === "Pagos desde Argentina") {
-        const response = await api.post("/payment/create-preference", {
-          paymentInformation: items,
-          id_User,
-          DNI: formData.dni,
-          email: formData.email,
-          id_ServiceOrder: createdOrder.id_ServiceOrder,
-          external_reference: createdOrder.id_ServiceOrder,
-          metadata: {
-            orderId: createdOrder.id_ServiceOrder,
-            totalPeople: items.reduce(
-              (total, item) => total + item.totalPeople,
-              0
-            ),
-            totalPrice: items.reduce(
-              (total, item) => total + item.unit_price * item.totalPeople,
-              0
-            ),
-          },
-        });
+        const response = await fetch(
+          "http://localhost:3001/payment/create-preference",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              paymentInformation: items,
+              id_User,
+              DNI: formData.dni,
+              email: formData.email,
+              id_ServiceOrder: createdOrder.id_ServiceOrder,
+              external_reference: createdOrder.id_ServiceOrder,
+              metadata: {
+                orderId: createdOrder.id_ServiceOrder,
+                totalPeople: items.reduce(
+                  (total, item) => total + item.totalPeople,
+                  0
+                ),
+                totalPrice: items.reduce(
+                  (total, item) => total + item.unit_price * item.totalPeople,
+                  0
+                ),
+              },
+            }),
+          }
+        );
 
-        data = response.data;
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Detalles del error:", errorText);
+          throw new Error(`Error en la solicitud: ${response.statusText}`);
+        }
+
+        data = await response.json();
         console.log("Preference ID recibido:", data.preferenceId);
       }
 
@@ -320,67 +342,78 @@ const OrderForm = () => {
             <h2 className="text-2xl font-semibold text-[#4256a6] border-b border-[#425a66]/10 pb-4 mb-4 font-poppins">
               Resumen de la Orden
             </h2>
-            <div className="space-y-4">
-              {cartItems.map((item, index) => {
-                const adultsTotal = (item.quantities?.adults || 0) * item.price;
-                const childrenTotal =
-                  (item.quantities?.children || 0) *
-                  item.price *
-                  ((100 - (item.discountForMinors || 0)) / 100);
-                const seniorsTotal =
-                  (item.quantities?.seniors || 0) *
-                  item.price *
-                  ((100 - (item.discountForSeniors || 0)) / 100);
-                const totalItemPrice =
-                  adultsTotal + childrenTotal + seniorsTotal;
+            {cartItems.length > 0 ? (
+              <div className="space-y-4">
+                {cartItems.map((item, index) => {
+                  const adultsTotal =
+                    (item.quantities?.adults || 0) * item.price;
+                  const childrenTotal =
+                    (item.quantities?.children || 0) *
+                    item.price *
+                    ((100 - (item.discountForMinors || 0)) / 100);
+                  const seniorsTotal =
+                    (item.quantities?.seniors || 0) *
+                    item.price *
+                    ((100 - (item.discountForSeniors || 0)) / 100);
+                  const totalItemPrice =
+                    adultsTotal + childrenTotal + seniorsTotal;
 
-                return (
-                  <div
-                    key={`order-item-${item.id_Service}-${index}`}
-                    className="bg-white p-4 rounded-lg shadow-sm border border-[#425a66]/10 hover:shadow-md transition-shadow duration-300"
-                  >
-                    <p className="text-lg font-medium text-[#4256a6] mb-2 font-poppins">
-                      {item.title}
-                    </p>
-                    <div className="space-y-1 text-[#425a66]">
-                      {item.quantities?.adults > 0 && (
-                        <p className="text-sm">
-                          Adultos: {item.quantities?.adults} x $
-                          {item.price.toLocaleString()} = $
-                          {adultsTotal.toFixed(2)}
-                        </p>
-                      )}
-                      {item.quantities?.children > 0 && (
-                        <p className="text-sm">
-                          Menores: {item.quantities?.children} x $
-                          {(
-                            item.price *
-                            ((100 - (item.discountForMinors || 0)) / 100)
-                          ).toFixed(2)}{" "}
-                          = ${childrenTotal.toFixed(2)}
-                        </p>
-                      )}
-                      {item.quantities?.seniors > 0 && (
-                        <p className="text-sm">
-                          Jubilados: {item.quantities?.seniors} x $
-                          {(
-                            item.price *
-                            ((100 - (item.discountForSeniors || 0)) / 100)
-                          ).toFixed(2)}{" "}
-                          = ${seniorsTotal.toFixed(2)}
-                        </p>
-                      )}
-                    </div>
-                    <div className="mt-2 text-xs text-[#425a66] border-t border-[#425a66]/10 pt-2">
-                      <p>
-                        Fecha: {item.selectedDate || "Fecha no seleccionada"}
+                  return (
+                    <div
+                      key={`order-item-${item.id_Service}-${index}`}
+                      className="bg-white p-4 rounded-lg shadow-sm border border-[#425a66]/10 hover:shadow-md transition-shadow duration-300"
+                    >
+                      <p className="text-lg font-medium text-[#4256a6] mb-2 font-poppins">
+                        {item.title}
                       </p>
-                      <p>Hora: {item.selectedTime || "Hora no seleccionada"}</p>
+                      <div className="space-y-1 text-[#425a66]">
+                        {item.quantities?.adults > 0 && (
+                          <p className="text-sm">
+                            Adultos: {item.quantities.adults} x $
+                            {item.price.toLocaleString()} = $
+                            {adultsTotal.toFixed(2)}
+                          </p>
+                        )}
+                        {item.quantities?.children > 0 && (
+                          <p className="text-sm">
+                            Menores: {item.quantities.children} x $
+                            {(
+                              item.price *
+                              ((100 - (item.discountForMinors || 0)) / 100)
+                            ).toFixed(2)}{" "}
+                            = ${childrenTotal.toFixed(2)}
+                          </p>
+                        )}
+                        {item.quantities?.seniors > 0 && (
+                          <p className="text-sm">
+                            Jubilados: {item.quantities.seniors} x $
+                            {(
+                              item.price *
+                              ((100 - (item.discountForSeniors || 0)) / 100)
+                            ).toFixed(2)}{" "}
+                            = ${seniorsTotal.toFixed(2)}
+                          </p>
+                        )}
+                      </div>
+                      <div className="mt-2 text-xs text-[#425a66] border-t border-[#425a66]/10 pt-2">
+                        <p>
+                          Fecha:{" "}
+                          {item.selectedDate || "Fecha no seleccionada"}
+                        </p>
+                        <p>
+                          Hora:{" "}
+                          {item.selectedTime || "Hora no seleccionada"}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-center text-[#4256a6]">
+                No hay productos en el carrito.
+              </p>
+            )}
 
             <div className="bg-white p-4 rounded-lg mt-4">
               <div className="flex justify-between text-[#425a66] text-lg font-semibold">
@@ -390,13 +423,13 @@ const OrderForm = () => {
                   {cartItems
                     .reduce((acc, item) => {
                       const totalItemPrice =
-                        item.quantities?.adults * item.price +
-                        item.quantities?.children *
+                        (item.quantities?.adults * item.price) +
+                        (item.quantities?.children *
                           item.price *
-                          ((100 - (item.discountForMinors || 0)) / 100) +
-                        item.quantities?.seniors *
+                          ((100 - (item.discountForMinors || 0)) / 100)) +
+                        (item.quantities?.seniors *
                           item.price *
-                          ((100 - (item.discountForSeniors || 0)) / 100);
+                          ((100 - (item.discountForSeniors || 0)) / 100));
                       return acc + totalItemPrice;
                     }, 0)
                     .toFixed(2)}
@@ -409,13 +442,13 @@ const OrderForm = () => {
                   {cartItems
                     .reduce((acc, item) => {
                       const totalItemPrice =
-                        item.quantities?.adults * item.price +
-                        item.quantities?.children *
+                        (item.quantities?.adults * item.price) +
+                        (item.quantities?.children *
                           item.price *
-                          ((100 - (item.discountForMinors || 0)) / 100) +
-                        item.quantities?.seniors *
+                          ((100 - (item.discountForMinors || 0)) / 100)) +
+                        (item.quantities?.seniors *
                           item.price *
-                          ((100 - (item.discountForSeniors || 0)) / 100);
+                          ((100 - (item.discountForSeniors || 0)) / 100));
                       return acc + totalItemPrice;
                     }, 0)
                     .toFixed(2)}
@@ -436,17 +469,20 @@ const OrderForm = () => {
             required
           >
             <option value="">Selecciona un método</option>
-            <option value="Pagos desde Argentina">Pagos desde Argentina</option>
+            <option value="Pagos desde Argentina">
+              Pagos desde Argentina
+            </option>
             <option value="Pagos desde el exterior">
               Pagos desde el exterior
             </option>
           </select>
         </div>
-        {formData.paymentMethod === "Pagos desde Argentina" && preferenceId && (
-          <div className="mt-4">
-            <Wallet initialization={{ preferenceId }} />
-          </div>
-        )}
+        {formData.paymentMethod === "Pagos desde Argentina" &&
+          preferenceId && (
+            <div className="mt-4">
+              <Wallet initialization={{ preferenceId }} />
+            </div>
+          )}
         {formData.paymentMethod === "Pagos desde el exterior" && (
           <a
             href={`https://wa.me/+541169084059?text=${encodeURIComponent(
@@ -462,16 +498,15 @@ const OrderForm = () => {
                 .join("\n\n")}\n\nTotal a pagar: $${cartItems
                 .reduce((acc, item) => {
                   const totalItemPrice =
-                    item.quantities?.adults * item.price +
-                    item.quantities?.children *
+                    (item.quantities?.adults * item.price) +
+                    (item.quantities?.children *
                       item.price *
-                      ((100 - (item.discountForMinors || 0)) / 100) +
-                    item.quantities?.seniors *
+                      ((100 - (item.discountForMinors || 0)) / 100)) +
+                    (item.quantities?.seniors *
                       item.price *
-                      ((100 - (item.discountForSeniors || 0)) / 100);
+                      ((100 - (item.discountForSeniors || 0)) / 100));
                   return acc + totalItemPrice;
-                }, 0)
-                .toFixed(2)}`
+                }, 0).toFixed(2)}`
             )}`}
             target="_blank"
             rel="noopener noreferrer"

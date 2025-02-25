@@ -19,7 +19,7 @@ import api from "../../config/axios";
 export default function StickyNavbar() {
   const { user, role, setAllowHomeNavigation, isUserActive } =
     useContext(AuthContext);
-  const { clearCart } = useCart();
+  const { clearCart, setUserId } = useCart();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -34,6 +34,7 @@ export default function StickyNavbar() {
         localStorage.setItem("uuid", response.data.id_User);
         localStorage.setItem("role", response.data.role);
 
+        setUserId(response.data.id_User);
         // Cerrar cualquier SweetAlert abierto
         Swal.close();
 
@@ -88,7 +89,7 @@ export default function StickyNavbar() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      clearCart();
+      setUserId(null);
       navigate("/");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);

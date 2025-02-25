@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import api from "../../config/axios";
 import { Card, Typography, Button, Input } from "@material-tailwind/react";
+import { useCart } from "../shopping-cart/CartContext"; // Importa el hook
 
 const BookingForm = ({ serviceId, quantity, serviceTitle, userId }) => {
+  const { clearCart } = useCart(); // Extrae clearCart del contexto
   const [attendees, setAttendees] = useState(
     Array.from({ length: quantity }, () => ({
       name: "",
@@ -34,8 +36,12 @@ const BookingForm = ({ serviceId, quantity, serviceTitle, userId }) => {
         })),
       });
 
-      console.log("Reservas creadas:", response.data);
-      alert("¡Reservas creadas con éxito!");
+      console.log('Reservas creadas:', response.data);
+      alert('¡Reservas creadas con éxito!');
+      
+      // Vacía el carrito una vez que la reserva se creó exitosamente
+      clearCart();
+      
     } catch (error) {
       console.error("Error al crear reservas:", error);
       alert("Hubo un problema al crear las reservas.");
