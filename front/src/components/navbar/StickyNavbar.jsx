@@ -23,7 +23,7 @@ import { AuthContext } from "../../firebase/AuthContext";
 export default function StickyNavbar() {
   const { user, role, setAllowHomeNavigation, isUserActive } =
     useContext(AuthContext);
-  const { clearCart } = useCart();
+  const { clearCart, setUserId } = useCart();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -33,13 +33,14 @@ export default function StickyNavbar() {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/user/email/${userData.email}`
+        `http://localhost:3001/user/email/${userData.email}`
       );
 
       if (response.data) {
         localStorage.setItem("uuid", response.data.id_User);
         localStorage.setItem("role", response.data.role);
 
+        setUserId(response.data.id_User);
         // Cerrar cualquier SweetAlert abierto
         Swal.close();
 
@@ -94,7 +95,7 @@ export default function StickyNavbar() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      clearCart();
+      setUserId(null);
       navigate("/");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
@@ -195,11 +196,7 @@ export default function StickyNavbar() {
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <div className="flex-shrink-0">
-              <Link
-                to="/"
-                onClick={handleLogoClick}
-                className="flex items-center bg-[#f9f3e1]"
-              >
+              <Link to="/" onClick={handleLogoClick} className="flex items-center bg-[#f9f3e1]">
                 <img
                   src={logoImage}
                   alt="logo"
