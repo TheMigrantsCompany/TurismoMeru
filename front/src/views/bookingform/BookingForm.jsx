@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Card, Typography, Button, Input } from "@material-tailwind/react";
-import { useCart } from "../shopping-cart/CartContext"; // Importa el hook
+import { useCart } from "../shopping-cart/CartContext";
 
-const BookingForm = ({ serviceId, quantity, serviceTitle, userId }) => {
-  const { clearCart } = useCart(); // Extrae clearCart del contexto
+const BookingForm = ({ serviceId, quantity, serviceTitle, userId, price }) => {
+  const { clearCart, cartItems } = useCart();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [attendees, setAttendees] = useState(
     Array.from({ length: quantity }, () => ({
       name: "",
@@ -22,19 +24,36 @@ const BookingForm = ({ serviceId, quantity, serviceTitle, userId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
 
     try {
-      // Primero hacemos una llamada de prueba para verificar la conexión
-      const healthCheck = await axios.get(`${import.meta.env.VITE_API_URL}`, {
-        withCredentials: true,
-      });
-      console.log("Health check response:", healthCheck.data);
+      // 1. Primero crear la orden de servicio
+      const serviceOrderResponse = await axios.post(
+        `${import.meta.env.VITE_API_URL}/servicesOrder`,
+        {
+          orderDate: new Date().toISOString(),
+          id_User: userId,
+          paymentMethod: "Pagos desde Argentina",
+          items: cartItems,
+          paymentStatus: "Paid", // Cambiado de Pendiente a Paid
+          DNI: attendees[0].dni, // Agregamos el DNI del primer asistente
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
 
+      console.log("Orden de servicio creada:", serviceOrderResponse.data);
+
+      // 2. Luego crear las reservas
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/booking`,
         {
           id_User: userId,
           paymentStatus: "Paid",
+          id_ServiceOrder: serviceOrderResponse.data.id_ServiceOrder, // Agregamos el ID de la orden
           paymentInformation: attendees.map((attendee, i) => ({
             id_Service: serviceId,
             serviceTitle: serviceTitle,
@@ -46,16 +65,14 @@ const BookingForm = ({ serviceId, quantity, serviceTitle, userId }) => {
             ),
             active: true,
             totalPeople: quantity,
-            totalPrice: 0,
+            totalPrice: price || 0,
             dateTime: `${attendee.bookingDate}T${attendee.bookingTime}:00`,
           })),
         },
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           withCredentials: true,
-          timeout: 10000, // 10 segundos de timeout
+          timeout: 10000,
         }
       );
 
@@ -68,18 +85,21 @@ const BookingForm = ({ serviceId, quantity, serviceTitle, userId }) => {
         respuesta: error.response?.data,
         estado: error.response?.status,
         config: error.config,
-        url: error.config?.url,
-        headers: error.config?.headers,
       });
 
-      let mensajeError = "Error al crear las reservas";
-      if (error.response?.data?.message) {
-        mensajeError += `: ${error.response.data.message}`;
-      } else if (error.message) {
-        mensajeError += `: ${error.message}`;
-      }
+      setError(
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          error.message ||
+          "Error al procesar la reserva"
+      );
 
-      alert(mensajeError);
+      alert(
+        "Error al crear las reservas: " +
+          (error.response?.data?.error || error.message)
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -110,6 +130,12 @@ const BookingForm = ({ serviceId, quantity, serviceTitle, userId }) => {
         >
           Formulario de Reserva para {serviceTitle}
         </Typography>
+
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {attendees.map((attendee, index) => (
@@ -190,9 +216,10 @@ const BookingForm = ({ serviceId, quantity, serviceTitle, userId }) => {
 
           <Button
             type="submit"
-            className="w-full bg-[#4256a6] text-white py-3 rounded-lg hover:bg-[#2a3875] transition-all duration-300 font-poppins"
+            disabled={loading}
+            className="w-full bg-[#4256a6] text-white py-3 rounded-lg hover:bg-[#2a3875] transition-all duration-300 font-poppins disabled:bg-gray-400"
           >
-            Confirmar Reservas
+            {loading ? "Procesando..." : "Confirmar Reservas"}
           </Button>
         </form>
       </Card>
