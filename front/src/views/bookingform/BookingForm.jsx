@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Card, Typography, Button, Input } from "@material-tailwind/react";
 import { useCart } from "../shopping-cart/CartContext"; // Importa el hook
@@ -6,14 +6,20 @@ import { useCart } from "../shopping-cart/CartContext"; // Importa el hook
 const BookingForm = ({ serviceId, quantity, serviceTitle, userId, serviceOrderId, servicePrice }) => {
   const { clearCart } = useCart(); // Extrae clearCart del contexto
 
-  const [attendees, setAttendees] = useState(
-    Array.from({ length: quantity }, () => ({
-      name: '',
-      dni: '',
-      bookingDate: new Date().toISOString().split('T')[0],
-      bookingTime: '12:00'
-    }))
-  );
+  const [attendees, setAttendees] = useState([]);
+
+  useEffect(() => {
+    if (quantity > 0) {
+      setAttendees(
+        Array.from({ length: quantity }, () => ({
+          name: '',
+          dni: '',
+          bookingDate: new Date().toISOString().split('T')[0],
+          bookingTime: '12:00',
+        }))
+      );
+    }
+  }, [quantity]);
 
   const handleChange = (index, field, value) => {
     const updatedAttendees = [...attendees];
@@ -33,17 +39,17 @@ const BookingForm = ({ serviceId, quantity, serviceTitle, userId, serviceOrderId
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, {
         id_User: userId,
         paymentStatus: 'Paid',
-        id_ServiceOrder: serviceOrderId, // 🔹 Asegúrate de obtener este ID después del pago
+        id_ServiceOrder: serviceOrderId, 
         paymentInformation: attendees.map((attendee) => ({
-          id_Service: serviceId, // ✅ Corregido: antes era "ServiceId"
+          id_Service: serviceId, 
           serviceTitle,
-          lockedStock: 1, // ✅ Cada pasajero ocupa un lugar
-          totalPeople: 1, // ✅ Cada reserva representa a un solo pasajero
-          totalPrice: servicePrice, // 🔹 Asegúrate de obtener el precio real del servicio
-          date: attendee.bookingDate, // ✅ Extraído de bookingDate
-          time: attendee.bookingTime, // ✅ Extraído de bookingTime
-          passengerName: attendee.name || 'Desconocido', // ✅ Se usa "Desconocido" si no hay nombre
-          DNI: attendee.dni // ✅ Cada pasajero tiene su propio DNI
+          lockedStock: 1,
+          totalPeople: 1, 
+          totalPrice: servicePrice, 
+          date: attendee.bookingDate, 
+          time: attendee.bookingTime, 
+          passengerName: attendee.name || 'Desconocido', 
+          DNI: attendee.dni 
         })),
       });
 
