@@ -18,14 +18,21 @@ server.use(bodyParser.json({ limit: "50mb" }));
 server.use(cookieParser());
 server.use(morgan("dev"));
 
+// Middleware CORS global para asegurar que todas las respuestas incluyan las cabeceras necesarias
+server.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*"); // Permitir todas las solicitudes
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
 
 // Middleware CORS con configuración personalizada
 server.use(
   cors({
     origin: [
-      "http://localhost:5173", // desarrollo
-      "https://www.meruviajes.tur.ar", // producción
-      "https://meruviajes.tur.ar", // producción sin www
+      "http://localhost:5173", // Desarrollo
+      "https://www.meruviajes.tur.ar", // Producción
+      "https://meruviajes.tur.ar", // Producción sin www
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -33,7 +40,7 @@ server.use(
   })
 );
 
-// Habilitar preflight request para todas las rutas
+// Habilitar preflight antes de registrar las rutas
 server.options("*", cors());
 
 // Agregar una ruta de health check
@@ -44,12 +51,16 @@ server.get("/", (req, res) => {
 // Manejo de rutas
 server.use("/", router); // Montar las rutas en la raíz
 
-// Manejo de errores
+// Manejo de errores con CORS habilitado en respuestas de error
 server.use((err, req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
   const status = err.status || 500;
-  const message = err.message || err;
-  console.log(err);
-  res.status(status).send(message);
+  const message = err.message || "Internal Server Error";
+  console.error(err);
+  res.status(status).send({ error: message });
 });
 
 module.exports = server;
