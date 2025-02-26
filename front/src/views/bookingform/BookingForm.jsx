@@ -36,8 +36,8 @@ const BookingForm = ({ serviceId, quantity, serviceTitle, userId, price }) => {
           id_User: userId,
           paymentMethod: "Pagos desde Argentina",
           items: cartItems,
-          paymentStatus: "Paid", // Cambiado de Pendiente a Paid
-          DNI: attendees[0].dni, // Agregamos el DNI del primer asistente
+          paymentStatus: "Pendiente",
+          DNI: parseInt(attendees[0].dni),
         },
         {
           headers: { "Content-Type": "application/json" },
@@ -47,44 +47,43 @@ const BookingForm = ({ serviceId, quantity, serviceTitle, userId, price }) => {
 
       console.log("Orden de servicio creada:", serviceOrderResponse.data);
 
-      // 2. Luego crear las reservas
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/booking`,
+      // 2. Crear preferencia de pago
+      const paymentPreference = await axios.post(
+        `${import.meta.env.VITE_API_URL}/payment/create-preference`,
         {
+          id_ServiceOrder: serviceOrderResponse.data.id_ServiceOrder,
           id_User: userId,
-          paymentStatus: "Paid",
-          id_ServiceOrder: serviceOrderResponse.data.id_ServiceOrder, // Agregamos el ID de la orden
-          paymentInformation: attendees.map((attendee, i) => ({
-            id_Service: serviceId,
-            serviceTitle: serviceTitle,
-            DNI: parseInt(attendee.dni),
-            passengerName: attendee.name,
-            seatNumber: i + 1,
-            bookingDate: new Date(
-              `${attendee.bookingDate}T${attendee.bookingTime}:00`
-            ),
-            active: true,
+          DNI: attendees[0].dni,
+          email: "email@del.usuario",
+          paymentInformation: cartItems.map((item) => ({
+            title: item.title,
+            description: `Reserva para ${item.title}`,
+            unit_price: parseFloat(item.price),
             totalPeople: quantity,
-            totalPrice: price || 0,
-            dateTime: `${attendee.bookingDate}T${attendee.bookingTime}:00`,
+            id_Service: item.id_Service,
           })),
         },
         {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
-          timeout: 10000,
         }
       );
 
-      console.log("Reservas creadas:", response.data);
-      alert("¡Reservas creadas con éxito!");
-      clearCart();
+      console.log("Preferencia de pago creada:", paymentPreference.data);
+
+      // 3. Redirigir a MercadoPago
+      if (paymentPreference.data.preferenceId) {
+        window.location.href = `https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=${paymentPreference.data.preferenceId}`;
+      } else {
+        throw new Error("No se pudo obtener el ID de preferencia de pago");
+      }
     } catch (error) {
       console.error("Error detallado:", {
         mensaje: error.message,
         respuesta: error.response?.data,
         estado: error.response?.status,
         config: error.config,
+        datos_enviados: error.config?.data,
       });
 
       setError(
@@ -95,7 +94,7 @@ const BookingForm = ({ serviceId, quantity, serviceTitle, userId, price }) => {
       );
 
       alert(
-        "Error al crear las reservas: " +
+        "Error al crear la orden: " +
           (error.response?.data?.error || error.message)
       );
     } finally {
