@@ -24,17 +24,30 @@ const BookingForm = ({ serviceId, quantity, serviceTitle, userId }) => {
     e.preventDefault();
 
     try {
+      // Primero hacemos una llamada de prueba para verificar la conexión
+      const healthCheck = await axios.get(`${import.meta.env.VITE_API_URL}`, {
+        withCredentials: true,
+      });
+      console.log("Health check response:", healthCheck.data);
+
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/booking`,
         {
-          userId,
+          id_User: userId,
           paymentStatus: "Paid",
           paymentInformation: attendees.map((attendee, i) => ({
-            ServiceId: serviceId,
-            serviceTitle,
+            id_Service: serviceId,
+            serviceTitle: serviceTitle,
+            DNI: parseInt(attendee.dni),
+            passengerName: attendee.name,
             seatNumber: i + 1,
-            DNI_Personal: attendee.dni,
-            bookingDateTime: `${attendee.bookingDate}T${attendee.bookingTime}:00`,
+            bookingDate: new Date(
+              `${attendee.bookingDate}T${attendee.bookingTime}:00`
+            ),
+            active: true,
+            totalPeople: quantity,
+            totalPrice: 0,
+            dateTime: `${attendee.bookingDate}T${attendee.bookingTime}:00`,
           })),
         },
         {
@@ -42,6 +55,7 @@ const BookingForm = ({ serviceId, quantity, serviceTitle, userId }) => {
             "Content-Type": "application/json",
           },
           withCredentials: true,
+          timeout: 10000, // 10 segundos de timeout
         }
       );
 
@@ -54,6 +68,8 @@ const BookingForm = ({ serviceId, quantity, serviceTitle, userId }) => {
         respuesta: error.response?.data,
         estado: error.response?.status,
         config: error.config,
+        url: error.config?.url,
+        headers: error.config?.headers,
       });
 
       let mensajeError = "Error al crear las reservas";
