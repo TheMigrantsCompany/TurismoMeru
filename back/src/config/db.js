@@ -5,6 +5,12 @@ const fs = require("fs");
 const path = require("path");
 const { DB_USER, DB_PASSWORD, DB_HOST } = process.env;
 
+console.log("Configuración DB:", {
+  user: DB_USER,
+  host: DB_HOST,
+  database: "turismomeru",
+});
+
 // Comprueba si process está definido antes de intentar acceder a él
 if (typeof process !== "undefined") {
   console.log("Configuración DB:", {
