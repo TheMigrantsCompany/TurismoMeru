@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+ import React, { useState } from 'react';
 import axios from 'axios';
 import { Card, Typography, Button, Input } from "@material-tailwind/react";
 import { useCart } from "../shopping-cart/CartContext"; // Importa el hook
@@ -6,20 +6,14 @@ import { useCart } from "../shopping-cart/CartContext"; // Importa el hook
 const BookingForm = ({ serviceId, quantity, serviceTitle, userId, serviceOrderId, servicePrice }) => {
   const { clearCart } = useCart(); // Extrae clearCart del contexto
 
-  const [attendees, setAttendees] = useState([]);
-
-  useEffect(() => {
-    if (quantity > 0) {
-      setAttendees(
-        Array.from({ length: quantity }, () => ({
-          name: '',
-          dni: '',
-          bookingDate: new Date().toISOString().split('T')[0],
-          bookingTime: '12:00',
-        }))
-      );
-    }
-  }, [quantity]);
+const [attendees, setAttendees] = useState(
+  Array.from({ length: quantity > 0 ? quantity : 1 }, () => ({ 
+    name: '', 
+    dni: '',
+    bookingDate: new Date().toISOString().split('T')[0],
+    bookingTime: '12:00'
+  }))
+);
 
   const handleChange = (index, field, value) => {
     const updatedAttendees = [...attendees];
@@ -36,10 +30,10 @@ const BookingForm = ({ serviceId, quantity, serviceTitle, userId, serviceOrderId
     }
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, {
+      const response = await axios.post(${import.meta.env.VITE_API_URL}/booking, {
         id_User: userId,
         paymentStatus: 'Paid',
-        id_ServiceOrder: serviceOrderId, 
+        id_ServiceOrder: serviceOrderId, // 🔹 Asegúrate de obtener este ID después del pago
         paymentInformation: attendees.map((attendee) => ({
           id_Service: serviceId, 
           serviceTitle,
@@ -76,7 +70,7 @@ const BookingForm = ({ serviceId, quantity, serviceTitle, userId, serviceOrderId
   };
 
   const formatTime = (time) => {
-    return new Date(`2000-01-01T${time}`).toLocaleTimeString('es-ES', {
+    return new Date(2000-01-01T${time}).toLocaleTimeString('es-ES', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true
