@@ -18,9 +18,9 @@ server.use(bodyParser.json({ limit: "50mb" }));
 server.use(cookieParser());
 server.use(morgan("dev"));
 
+
 // Middleware CORS con configuración personalizada
 server.use(
-  "*",
   cors({
     origin: [
       "http://localhost:5173", // desarrollo
@@ -29,8 +29,12 @@ server.use(
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// Habilitar preflight request para todas las rutas
+server.options("*", cors());
 
 // Agregar una ruta de health check
 server.get("/", (req, res) => {
