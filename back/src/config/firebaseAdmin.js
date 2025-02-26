@@ -16,7 +16,10 @@ const config = {
   }),
 };
 
-admin.initializeApp(config);
+// Comprueba si process está definido antes de intentar acceder a él
+if (typeof process !== 'undefined') {
+  admin.initializeApp(config);
+}
 
 const auth = admin.auth();
 
