@@ -28,7 +28,19 @@ const BookingForm = ({ serviceId, quantity, serviceTitle, userId, price }) => {
     setError(null);
 
     try {
+      console.log("Iniciando proceso de reserva...");
+      console.log("Datos del carrito:", cartItems);
+
       // 1. Primero crear la orden de servicio
+      console.log("Creando orden de servicio con datos:", {
+        orderDate: new Date().toISOString(),
+        id_User: userId,
+        paymentMethod: "Pagos desde Argentina",
+        items: cartItems,
+        paymentStatus: "Pendiente",
+        DNI: parseInt(attendees[0].dni),
+      });
+
       const serviceOrderResponse = await axios.post(
         `${import.meta.env.VITE_API_URL}/servicesOrder`,
         {
@@ -48,33 +60,52 @@ const BookingForm = ({ serviceId, quantity, serviceTitle, userId, price }) => {
       console.log("Orden de servicio creada:", serviceOrderResponse.data);
 
       // 2. Crear preferencia de pago
+      const paymentData = {
+        id_ServiceOrder: serviceOrderResponse.data.id_ServiceOrder,
+        id_User: userId,
+        DNI: attendees[0].dni,
+        email: "email@del.usuario",
+        paymentInformation: [
+          {
+            title: serviceTitle,
+            description: `Reserva para ${serviceTitle}`,
+            unit_price: parseFloat(cartItems[0].price),
+            totalPeople: quantity,
+            id_Service: serviceId,
+            currency_id: "ARS",
+            quantity: quantity,
+          },
+        ],
+      };
+
+      console.log(
+        "URL de la petición:",
+        `${import.meta.env.VITE_API_URL}/payment/create-preference`
+      );
+      console.log("Datos para crear preferencia de pago:", paymentData);
+
       const paymentPreference = await axios.post(
         `${import.meta.env.VITE_API_URL}/payment/create-preference`,
-        {
-          id_ServiceOrder: serviceOrderResponse.data.id_ServiceOrder,
-          id_User: userId,
-          DNI: attendees[0].dni,
-          email: "email@del.usuario",
-          paymentInformation: cartItems.map((item) => ({
-            title: item.title,
-            description: `Reserva para ${item.title}`,
-            unit_price: parseFloat(item.price),
-            totalPeople: quantity,
-            id_Service: item.id_Service,
-          })),
-        },
+        paymentData,
         {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
         }
       );
 
-      console.log("Preferencia de pago creada:", paymentPreference.data);
+      console.log("Respuesta de preferencia de pago:", paymentPreference.data);
 
       // 3. Redirigir a MercadoPago
-      if (paymentPreference.data.preferenceId) {
-        window.location.href = `https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=${paymentPreference.data.preferenceId}`;
+      if (paymentPreference.data && paymentPreference.data.preferenceId) {
+        const mpUrl = `https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=${paymentPreference.data.preferenceId}`;
+        console.log("Redirigiendo a MercadoPago:", mpUrl);
+        window.location.href = mpUrl;
       } else {
+        console.error("Respuesta de preferencia inválida:", {
+          data: paymentPreference.data,
+          status: paymentPreference.status,
+          headers: paymentPreference.headers,
+        });
         throw new Error("No se pudo obtener el ID de preferencia de pago");
       }
     } catch (error) {
@@ -82,21 +113,26 @@ const BookingForm = ({ serviceId, quantity, serviceTitle, userId, price }) => {
         mensaje: error.message,
         respuesta: error.response?.data,
         estado: error.response?.status,
-        config: error.config,
-        datos_enviados: error.config?.data,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          data: JSON.parse(error.config?.data || "{}"),
+          headers: error.config?.headers,
+        },
       });
 
-      setError(
-        error.response?.data?.error ||
-          error.response?.data?.message ||
-          error.message ||
-          "Error al procesar la reserva"
-      );
+      let errorMessage = "Error al procesar la reserva";
 
-      alert(
-        "Error al crear la orden: " +
-          (error.response?.data?.error || error.message)
-      );
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setError(errorMessage);
+      alert(`Error al crear la orden: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
