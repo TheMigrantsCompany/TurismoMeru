@@ -9,8 +9,9 @@ const OrderForm = () => {
   const dispatch = useDispatch();
   const { cartItems } = useCart();
   const formRef = useRef(null);
-  const { id_User } = useContext(AuthContext);
-
+  const { id_User, user  } = useContext(AuthContext);
+  const token = user?.token;
+  
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -148,8 +149,11 @@ const OrderForm = () => {
        const apiUrl = import.meta.env.VITE_API_URL;
        const response = await fetch(`${apiUrl}/payment/create-preference`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`, 
+              },
+              body: JSON.stringify({
               paymentInformation: items,
               id_User,
               DNI: formData.dni,
