@@ -1,19 +1,21 @@
 import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { Input, Button } from "@material-tailwind/react";
 
-const BookingForm = ({ 
-  userId, 
-  serviceId, 
-  serviceTitle, 
-  servicePrice, 
-  serviceOrderId, 
-  bookingDate,  // Fecha de la reserva predefinida
-  bookingTime   // Hora de la reserva predefinida
-}) => {
-  const [attendees, setAttendees] = useState([
-    { dni: "", passengerName: "" },
-  ]);
+const BookingForm = ({ userId }) => {
+  // Obtener datos de la URL
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+
+  const serviceId = queryParams.get("id_Service");
+  const serviceTitle = queryParams.get("title");
+  const servicePrice = queryParams.get("price");
+  const serviceOrderId = queryParams.get("id_ServiceOrder");
+  const bookingDate = queryParams.get("date");
+  const bookingTime = queryParams.get("time");
+
+  const [attendees, setAttendees] = useState([{ dni: "", passengerName: "" }]);
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (index, field, value) => {
@@ -61,8 +63,8 @@ const BookingForm = ({
           seatNumber: i + 1,
           DNI_Personal: attendee.dni,
           passengerName: attendee.passengerName || "Desconocido",
-          date: bookingDate,  // Se usa la fecha predefinida
-          time: bookingTime,  // Se usa la hora predefinida
+          date: bookingDate,
+          time: bookingTime,
         })),
       };
 
@@ -76,6 +78,11 @@ const BookingForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <h2 className="text-xl font-semibold">Reserva para {serviceTitle}</h2>
+      <p>Precio: ${servicePrice}</p>
+      <p>Fecha: {bookingDate}</p>
+      <p>Hora: {bookingTime}</p>
+
       {attendees.map((attendee, index) => (
         <div key={index} className="flex flex-col gap-2 border p-4 rounded-lg">
           <Input
@@ -92,18 +99,6 @@ const BookingForm = ({
             onChange={(e) => handleChange(index, "dni", e.target.value)}
             required
           />
-          <Input
-            type="date"
-            label="Fecha de Reserva"
-            value={bookingDate}
-            readOnly
-          />
-          <Input
-            type="time"
-            label="Hora de Reserva"
-            value={bookingTime}
-            readOnly
-          />
           {index > 0 && (
             <Button type="button" color="red" onClick={() => removeAttendee(index)}>
               Eliminar
@@ -111,7 +106,7 @@ const BookingForm = ({
           )}
         </div>
       ))}
-      
+
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
 
       <Button type="button" color="blue" onClick={addAttendee}>
