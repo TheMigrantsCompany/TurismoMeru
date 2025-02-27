@@ -56,6 +56,7 @@ const BookingForm = ({ userId }) => {
       const payload = {
         id_User: userId,
         id_ServiceOrder: serviceOrderId,
+        DNI: attendees[0]?.dni,
         paymentStatus: "Paid",
         paymentInformation: attendees.map((attendee, i) => ({
           id_Service: serviceId,
