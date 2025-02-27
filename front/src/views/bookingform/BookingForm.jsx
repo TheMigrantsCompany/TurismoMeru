@@ -2,10 +2,19 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Input, Button } from "@material-tailwind/react";
 
-const BookingForm = ({ userId, serviceId, serviceTitle, servicePrice, serviceOrderId }) => {
+const BookingForm = ({ 
+  userId, 
+  serviceId, 
+  serviceTitle, 
+  servicePrice, 
+  serviceOrderId, 
+  bookingDate,  // Fecha de la reserva predefinida
+  bookingTime   // Hora de la reserva predefinida
+}) => {
   const [attendees, setAttendees] = useState([
-    { dni: "", bookingDate: "", bookingTime: "", passengerName: "" },
+    { dni: "", passengerName: "" },
   ]);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (index, field, value) => {
     const updatedAttendees = [...attendees];
@@ -14,10 +23,7 @@ const BookingForm = ({ userId, serviceId, serviceTitle, servicePrice, serviceOrd
   };
 
   const addAttendee = () => {
-    setAttendees([
-      ...attendees,
-      { dni: "", bookingDate: "", bookingTime: "", passengerName: "" },
-    ]);
+    setAttendees([...attendees, { dni: "", passengerName: "" }]);
   };
 
   const removeAttendee = (index) => {
@@ -28,31 +34,42 @@ const BookingForm = ({ userId, serviceId, serviceTitle, servicePrice, serviceOrd
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // Validación básica
+    for (const attendee of attendees) {
+      if (!attendee.passengerName.trim() || !attendee.dni.trim()) {
+        setErrorMessage("Todos los campos son obligatorios.");
+        return;
+      }
+      if (!/^\d+$/.test(attendee.dni)) {
+        setErrorMessage("El DNI debe contener solo números.");
+        return;
+      }
+    }
+
     try {
+      setErrorMessage(""); // Reset error
       const quantity = attendees.length;
-      const totalPrice = servicePrice * quantity;
 
       const payload = {
         id_User: userId,
         id_ServiceOrder: serviceOrderId,
         paymentStatus: "Paid",
-        DNI: attendees[0]?.dni, // Usamos el DNI del primer asistente como referencia
         paymentInformation: attendees.map((attendee, i) => ({
           id_Service: serviceId,
           serviceTitle,
-          seatNumber: i + 1, // Asigna números de asiento secuenciales
+          seatNumber: i + 1,
           DNI_Personal: attendee.dni,
           passengerName: attendee.passengerName || "Desconocido",
-          date: attendee.bookingDate,
-          time: attendee.bookingTime,
-          totalPeople: quantity,
-          totalPrice,
+          date: bookingDate,  // Se usa la fecha predefinida
+          time: bookingTime,  // Se usa la hora predefinida
         })),
       };
 
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, payload);
       console.log("Reserva creada:", response.data);
     } catch (error) {
+      setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
       console.error("Error al crear la reserva:", error.response?.data || error.message);
     }
   };
@@ -78,25 +95,26 @@ const BookingForm = ({ userId, serviceId, serviceTitle, servicePrice, serviceOrd
           <Input
             type="date"
             label="Fecha de Reserva"
-            value={attendee.bookingDate}
-            onChange={(e) => handleChange(index, "bookingDate", e.target.value)}
-            required
+            value={bookingDate}
+            readOnly
           />
           <Input
             type="time"
             label="Hora de Reserva"
-            value={attendee.bookingTime}
-            onChange={(e) => handleChange(index, "bookingTime", e.target.value)}
-            required
+            value={bookingTime}
+            readOnly
           />
           {index > 0 && (
-            <Button color="red" onClick={() => removeAttendee(index)}>
+            <Button type="button" color="red" onClick={() => removeAttendee(index)}>
               Eliminar
             </Button>
           )}
         </div>
       ))}
-      <Button color="blue" onClick={addAttendee}>
+      
+      {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+
+      <Button type="button" color="blue" onClick={addAttendee}>
         Añadir Pasajero
       </Button>
       <Button type="submit" color="green">
