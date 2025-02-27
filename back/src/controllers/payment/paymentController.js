@@ -76,7 +76,7 @@ exports.createPaymentPreference = async (req, res) => {
         },
       },
       back_urls: {
-      success: `https://www.meruviajes.tur.ar/bookingform?id_ServiceOrder=${orderId}&id_Service=${serviceId}&title=${encodeURIComponent(serviceTitle)}&price=${servicePrice}&date=${selectedDate}&time=${selectedTime}`,
+      success: `https://www.meruviajes.tur.ar/bookingform?id_ServiceOrder=${req.body.id_ServiceOrder}&id_Service=${paymentInformation[0].id_Service}&title=${encodeURIComponent(paymentInformation[0].title)}&price=${paymentInformation[0].unit_price}&date=${paymentInformation[0].date || ''}&time=${paymentInformation[0].time || ''}`,
       failure: "https://www.meruviajes.tur.ar/payment-failure",
        pending: "https://www.meruviajes.tur.ar/payment-pending",
        },
