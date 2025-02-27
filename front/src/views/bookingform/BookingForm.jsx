@@ -69,6 +69,7 @@ const BookingForm = ({ userId }) => {
         })),
       };
 
+     
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, payload);
       console.log("Reserva creada:", response.data);
     } catch (error) {
