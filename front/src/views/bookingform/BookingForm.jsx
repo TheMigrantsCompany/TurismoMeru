@@ -14,7 +14,7 @@ const BookingForm = ({ userId }) => {
   const serviceOrderId = queryParams.get("id_ServiceOrder");
   const bookingDate = queryParams.get("date");
   const bookingTime = queryParams.get("time");
-
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [attendees, setAttendees] = useState([{ dni: "", passengerName: "" }]);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -53,23 +53,25 @@ const BookingForm = ({ userId }) => {
       setErrorMessage(""); // Reset error
       const quantity = attendees.length;
 
-      const payload = {
-        id_User: userId,
-        id_ServiceOrder: serviceOrderId,
-        DNI: attendees[0]?.dni,
-        paymentStatus: "Paid",
-        paymentInformation: attendees.map((attendee, i) => ({
-          id_Service: serviceId,
-          serviceTitle,
-          seatNumber: i + 1,
-          DNI_Personal: attendee.dni,
-          passengerName: attendee.passengerName || "Desconocido",
-          date: bookingDate,
-          time: bookingTime,
+     const payload = {
+      id_User: userId,
+      id_ServiceOrder: serviceOrderId,
+      DNI: attendees[0]?.dni,
+      paymentStatus: "Paid",
+      paymentInformation: attendees.map((attendee, i) => ({
+      id_Service: serviceId,
+      serviceTitle,
+      seatNumber: i + 1,
+      DNI_Personal: attendee.dni,
+      passengerName: attendee.passengerName || "Desconocido",
+      date: bookingDate,
+      time: bookingTime,
+      lockedStock: selectedQuantity,
+      totalPeople: selectedQuantity,
+       totalPrice: parseFloat(servicePrice) * selectedQuantity,
         })),
-      };
-
-     
+     };
+      
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, payload);
       console.log("Reserva creada:", response.data);
     } catch (error) {
