@@ -9,16 +9,32 @@ import {
 
 const ServiceOrdersTable = ({ orders, onEdit }) => {
   const [filteredOrders, setFilteredOrders] = useState(orders);
+  const [currentFilter, setCurrentFilter] = useState("all");
 
   useEffect(() => {
-    setFilteredOrders(orders);
+    console.log("Órdenes actualizadas:", orders);
+    filterOrdersByStatus(currentFilter);
   }, [orders]);
 
   const filterOrdersByStatus = (status) => {
+    setCurrentFilter(status);
+    console.log("Filtrando por estado:", status);
+    console.log("Órdenes disponibles:", orders);
+
     if (status === "all") {
       setFilteredOrders(orders);
     } else {
-      setFilteredOrders(orders.filter((order) => order.status === status));
+      const filtered = orders.filter((order) => {
+        console.log(`Orden ${order.id}:`, {
+          orderStatus: order.status,
+          filterStatus: status,
+          matches: order.status === status
+        });
+        return order.status === status;
+      });
+      
+      console.log("Órdenes filtradas:", filtered);
+      setFilteredOrders(filtered);
     }
   };
 
@@ -35,19 +51,25 @@ const ServiceOrdersTable = ({ orders, onEdit }) => {
       <div className="flex justify-start gap-4 p-4">
         <Button
           onClick={() => filterOrdersByStatus("all")}
-          className="bg-[#4256a6] text-white px-6 py-2 rounded-lg hover:bg-[#334477] transition-colors font-poppins"
+          className={`${
+            currentFilter === "all" ? "bg-[#4256a6]" : "bg-[#4256a6]/70"
+          } text-white px-6 py-2 rounded-lg hover:bg-[#334477] transition-colors font-poppins`}
         >
           Todas
         </Button>
         <Button
           onClick={() => filterOrdersByStatus("pending")}
-          className="bg-[#f4925b] text-white px-6 py-2 rounded-lg hover:bg-[#d98248] transition-colors font-poppins"
+          className={`${
+            currentFilter === "pending" ? "bg-[#f4925b]" : "bg-[#f4925b]/70"
+          } text-white px-6 py-2 rounded-lg hover:bg-[#d98248] transition-colors font-poppins`}
         >
           Pendientes
         </Button>
         <Button
           onClick={() => filterOrdersByStatus("completed")}
-          className="bg-[#425a66] text-white px-6 py-2 rounded-lg hover:bg-[#2f4047] transition-colors font-poppins"
+          className={`${
+            currentFilter === "completed" ? "bg-[#425a66]" : "bg-[#425a66]/70"
+          } text-white px-6 py-2 rounded-lg hover:bg-[#2f4047] transition-colors font-poppins`}
         >
           Completadas
         </Button>

@@ -46,8 +46,9 @@ import {
   GET_ALL_BOOKINGS,
   GET_ALL_BOOKINGS_REQUEST,
   GET_ALL_BOOKINGS_ERROR,
-
-
+  UPDATE_ORDER_STATUS_REQUEST,
+  UPDATE_ORDER_STATUS_SUCCESS,
+  UPDATE_ORDER_STATUS_FAILURE,
 } from "../actions/types";
 
 const initialState = {
@@ -74,6 +75,10 @@ const initialState = {
     order: null,
     error: null,
     ordersList: [],
+    updateStatus: {
+      loading: false,
+      error: null,
+    },
   },
   bookings: {
     loading: false,
@@ -150,7 +155,6 @@ const rootReducer = (state = initialState, action) => {
           error: action.payload,
         },
       };
-    
 
     //USERS
     case GET_USERS_REQUEST:
@@ -429,43 +433,6 @@ const rootReducer = (state = initialState, action) => {
         users: { ...state.users, loading: false, error: action.payload },
       };
 
-    case UPDATE_USER_REQUEST:
-      console.log(
-        "Reducer - UPDATE_USER_REQUEST: Solicitando actualización de usuario"
-      );
-      return {
-        ...state,
-        users: { ...state.users, loading: true, error: null },
-      };
-
-    case UPDATE_USER_SUCCESS:
-      console.log(
-        "Reducer - UPDATE_USER_SUCCESS: Usuario actualizado con éxito",
-        action.payload
-      );
-      return {
-        ...state,
-        users: {
-          ...state.users,
-          loading: false,
-          userList: state.users.userList.map((user) =>
-            user.id_User === action.payload.id_User ? action.payload : user
-          ),
-          userDetails: action.payload, // Actualizamos también los detalles del usuario si aplica
-          error: null,
-        },
-      };
-
-    case UPDATE_USER_FAILURE:
-      console.error(
-        "Reducer - UPDATE_USER_FAILURE: Error al actualizar usuario",
-        action.payload
-      );
-      return {
-        ...state,
-        users: { ...state.users, loading: false, error: action.payload },
-      };
-
     //ORDENES DE SERVICIO
     //crear ordenes de servicio
     case CREATE_ORDER_REQUEST:
@@ -482,7 +449,7 @@ const rootReducer = (state = initialState, action) => {
         ...state,
         orders: {
           ...state.orders, // Mantén el resto del estado de `orders`
-          loading: true,   // Cambia solo `loading`
+          loading: true, // Cambia solo `loading`
         },
       };
 
@@ -490,10 +457,10 @@ const rootReducer = (state = initialState, action) => {
       return {
         ...state,
         orders: {
-          ...state.orders,      // Mantén el resto del estado de `orders`
-          loading: false,       // Cambia `loading` a false
+          ...state.orders, // Mantén el resto del estado de `orders`
+          loading: false, // Cambia `loading` a false
           ordersList: action.payload, // Actualiza la lista de órdenes
-          error: null,          // Resetea errores
+          error: null, // Resetea errores
         },
       };
 
@@ -507,13 +474,13 @@ const rootReducer = (state = initialState, action) => {
         },
       };
 
-      case GET_ORDERS_BY_USER_REQUEST:
-        return {
-          ...state,
-          loading: true, // Activamos el estado de carga
-        };
-      
-      case GET_ORDERS_BY_USER_SUCCESS:
+    case GET_ORDERS_BY_USER_REQUEST:
+      return {
+        ...state,
+        loading: true, // Activamos el estado de carga
+      };
+
+    case GET_ORDERS_BY_USER_SUCCESS:
       console.log("Órdenes obtenidas:", action.payload);
       return {
         ...state,
@@ -521,25 +488,59 @@ const rootReducer = (state = initialState, action) => {
         ordersList: Array.isArray(action.payload) ? action.payload : [],
         error: null,
       };
-      
-      case GET_ORDERS_BY_USER_FAILURE:
-        return {
-          ...state,
-          loading: false, // Desactivamos `loading`
-          error: action.payload, // Guardamos el error
-        };
-   
-    
-      case GET_ALL_BOOKINGS:
-        return {
-          ...state,
-          bookings: {
-            ...state.bookings,
-            loading: false,
-            bookingsList: action.payload, // Aquí debes asegurar que se asignen los bookings a bookingsList
-          },
-        };
 
+    case GET_ORDERS_BY_USER_FAILURE:
+      return {
+        ...state,
+        loading: false, // Desactivamos `loading`
+        error: action.payload, // Guardamos el error
+      };
+
+    case GET_ALL_BOOKINGS:
+      return {
+        ...state,
+        bookings: {
+          ...state.bookings,
+          loading: false,
+          bookingsList: action.payload, // Aquí debes asegurar que se asignen los bookings a bookingsList
+        },
+      };
+
+    case UPDATE_ORDER_STATUS_REQUEST:
+      return {
+        ...state,
+        orders: {
+          ...state.orders,
+          updateStatus: {
+            loading: true,
+            error: null,
+          },
+        },
+      };
+
+    case UPDATE_ORDER_STATUS_SUCCESS:
+      return {
+        ...state,
+        orders: {
+          ...state.orders,
+          updateStatus: {
+            loading: false,
+            error: null,
+          },
+        },
+      };
+
+    case UPDATE_ORDER_STATUS_FAILURE:
+      return {
+        ...state,
+        orders: {
+          ...state.orders,
+          updateStatus: {
+            loading: false,
+            error: action.payload,
+          },
+        },
+      };
 
     default:
       return state;

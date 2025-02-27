@@ -16,12 +16,23 @@ export function ServiceOrderManagement() {
         0
       );
 
+      // Normalizar el estado de pago
+      let status = order.paymentStatus.toLowerCase();
+      // Asegurarnos de que solo usemos 'pending' o 'completed'
+      status = status === "pagado" ? "completed" : "pending";
+
+      console.log("Transformando orden:", {
+        id: order.id_ServiceOrder,
+        paymentStatus: order.paymentStatus,
+        transformedStatus: status
+      });
+
       return {
         id: order.id_ServiceOrder,
         excursionName: order.paymentInformation[0]?.title || "Sin título",
         date: new Date(order.orderDate).toLocaleDateString(),
         passengers: totalPassengers,
-        status: order.paymentStatus.toLowerCase(),
+        status: status,
       };
     });
   };
