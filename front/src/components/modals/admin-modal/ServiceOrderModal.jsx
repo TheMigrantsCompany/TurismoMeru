@@ -12,13 +12,21 @@ const ServiceOrderModal = ({ order, onClose }) => {
 
   const handleStatusChange = async (newStatus) => {
     try {
-      console.log("Intentando actualizar orden:", order.id, "a estado:", newStatus);
+      console.log(
+        "Intentando actualizar orden:",
+        order.id,
+        "a estado:",
+        newStatus
+      );
       await dispatch(updateOrderStatus(order.id, newStatus));
       console.log("Orden actualizada exitosamente");
       await dispatch(getAllOrders());
       onClose();
     } catch (error) {
-      console.error("Error detallado al actualizar el estado:", error.response?.data || error.message);
+      console.error(
+        "Error detallado al actualizar el estado:",
+        error.response?.data || error.message
+      );
     }
   };
 
