@@ -3,27 +3,36 @@ const { Sequelize } = require("sequelize");
 
 const fs = require("fs");
 const path = require("path");
-const { DB_USER, DB_PASSWORD, DB_HOST } = process.env;
+const { DB_USER, DB_PASSWORD, DB_HOST, NODE_ENV } = process.env;
 
 console.log("Configuración DB:", {
   user: DB_USER,
   host: DB_HOST,
   database: "turismomeru",
+  environment: NODE_ENV,
 });
 
-const sequelize = new Sequelize(
-  `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/turismomeru`,
-  {
-    logging: false,
-    native: false,
-    dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false,
-      },
+// Configuración de dialectOptions según el entorno
+const dialectOptions =
+  NODE_ENV === "production"
+    ? {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false,
+        },
+      }
+    : {};
+
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  logging: false,
+  native: false,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
     },
-  }
-);
+  },
+});
 
 const basename = path.basename(__filename);
 
