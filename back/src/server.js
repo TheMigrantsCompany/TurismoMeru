@@ -17,7 +17,7 @@ server.use(bodyParser.json({ limit: "50mb" }));
 server.use(cookieParser());
 server.use(morgan("dev"));
 
-// Configuración CORS
+// Configuración CORS mejorada
 const allowedOrigins = [
   "http://localhost:5173",
   "https://www.meruviajes.tur.ar",
@@ -36,12 +36,12 @@ server.use((req, res, next) => {
   );
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, Origin"
+    "Content-Type, Authorization, Origin, X-Requested-With, Accept"
   );
 
-  // Manejar solicitudes preflight automáticamente
+  // Responder de inmediato a las solicitudes preflight (OPTIONS)
   if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
+    return res.sendStatus(204); // 204 No Content para solicitudes preflight
   }
 
   next();
