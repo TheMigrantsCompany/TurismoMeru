@@ -44,50 +44,54 @@ const BookingForm = ({ userId }) => {
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
+  event.preventDefault();
 
-    // Validación básica
-    for (const attendee of attendees) {
-      if (!attendee.passengerName.trim() || !attendee.dni.trim()) {
-        setErrorMessage("Todos los campos son obligatorios.");
-        return;
-      }
-      if (!/^\d+$/.test(attendee.dni)) {
-        setErrorMessage("El DNI debe contener solo números.");
-        return;
-      }
+  // Validación básica
+  for (const attendee of attendees) {
+    if (!attendee.passengerName.trim() || !attendee.dni.trim()) {
+      setErrorMessage("Todos los campos son obligatorios.");
+      return;
     }
+    if (!/^\d+$/.test(attendee.dni)) {
+      setErrorMessage("El DNI debe contener solo números.");
+      return;
+    }
+  }
 
-    try {
-      setErrorMessage(""); // Reset error
-      const quantity = attendees.length;
+  // Log para verificar el DNI
+  console.log("Valor de DNI del primer asistente:", attendees[0].dni);
 
-     const payload = {
+  try {
+    setErrorMessage(""); // Reset error
+    const quantity = attendees.length;
+
+    const payload = {
       id_User: userId,
       id_ServiceOrder: serviceOrderId,
       DNI: attendees[0]?.dni,
       paymentStatus: "Paid",
       paymentInformation: attendees.map((attendee, i) => ({
-      id_Service: serviceId,
-      serviceTitle,
-      seatNumber: i + 1,
-      DNI_Personal: attendee.dni,
-      passengerName: attendee.passengerName || "Desconocido",
-      date: bookingDate,
-      time: bookingTime,
-      lockedStock: selectedQuantity,
-      totalPeople: selectedQuantity,
-       totalPrice: parseFloat(servicePrice) * selectedQuantity,
-        })),
-     };
-      console.log("Payload a enviar:", payload);
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, payload);
-      console.log("Reserva creada:", response.data);
-    } catch (error) {
-      setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
-      console.error("Error al crear la reserva:", error.response?.data || error.message);
-    }
-  };
+        id_Service: serviceId,
+        serviceTitle,
+        seatNumber: i + 1,
+        DNI_Personal: attendee.dni,
+        passengerName: attendee.passengerName || "Desconocido",
+        date: bookingDate,
+        time: bookingTime,
+        lockedStock: selectedQuantity,
+        totalPeople: selectedQuantity,
+        totalPrice: parseFloat(servicePrice) * selectedQuantity,
+      })),
+    };
+
+    console.log("Payload a enviar:", payload);
+    const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, payload);
+    console.log("Reserva creada:", response.data);
+  } catch (error) {
+    setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
+    console.error("Error al crear la reserva:", error.response?.data || error.message);
+  }
+};
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
