@@ -4,6 +4,7 @@ import { Typography, Avatar, Rating } from "@material-tailwind/react";
 import BookingCard from "../../components/bookingcard/BookingCard";
 import { motion } from "framer-motion";
 import { AuthContext } from "../../firebase/AuthContext";
+import axios from "axios";
 
 const Review = ({ review, rating, userImage, userName, date }) => {
   return (
@@ -130,30 +131,50 @@ export function Detail() {
 
     const fetchReviews = async () => {
       try {
-        const [reviewsResponse, usersResponse] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/review/`),
-          fetch(`${import.meta.env.VITE_API_URL}/user/`),
-        ]);
+        // Obtener solo las reviews para esta excursión
+        const reviewsResponse = await axios.get(
+          "${import.meta.env.VITE_API_URL}/review/"
+        );
+        const reviewsData = reviewsResponse.data;
 
-        const [reviewsData, usersData] = await Promise.all([
-          reviewsResponse.json(),
-          usersResponse.json(),
-        ]);
+        // Filtrar reviews activas para esta excursión
+        const filteredReviews = reviewsData.filter(
+          (review) => review.active && review.id_Service === id_Service
+        );
 
-        const approvedReviews = reviewsData
-          .filter((review) => review.active && review.id_Service === id_Service)
-          .map((review) => {
-            const user = usersData.find((u) => u.id_User === review.id_User);
-            return {
-              ...review,
-              userName: user?.name || "Usuario Anónimo",
-              userImage: user?.image || "https://via.placeholder.com/50",
-            };
-          });
+        // Obtener los usuarios solo para las reviews filtradas
+        const reviewsWithUserDetails = await Promise.all(
+          filteredReviews.map(async (review) => {
+            try {
+              // Usar la ruta específica para obtener usuario por ID
+              const userResponse = await axios.get(
+                `${import.meta.env.VITE_API_URL}/user/id/${review.id_User}`
+              );
+              const userData = userResponse.data;
 
-        setReviews(approvedReviews);
-      } catch (err) {
-        setError(err.message);
+              return {
+                ...review,
+                userName: userData?.name || "Usuario Anónimo",
+                userImage: userData?.image || "https://via.placeholder.com/50",
+              };
+            } catch (error) {
+              console.error(
+                `Error al obtener usuario para review ${review.id_Review}:`,
+                error
+              );
+              return {
+                ...review,
+                userName: "Usuario Anónimo",
+                userImage: "https://via.placeholder.com/50",
+              };
+            }
+          })
+        );
+
+        setReviews(reviewsWithUserDetails);
+      } catch (error) {
+        console.error("Error al obtener reviews:", error);
+        setReviews([]);
       } finally {
         setLoading(false);
       }
