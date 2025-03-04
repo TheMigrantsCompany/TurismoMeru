@@ -56,7 +56,7 @@ const BookingForm = ({ userId }) => {
     }
 
     try {
-      setErrorMessage("");
+      setErrorMessage(""); // Limpiar mensajes de error previos
 
       // Preparar el payload usando el DNI global
       const payload = {
@@ -79,8 +79,15 @@ const BookingForm = ({ userId }) => {
       };
 
       console.log("Payload a enviar:", payload);
+
+      // Realizar la solicitud POST
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, payload);
       console.log("Reserva creada:", response.data);
+
+      // Limpiar campos después de la creación
+      setPassengerName("");
+      setGlobalDNI("");
+      setErrorMessage("");
     } catch (error) {
       setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
       console.error("Error al crear la reserva:", error.response?.data || error.message);
