@@ -26,12 +26,11 @@ const BookingForm = ({ userId }) => {
   });
 
   const [selectedQuantity, setSelectedQuantity] = useState(1);
-  // Estados para DNI y nombre del pasajero, en lugar de un array de asistentes
   const [globalDNI, setGlobalDNI] = useState("");
   const [passengerName, setPassengerName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Puedes agregar un useEffect para loggear cuando cambian los estados relevantes
+  // useEffect para loggear cuando cambian los estados relevantes
   useEffect(() => {
     console.log("Estado actualizado - passengerName:", passengerName);
   }, [passengerName]);
@@ -58,7 +57,7 @@ const BookingForm = ({ userId }) => {
 
     try {
       setErrorMessage("");
-      
+
       // Preparar el payload usando el DNI global
       const payload = {
         id_User: userId,
@@ -95,26 +94,39 @@ const BookingForm = ({ userId }) => {
       <p>Fecha: {bookingDate}</p>
       <p>Hora: {bookingTime}</p>
 
-      <Input
-        type="text"
-        label="Nombre del Pasajero"
-        value={passengerName}
-        onChange={(e) => {
-          setPassengerName(e.target.value);
-          console.log("onChange - passengerName:", e.target.value);
-        }}
-        required
-      />
-      <Input
-        type="text"
-        label="DNI"
-        value={globalDNI}
-        onChange={(e) => {
-          setGlobalDNI(e.target.value);
-          console.log("onChange - globalDNI:", e.target.value);
-        }}
-        required
-      />
+      <div>
+        <label htmlFor="passengerName" className="block text-sm font-medium text-gray-700">
+          Nombre del Pasajero
+        </label>
+        <Input
+          id="passengerName"
+          type="text"
+          name="passengerName"
+          value={passengerName}
+          onChange={(e) => {
+            setPassengerName(e.target.value);
+            console.log("onChange - passengerName:", e.target.value);
+          }}
+          required
+        />
+      </div>
+
+      <div>
+        <label htmlFor="globalDNI" className="block text-sm font-medium text-gray-700">
+          DNI
+        </label>
+        <Input
+          id="globalDNI"
+          type="text"
+          name="globalDNI"
+          value={globalDNI}
+          onChange={(e) => {
+            setGlobalDNI(e.target.value);
+            console.log("onChange - globalDNI:", e.target.value);
+          }}
+          required
+        />
+      </div>
 
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
 
