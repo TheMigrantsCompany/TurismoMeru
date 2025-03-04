@@ -17,6 +17,8 @@ const BookingForm = ({ userId }) => {
   const selectedDate = queryParams.get("date") || "Fecha no disponible";
   const selectedTime = queryParams.get("time") || "Hora no disponible";
 
+  console.log("Fecha seleccionada:", selectedDate);
+  console.log("Hora seleccionada:", selectedTime);
   // Console.log de los query params para confirmar que llegan correctamente
   console.log("Query Params:", {
     serviceId,
