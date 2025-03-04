@@ -119,6 +119,7 @@ const OrderForm = () => {
           totalPeople,
           unit_price: basePrice,
           currency_id: "ARS",
+        
         };
       });
 
@@ -147,6 +148,7 @@ const OrderForm = () => {
       // Crear preferencia de pago si se selecciona "Pagos desde Argentina"
       if (formData.paymentMethod === "Pagos desde Argentina") {
        const apiUrl = import.meta.env.VITE_API_URL;
+        
        const response = await fetch(`${apiUrl}/payment/create-preference`, {
             method: "POST",
             headers: {
