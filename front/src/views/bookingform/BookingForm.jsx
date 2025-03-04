@@ -14,8 +14,8 @@ const BookingForm = ({ userId }) => {
   const serviceOrderId = queryParams.get("id_ServiceOrder");
 
   // Asegúrate de que los query params tengan valores válidos
-  const bookingDate = queryParams.get("date") || "Fecha no disponible";
-  const bookingTime = queryParams.get("time") || "Hora no disponible";
+  const selectedDate = queryParams.get("date") || "Fecha no disponible";
+  const selectedTime = queryParams.get("time") || "Hora no disponible";
 
   // Console.log de los query params para confirmar que llegan correctamente
   console.log("Query Params:", {
@@ -23,8 +23,8 @@ const BookingForm = ({ userId }) => {
     serviceTitle,
     servicePrice,
     serviceOrderId,
-    bookingDate,
-    bookingTime,
+    selectedDate,
+    selectedTime,
   });
 
   const [selectedQuantity, setSelectedQuantity] = useState(1);
@@ -63,8 +63,8 @@ const BookingForm = ({ userId }) => {
           seatNumber: 1,
           DNI_Personal: parseInt(globalDNI, 10),
           passengerName: passengerName || "Desconocido",
-          date: bookingDate,  // Usar la fecha del query param
-          time: bookingTime,  // Usar la hora del query param
+          date: selectedDate,  // Usar selectedDate
+          time: selectedTime,  // Usar selectedTime
           lockedStock: selectedQuantity,
           totalPeople: selectedQuantity,
           totalPrice: parseFloat(servicePrice) * selectedQuantity,
@@ -92,8 +92,8 @@ const BookingForm = ({ userId }) => {
     <form onSubmit={handleSubmit} className="space-y-4">
       <h2 className="text-xl font-semibold">Reserva para {serviceTitle}</h2>
       <p>Precio: ${servicePrice}</p>
-      <p>Fecha: {bookingDate}</p>
-      <p>Hora: {bookingTime}</p>
+      <p>Fecha: {selectedDate}</p>
+      <p>Hora: {selectedTime}</p>
 
       <div>
         <label htmlFor="passengerName" className="block text-sm font-medium text-gray-700">
