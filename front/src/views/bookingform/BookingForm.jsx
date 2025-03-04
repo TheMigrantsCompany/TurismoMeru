@@ -14,84 +14,57 @@ const BookingForm = ({ userId }) => {
   const serviceOrderId = queryParams.get("id_ServiceOrder");
   const bookingDate = queryParams.get("date");
   const bookingTime = queryParams.get("time");
+
   const [selectedQuantity, setSelectedQuantity] = useState(1);
-  const [attendees, setAttendees] = useState([{ dni: "", passengerName: "" }]);
+  // Estados para DNI y nombre del pasajero, en lugar de un array de asistentes
+  const [globalDNI, setGlobalDNI] = useState("");
+  const [passengerName, setPassengerName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  console.log("Query params:", {
-  serviceOrderId,
-  serviceId,
-  serviceTitle,
-  servicePrice,
-  bookingDate,
-  bookingTime,
-});
-
-  const handleChange = (index, field, value) => {
-    const updatedAttendees = [...attendees];
-    updatedAttendees[index][field] = value;
-    setAttendees(updatedAttendees);
-  };
-
-  const addAttendee = () => {
-    setAttendees([...attendees, { dni: "", passengerName: "" }]);
-  };
-
-  const removeAttendee = (index) => {
-    if (attendees.length > 1) {
-      setAttendees(attendees.filter((_, i) => i !== index));
-    }
-  };
-
   const handleSubmit = async (event) => {
-  event.preventDefault();
+    event.preventDefault();
 
-  // Validación básica
-  for (const attendee of attendees) {
-    if (!attendee.passengerName.trim() || !attendee.dni.trim()) {
+    // Validación básica
+    if (!passengerName.trim() || !globalDNI.trim()) {
       setErrorMessage("Todos los campos son obligatorios.");
       return;
     }
-    if (!/^\d+$/.test(attendee.dni)) {
+    if (!/^\d+$/.test(globalDNI)) {
       setErrorMessage("El DNI debe contener solo números.");
       return;
     }
-  }
 
-  // Log para verificar el DNI
-  console.log("Valor de DNI del primer asistente:", attendees[0].dni);
+    try {
+      setErrorMessage("");
+      
+      // Preparar el payload usando el DNI global
+      const payload = {
+        id_User: userId,
+        id_ServiceOrder: serviceOrderId,
+        DNI: globalDNI, // DNI global
+        paymentStatus: "Paid",
+        paymentInformation: [{
+          id_Service: serviceId,
+          serviceTitle,
+          seatNumber: 1,
+          DNI_Personal: globalDNI, // mismo DNI para el pasajero principal
+          passengerName: passengerName || "Desconocido",
+          date: bookingDate,
+          time: bookingTime,
+          lockedStock: selectedQuantity,
+          totalPeople: selectedQuantity,
+          totalPrice: parseFloat(servicePrice) * selectedQuantity,
+        }],
+      };
 
-  try {
-    setErrorMessage(""); // Reset error
-    const quantity = attendees.length;
-
-    const payload = {
-      id_User: userId,
-      id_ServiceOrder: serviceOrderId,
-      DNI: attendees[0]?.dni,
-      paymentStatus: "Paid",
-      paymentInformation: attendees.map((attendee, i) => ({
-        id_Service: serviceId,
-        serviceTitle,
-        seatNumber: i + 1,
-        DNI_Personal: attendee.dni,
-        passengerName: attendee.passengerName || "Desconocido",
-        date: bookingDate,
-        time: bookingTime,
-        lockedStock: selectedQuantity,
-        totalPeople: selectedQuantity,
-        totalPrice: parseFloat(servicePrice) * selectedQuantity,
-      })),
-    };
-
-    console.log("Payload a enviar:", payload);
-    const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, payload);
-    console.log("Reserva creada:", response.data);
-  } catch (error) {
-    setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
-    console.error("Error al crear la reserva:", error.response?.data || error.message);
-  }
-};
+      console.log("Payload a enviar:", payload);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, payload);
+      console.log("Reserva creada:", response.data);
+    } catch (error) {
+      setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
+      console.error("Error al crear la reserva:", error.response?.data || error.message);
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -100,35 +73,23 @@ const BookingForm = ({ userId }) => {
       <p>Fecha: {bookingDate}</p>
       <p>Hora: {bookingTime}</p>
 
-      {attendees.map((attendee, index) => (
-        <div key={index} className="flex flex-col gap-2 border p-4 rounded-lg">
-          <Input
-            type="text"
-            label="Nombre del Pasajero"
-            value={attendee.passengerName}
-            onChange={(e) => handleChange(index, "passengerName", e.target.value)}
-            required
-          />
-          <Input
-            type="text"
-            label="DNI"
-            value={attendee.dni}
-            onChange={(e) => handleChange(index, "dni", e.target.value)}
-            required
-          />
-          {index > 0 && (
-            <Button type="button" color="red" onClick={() => removeAttendee(index)}>
-              Eliminar
-            </Button>
-          )}
-        </div>
-      ))}
+      <Input
+        type="text"
+        label="Nombre del Pasajero"
+        value={passengerName}
+        onChange={(e) => setPassengerName(e.target.value)}
+        required
+      />
+      <Input
+        type="text"
+        label="DNI"
+        value={globalDNI}
+        onChange={(e) => setGlobalDNI(e.target.value)}
+        required
+      />
 
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
 
-      <Button type="button" color="blue" onClick={addAttendee}>
-        Añadir Pasajero
-      </Button>
       <Button type="submit" color="green">
         Reservar
       </Button>
