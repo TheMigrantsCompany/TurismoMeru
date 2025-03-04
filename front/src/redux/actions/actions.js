@@ -42,6 +42,9 @@ import {
   GET_ALL_BOOKINGS,
   GET_ALL_BOOKINGS_REQUEST,
   GET_ALL_BOOKINGS_ERROR,
+  UPDATE_ORDER_STATUS_REQUEST,
+  UPDATE_ORDER_STATUS_SUCCESS,
+  UPDATE_ORDER_STATUS_FAILURE,
 } from "./types";
 
 export const createExcursion = (excursionData) => async (dispatch) => {
@@ -356,3 +359,34 @@ export const getOrdersByUser = (id_User) => async (dispatch) => {
     dispatch({ type: GET_ORDERS_BY_USER_FAILURE, payload: error.message });
   }
 };
+
+export const updateOrderStatus =
+  (id_ServiceOrder, newStatus) => async (dispatch) => {
+    dispatch({ type: UPDATE_ORDER_STATUS_REQUEST });
+    try {
+      const response = await axios.patch(
+        `${import.meta.env.VITE_API_URL}/servicesOrder/id/${id_ServiceOrder}`,
+        {
+          paymentStatus: newStatus === "completed" ? "Pagado" : "Pendiente",
+        }
+      );
+
+      dispatch({
+        type: UPDATE_ORDER_STATUS_SUCCESS,
+        payload: response.data,
+      });
+
+      // Recargar las órdenes
+      dispatch(getAllOrders());
+
+      return response.data;
+    } catch (error) {
+      dispatch({
+        type: UPDATE_ORDER_STATUS_FAILURE,
+        payload: error.message,
+      });
+      throw error;
+    }
+  };
+
+
