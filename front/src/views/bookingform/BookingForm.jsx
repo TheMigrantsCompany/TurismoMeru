@@ -4,7 +4,6 @@ import axios from "axios";
 import { Input, Button } from "@material-tailwind/react";
 
 const BookingForm = ({ userId }) => {
-  // Obtener datos de la URL
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
 
@@ -13,21 +12,9 @@ const BookingForm = ({ userId }) => {
   const servicePrice = queryParams.get("price");
   const serviceOrderId = queryParams.get("id_ServiceOrder");
 
-  // Asegúrate de que los query params tengan valores válidos
+  // Captura de la fecha y hora seleccionadas desde los query params
   const selectedDate = queryParams.get("date") || "Fecha no disponible";
   const selectedTime = queryParams.get("time") || "Hora no disponible";
-
-  console.log("Fecha seleccionada:", selectedDate);
-  console.log("Hora seleccionada:", selectedTime);
-  // Console.log de los query params para confirmar que llegan correctamente
-  console.log("Query Params:", {
-    serviceId,
-    serviceTitle,
-    servicePrice,
-    serviceOrderId,
-    selectedDate,
-    selectedTime,
-  });
 
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [globalDNI, setGlobalDNI] = useState("");
@@ -36,24 +23,20 @@ const BookingForm = ({ userId }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("Submit iniciado");
 
     // Validación básica
     if (!passengerName.trim() || !globalDNI.trim()) {
       setErrorMessage("Todos los campos son obligatorios.");
-      console.log("Error: Todos los campos son obligatorios.");
       return;
     }
     if (!/^\d+$/.test(globalDNI)) {
       setErrorMessage("El DNI debe contener solo números.");
-      console.log("Error: El DNI debe contener solo números.");
       return;
     }
 
     try {
       setErrorMessage(""); // Limpiar mensajes de error previos
 
-      // Preparar el payload usando el DNI global
       const payload = {
         id_User: userId,
         id_ServiceOrder: serviceOrderId,
@@ -65,22 +48,17 @@ const BookingForm = ({ userId }) => {
           seatNumber: 1,
           DNI_Personal: parseInt(globalDNI, 10),
           passengerName: passengerName || "Desconocido",
-          date: selectedDate,  // Usar selectedDate
-          time: selectedTime,  // Usar selectedTime
+          date: selectedDate,  // Usar la fecha seleccionada desde la URL
+          time: selectedTime,  // Usar la hora seleccionada desde la URL
           lockedStock: selectedQuantity,
           totalPeople: selectedQuantity,
           totalPrice: parseFloat(servicePrice) * selectedQuantity,
         }],
       };
 
-      // Loggear el payload antes de enviarlo al backend
-      console.log("Datos a enviar al backend:", JSON.stringify(payload, null, 2));
-
-      // Realizar la solicitud POST
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, payload);
       console.log("Reserva creada:", response.data);
 
-      // Limpiar campos después de la creación
       setPassengerName("");
       setGlobalDNI("");
       setErrorMessage("");
@@ -104,12 +82,8 @@ const BookingForm = ({ userId }) => {
         <Input
           id="passengerName"
           type="text"
-          name="passengerName"
           value={passengerName}
-          onChange={(e) => {
-            setPassengerName(e.target.value);
-            console.log("onChange - passengerName:", e.target.value);
-          }}
+          onChange={(e) => setPassengerName(e.target.value)}
           required
         />
       </div>
@@ -121,12 +95,8 @@ const BookingForm = ({ userId }) => {
         <Input
           id="globalDNI"
           type="text"
-          name="globalDNI"
           value={globalDNI}
-          onChange={(e) => {
-            setGlobalDNI(e.target.value);
-            console.log("onChange - globalDNI:", e.target.value);
-          }}
+          onChange={(e) => setGlobalDNI(e.target.value)}
           required
         />
       </div>
