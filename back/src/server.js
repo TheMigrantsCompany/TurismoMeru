@@ -3,7 +3,6 @@ const router = require("./routes/index");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
-const cors = require("cors");
 const mercadopago = require("mercadopago");
 
 const server = express();
@@ -18,23 +17,35 @@ server.use(bodyParser.json({ limit: "50mb" }));
 server.use(cookieParser());
 server.use(morgan("dev"));
 
-// Eliminar el middleware CORS global y dejar solo una configuración CORS
-server.use(
-  cors({
-    origin: [
-      "http://localhost:5173",
-      "https://www.meruviajes.tur.ar",
-      "https://meruviajes.tur.ar",
-    ],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Origin"],
-    exposedHeaders: ["Access-Control-Allow-Origin"],
-  })
-);
+// Configuración CORS
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://www.meruviajes.tur.ar",
+  "https://meruviajes.tur.ar",
+];
 
-// Habilitar preflight
-server.options("*", cors());
+server.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, Origin"
+  );
+
+  // Manejar solicitudes preflight automáticamente
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
 
 // Health check route
 server.get("/", (req, res) => {
