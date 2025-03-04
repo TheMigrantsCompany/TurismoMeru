@@ -39,7 +39,7 @@ const BookingForm = ({ userId }) => {
     console.log("Estado actualizado - globalDNI:", globalDNI);
   }, [globalDNI]);
 
-  const handleSubmit = async (event) => {
+const handleSubmit = async (event) => {
     event.preventDefault();
     console.log("Submit iniciado");
 
@@ -78,7 +78,8 @@ const BookingForm = ({ userId }) => {
         }],
       };
 
-      console.log("Payload a enviar:", payload);
+      // Loggear el payload antes de enviarlo al backend
+      console.log("Datos a enviar al backend:", JSON.stringify(payload, null, 2));
 
       // Realizar la solicitud POST
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, payload);
@@ -92,7 +93,8 @@ const BookingForm = ({ userId }) => {
       setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
       console.error("Error al crear la reserva:", error.response?.data || error.message);
     }
-  };
+};
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
