@@ -67,6 +67,8 @@ exports.createPaymentPreference = async (req, res) => {
         quantity: item.totalPeople,
         unit_price: item.unit_price,
         currency_id: "ARS",
+        date: item.selectedDate || '',
+        time: item.selectedTime || '',
       })),
       payer: {
         email,
@@ -76,8 +78,8 @@ exports.createPaymentPreference = async (req, res) => {
         },
       },
       back_urls: {
-      success: `https://www.meruviajes.tur.ar/bookingform?id_ServiceOrder=${req.body.id_ServiceOrder}&id_Service=${paymentInformation[0].id_Service}&title=${encodeURIComponent(paymentInformation[0].title)}&price=${paymentInformation[0].unit_price}&date=${paymentInformation[0].date || ''}&time=${paymentInformation[0].time || ''}`,
-      failure: "https://www.meruviajes.tur.ar/payment-failure",
+      success: `https://www.meruviajes.tur.ar/bookingform?id_ServiceOrder=${req.body.id_ServiceOrder}&id_Service=${paymentInformation[0].id_Service}&title=${encodeURIComponent(paymentInformation[0].title)}&price=${paymentInformation[0].unit_price}&date=${paymentInformation[0].selectedDate || ''}&time=${paymentInformation[0].selectedTime || ''}`,
+      failure:  "https://www.meruviajes.tur.ar/payment-failure",
        pending: "https://www.meruviajes.tur.ar/payment-pending",
        },
       auto_return: "approved",
@@ -88,7 +90,9 @@ exports.createPaymentPreference = async (req, res) => {
         totalPeople: paymentInformation[0].totalPeople,
         DNI: DNI,
         totalPrice: paymentInformation.reduce((total, item) => total + (item.unit_price * item.totalPeople), 0),  
-        lockedStock: paymentInformation[0].totalPeople  
+        lockedStock: paymentInformation[0].totalPeople,
+        selectedDate: paymentInformation[0].selectedDate || '',
+        selectedTime: paymentInformation[0].selectedTime || ''
       },
     };
     
@@ -141,6 +145,8 @@ exports.processPaymentWebhook = async (req, res) => {
     const totalPeople = metadata?.total_people;
     const totalPrice = metadata?.total_price;
     const lockedStock = metadata?.locked_stock;
+    const selectedDate = metadata?.selectedDate; 
+    const selectedTime = metadata?.selectedTime;
 
     console.log("Metadata obtenida:", metadata);
 
