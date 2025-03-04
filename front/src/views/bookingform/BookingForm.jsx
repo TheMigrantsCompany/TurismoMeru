@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { Input, Button } from "@material-tailwind/react";
@@ -15,22 +15,44 @@ const BookingForm = ({ userId }) => {
   const bookingDate = queryParams.get("date");
   const bookingTime = queryParams.get("time");
 
+  // Console.log de los query params para confirmar que llegan correctamente
+  console.log("Query Params:", {
+    serviceId,
+    serviceTitle,
+    servicePrice,
+    serviceOrderId,
+    bookingDate,
+    bookingTime,
+  });
+
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   // Estados para DNI y nombre del pasajero, en lugar de un array de asistentes
   const [globalDNI, setGlobalDNI] = useState("");
   const [passengerName, setPassengerName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Puedes agregar un useEffect para loggear cuando cambian los estados relevantes
+  useEffect(() => {
+    console.log("Estado actualizado - passengerName:", passengerName);
+  }, [passengerName]);
+
+  useEffect(() => {
+    console.log("Estado actualizado - globalDNI:", globalDNI);
+  }, [globalDNI]);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    console.log("Submit iniciado");
 
     // Validación básica
     if (!passengerName.trim() || !globalDNI.trim()) {
       setErrorMessage("Todos los campos son obligatorios.");
+      console.log("Error: Todos los campos son obligatorios.");
       return;
     }
     if (!/^\d+$/.test(globalDNI)) {
       setErrorMessage("El DNI debe contener solo números.");
+      console.log("Error: El DNI debe contener solo números.");
       return;
     }
 
@@ -77,14 +99,20 @@ const BookingForm = ({ userId }) => {
         type="text"
         label="Nombre del Pasajero"
         value={passengerName}
-        onChange={(e) => setPassengerName(e.target.value)}
+        onChange={(e) => {
+          setPassengerName(e.target.value);
+          console.log("onChange - passengerName:", e.target.value);
+        }}
         required
       />
       <Input
         type="text"
         label="DNI"
         value={globalDNI}
-        onChange={(e) => setGlobalDNI(e.target.value)}
+        onChange={(e) => {
+          setGlobalDNI(e.target.value);
+          console.log("onChange - globalDNI:", e.target.value);
+        }}
         required
       />
 
