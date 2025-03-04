@@ -39,7 +39,7 @@ const BookingForm = ({ userId }) => {
     console.log("Estado actualizado - globalDNI:", globalDNI);
   }, [globalDNI]);
 
-const handleSubmit = async (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     console.log("Submit iniciado");
 
@@ -70,8 +70,8 @@ const handleSubmit = async (event) => {
           seatNumber: 1,
           DNI_Personal: parseInt(globalDNI, 10),
           passengerName: passengerName || "Desconocido",
-          date: bookingDate,
-          time: bookingTime,
+          date: bookingDate,  // Usar la fecha del query param
+          time: bookingTime,  // Usar la hora del query param
           lockedStock: selectedQuantity,
           totalPeople: selectedQuantity,
           totalPrice: parseFloat(servicePrice) * selectedQuantity,
@@ -93,8 +93,7 @@ const handleSubmit = async (event) => {
       setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
       console.error("Error al crear la reserva:", error.response?.data || error.message);
     }
-};
-
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
