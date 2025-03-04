@@ -18,6 +18,15 @@ const BookingForm = ({ userId }) => {
   const [attendees, setAttendees] = useState([{ dni: "", passengerName: "" }]);
   const [errorMessage, setErrorMessage] = useState("");
 
+  console.log("Query params:", {
+  serviceOrderId,
+  serviceId,
+  serviceTitle,
+  servicePrice,
+  bookingDate,
+  bookingTime,
+});
+
   const handleChange = (index, field, value) => {
     const updatedAttendees = [...attendees];
     updatedAttendees[index][field] = value;
