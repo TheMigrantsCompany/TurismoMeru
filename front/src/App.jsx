@@ -54,7 +54,7 @@ function App() {
               <Route path="reservas" element={<UserBookings id_User={id_User} />} />
             </Route>
             <Route path="/orderform" element={<OrderForm />} />
-            <Route path="/bookingform" element={<BookingForm />} />
+           <Route path="/bookingform" element={<BookingForm userId={id_User} />} />
           </>
         )}
       </Routes>
