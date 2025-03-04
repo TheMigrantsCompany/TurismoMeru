@@ -12,8 +12,10 @@ const BookingForm = ({ userId }) => {
   const serviceTitle = queryParams.get("title");
   const servicePrice = queryParams.get("price");
   const serviceOrderId = queryParams.get("id_ServiceOrder");
-  const bookingDate = queryParams.get("date");
-  const bookingTime = queryParams.get("time");
+
+  // Asegúrate de que los query params tengan valores válidos
+  const bookingDate = queryParams.get("date") || "Fecha no disponible";
+  const bookingTime = queryParams.get("time") || "Hora no disponible";
 
   // Console.log de los query params para confirmar que llegan correctamente
   console.log("Query Params:", {
@@ -29,15 +31,6 @@ const BookingForm = ({ userId }) => {
   const [globalDNI, setGlobalDNI] = useState("");
   const [passengerName, setPassengerName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-
-  // useEffect para loggear cuando cambian los estados relevantes
-  useEffect(() => {
-    console.log("Estado actualizado - passengerName:", passengerName);
-  }, [passengerName]);
-
-  useEffect(() => {
-    console.log("Estado actualizado - globalDNI:", globalDNI);
-  }, [globalDNI]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
