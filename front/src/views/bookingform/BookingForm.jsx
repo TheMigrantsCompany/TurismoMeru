@@ -63,13 +63,13 @@ const BookingForm = ({ userId }) => {
       const payload = {
         id_User: userId,
         id_ServiceOrder: serviceOrderId,
-        DNI: globalDNI, // DNI global
+        DNI: parseInt(globalDNI, 10),
         paymentStatus: "Paid",
         paymentInformation: [{
           id_Service: serviceId,
           serviceTitle,
           seatNumber: 1,
-          DNI_Personal: globalDNI, // mismo DNI para el pasajero principal
+          DNI_Personal: parseInt(globalDNI, 10),
           passengerName: passengerName || "Desconocido",
           date: bookingDate,
           time: bookingTime,
