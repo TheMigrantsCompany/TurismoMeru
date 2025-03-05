@@ -132,10 +132,13 @@ const UserBookings = ({ id_User }) => {
     }
   };
 
-  // Agregar esta función para formatear la fecha
+  // Agregar esta función para formatear la fecha y hora desde el backend
   const formatDate = (dateString) => {
     if (!dateString) return "No disponible";
     const date = new Date(dateString);
+
+    // Verificar si la fecha es válida
+    if (isNaN(date)) return "Fecha inválida";
 
     // Formatear fecha
     const dia = date.getDate().toString().padStart(2, "0");
