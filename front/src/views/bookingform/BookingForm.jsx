@@ -93,15 +93,20 @@ const BookingForm = ({ userId }) => {
        text: "Tu reserva se ha realizado con éxito.",
        icon: "success",
        confirmButtonText: "Ir a mis reservas",
-       }).then((result) => {
-     // Redirigir solo si el usuario hizo clic en "Aceptar"
-      if (result.isConfirmed) {
-      navigate("/user/reservas");
-    }
-  });
+     }).then((result) => {
+  console.log("SweetAlert cerrado, resultado:", result);
+    if (result.isConfirmed) {
+    console.log("Redirigiendo a /user/reservas...");
+    navigate("/user/reservas");
+  }
+});
 
-// Fallback en caso de que no haga clic
-setTimeout(() => navigate("/user/reservas"), 5000);
+// Redirección de respaldo después de 2 segundos
+setTimeout(() => {
+  console.log("Redirección forzada a /user/reservas...");
+  navigate("/user/reservas");
+}, 2000);
+
 
 
       // Limpiar los campos
