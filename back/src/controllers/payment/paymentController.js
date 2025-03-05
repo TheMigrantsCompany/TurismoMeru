@@ -78,7 +78,7 @@ exports.createPaymentPreference = async (req, res) => {
         },
       },
       back_urls: {
-      success: `https://www.meruviajes.tur.ar/bookingform?id_ServiceOrder=${req.body.id_ServiceOrder}&id_Service=${paymentInformation[0].id_Service}&title=${encodeURIComponent(paymentInformation[0].title)}&price=${paymentInformation[0].unit_price}&date=${paymentInformation[0].selectedDate || ''}&time=${paymentInformation[0].selectedTime || ''}`,
+      success: `https://www.meruviajes.tur.ar/bookingform?id_ServiceOrder=${req.body.id_ServiceOrder}&id_Service=${paymentInformation[0].id_Service}&title=${encodeURIComponent(paymentInformation[0].title)}&price=${paymentInformation[0].unit_price}&date=${paymentInformation[0].selectedDate || ''}&time=${paymentInformation[0].selectedTime || ''}&totalPeople=${req.body.metadata.totalPeople}`,
       failure:  "https://www.meruviajes.tur.ar/payment-failure",
       pending: "https://www.meruviajes.tur.ar/payment-pending",
        },
@@ -89,6 +89,7 @@ exports.createPaymentPreference = async (req, res) => {
         id_Service: paymentInformation[0].id_Service,  
         totalPeople: paymentInformation[0].totalPeople,
         DNI: DNI,
+        totalPeople: items.reduce((total, item) => total + item.totalPeople, 0),
         totalPrice: paymentInformation.reduce((total, item) => total + (item.unit_price * item.totalPeople), 0),  
         lockedStock: paymentInformation[0].totalPeople,
         selectedDate: paymentInformation[0].selectedDate || '',
