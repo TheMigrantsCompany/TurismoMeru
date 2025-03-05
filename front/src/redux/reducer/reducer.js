@@ -49,6 +49,16 @@ import {
   UPDATE_ORDER_STATUS_REQUEST,
   UPDATE_ORDER_STATUS_SUCCESS,
   UPDATE_ORDER_STATUS_FAILURE,
+
+  // Delete Booking
+  DELETE_BOOKING_REQUEST,
+  DELETE_BOOKING_SUCCESS,
+  DELETE_BOOKING_FAILURE,
+
+  // Delete Service Order
+  DELETE_SERVICE_ORDER_REQUEST,
+  DELETE_SERVICE_ORDER_SUCCESS,
+  DELETE_SERVICE_ORDER_FAILURE,
 } from "../actions/types";
 
 const initialState = {
@@ -539,6 +549,72 @@ const rootReducer = (state = initialState, action) => {
             loading: false,
             error: action.payload,
           },
+        },
+      };
+
+    case DELETE_BOOKING_REQUEST:
+      return {
+        ...state,
+        bookings: {
+          ...state.bookings,
+          loading: true,
+          error: null,
+        },
+      };
+
+    case DELETE_BOOKING_SUCCESS:
+      return {
+        ...state,
+        bookings: {
+          ...state.bookings,
+          loading: false,
+          bookingsList: state.bookings.bookingsList.filter(
+            (booking) => booking.id_Booking !== action.payload
+          ),
+          error: null,
+        },
+      };
+
+    case DELETE_BOOKING_FAILURE:
+      return {
+        ...state,
+        bookings: {
+          ...state.bookings,
+          loading: false,
+          error: action.payload,
+        },
+      };
+
+    case DELETE_SERVICE_ORDER_REQUEST:
+      return {
+        ...state,
+        orders: {
+          ...state.orders,
+          loading: true,
+          error: null,
+        },
+      };
+
+    case DELETE_SERVICE_ORDER_SUCCESS:
+      return {
+        ...state,
+        orders: {
+          ...state.orders,
+          loading: false,
+          ordersList: state.orders.ordersList.filter(
+            (order) => order.id_ServiceOrder !== action.payload
+          ),
+          error: null,
+        },
+      };
+
+    case DELETE_SERVICE_ORDER_FAILURE:
+      return {
+        ...state,
+        orders: {
+          ...state.orders,
+          loading: false,
+          error: action.payload,
         },
       };
 
