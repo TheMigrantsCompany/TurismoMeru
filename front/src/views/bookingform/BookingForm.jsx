@@ -37,24 +37,24 @@ const BookingForm = ({ userId }) => {
     try {
       setErrorMessage(""); // Limpiar mensajes de error previos
 
-      const payload = {
-        id_User: userId,
-        id_ServiceOrder: serviceOrderId,
-        DNI: parseInt(globalDNI, 10),
-        paymentStatus: "Paid",
-        paymentInformation: [{
-          id_Service: serviceId,
-          serviceTitle,
-          seatNumber: 1,
-          DNI_Personal: parseInt(globalDNI, 10),
-          passengerName: passengerName || "Desconocido",
-          date: selectedDate,  // Usar la fecha seleccionada desde la URL
-          time: selectedTime,  // Usar la hora seleccionada desde la URL
-          lockedStock: selectedQuantity,
-          totalPeople: selectedQuantity,
-          totalPrice: parseFloat(servicePrice) * selectedQuantity,
-        }],
-      };
+    const payload = {
+     id_User: userId,
+     id_ServiceOrder: serviceOrderId,
+     DNI: globalDNI.toString(),  // Enviarlo como string
+     paymentStatus: "Paid",
+     paymentInformation: [{
+     id_Service: serviceId,
+     serviceTitle,
+     seatNumber: 1,
+     DNI_Personal: globalDNI.toString(),
+     passengerName: passengerName || "Desconocido",
+     date: selectedDate,  
+     time: selectedTime, 
+     lockedStock: selectedQuantity,
+     totalPeople: selectedQuantity,
+     totalPrice: parseFloat(servicePrice) * selectedQuantity,
+  }],
+};
 
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, payload);
       console.log("Reserva creada:", response.data);
