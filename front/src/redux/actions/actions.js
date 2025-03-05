@@ -45,6 +45,12 @@ import {
   UPDATE_ORDER_STATUS_REQUEST,
   UPDATE_ORDER_STATUS_SUCCESS,
   UPDATE_ORDER_STATUS_FAILURE,
+  DELETE_BOOKING_REQUEST,
+  DELETE_BOOKING_SUCCESS,
+  DELETE_BOOKING_FAILURE,
+  DELETE_SERVICE_ORDER_REQUEST,
+  DELETE_SERVICE_ORDER_SUCCESS,
+  DELETE_SERVICE_ORDER_FAILURE,
 } from "./types";
 
 export const createExcursion = (excursionData) => async (dispatch) => {
@@ -375,3 +381,55 @@ export const updateOrderStatus =
       throw error;
     }
   };
+
+// Eliminar Orden de Servicio
+export const deleteServiceOrder = (id_ServiceOrder) => async (dispatch) => {
+  dispatch({ type: DELETE_SERVICE_ORDER_REQUEST });
+  try {
+    // Usamos la ruta correcta según serviceOrderRouter.js
+    await axios.delete(
+      `http://localhost:3001/servicesOrder/id/${id_ServiceOrder}`
+    );
+
+    dispatch({
+      type: DELETE_SERVICE_ORDER_SUCCESS,
+      payload: id_ServiceOrder,
+    });
+
+    // Esperamos a que se complete la eliminación antes de obtener todas las órdenes
+    await dispatch(getAllOrders());
+
+    return Promise.resolve(); // Para manejar el then() en el componente
+  } catch (error) {
+    dispatch({
+      type: DELETE_SERVICE_ORDER_FAILURE,
+      payload: error.message,
+    });
+    return Promise.reject(error); // Para manejar el catch() en el componente
+  }
+};
+
+// Eliminar Booking
+export const deleteBooking = (id_Booking) => async (dispatch) => {
+  dispatch({ type: DELETE_BOOKING_REQUEST });
+  try {
+    // Usamos la ruta correcta según bookingRouter.js
+    await axios.delete(`http://localhost:3001/booking/id/${id_Booking}`);
+
+    dispatch({
+      type: DELETE_BOOKING_SUCCESS,
+      payload: id_Booking,
+    });
+
+    // Esperamos a que se complete la eliminación antes de obtener todos los bookings
+    await dispatch(getAllBookings());
+
+    return Promise.resolve();
+  } catch (error) {
+    dispatch({
+      type: DELETE_BOOKING_FAILURE,
+      payload: error.message,
+    });
+    return Promise.reject(error);
+  }
+};
