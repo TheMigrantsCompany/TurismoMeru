@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllOrders } from "../../../redux/actions/actions";
+import {
+  getAllOrders,
+  deleteServiceOrder,
+} from "../../../redux/actions/actions";
 import ServiceOrdersTable from "../../../components/tables/admin/ServiceOrdersTable";
 import ServiceOrderModal from "../../../components/modals/admin-modal/ServiceOrderModal";
+import Swal from "sweetalert2";
 
 export function ServiceOrderManagement() {
   const dispatch = useDispatch();
@@ -24,7 +28,7 @@ export function ServiceOrderManagement() {
       console.log("Transformando orden:", {
         id: order.id_ServiceOrder,
         paymentStatus: order.paymentStatus,
-        transformedStatus: status
+        transformedStatus: status,
       });
 
       return {
@@ -43,6 +47,43 @@ export function ServiceOrderManagement() {
 
   const handleEditOrder = (order) => {
     setSelectedOrder(order);
+  };
+
+  const handleDeleteOrder = (id_ServiceOrder) => {
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text: "Esta acción no se puede deshacer",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#4256a6",
+      cancelButtonColor: "#f4925b",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+      background: "#f9f3e1",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await dispatch(deleteServiceOrder(id_ServiceOrder));
+          Swal.fire({
+            title: "¡Eliminado!",
+            text: "La orden ha sido eliminada.",
+            icon: "success",
+            confirmButtonColor: "#4256a6",
+            background: "#f9f3e1",
+          });
+        } catch (error) {
+          console.error("Error al eliminar la orden:", error);
+          Swal.fire({
+            title: "Error",
+            text:
+              error.response?.data?.message || "No se pudo eliminar la orden.",
+            icon: "error",
+            confirmButtonColor: "#4256a6",
+            background: "#f9f3e1",
+          });
+        }
+      }
+    });
   };
 
   return (
@@ -69,6 +110,7 @@ export function ServiceOrderManagement() {
             <ServiceOrdersTable
               orders={transformOrders(ordersList)}
               onEdit={handleEditOrder}
+              onDelete={handleDeleteOrder}
             />
           )}
         </div>
