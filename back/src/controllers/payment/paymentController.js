@@ -78,9 +78,9 @@ exports.createPaymentPreference = async (req, res) => {
         },
       },
       back_urls: {
-       success: `https://www.meruviajes.tur.ar/bookingform?id_ServiceOrder=${createdOrder.id_ServiceOrder}&id_Service=${items[0].id_Service}&title=${encodeURIComponent(items[0].title)}&price=${items[0].unit_price}&date=${items[0].selectedDate || ''}&time=${items[0].selectedTime || ''}&totalPeople=${totalPeople}`,
+      success: `https://www.meruviajes.tur.ar/bookingform?id_ServiceOrder=${req.body.id_ServiceOrder}&id_Service=${paymentInformation[0].id_Service}&title=${encodeURIComponent(paymentInformation[0].title)}&price=${paymentInformation[0].unit_price}&date=${paymentInformation[0].selectedDate || ''}&time=${paymentInformation[0].selectedTime || ''}&totalPeople=${paymentInformation[0].totalPeople || 1}`,
       failure:  "https://www.meruviajes.tur.ar/payment-failure",
-       pending: "https://www.meruviajes.tur.ar/payment-pending",
+      pending: "https://www.meruviajes.tur.ar/payment-pending",
        },
       auto_return: "approved",
       notification_url: "https://www.meruviajes.tur.ar/api/payment/webhook",  // para recibir y reenviar las notificaciones de mervado pago webhookrelay.com
