@@ -4,8 +4,9 @@ import {
   getAllBookings,
   getBookingsByService,
   getAllOrders,
+  deleteBooking,
 } from "../../../redux/actions/actions";
-import { EyeIcon } from "@heroicons/react/24/solid";
+import { EyeIcon, TrashIcon } from "@heroicons/react/24/solid";
 import {
   Typography,
   IconButton,
@@ -348,6 +349,42 @@ export function ReservationsTable({
     );
   };
 
+  const handleDeleteBooking = (id_Booking) => {
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text: "Esta acción no se puede deshacer",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#4256a6",
+      cancelButtonColor: "#f4925b",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+      background: "#f9f3e1",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(deleteBooking(id_Booking))
+          .then(() => {
+            Swal.fire({
+              title: "¡Eliminado!",
+              text: "La reserva ha sido eliminada.",
+              icon: "success",
+              confirmButtonColor: "#4256a6",
+              background: "#f9f3e1",
+            });
+          })
+          .catch((error) => {
+            Swal.fire({
+              title: "Error",
+              text: "No se pudo eliminar la reserva.",
+              icon: "error",
+              confirmButtonColor: "#4256a6",
+              background: "#f9f3e1",
+            });
+          });
+      }
+    });
+  };
+
   if (reservationsState.loading || ordersState.loading) {
     return (
       <div className="text-center py-8">
@@ -510,7 +547,7 @@ export function ReservationsTable({
                       </Typography>
                     </td>
                     <td className="p-4">
-                      <div className="flex justify-center">
+                      <div className="flex justify-center gap-2">
                         <Tooltip content="Ver Detalle">
                           <IconButton
                             variant="text"
@@ -527,6 +564,15 @@ export function ReservationsTable({
                             className="text-[#4256a6] hover:bg-[#4256a6]/10"
                           >
                             <EyeIcon className="h-5 w-5" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip content="Eliminar Reserva">
+                          <IconButton
+                            variant="text"
+                            onClick={() => handleDeleteBooking(id_Booking)}
+                            className="text-red-500 hover:bg-red-50"
+                          >
+                            <TrashIcon className="h-5 w-5" />
                           </IconButton>
                         </Tooltip>
                       </div>
