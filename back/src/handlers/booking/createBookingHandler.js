@@ -2,7 +2,7 @@ const createBookingController = require('../../controllers/booking/createBooking
 
 const createBookingHandler = async (bookingData) => {
   console.log("[Handler] Datos recibidos en createBookingHandler:", bookingData);
-  console.log("paymentInformation recibido:", paymentInformation);
+  console.log("paymentInformation recibido:", bookingData.paymentInformation);
   
   try {
     const bookings = await createBookingController(
