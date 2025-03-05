@@ -37,6 +37,8 @@ const BookingForm = ({ userId }) => {
     try {
       setErrorMessage(""); // Limpiar mensajes de error previos
 
+    console.log("Payload que se enviará:", payload);
+      
     const payload = {
      id_User: userId,
      id_ServiceOrder: serviceOrderId,
