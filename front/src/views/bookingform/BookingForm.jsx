@@ -2,20 +2,18 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Input, Button } from "@material-tailwind/react";
-import Swal from "sweetalert2";
 
 const BookingForm = ({ userId }) => {
   const location = useLocation();
-  const navigate = useNavigate(); // Usamos navigate para redirigir
+  const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
 
   const serviceId = queryParams.get("id_Service");
   const serviceTitle = queryParams.get("title");
   const servicePrice = parseFloat(queryParams.get("price")) || 0;
   const serviceOrderId = queryParams.get("id_ServiceOrder");
-
   const selectedDate = queryParams.get("date") || "Fecha no disponible";
-  const selectedTime = queryParams.get("time") || "Hora no disponible"; // Hora seleccionada por el usuario
+  const selectedTime = queryParams.get("time") || "Hora no disponible";
   const selectedQuantity = parseInt(queryParams.get("totalPeople")) || 1;
 
   const [passengers, setPassengers] = useState(
@@ -26,7 +24,7 @@ const BookingForm = ({ userId }) => {
   );
 
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [reservationSuccess, setReservationSuccess] = useState(false);
 
   const handlePassengerChange = (index, field, value) => {
     setPassengers((prevPassengers) =>
@@ -39,7 +37,6 @@ const BookingForm = ({ userId }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Validación básica
     for (let i = 0; i < passengers.length; i++) {
       if (!passengers[i].passengerName.trim() || !passengers[i].dni.trim()) {
         setErrorMessage("Todos los campos son obligatorios.");
@@ -53,13 +50,12 @@ const BookingForm = ({ userId }) => {
 
     try {
       setErrorMessage("");
-      setSuccessMessage("");
 
       const payload = {
         id_User: userId,
         id_ServiceOrder: serviceOrderId,
         paymentStatus: "Paid",
-        DNI: passengers[0]?.dni || "", // Asigna el DNI del primer pasajero
+        DNI: passengers[0]?.dni || "",
         paymentInformation: passengers.map((passenger, index) => ({
           id_Service: serviceId,
           serviceTitle,
@@ -67,7 +63,7 @@ const BookingForm = ({ userId }) => {
           DNI_Personal: passenger.dni,
           passengerName: passenger.passengerName || "Desconocido",
           selectedDate,
-          selectedTime, // Hora seleccionada por el usuario
+          selectedTime,
           lockedStock: 1,
           totalPeople: selectedQuantity,
           totalPrice: servicePrice,
@@ -81,33 +77,17 @@ const BookingForm = ({ userId }) => {
         payload,
         {
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       );
       console.log("Reserva creada:", response.data);
 
-      // Mostrar SweetAlert con el mensaje de éxito
-     Swal.fire({
-       title: "Reserva exitosa",
-       text: "Tu reserva se ha realizado con éxito.",
-       icon: "success",
-       confirmButtonText: "Ir a mis reservas",
-     }).then((result) => {
-  console.log("SweetAlert cerrado, resultado:", result);
-    if (result.isConfirmed) {
-    console.log("Redirigiendo a /user/reservas...");
-    navigate("/user/reservas");
-  }
-});
-
-// Redirección de respaldo después de 2 segundos
-setTimeout(() => {
-  console.log("Redirección forzada a /user/reservas...");
-  navigate("/user/reservas");
-}, 2000);
-
-
+      // Mostrar mensaje y redirigir
+      setReservationSuccess(true);
+      setTimeout(() => {
+        navigate("/user/reservas");
+      }, 2000); // Redirigir después de 2 segundos
 
       // Limpiar los campos
       setPassengers(
@@ -118,7 +98,10 @@ setTimeout(() => {
       );
     } catch (error) {
       setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
-      console.error("Error al crear la reserva:", error.response?.data || error.message);
+      console.error(
+        "Error al crear la reserva:",
+        error.response?.data || error.message
+      );
     }
   };
 
@@ -136,19 +119,27 @@ setTimeout(() => {
             type="text"
             placeholder="Nombre"
             value={passenger.passengerName}
-            onChange={(e) => handlePassengerChange(index, "passengerName", e.target.value)}
+            onChange={(e) =>
+              handlePassengerChange(index, "passengerName", e.target.value)
+            }
           />
           <Input
             type="text"
             placeholder="DNI"
             value={passenger.dni}
-            onChange={(e) => handlePassengerChange(index, "dni", e.target.value)}
+            onChange={(e) =>
+              handlePassengerChange(index, "dni", e.target.value)
+            }
           />
         </div>
       ))}
 
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-      {successMessage && <p className="text-green-500">{successMessage}</p>}
+      {reservationSuccess && (
+        <p className="text-green-500 font-semibold">
+          ¡Tu reserva se ha creado con éxito! Redirigiendo...
+        </p>
+      )}
 
       <Button type="submit" color="green">
         Reservar
