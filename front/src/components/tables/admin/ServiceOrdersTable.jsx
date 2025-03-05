@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { PencilIcon } from "@heroicons/react/24/outline";
+import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import {
   Button,
   IconButton,
@@ -7,7 +7,7 @@ import {
   Tooltip,
 } from "@material-tailwind/react";
 
-const ServiceOrdersTable = ({ orders, onEdit }) => {
+const ServiceOrdersTable = ({ orders, onEdit, onDelete }) => {
   const [filteredOrders, setFilteredOrders] = useState(orders);
   const [currentFilter, setCurrentFilter] = useState("all");
 
@@ -28,11 +28,11 @@ const ServiceOrdersTable = ({ orders, onEdit }) => {
         console.log(`Orden ${order.id}:`, {
           orderStatus: order.status,
           filterStatus: status,
-          matches: order.status === status
+          matches: order.status === status,
         });
         return order.status === status;
       });
-      
+
       console.log("Órdenes filtradas:", filtered);
       setFilteredOrders(filtered);
     }
@@ -153,6 +153,15 @@ const ServiceOrdersTable = ({ orders, onEdit }) => {
                           className="text-[#4256a6] hover:bg-[#4256a6]/10"
                         >
                           <PencilIcon className="h-5 w-5" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip content="Eliminar Orden">
+                        <IconButton
+                          variant="text"
+                          onClick={() => onDelete(order.id)}
+                          className="text-red-500 hover:bg-red-50"
+                        >
+                          <TrashIcon className="h-5 w-5" />
                         </IconButton>
                       </Tooltip>
                     </div>
