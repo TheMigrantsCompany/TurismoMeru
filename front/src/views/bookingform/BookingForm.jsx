@@ -84,10 +84,9 @@ const BookingForm = ({ userId }) => {
       console.log("Reserva creada:", response.data);
 
       // Mostrar mensaje y redirigir
-      setReservationSuccess(true);
-      setTimeout(() => {
-        navigate("/user/reservas");
-      }, 2000); // Redirigir después de 2 segundos
+     console.log("Reserva creada:", response.data);
+     setReservationSuccess(true);
+     navigate("/user/reservas");
 
       // Limpiar los campos
       setPassengers(
