@@ -15,54 +15,71 @@ const BookingForm = ({ userId }) => {
   // Captura de la fecha y hora seleccionadas desde los query params
   const selectedDate = queryParams.get("date") || "Fecha no disponible";
   const selectedTime = queryParams.get("time") || "Hora no disponible";
+  const selectedQuantity = parseInt(queryParams.get("totalPeople")) || 1;
 
-  const [selectedQuantity, setSelectedQuantity] = useState(1);
-  const [globalDNI, setGlobalDNI] = useState("");
-  const [passengerName, setPassengerName] = useState("");
+  const [passengers, setPassengers] = useState(
+    Array.from({ length: selectedQuantity }, () => ({
+      passengerName: "",
+      dni: "",
+    }))
+  );
+
   const [errorMessage, setErrorMessage] = useState("");
+
+  const handlePassengerChange = (index, field, value) => {
+    setPassengers((prevPassengers) =>
+      prevPassengers.map((p, i) =>
+        i === index ? { ...p, [field]: value } : p
+      )
+    );
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     // Validación básica
-    if (!passengerName.trim() || !globalDNI.trim()) {
-      setErrorMessage("Todos los campos son obligatorios.");
-      return;
-    }
-    if (!/^\d+$/.test(globalDNI)) {
-      setErrorMessage("El DNI debe contener solo números.");
-      return;
+    for (let i = 0; i < passengers.length; i++) {
+      if (!passengers[i].passengerName.trim() || !passengers[i].dni.trim()) {
+        setErrorMessage("Todos los campos son obligatorios.");
+        return;
+      }
+      if (!/^\d+$/.test(passengers[i].dni)) {
+        setErrorMessage("El DNI debe contener solo números.");
+        return;
+      }
     }
 
     try {
       setErrorMessage(""); // Limpiar mensajes de error previos
-      
-   const payload = {
-    id_User: userId,
-    id_ServiceOrder: serviceOrderId,
-    DNI: globalDNI.toString(),
-    paymentStatus: "Paid",
-    paymentInformation: [{
-    id_Service: serviceId,
-    serviceTitle,
-    seatNumber: 1,
-    DNI_Personal: globalDNI.toString(),
-    passengerName: passengerName || "Desconocido",
-    selectedDate: selectedDate,  
-    selectedTime: selectedTime,  
-    lockedStock: selectedQuantity,
-    totalPeople: selectedQuantity,
-    totalPrice: parseFloat(servicePrice) * selectedQuantity,
-  }],
-};
+
+      const payload = {
+        id_User: userId,
+        id_ServiceOrder: serviceOrderId,
+        paymentStatus: "Paid",
+        paymentInformation: passengers.map((passenger, index) => ({
+          id_Service: serviceId,
+          serviceTitle,
+          seatNumber: index + 1,
+          DNI_Personal: passenger.dni,
+          passengerName: passenger.passengerName || "Desconocido",
+          selectedDate,
+          selectedTime,
+          lockedStock: 1,  // Asumiendo que cada pasajero ocupa un lugar
+          totalPeople: 1,
+          totalPrice: parseFloat(servicePrice),
+        })),
+      };
 
       console.log("Payload que se enviará:", payload);
 
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, payload);
       console.log("Reserva creada:", response.data);
 
-      setPassengerName("");
-      setGlobalDNI("");
+      // Limpiar campos
+      setPassengers(Array.from({ length: selectedQuantity }, () => ({
+        passengerName: "",
+        dni: "",
+      })));
       setErrorMessage("");
     } catch (error) {
       setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
@@ -77,31 +94,23 @@ const BookingForm = ({ userId }) => {
       <p>Fecha: {selectedDate}</p>
       <p>Hora: {selectedTime}</p>
 
-      <div>
-        <label htmlFor="passengerName" className="block text-sm font-medium text-gray-700">
-          Nombre del Pasajero
-        </label>
-        <Input
-          id="passengerName"
-          type="text"
-          value={passengerName}
-          onChange={(e) => setPassengerName(e.target.value)}
-          required
-        />
-      </div>
-
-      <div>
-        <label htmlFor="globalDNI" className="block text-sm font-medium text-gray-700">
-          DNI
-        </label>
-        <Input
-          id="globalDNI"
-          type="text"
-          value={globalDNI}
-          onChange={(e) => setGlobalDNI(e.target.value)}
-          required
-        />
-      </div>
+      {passengers.map((passenger, index) => (
+        <div key={index} className="border p-4 rounded-md">
+          <h3>Pasajero {index + 1}</h3>
+          <Input
+            type="text"
+            placeholder="Nombre"
+            value={passenger.passengerName}
+            onChange={(e) => handlePassengerChange(index, "passengerName", e.target.value)}
+          />
+          <Input
+            type="text"
+            placeholder="DNI"
+            value={passenger.dni}
+            onChange={(e) => handlePassengerChange(index, "dni", e.target.value)}
+          />
+        </div>
+      ))}
 
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
 
@@ -113,3 +122,4 @@ const BookingForm = ({ userId }) => {
 };
 
 export default BookingForm;
+
