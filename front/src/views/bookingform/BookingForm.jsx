@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Input, Button } from "@material-tailwind/react";
+import Swal from "sweetalert2";
 
 const BookingForm = ({ userId }) => {
   const location = useLocation();
+  const navigate = useNavigate(); // Para redirigir
   const queryParams = new URLSearchParams(location.search);
 
   const serviceId = queryParams.get("id_Service");
@@ -34,71 +36,80 @@ const BookingForm = ({ userId }) => {
     );
   };
 
- const handleSubmit = async (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     // Validación básica
     for (let i = 0; i < passengers.length; i++) {
-        if (!passengers[i].passengerName.trim() || !passengers[i].dni.trim()) {
-            setErrorMessage("Todos los campos son obligatorios.");
-            return;
-        }
-        if (!/^\d+$/.test(passengers[i].dni)) {
-            setErrorMessage("El DNI debe contener solo números.");
-            return;
-        }
+      if (!passengers[i].passengerName.trim() || !passengers[i].dni.trim()) {
+        setErrorMessage("Todos los campos son obligatorios.");
+        return;
+      }
+      if (!/^\d+$/.test(passengers[i].dni)) {
+        setErrorMessage("El DNI debe contener solo números.");
+        return;
+      }
     }
 
     try {
-        setErrorMessage("");
-        setSuccessMessage("");
+      setErrorMessage("");
+      setSuccessMessage("");
 
-        const payload = {
-            id_User: userId,
-            id_ServiceOrder: serviceOrderId,
-            paymentStatus: "Paid",
-            DNI: passengers[0]?.dni || "", // Asigna el DNI del primer pasajero
-            paymentInformation: passengers.map((passenger, index) => ({
-                id_Service: serviceId,
-                serviceTitle,
-                seatNumber: index + 1,
-                DNI_Personal: passenger.dni,
-                passengerName: passenger.passengerName || "Desconocido",
-                selectedDate,
-                selectedTime,
-                lockedStock: 1,
-                totalPeople: selectedQuantity,
-                totalPrice: servicePrice,
-            })),
-        };
+      const payload = {
+        id_User: userId,
+        id_ServiceOrder: serviceOrderId,
+        paymentStatus: "Paid",
+        DNI: passengers[0]?.dni || "", // Asigna el DNI del primer pasajero
+        paymentInformation: passengers.map((passenger, index) => ({
+          id_Service: serviceId,
+          serviceTitle,
+          seatNumber: index + 1,
+          DNI_Personal: passenger.dni,
+          passengerName: passenger.passengerName || "Desconocido",
+          selectedDate,
+          selectedTime,
+          lockedStock: 1,
+          totalPeople: selectedQuantity,
+          totalPrice: servicePrice,
+        })),
+      };
 
-        console.log("Payload que se enviará:", payload);
+      console.log("Payload que se enviará:", payload);
 
-        const response = await axios.post(
-            `${import.meta.env.VITE_API_URL}/booking`,
-            payload,
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
-        console.log("Reserva creada:", response.data);
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/booking`,
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      console.log("Reserva creada:", response.data);
 
-        setSuccessMessage("Reserva realizada con éxito.");
+      // Mostrar SweetAlert con el mensaje de éxito
+      Swal.fire({
+        title: "Reserva exitosa",
+        text: "Tu reserva se ha realizado con éxito.",
+        icon: "success",
+        confirmButtonText: "Ir a mis reservas",
+      }).then(() => {
+        // Redirigir a la página de reservas después de que el usuario cierre el alert
+        navigate("/user/reservas");
+      });
 
-        setPassengers(
-            Array.from({ length: selectedQuantity }, () => ({
-                passengerName: "",
-                dni: "",
-            }))
-        );
+      // Limpiar los campos
+      setPassengers(
+        Array.from({ length: selectedQuantity }, () => ({
+          passengerName: "",
+          dni: "",
+        }))
+      );
     } catch (error) {
-        setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
-        console.error("Error al crear la reserva:", error.response?.data || error.message);
+      setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
+      console.error("Error al crear la reserva:", error.response?.data || error.message);
     }
-};
-
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
