@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getAllOrders,
-  deleteServiceOrder,
+  deleteServiceOrder, 
 } from "../../../redux/actions/actions";
 import ServiceOrdersTable from "../../../components/tables/admin/ServiceOrdersTable";
 import ServiceOrderModal from "../../../components/modals/admin-modal/ServiceOrderModal";
