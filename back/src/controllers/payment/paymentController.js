@@ -89,7 +89,7 @@ exports.createPaymentPreference = async (req, res) => {
         id_Service: paymentInformation[0].id_Service,  
         totalPeople: paymentInformation[0].totalPeople,
         DNI: DNI,
-        totalPeople: items.reduce((total, item) => total + item.totalPeople, 0),
+        totalPeople: paymentInformation.reduce((total, item) => total + item.totalPeople, 0),
         totalPrice: paymentInformation.reduce((total, item) => total + (item.unit_price * item.totalPeople), 0),  
         lockedStock: paymentInformation[0].totalPeople,
         selectedDate: paymentInformation[0].selectedDate || '',
