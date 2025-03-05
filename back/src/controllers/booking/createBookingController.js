@@ -21,7 +21,17 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
     for (const item of paymentInformation) {
       console.log('[Controller] Datos del item recibido:', item);
 
-      const { id_Service, lockedStock, totalPeople, totalPrice, date, time } = item;
+      const { id_Service, lockedStock, totalPeople, totalPrice, passengerName, selectedDate, selectedTime } = item;
+
+      // Asegúrate de que lockedStock sea un número positivo
+      if (lockedStock <= 0) {
+        console.error('[Controller] El valor de lockedStock debe ser mayor que 0.');
+        throw new Error('El valor de lockedStock debe ser mayor que 0.');
+      }
+
+      // Asignar selectedDate y selectedTime a las variables date y time
+      const date = selectedDate; // Usar la fecha seleccionada
+      const time = selectedTime; // Usar la hora seleccionada
 
       const validatedTotalPeople = totalPeople || 0;
       const validatedTotalPrice = totalPrice || 0;
@@ -150,7 +160,7 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
         totalPeople: validatedTotalPeople,
         totalPrice: validatedTotalPrice,
         dateTime: `${formattedDate} ${formattedTime}`,
-        passengerName: item.passengerName || 'Desconocido', 
+        passengerName: passengerName || 'Desconocido', 
       }));
 
       const createdBookings = await Booking.bulkCreate(newBookings, { transaction });
