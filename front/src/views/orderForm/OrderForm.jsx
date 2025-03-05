@@ -119,6 +119,8 @@ const OrderForm = () => {
           totalPeople,
           unit_price: basePrice,
           currency_id: "ARS",
+          selectedDate: item.selectedDate,
+          selectedTime: item.selectedTime,
         
         };
       });
