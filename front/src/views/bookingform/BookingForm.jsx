@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { Input, Button } from "@material-tailwind/react";
@@ -9,10 +9,9 @@ const BookingForm = ({ userId }) => {
 
   const serviceId = queryParams.get("id_Service");
   const serviceTitle = queryParams.get("title");
-  const servicePrice = queryParams.get("price");
+  const servicePrice = parseFloat(queryParams.get("price")) || 0;
   const serviceOrderId = queryParams.get("id_ServiceOrder");
 
-  // Captura de la fecha y hora seleccionadas desde los query params
   const selectedDate = queryParams.get("date") || "Fecha no disponible";
   const selectedTime = queryParams.get("time") || "Hora no disponible";
   const selectedQuantity = parseInt(queryParams.get("totalPeople")) || 1;
@@ -25,6 +24,7 @@ const BookingForm = ({ userId }) => {
   );
 
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handlePassengerChange = (index, field, value) => {
     setPassengers((prevPassengers) =>
@@ -51,6 +51,7 @@ const BookingForm = ({ userId }) => {
 
     try {
       setErrorMessage(""); // Limpiar mensajes de error previos
+      setSuccessMessage(""); // Limpiar mensajes de éxito previos
 
       const payload = {
         id_User: userId,
@@ -66,7 +67,7 @@ const BookingForm = ({ userId }) => {
           selectedTime,
           lockedStock: 1,  // Asumiendo que cada pasajero ocupa un lugar
           totalPeople: 1,
-          totalPrice: parseFloat(servicePrice),
+          totalPrice: servicePrice,
         })),
       };
 
@@ -75,12 +76,14 @@ const BookingForm = ({ userId }) => {
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, payload);
       console.log("Reserva creada:", response.data);
 
+      // Mensaje de éxito
+      setSuccessMessage("Reserva realizada con éxito.");
+
       // Limpiar campos
       setPassengers(Array.from({ length: selectedQuantity }, () => ({
         passengerName: "",
         dni: "",
       })));
-      setErrorMessage("");
     } catch (error) {
       setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
       console.error("Error al crear la reserva:", error.response?.data || error.message);
@@ -113,6 +116,7 @@ const BookingForm = ({ userId }) => {
       ))}
 
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+      {successMessage && <p className="text-green-500">{successMessage}</p>}
 
       <Button type="submit" color="green">
         Reservar
@@ -122,4 +126,3 @@ const BookingForm = ({ userId }) => {
 };
 
 export default BookingForm;
-
