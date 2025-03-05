@@ -6,7 +6,7 @@ import Swal from "sweetalert2";
 
 const BookingForm = ({ userId }) => {
   const location = useLocation();
-  const navigate = useNavigate(); // Para redirigir
+  const navigate = useNavigate(); // Usamos navigate para redirigir
   const queryParams = new URLSearchParams(location.search);
 
   const serviceId = queryParams.get("id_Service");
@@ -15,7 +15,7 @@ const BookingForm = ({ userId }) => {
   const serviceOrderId = queryParams.get("id_ServiceOrder");
 
   const selectedDate = queryParams.get("date") || "Fecha no disponible";
-  const selectedTime = queryParams.get("time") || "Hora no disponible";
+  const selectedTime = queryParams.get("time") || "Hora no disponible"; // Hora seleccionada por el usuario
   const selectedQuantity = parseInt(queryParams.get("totalPeople")) || 1;
 
   const [passengers, setPassengers] = useState(
@@ -67,7 +67,7 @@ const BookingForm = ({ userId }) => {
           DNI_Personal: passenger.dni,
           passengerName: passenger.passengerName || "Desconocido",
           selectedDate,
-          selectedTime,
+          selectedTime, // Hora seleccionada por el usuario
           lockedStock: 1,
           totalPeople: selectedQuantity,
           totalPrice: servicePrice,
