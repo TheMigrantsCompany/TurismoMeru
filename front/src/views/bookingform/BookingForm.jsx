@@ -73,7 +73,11 @@ const BookingForm = ({ userId }) => {
 
       console.log("Payload que se enviará:", payload);
 
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, payload);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, payload, {
+       headers: {
+                  'Content-Type': 'application/json',
+           },
+       });
       console.log("Reserva creada:", response.data);
 
       // Mensaje de éxito
