@@ -37,24 +37,25 @@ const BookingForm = ({ userId }) => {
     try {
       setErrorMessage(""); // Limpiar mensajes de error previos
       
-    const payload = {
-     id_User: userId,
-     id_ServiceOrder: serviceOrderId,
-     DNI: globalDNI.toString(),  // Enviarlo como string
-     paymentStatus: "Paid",
-     paymentInformation: [{
-     id_Service: serviceId,
-     serviceTitle,
-     seatNumber: 1,
-     DNI_Personal: globalDNI.toString(),
-     passengerName: passengerName || "Desconocido",
-     date: selectedDate,  
-     time: selectedTime, 
-     lockedStock: selectedQuantity,
-     totalPeople: selectedQuantity,
-     totalPrice: parseFloat(servicePrice) * selectedQuantity,
+   const payload = {
+    id_User: userId,
+    id_ServiceOrder: serviceOrderId,
+    DNI: globalDNI.toString(),
+    paymentStatus: "Paid",
+    paymentInformation: [{
+    id_Service: serviceId,
+    serviceTitle,
+    seatNumber: 1,
+    DNI_Personal: globalDNI.toString(),
+    passengerName: passengerName || "Desconocido",
+    selectedDate: selectedDate,  
+    selectedTime: selectedTime,  
+    lockedStock: selectedQuantity,
+    totalPeople: selectedQuantity,
+    totalPrice: parseFloat(servicePrice) * selectedQuantity,
   }],
 };
+
       console.log("Payload que se enviará:", payload);
 
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, payload);
