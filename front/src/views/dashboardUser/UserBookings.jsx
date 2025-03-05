@@ -36,7 +36,6 @@ const UserBookings = ({ id_User }) => {
     console.log("Inicializando formData con bookings:", bookings);
     const initialFormData = {};
     bookings.forEach((booking) => {
-      // Para el primer pasajero, usamos los datos existentes
       const passengers = Array(booking.totalPeople || 1)
         .fill()
         .map((_, index) => {
@@ -67,12 +66,7 @@ const UserBookings = ({ id_User }) => {
       const updatedPassengers = prevData[bookingId].map((passenger, i) =>
         i === index ? { ...passenger, [field]: value } : passenger
       );
-      console.log(
-        "Pasajeros actualizados para booking",
-        bookingId,
-        ":",
-        updatedPassengers
-      );
+      console.log("Pasajeros actualizados para booking", bookingId, ":", updatedPassengers);
       return { ...prevData, [bookingId]: updatedPassengers };
     });
   };
@@ -104,9 +98,7 @@ const UserBookings = ({ id_User }) => {
       if (response.status === 200) {
         setUpdateMessage({
           show: true,
-          message: `Datos del pasajero ${
-            passengerIndex + 1
-          } actualizados correctamente`,
+          message: `Datos del pasajero ${passengerIndex + 1} actualizados correctamente`,
           isError: false,
         });
 
@@ -120,9 +112,7 @@ const UserBookings = ({ id_User }) => {
 
       setUpdateMessage({
         show: true,
-        message: `Error al actualizar los datos del pasajero ${
-          passengerIndex + 1
-        }`,
+        message: `Error al actualizar los datos del pasajero ${passengerIndex + 1}`,
         isError: true,
       });
 
@@ -132,30 +122,26 @@ const UserBookings = ({ id_User }) => {
     }
   };
 
-  // Agregar esta función para formatear la fecha y hora desde el backend
+  // Función para formatear la fecha y hora de la excursión
   const formatDate = (dateString) => {
     if (!dateString) return "No disponible";
-    const date = new Date(dateString);
-
-    // Verificar si la fecha es válida
+    // Reemplaza el espacio por 'T' para formar una fecha ISO
+    const isoString = dateString.includes(" ") ? dateString.replace(" ", "T") : dateString;
+    const date = new Date(isoString);
     if (isNaN(date)) return "Fecha inválida";
-
-    // Formatear fecha
     const dia = date.getDate().toString().padStart(2, "0");
     const mes = (date.getMonth() + 1).toString().padStart(2, "0");
     const año = date.getFullYear();
-
-    // Formatear hora
     const hora = date.getHours().toString().padStart(2, "0");
     const minutos = date.getMinutes().toString().padStart(2, "0");
-
     return `${dia}/${mes}/${año} - ${hora}:${minutos}hs`;
   };
 
   const isBookingPast = (dateString) => {
-    const bookingDate = new Date(dateString);
+    const isoString = dateString.includes(" ") ? dateString.replace(" ", "T") : dateString;
+    const excursionDate = new Date(isoString);
     const currentDate = new Date();
-    return bookingDate < currentDate;
+    return excursionDate < currentDate;
   };
 
   console.log("Render: bookings:", bookings);
@@ -186,7 +172,7 @@ const UserBookings = ({ id_User }) => {
             <div
               key={booking.id_Booking}
               className={`bg-[#dac9aa] shadow-md rounded-lg p-6 border border-[#425a66] hover:shadow-lg transition-shadow ${
-                isBookingPast(booking.bookingDate) ? "opacity-60" : ""
+                isBookingPast(booking.dateTime) ? "opacity-60" : ""
               }`}
             >
               <div className="mb-4">
@@ -196,8 +182,8 @@ const UserBookings = ({ id_User }) => {
                 <div className="grid grid-cols-2 gap-4 text-sm text-[#425a66]">
                   <div className="bg-[#f9f3e1] p-3 rounded-lg">
                     <span className="font-semibold">Fecha y Hora:</span>
-                    <p className="mt-1">{formatDate(booking.bookingDate)}</p>
-                    {isBookingPast(booking.bookingDate) && (
+                    <p className="mt-1">{formatDate(booking.dateTime)}</p>
+                    {isBookingPast(booking.dateTime) && (
                       <p className="text-red-500 text-sm mt-1">
                         Esta reserva ya ha pasado
                       </p>
@@ -209,12 +195,12 @@ const UserBookings = ({ id_User }) => {
                       className={`mt-1 font-medium ${
                         booking.status === "Completada"
                           ? "text-green-600"
-                          : isBookingPast(booking.bookingDate)
+                          : isBookingPast(booking.dateTime)
                           ? "text-red-600"
                           : "text-yellow-600"
                       }`}
                     >
-                      {isBookingPast(booking.bookingDate)
+                      {isBookingPast(booking.dateTime)
                         ? "Finalizada"
                         : booking.status}
                     </p>
@@ -222,7 +208,7 @@ const UserBookings = ({ id_User }) => {
                 </div>
               </div>
 
-              {!isBookingPast(booking.bookingDate) && (
+              {!isBookingPast(booking.dateTime) && (
                 <div className="mt-6">
                   <h4 className="text-lg font-semibold text-[#425a66] mb-3">
                     Información de Pasajeros ({booking.totalPeople || 1})
