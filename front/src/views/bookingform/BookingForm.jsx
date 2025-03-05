@@ -88,15 +88,21 @@ const BookingForm = ({ userId }) => {
       console.log("Reserva creada:", response.data);
 
       // Mostrar SweetAlert con el mensaje de éxito
-      Swal.fire({
-        title: "Reserva exitosa",
-        text: "Tu reserva se ha realizado con éxito.",
-        icon: "success",
-        confirmButtonText: "Ir a mis reservas",
-      }).then(() => {
-        // Redirigir a la página de reservas después de que el usuario cierre el alert
-        navigate("/user/reservas");
-      });
+     Swal.fire({
+       title: "Reserva exitosa",
+       text: "Tu reserva se ha realizado con éxito.",
+       icon: "success",
+       confirmButtonText: "Ir a mis reservas",
+       }).then((result) => {
+     // Redirigir solo si el usuario hizo clic en "Aceptar"
+      if (result.isConfirmed) {
+      navigate("/user/reservas");
+    }
+  });
+
+// Fallback en caso de que no haga clic
+setTimeout(() => navigate("/user/reservas"), 5000);
+
 
       // Limpiar los campos
       setPassengers(
