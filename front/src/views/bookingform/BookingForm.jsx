@@ -54,22 +54,24 @@ const BookingForm = ({ userId }) => {
       setSuccessMessage(""); // Limpiar mensajes de éxito previos
 
       const payload = {
-        id_User: userId,
-        id_ServiceOrder: serviceOrderId,
-        paymentStatus: "Paid",
-        paymentInformation: passengers.map((passenger, index) => ({
-          id_Service: serviceId,
-          serviceTitle,
-          seatNumber: index + 1,
-          DNI_Personal: passenger.dni,
-          passengerName: passenger.passengerName || "Desconocido",
-          selectedDate,
-          selectedTime,
-          lockedStock: 1,  // Asumiendo que cada pasajero ocupa un lugar
-          totalPeople: 1,
-          totalPrice: servicePrice,
-        })),
-      };
+      id_User: userId,
+      id_ServiceOrder: serviceOrderId,
+      paymentStatus: "Paid",
+      DNI: "",  // Si el DNI es necesario en el payload, inclúyelo aquí
+      paymentInformation: passengers.map((passenger, index) => ({
+      id_Service: serviceId,
+      serviceTitle,
+      seatNumber: index + 1,
+      DNI_Personal: passenger.dni,
+      passengerName: passenger.passengerName || "Desconocido",
+      selectedDate,
+      selectedTime,
+      lockedStock: 1,  // Asumiendo que cada pasajero ocupa un lugar
+      totalPeople: selectedQuantity,
+      totalPrice: servicePrice,
+  })),
+};
+
 
       console.log("Payload que se enviará:", payload);
 
