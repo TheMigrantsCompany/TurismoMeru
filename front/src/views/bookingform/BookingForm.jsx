@@ -36,8 +36,6 @@ const BookingForm = ({ userId }) => {
 
     try {
       setErrorMessage(""); // Limpiar mensajes de error previos
-
-    console.log("Payload que se enviará:", payload);
       
     const payload = {
      id_User: userId,
@@ -57,6 +55,7 @@ const BookingForm = ({ userId }) => {
      totalPrice: parseFloat(servicePrice) * selectedQuantity,
   }],
 };
+      console.log("Payload que se enviará:", payload);
 
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, payload);
       console.log("Reserva creada:", response.data);
