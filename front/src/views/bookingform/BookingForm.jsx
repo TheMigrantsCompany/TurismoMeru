@@ -34,67 +34,71 @@ const BookingForm = ({ userId }) => {
     );
   };
 
-  const handleSubmit = async (event) => {
+ const handleSubmit = async (event) => {
     event.preventDefault();
 
     // Validación básica
     for (let i = 0; i < passengers.length; i++) {
-      if (!passengers[i].passengerName.trim() || !passengers[i].dni.trim()) {
-        setErrorMessage("Todos los campos son obligatorios.");
-        return;
-      }
-      if (!/^\d+$/.test(passengers[i].dni)) {
-        setErrorMessage("El DNI debe contener solo números.");
-        return;
-      }
+        if (!passengers[i].passengerName.trim() || !passengers[i].dni.trim()) {
+            setErrorMessage("Todos los campos son obligatorios.");
+            return;
+        }
+        if (!/^\d+$/.test(passengers[i].dni)) {
+            setErrorMessage("El DNI debe contener solo números.");
+            return;
+        }
     }
 
     try {
-      setErrorMessage(""); // Limpiar mensajes de error previos
-      setSuccessMessage(""); // Limpiar mensajes de éxito previos
+        setErrorMessage("");
+        setSuccessMessage("");
 
-      const payload = {
-      id_User: userId,
-      id_ServiceOrder: serviceOrderId,
-      paymentStatus: "Paid",
-      DNI: "",  // Si el DNI es necesario en el payload, inclúyelo aquí
-      paymentInformation: passengers.map((passenger, index) => ({
-      id_Service: serviceId,
-      serviceTitle,
-      seatNumber: index + 1,
-      DNI_Personal: passenger.dni,
-      passengerName: passenger.passengerName || "Desconocido",
-      selectedDate,
-      selectedTime,
-      lockedStock: 1,  // Asumiendo que cada pasajero ocupa un lugar
-      totalPeople: selectedQuantity,
-      totalPrice: servicePrice,
-  })),
+        const payload = {
+            id_User: userId,
+            id_ServiceOrder: serviceOrderId,
+            paymentStatus: "Paid",
+            DNI: passengers[0]?.dni || "", // Asigna el DNI del primer pasajero
+            paymentInformation: passengers.map((passenger, index) => ({
+                id_Service: serviceId,
+                serviceTitle,
+                seatNumber: index + 1,
+                DNI_Personal: passenger.dni,
+                passengerName: passenger.passengerName || "Desconocido",
+                selectedDate,
+                selectedTime,
+                lockedStock: 1,
+                totalPeople: selectedQuantity,
+                totalPrice: servicePrice,
+            })),
+        };
+
+        console.log("Payload que se enviará:", payload);
+
+        const response = await axios.post(
+            `${import.meta.env.VITE_API_URL}/booking`,
+            payload,
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        console.log("Reserva creada:", response.data);
+
+        setSuccessMessage("Reserva realizada con éxito.");
+
+        setPassengers(
+            Array.from({ length: selectedQuantity }, () => ({
+                passengerName: "",
+                dni: "",
+            }))
+        );
+    } catch (error) {
+        setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
+        console.error("Error al crear la reserva:", error.response?.data || error.message);
+    }
 };
 
-
-      console.log("Payload que se enviará:", payload);
-
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/booking`, payload, {
-       headers: {
-                  'Content-Type': 'application/json',
-           },
-       });
-      console.log("Reserva creada:", response.data);
-
-      // Mensaje de éxito
-      setSuccessMessage("Reserva realizada con éxito.");
-
-      // Limpiar campos
-      setPassengers(Array.from({ length: selectedQuantity }, () => ({
-        passengerName: "",
-        dni: "",
-      })));
-    } catch (error) {
-      setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
-      console.error("Error al crear la reserva:", error.response?.data || error.message);
-    }
-  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
