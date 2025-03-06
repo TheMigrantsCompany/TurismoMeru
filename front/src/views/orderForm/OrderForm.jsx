@@ -151,73 +151,71 @@ const OrderForm = () => {
       if (formData.paymentMethod === "Pagos desde Argentina") {
        const apiUrl = import.meta.env.VITE_API_URL;
         
-      const response = await fetch(`${apiUrl}/payment/create-preference`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-             "Authorization": `Bearer ${token}` 
-              },
-              body: JSON.stringify({
-              paymentInformation: items,
-              id_User,
-              DNI: formData.dni,
-              email: formData.email,
-              id_ServiceOrder: createdOrder.id_ServiceOrder,
-              external_reference: createdOrder.id_ServiceOrder,
-              metadata: {
-                orderId: createdOrder.id_ServiceOrder,
-                totalPeople: items.reduce(
-                  (total, item) => total + item.totalPeople,
-                  0
-                ),
-                totalPrice: items.reduce(
-                  (total, item) => total + item.unit_price * item.totalPeople,
-                  0
-                ),
-              },
-            }),
-          }
-        );
+  const response = await fetch(`${apiUrl}/payment/create-preference`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}`,
+  },
+  body: JSON.stringify({
+    paymentInformation: items,
+    id_User,
+    DNI: formData.dni,
+    email: formData.email,
+    id_ServiceOrder: createdOrder.id_ServiceOrder,
+    external_reference: createdOrder.id_ServiceOrder,
+    metadata: {
+      orderId: createdOrder.id_ServiceOrder,
+      totalPeople: items.reduce(
+        (total, item) => total + item.totalPeople,
+        0
+      ),
+      totalPrice: items.reduce(
+        (total, item) => total + item.unit_price * item.totalPeople,
+        0
+      ),
+    },
+  }),
+});
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Detalles del error:", errorText);
-          throw new Error(`Error en la solicitud: ${response.statusText}`);
-        }
+if (!response.ok) {
+  const errorText = await response.text();
+  console.error("Detalles del error:", errorText);
+  throw new Error(`Error en la solicitud: ${response.statusText}`);
+}
 
-        data = await response.json();
-        console.log("Preference ID recibido:", data.preferenceId);
-      }
+const data = await response.json();
+console.log("Preference ID recibido:", data.preferenceId);
 
-      if (!data || !data.preferenceId) {
-        throw new Error("No se recibió un preferenceId válido.");
-      }
+if (!data || !data.preferenceId) {
+  throw new Error("No se recibió un preferenceId válido.");
+}
 
-      setPreferenceId(data.preferenceId);
+setPreferenceId(data.preferenceId);
 
-      // Esperar a que el SDK esté listo
-      if (!sdkLoaded) {
-        setIsReady(false);
-        return alert("Error: Mercado Pago aún no está listo.");
-      }
+// Esperar a que el SDK esté listo
+if (!sdkLoaded) {
+  setIsReady(false);
+  return alert("Error: Mercado Pago aún no está listo.");
+}
 
-      setIsReady(true); // Marcar como listo para proceder con el pago
+setIsReady(true); // Marcar como listo para proceder con el pago
 
-      // Ejecutar el flujo de pago solo si el SDK está listo
-     if (isReady && mercadoPago) {
-      mercadoPago.checkout({
-        preference: { id: data.preferenceId },
-        autoOpen: true,
-      });
-      alert("¡Pedido confirmado exitosamente!");
-    }
-  } else if (formData.paymentMethod === "Pagos desde el exterior") {
-    // No se crea preferencia para Mercado Pago
-    alert("¡Pedido confirmado exitosamente! Proceda con el pago por WhatsApp.");
+// Ejecutar el flujo de pago solo si el SDK está listo
+if (isReady && mercadoPago) {
+  try {
+    mercadoPago.checkout({
+      preference: { id: data.preferenceId },
+      autoOpen: true,
+    });
+    alert("¡Pedido confirmado exitosamente!");
+  } catch (error) {
+    console.error("Error en el flujo de pago:", error);
+    alert("Hubo un error. Intenta nuevamente.");
   }
-} catch (error) {
-  console.error("Error en el flujo de pago:", error);
-  alert("Hubo un error. Intenta nuevamente.");
+} else if (formData.paymentMethod === "Pagos desde el exterior") {
+  // No se crea preferencia para Mercado Pago
+  alert("¡Pedido confirmado exitosamente! Proceda con el pago por WhatsApp.");
 } finally {
   setLoading(false);
 }
