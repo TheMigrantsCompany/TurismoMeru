@@ -42,10 +42,19 @@ export function ServiceOrderManagement() {
   };
 
   useEffect(() => {
-    dispatch(getAllOrders());
+    const fetchOrders = async () => {
+      try {
+        await dispatch(getAllOrders());
+      } catch (error) {
+        console.error("Error al obtener órdenes:", error);
+      }
+    };
+
+    fetchOrders();
   }, [dispatch]);
 
   const handleEditOrder = (order) => {
+    console.log("Editando orden:", order);
     setSelectedOrder(order);
   };
 
@@ -119,8 +128,10 @@ export function ServiceOrderManagement() {
       {selectedOrder && (
         <ServiceOrderModal
           order={selectedOrder}
-          onClose={() => setSelectedOrder(null)}
-          onChangeStatus={() => {}}
+          onClose={() => {
+            setSelectedOrder(null);
+            dispatch(getAllOrders());
+          }}
         />
       )}
     </div>
