@@ -491,7 +491,7 @@ const OrderForm = () => {
           )}
         {formData.paymentMethod === "Pagos desde el exterior" && (
           <a
-            href={https://wa.me/+541169084059?text=${encodeURIComponent(
+            href={`https://wa.me/+541169084059?text=${encodeURIComponent(
               ¡Hola! Quisiera realizar una reserva con pago desde el exterior.\n\nDetalles de la reserva:\n${cartItems
                 .map(
                   (item) => • ${item.title}
