@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext, useEffect } from "react";
+React, { useState, useRef, useContext, useEffect } from "react";
 import { useCart } from "../shopping-cart/CartContext";
 import { useDispatch } from "react-redux";
 import { createServiceOrder } from "../../redux/actions/actions";
@@ -9,8 +9,9 @@ const OrderForm = () => {
   const dispatch = useDispatch();
   const { cartItems } = useCart();
   const formRef = useRef(null);
-  const { id_User } = useContext(AuthContext);
-
+  const { id_User, user  } = useContext(AuthContext);
+  const token = user?.token;
+  
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -118,6 +119,9 @@ const OrderForm = () => {
           totalPeople,
           unit_price: basePrice,
           currency_id: "ARS",
+          selectedDate: item.selectedDate, 
+          selectedTime: item.selectedTime,
+        
         };
       });
 
@@ -145,12 +149,15 @@ const OrderForm = () => {
 
       // Crear preferencia de pago si se selecciona "Pagos desde Argentina"
       if (formData.paymentMethod === "Pagos desde Argentina") {
-        const response = await fetch(
-          "http://localhost:3001/payment/create-preference",
-          {
+       const apiUrl = import.meta.env.VITE_API_URL;
+        
+      const response = await fetch(`${apiUrl}/payment/create-preference`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
+            headers: {
+              "Content-Type": "application/json",
+             "Authorization": `Bearer ${token}` 
+              },
+              body: JSON.stringify({
               paymentInformation: items,
               id_User,
               DNI: formData.dni,
@@ -175,7 +182,7 @@ const OrderForm = () => {
         if (!response.ok) {
           const errorText = await response.text();
           console.error("Detalles del error:", errorText);
-          throw new Error(`Error en la solicitud: ${response.statusText}`);
+          throw new Error(Error en la solicitud: ${response.statusText});
         }
 
         data = await response.json();
@@ -197,19 +204,23 @@ const OrderForm = () => {
       setIsReady(true); // Marcar como listo para proceder con el pago
 
       // Ejecutar el flujo de pago solo si el SDK está listo
-      if (isReady && mercadoPago) {
-        mercadoPago.checkout({
-          preference: { id: data.preferenceId },
-          autoOpen: true,
-        });
-        alert("¡Pedido confirmado exitosamente!");
-      }
-    } catch (error) {
-      console.error("Error en el flujo de pago:", error);
-      alert("Hubo un error. Intenta nuevamente.");
-    } finally {
-      setLoading(false);
+     if (isReady && mercadoPago) {
+      mercadoPago.checkout({
+        preference: { id: data.preferenceId },
+        autoOpen: true,
+      });
+      alert("¡Pedido confirmado exitosamente!");
     }
+  } else if (formData.paymentMethod === "Pagos desde el exterior") {
+    // No se crea preferencia para Mercado Pago
+    alert("¡Pedido confirmado exitosamente! Proceda con el pago por WhatsApp.");
+  }
+} catch (error) {
+  console.error("Error en el flujo de pago:", error);
+  alert("Hubo un error. Intenta nuevamente.");
+} finally {
+  setLoading(false);
+}
   };
 
   return (
