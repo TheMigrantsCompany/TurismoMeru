@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const UserBookings = ({ id_User }) => {
   const [bookings, setBookings] = useState([]);
   const [groupedData, setGroupedData] = useState([]); // Datos agrupados
   const [formData, setFormData] = useState({});
-  const [updateMessage, setUpdateMessage] = useState({
-    show: false,
-    message: "",
-    isError: false,
-  });
 
   console.log("ID del usuario recibido en UserBookings:", id_User);
 
@@ -88,7 +84,7 @@ const UserBookings = ({ id_User }) => {
     });
   };
 
-  // Actualiza la información de un pasajero individualmente
+  // Actualiza la información de un pasajero individualmente usando SweetAlert para notificaciones
   const handleUpdate = async (groupKey, passengerIndex) => {
     try {
       const passenger = formData[groupKey][passengerIndex];
@@ -112,25 +108,23 @@ const UserBookings = ({ id_User }) => {
       );
 
       if (response.status === 200) {
-        setUpdateMessage({
-          show: true,
-          message: `Pasajero ${passengerIndex + 1} actualizado correctamente`,
-          isError: false,
+        Swal.fire({
+          title: "Éxito",
+          text: `Pasajero ${passengerIndex + 1} actualizado correctamente`,
+          icon: "success",
+          timer: 3000,
+          timerProgressBar: true,
         });
-        setTimeout(() => {
-          setUpdateMessage({ show: false, message: "", isError: false });
-        }, 3000);
       }
     } catch (error) {
       console.error("Error al actualizar el pasajero:", error);
-      setUpdateMessage({
-        show: true,
-        message: `Error al actualizar pasajero ${passengerIndex + 1}`,
-        isError: true,
+      Swal.fire({
+        title: "Error",
+        text: `Error al actualizar pasajero ${passengerIndex + 1}`,
+        icon: "error",
+        timer: 3000,
+        timerProgressBar: true,
       });
-      setTimeout(() => {
-        setUpdateMessage({ show: false, message: "", isError: false });
-      }, 3000);
     }
   };
 
@@ -164,19 +158,6 @@ const UserBookings = ({ id_User }) => {
       <h1 className="text-3xl font-bold mb-6 text-[#4256a6] font-poppins">
         Mis Reservas
       </h1>
-
-      {/* Mostrar mensaje de actualización */}
-      {updateMessage.show && (
-        <div
-          className={`p-3 rounded-md mb-4 ${
-            updateMessage.isError
-              ? "bg-red-100 text-red-700 border border-red-300"
-              : "bg-green-100 text-green-700 border border-green-300"
-          }`}
-        >
-          {updateMessage.message}
-        </div>
-      )}
 
       {groupedData.length > 0 ? (
         <div className="space-y-6">
@@ -248,7 +229,7 @@ const UserBookings = ({ id_User }) => {
                                   e.target.value
                                 )
                               }
-                              className="w-full p-2 border rounded-md text-black bg-white/90 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent"
+                              className="w-full p-2 border rounded-md text-black bg-white/90 focus:ring-2 focus:ring-[#425a6] focus:border-transparent"
                               placeholder="Ingrese nombre"
                             />
                           </div>
@@ -267,13 +248,13 @@ const UserBookings = ({ id_User }) => {
                                   e.target.value
                                 )
                               }
-                              className="w-full p-2 border rounded-md text-black bg-white/90 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent"
+                              className="w-full p-2 border rounded-md text-black bg-white/90 focus:ring-2 focus:ring-[#425a6] focus:border-transparent"
                               placeholder="Ingrese DNI"
                             />
                           </div>
                           <button
                             onClick={() => handleUpdate(group.groupKey, index)}
-                            className="w-full bg-[#4256a6] text-white px-4 py-2 rounded-md hover:bg-[#2c3d8f] transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-[#4256a6]"
+                            className="w-full bg-[#4256a6] text-white px-4 py-2 rounded-md hover:bg-[#2c3d8f] transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-[#425a6]"
                           >
                             Actualizar
                           </button>
