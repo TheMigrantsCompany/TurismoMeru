@@ -491,43 +491,39 @@ const OrderForm = () => {
               <Wallet initialization={{ preferenceId }} />
             </div>
           )}
-        {formData.paymentMethod === "Pagos desde el exterior" && (
-          <a
-            href={`https://wa.me/+541169084059?text=${encodeURIComponent(
-              `¡Hola! Quisiera realizar una reserva con pago desde el exterior.\n\nDetalles de la reserva:\n${cartItems
-                .map(
-                  (item) => `• ${item.title}
-- Fecha: ${item.selectedDate}
-- Hora: ${item.selectedTime}
-- Personas: ${item.quantities?.adults || 0} adultos, ${
-                    item.quantities?.children || 0
-                  } menores, ${item.quantities?.seniors || 0} jubilados`
-                )
-                .join("\n\n")}\n\nTotal a pagar: $${cartItems
-                .reduce((acc, item) => {
-                  const totalItemPrice =
-                    (item.quantities?.adults * item.price) +
-                    (item.quantities?.children *
-                      item.price *
-                      ((100 - (item.discountForMinors || 0)) / 100)) +
-                    (item.quantities?.seniors *
-                      item.price *
-                      ((100 - (item.discountForSeniors || 0)) / 100));
-                  return acc + totalItemPrice;
-                }, 0).toFixed(2)}`
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full py-3 bg-[#25D366] text-white rounded-lg hover:bg-[#128C7E] shadow-md hover:shadow-lg transition-all duration-300 mt-4 font-poppins"
-          >
-            <img
-              src="https://img.icons8.com/fluent/24/000000/whatsapp.png"
-              alt="WhatsApp"
-              className="filter brightness-0 invert"
-            />
-            Contactar por WhatsApp para pago
-          </a>
-        )}
+        {formData.paymentMethod === "Pagos desde el exterior" && orderId && (
+  <a
+    href={`https://wa.me/+541169084059?text=${encodeURIComponent(
+      `¡Hola! Quisiera realizar una reserva con pago desde el exterior.\n\nDetalles de la reserva:\n${cartItems
+        .map(
+          (item) => `• ${item.title}\n- Fecha: ${item.selectedDate}\n- Hora: ${item.selectedTime}\n- Personas: ${item.quantities?.adults || 0} adultos, ${item.quantities?.children || 0} menores, ${item.quantities?.seniors || 0} jubilados`
+        )
+        .join("\n\n")}\n\nTotal a pagar: $${cartItems
+        .reduce((acc, item) => {
+          const totalItemPrice =
+            (item.quantities?.adults * item.price) +
+            (item.quantities?.children *
+              item.price *
+              ((100 - (item.discountForMinors || 0)) / 100)) +
+            (item.quantities?.seniors *
+              item.price *
+              ((100 - (item.discountForSeniors || 0)) / 100));
+          return acc + totalItemPrice;
+        }, 0).toFixed(2)}`
+    )}`}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="flex items-center justify-center gap-2 w-full py-3 bg-[#25D366] text-white rounded-lg hover:bg-[#128C7E] shadow-md hover:shadow-lg transition-all duration-300 mt-4 font-poppins"
+  >
+    <img
+      src="https://img.icons8.com/fluent/24/000000/whatsapp.png"
+      alt="WhatsApp"
+      className="filter brightness-0 invert"
+    />
+    Contactar por WhatsApp para pago
+  </a>
+)}
+
         <div className="mt-4">
           <button
             type="submit"
