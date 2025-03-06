@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Input, Button } from "@material-tailwind/react";
-import Swal from "sweetalert2";
 
 const BookingForm = ({ userId }) => {
   const location = useLocation();
@@ -13,43 +12,40 @@ const BookingForm = ({ userId }) => {
   const serviceTitle = queryParams.get("title");
   const servicePrice = parseFloat(queryParams.get("price")) || 0;
   const serviceOrderId = queryParams.get("id_ServiceOrder");
-
-  const selectedDateRaw = queryParams.get("date") || "Fecha no disponible";
+  const selectedDate = queryParams.get("date") || "Fecha no disponible";
   const selectedTime = queryParams.get("time") || "Hora no disponible";
   const selectedQuantity = parseInt(queryParams.get("totalPeople")) || 1;
 
-  const formatDate = (dateString) => {
-    const dateObj = new Date(dateString);
-    if (isNaN(dateObj)) return dateString;
-    const day = dateObj.getDate().toString().padStart(2, "0");
-    const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
-    const year = dateObj.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
-
-  const displayDate = formatDate(selectedDateRaw);
-
-  const [passenger, setPassenger] = useState({
-    passengerName: "",
-    dni: "",
-  });
+  const [passengers, setPassengers] = useState(
+    Array.from({ length: selectedQuantity }, () => ({
+      passengerName: "",
+      dni: "",
+    }))
+  );
 
   const [errorMessage, setErrorMessage] = useState("");
+  const [reservationSuccess, setReservationSuccess] = useState(false);
 
-  const handlePassengerChange = (field, value) => {
-    setPassenger((prev) => ({ ...prev, [field]: value }));
+  const handlePassengerChange = (index, field, value) => {
+    setPassengers((prevPassengers) =>
+      prevPassengers.map((p, i) =>
+        i === index ? { ...p, [field]: value } : p
+      )
+    );
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!passenger.passengerName.trim() || !passenger.dni.trim()) {
-      setErrorMessage("Todos los campos son obligatorios.");
-      return;
-    }
-    if (!/^\d+$/.test(passenger.dni)) {
-      setErrorMessage("El DNI debe contener solo números.");
-      return;
+    for (let i = 0; i < passengers.length; i++) {
+      if (!passengers[i].passengerName.trim() || !passengers[i].dni.trim()) {
+        setErrorMessage("Todos los campos son obligatorios.");
+        return;
+      }
+      if (!/^\d+$/.test(passengers[i].dni)) {
+        setErrorMessage("El DNI debe contener solo números.");
+        return;
+      }
     }
 
     try {
@@ -59,21 +55,19 @@ const BookingForm = ({ userId }) => {
         id_User: userId,
         id_ServiceOrder: serviceOrderId,
         paymentStatus: "Paid",
-        DNI: passenger.dni,
-        paymentInformation: [
-          {
-            id_Service: serviceId,
-            serviceTitle,
-            seatNumber: 1,
-            DNI_Personal: passenger.dni,
-            passengerName: passenger.passengerName || "Desconocido",
-            selectedDate: selectedDateRaw,
-            selectedTime,
-            lockedStock: 1,
-            totalPeople: selectedQuantity,
-            totalPrice: servicePrice,
-          },
-        ],
+        DNI: passengers[0]?.dni || "",
+        paymentInformation: passengers.map((passenger, index) => ({
+          id_Service: serviceId,
+          serviceTitle,
+          seatNumber: index + 1,
+          DNI_Personal: passenger.dni,
+          passengerName: passenger.passengerName || "Desconocido",
+          selectedDate,
+          selectedTime,
+          lockedStock: 1,
+          totalPeople: selectedQuantity,
+          totalPrice: servicePrice,
+        })),
       };
 
       console.log("Payload que se enviará:", payload);
@@ -89,18 +83,15 @@ const BookingForm = ({ userId }) => {
       );
       console.log("Reserva creada:", response.data);
 
-      await Swal.fire({
-        title: "Reserva confirmada",
-        text: "Tu reserva se ha creado con éxito.",
-        icon: "success",
-        timer: 2000,
-        timerProgressBar: true,
-        showConfirmButton: false,
-      });
-
+      setReservationSuccess(true);
       navigate("/user/reservas");
 
-      setPassenger({ passengerName: "", dni: "" });
+      setPassengers(
+        Array.from({ length: selectedQuantity }, () => ({
+          passengerName: "",
+          dni: "",
+        }))
+      );
     } catch (error) {
       setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
       console.error(
@@ -110,30 +101,16 @@ const BookingForm = ({ userId }) => {
     }
   };
 
-return (
-  <div className="flex items-center justify-center min-h-screen">
-    <form
-      onSubmit={handleSubmit}
-      className="max-w-lg w-full p-8 bg-[#f9f3e1] shadow-lg rounded-xl text-[#4256a6]"
-    >
-      <h2 className="text-2xl font-bold text-center mb-4">
-        Reserva para {serviceTitle}
-      </h2>
-      <div className="flex flex-col gap-2 text-lg mb-4">
-        <p>
-          <span className="font-semibold">Precio:</span> ${servicePrice}
-        </p>
-        <p>
-          <span className="font-semibold">Fecha:</span> {selectedDate}
-        </p>
-        <p>
-          <span className="font-semibold">Hora:</span> {selectedTime}
-        </p>
-      </div>
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <h2 className="text-xl font-semibold">Reserva para {serviceTitle}</h2>
+      <p className="font-semibold">Precio: <span className="font-normal">${servicePrice}</span></p>
+      <p className="font-semibold">Fecha: <span className="font-normal">{selectedDate}</span></p>
+      <p className="font-semibold">Hora: <span className="font-normal">{selectedTime}</span></p>
 
       {passengers.map((passenger, index) => (
-        <div key={index} className="border p-4 rounded-md bg-white mb-4">
-          <h3 className="text-lg font-semibold">Pasajero {index + 1}</h3>
+        <div key={index} className="border p-4 rounded-md shadow-md">
+          <h3 className="font-medium">Pasajero {index + 1}</h3>
           <Input
             type="text"
             placeholder="Nombre"
@@ -141,7 +118,7 @@ return (
             onChange={(e) =>
               handlePassengerChange(index, "passengerName", e.target.value)
             }
-            className="mb-4 text-[#4256a6]"
+            className="mt-2"
           />
           <Input
             type="text"
@@ -150,14 +127,14 @@ return (
             onChange={(e) =>
               handlePassengerChange(index, "dni", e.target.value)
             }
-            className="mb-4 text-[#4256a6]"
+            className="mt-2"
           />
         </div>
       ))}
 
-      {errorMessage && <p className="text-red-500 text-center mb-4">{errorMessage}</p>}
+      {errorMessage && <p className="text-red-500">{errorMessage}</p>}
       {reservationSuccess && (
-        <p className="text-green-500 font-semibold text-center mb-4">
+        <p className="text-green-500 font-semibold">
           ¡Tu reserva se ha creado con éxito! Redirigiendo...
         </p>
       )}
@@ -166,8 +143,7 @@ return (
         Reservar
       </Button>
     </form>
-  </div>
-);
+  );
 };
 
 export default BookingForm;
