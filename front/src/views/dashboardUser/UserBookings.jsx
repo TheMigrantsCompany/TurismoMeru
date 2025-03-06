@@ -61,24 +61,14 @@ const UserBookings = ({ id_User }) => {
     const grouped = groupBookings(bookings);
     setGroupedData(Object.values(grouped));
 
-    // Se inicializa formData para cada grupo
+    // Inicializa formData para cada grupo con la info de cada pasajero
     const initialFormData = {};
     Object.values(grouped).forEach((group) => {
-      initialFormData[group.groupKey] = group.passengers.map((passenger, index) => {
-        // Para el primer pasajero se puede precargar la info
-        if (index === 0) {
-          return {
-            DNI: passenger.DNI,
-            passengerName: passenger.passengerName,
-            id_Booking: passenger.id_Booking,
-          };
-        }
-        return {
-          DNI: "",
-          passengerName: "",
-          id_Booking: passenger.id_Booking,
-        };
-      });
+      initialFormData[group.groupKey] = group.passengers.map((passenger) => ({
+        DNI: passenger.DNI,
+        passengerName: passenger.passengerName,
+        id_Booking: passenger.id_Booking,
+      }));
     });
     console.log("Form Data inicial agrupado:", initialFormData);
     setFormData(initialFormData);
@@ -98,50 +88,39 @@ const UserBookings = ({ id_User }) => {
     });
   };
 
-  // Actualiza la información de un pasajero usando el endpoint de actualización
-  const handleUpdate = async (groupKey, passengerIndex) => {
+  // Función para actualizar TODOS los pasajeros de un grupo
+  const handleUpdateGroup = async (groupKey) => {
+    const passengers = formData[groupKey];
     try {
-      const passenger = formData[groupKey][passengerIndex];
-      console.log(
-        "URL:",
-        `${import.meta.env.VITE_API_URL}/booking/id/${passenger.id_Booking}`
-      );
-      console.log("Datos a enviar:", {
-        DNI: passenger.DNI,
-        passengerName: passenger.passengerName,
+      // Se realizan las peticiones en paralelo para cada pasajero
+      const updatePromises = passengers.map((passenger) => {
+        const formattedDNI = passenger.DNI ? parseInt(passenger.DNI) : null;
+        return axios.patch(
+          `${import.meta.env.VITE_API_URL}/booking/id/${passenger.id_Booking}`,
+          {
+            DNI: formattedDNI,
+            passengerName: passenger.passengerName,
+          }
+        );
       });
 
-      const formattedDNI = passenger.DNI ? parseInt(passenger.DNI) : null;
-
-      const response = await axios.patch(
-        `${import.meta.env.VITE_API_URL}/booking/id/${passenger.id_Booking}`,
-        {
-          DNI: formattedDNI,
-          passengerName: passenger.passengerName,
-        }
-      );
-
-      if (response.status === 200) {
-        setUpdateMessage({
-          show: true,
-          message: `Datos del pasajero ${passengerIndex + 1} actualizados correctamente`,
-          isError: false,
-        });
-
-        setTimeout(() => {
-          setUpdateMessage({ show: false, message: "", isError: false });
-        }, 3000);
-      }
-    } catch (error) {
-      console.error("Error al actualizar la reserva:", error);
-      console.log("Detalles del error:", error.response);
+      await Promise.all(updatePromises);
 
       setUpdateMessage({
         show: true,
-        message: `Error al actualizar los datos del pasajero ${passengerIndex + 1}`,
+        message: `Todos los pasajeros actualizados correctamente`,
+        isError: false,
+      });
+      setTimeout(() => {
+        setUpdateMessage({ show: false, message: "", isError: false });
+      }, 3000);
+    } catch (error) {
+      console.error("Error al actualizar los pasajeros:", error);
+      setUpdateMessage({
+        show: true,
+        message: `Error al actualizar los pasajeros`,
         isError: true,
       });
-
       setTimeout(() => {
         setUpdateMessage({ show: false, message: "", isError: false });
       }, 3000);
@@ -178,7 +157,7 @@ const UserBookings = ({ id_User }) => {
         Mis Reservas
       </h1>
 
-      {/* Mostrar mensaje si existe */}
+      {/* Mostrar mensaje de actualización */}
       {updateMessage.show && (
         <div
           className={`p-3 rounded-md mb-4 ${
@@ -273,21 +252,26 @@ const UserBookings = ({ id_User }) => {
                               type="text"
                               value={passenger.DNI}
                               onChange={(e) =>
-                                handleInputChange(group.groupKey, index, "DNI", e.target.value)
+                                handleInputChange(
+                                  group.groupKey,
+                                  index,
+                                  "DNI",
+                                  e.target.value
+                                )
                               }
                               className="w-full p-2 border rounded-md text-black bg-white/90 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent"
                               placeholder="Ingrese DNI"
                             />
                           </div>
-                          <button
-                            onClick={() => handleUpdate(group.groupKey, index)}
-                            className="w-full bg-[#4256a6] text-white px-4 py-2 rounded-md hover:bg-[#2c3d8f] transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-[#4256a6]"
-                          >
-                            Actualizar Pasajero {index + 1}
-                          </button>
                         </div>
                       ))}
                   </div>
+                  <button
+                    onClick={() => handleUpdateGroup(group.groupKey)}
+                    className="w-full bg-[#4256a6] text-white px-4 py-2 rounded-md hover:bg-[#2c3d8f] transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-[#4256a6] mt-4"
+                  >
+                    Actualizar Pasajeros
+                  </button>
                 </div>
               )}
             </div>
