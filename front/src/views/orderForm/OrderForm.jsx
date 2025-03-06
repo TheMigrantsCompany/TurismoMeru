@@ -151,7 +151,7 @@ const OrderForm = () => {
       if (formData.paymentMethod === "Pagos desde Argentina") {
        const apiUrl = import.meta.env.VITE_API_URL;
         
-       const response = await fetch(${apiUrl}/payment/create-preference, {
+       const response = await fetch(`${apiUrl}/payment/create-preference`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
