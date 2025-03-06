@@ -151,11 +151,11 @@ const OrderForm = () => {
       if (formData.paymentMethod === "Pagos desde Argentina") {
        const apiUrl = import.meta.env.VITE_API_URL;
         
-       const response = await fetch(`${apiUrl}/payment/create-preference`, {
+       const response = await fetch(${apiUrl}/payment/create-preference, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`, 
+              "Authorization": Bearer ${token}, 
               },
               body: JSON.stringify({
               paymentInformation: items,
@@ -179,13 +179,13 @@ const OrderForm = () => {
           }
         );
 
-      if (!response.ok) {
+          if (!response.ok) {
       const errorText = await response.text();
       console.error("Detalles del error:", errorText);
       throw new Error(`Error en la solicitud: ${response.statusText}`);
     }
 
-     data = await response.json();
+    const data = await response.json();
     console.log("Preference ID recibido:", data.preferenceId);
 
     if (!data || !data.preferenceId) {
@@ -218,7 +218,7 @@ const OrderForm = () => {
 } finally {
   setLoading(false);
 }
-    
+
   return (
     <div className="flex flex-col lg:flex-row gap-12 mt-10 px-8 max-w-[1600px] mx-auto">
       <form
@@ -366,7 +366,7 @@ const OrderForm = () => {
 
                   return (
                     <div
-                      key={`order-item-${item.id_Service}-${index}`}
+                      key={order-item-${item.id_Service}-${index}}
                       className="bg-white p-4 rounded-lg shadow-sm border border-[#425a66]/10 hover:shadow-md transition-shadow duration-300"
                     >
                       <p className="text-lg font-medium text-[#4256a6] mb-2 font-poppins">
@@ -491,15 +491,15 @@ const OrderForm = () => {
           )}
         {formData.paymentMethod === "Pagos desde el exterior" && (
           <a
-            href={`https://wa.me/+541169084059?text=${encodeURIComponent(
-              `¡Hola! Quisiera realizar una reserva con pago desde el exterior.\n\nDetalles de la reserva:\n${cartItems
+            href={https://wa.me/+541169084059?text=${encodeURIComponent(
+              ¡Hola! Quisiera realizar una reserva con pago desde el exterior.\n\nDetalles de la reserva:\n${cartItems
                 .map(
-                  (item) => `• ${item.title}
+                  (item) => • ${item.title}
 - Fecha: ${item.selectedDate}
 - Hora: ${item.selectedTime}
 - Personas: ${item.quantities?.adults || 0} adultos, ${
                     item.quantities?.children || 0
-                  } menores, ${item.quantities?.seniors || 0} jubilados`
+                  } menores, ${item.quantities?.seniors || 0} jubilados
                 )
                 .join("\n\n")}\n\nTotal a pagar: $${cartItems
                 .reduce((acc, item) => {
@@ -512,8 +512,8 @@ const OrderForm = () => {
                       item.price *
                       ((100 - (item.discountForSeniors || 0)) / 100));
                   return acc + totalItemPrice;
-                }, 0).toFixed(2)}`
-            )}`}
+                }, 0).toFixed(2)}
+            )}}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full py-3 bg-[#25D366] text-white rounded-lg hover:bg-[#128C7E] shadow-md hover:shadow-lg transition-all duration-300 mt-4 font-poppins"
