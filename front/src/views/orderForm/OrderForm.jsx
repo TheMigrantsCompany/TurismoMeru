@@ -231,26 +231,25 @@ const OrderForm = () => {
           Detalles de Facturación
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[
-            { label: "Nombre *", name: "firstName", required: true },
-            { label: "Apellidos *", name: "lastName", required: true },
-            { label: "Mail *", name: "email", required: true },
-            { label: "DNI / Pasaporte *", name: "dni", required: true },
-          ].map((field) => (
-            <div key={field.name}>
-              <label className="block text-sm font-medium text-[#4256a6]">
-                {field.label}
-              </label>
-              <input
-                type="text"
-                name={field.name}
-                value={formData[field.name]}
-                onChange={handleChange}
-                className="w-full mt-1 p-3 border border-gray-300 rounded-md"
-                required={field.required}
-              />
-            </div>
-          ))}
+       {[
+           { label: "Ciudad *", name: "city", required: true },
+           { label: "Región / Provincia *", name: "state", required: true },
+           { label: "Código Postal *", name: "postalCode", required: true },
+       ].map((field) => (
+         <div key={field.name}>
+         <label className="block text-sm font-medium text-[#4256a6]">
+           {field.label}
+         </label>
+       <input
+          type="text"
+          name={field.name}
+          value={formData[field.name]}
+          onChange={handleChange}
+          className="w-full mt-1 p-3 border border-gray-300 rounded-md"
+          required={field.required}
+          />
+       </div>
+         ))}
           <div>
             <label className="block text-sm font-medium text-[#4256a6] mb-1">
               País / Región *
