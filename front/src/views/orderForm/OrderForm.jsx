@@ -145,7 +145,7 @@ const OrderForm = () => {
 
       setOrderId(createdOrder.id_ServiceOrder);
 
-      let data;
+
 
       // Crear preferencia de pago si se selecciona "Pagos desde Argentina"
       if (formData.paymentMethod === "Pagos desde Argentina") {
@@ -179,46 +179,45 @@ const OrderForm = () => {
           }
         );
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Detalles del error:", errorText);
-          throw new Error(`Error en la solicitud: ${response.statusText}`);
-        }
-
-        data = await response.json();
-        console.log("Preference ID recibido:", data.preferenceId);
-      }
-
-      if (!data || !data.preferenceId) {
-        throw new Error("No se recibió un preferenceId válido.");
-      }
-
-      setPreferenceId(data.preferenceId);
-
-      // Esperar a que el SDK esté listo
-      if (!sdkLoaded) {
-        setIsReady(false);
-        return alert("Error: Mercado Pago aún no está listo.");
-      }
-
-      setIsReady(true); // Marcar como listo para proceder con el pago
-
-      // Ejecutar el flujo de pago solo si el SDK está listo
-      if (isReady && mercadoPago) {
-        mercadoPago.checkout({
-          preference: { id: data.preferenceId },
-          autoOpen: true,
-        });
-        alert("¡Pedido confirmado exitosamente!");
-      }
-    } catch (error) {
-      console.error("Error en el flujo de pago:", error);
-      alert("Hubo un error. Intenta nuevamente.");
-    } finally {
-      setLoading(false);
+      if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Detalles del error:", errorText);
+      throw new Error(`Error en la solicitud: ${response.statusText}`);
     }
-  };
 
+     data = await response.json();
+    console.log("Preference ID recibido:", data.preferenceId);
+
+    if (!data || !data.preferenceId) {
+      throw new Error("No se recibió un preferenceId válido.");
+    }
+
+    setPreferenceId(data.preferenceId);
+
+    if (!sdkLoaded) {
+      setIsReady(false);
+      return alert("Error: Mercado Pago aún no está listo.");
+    }
+
+    setIsReady(true);
+
+    if (isReady && mercadoPago) {
+      mercadoPago.checkout({
+        preference: { id: data.preferenceId },
+        autoOpen: true,
+      });
+      alert("¡Pedido confirmado exitosamente!");
+    }
+  } else if (formData.paymentMethod === "Pagos desde el exterior") {
+    // No se crea preferencia para Mercado Pago
+    alert("¡Pedido confirmado exitosamente! Proceda con el pago por WhatsApp.");
+  }
+} catch (error) {
+  console.error("Error en el flujo de pago:", error);
+  alert("Hubo un error. Intenta nuevamente.");
+} finally {
+  setLoading(false);
+}
   return (
     <div className="flex flex-col lg:flex-row gap-12 mt-10 px-8 max-w-[1600px] mx-auto">
       <form
