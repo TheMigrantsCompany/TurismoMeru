@@ -217,7 +217,7 @@ const OrderForm = () => {
   alert("Hubo un error. Intenta nuevamente.");
 } finally {
   setLoading(false);
-};
+}
     
   return (
     <div className="flex flex-col lg:flex-row gap-12 mt-10 px-8 max-w-[1600px] mx-auto">
