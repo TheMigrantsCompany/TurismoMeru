@@ -9,9 +9,8 @@ const OrderForm = () => {
   const dispatch = useDispatch();
   const { cartItems } = useCart();
   const formRef = useRef(null);
-  const { id_User, user  } = useContext(AuthContext);
-  const token = user?.token;
-  
+  const { id_User } = useContext(AuthContext);
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -119,9 +118,6 @@ const OrderForm = () => {
           totalPeople,
           unit_price: basePrice,
           currency_id: "ARS",
-          selectedDate: item.selectedDate, 
-          selectedTime: item.selectedTime,
-        
         };
       });
 
@@ -149,15 +145,12 @@ const OrderForm = () => {
 
       // Crear preferencia de pago si se selecciona "Pagos desde Argentina"
       if (formData.paymentMethod === "Pagos desde Argentina") {
-       const apiUrl = import.meta.env.VITE_API_URL;
-        
-       const response = await fetch(`${apiUrl}/payment/create-preference`, {
+        const response = await fetch(
+          "http://localhost:3001/payment/create-preference",
+          {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`,
-              },
-              body: JSON.stringify({
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
               paymentInformation: items,
               id_User,
               DNI: formData.dni,
@@ -179,45 +172,45 @@ const OrderForm = () => {
           }
         );
 
-          if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Detalles del error:", errorText);
-      throw new Error(`Error en la solicitud: ${response.statusText}`);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Detalles del error:", errorText);
+          throw new Error(`Error en la solicitud: ${response.statusText}`);
+        }
+
+        data = await response.json();
+        console.log("Preference ID recibido:", data.preferenceId);
+      }
+
+      if (!data || !data.preferenceId) {
+        throw new Error("No se recibió un preferenceId válido.");
+      }
+
+      setPreferenceId(data.preferenceId);
+
+      // Esperar a que el SDK esté listo
+      if (!sdkLoaded) {
+        setIsReady(false);
+        return alert("Error: Mercado Pago aún no está listo.");
+      }
+
+      setIsReady(true); // Marcar como listo para proceder con el pago
+
+      // Ejecutar el flujo de pago solo si el SDK está listo
+      if (isReady && mercadoPago) {
+        mercadoPago.checkout({
+          preference: { id: data.preferenceId },
+          autoOpen: true,
+        });
+        alert("¡Pedido confirmado exitosamente!");
+      }
+    } catch (error) {
+      console.error("Error en el flujo de pago:", error);
+      alert("Hubo un error. Intenta nuevamente.");
+    } finally {
+      setLoading(false);
     }
-
-    const data = await response.json();
-    console.log("Preference ID recibido:", data.preferenceId);
-
-    if (!data || !data.preferenceId) {
-      throw new Error("No se recibió un preferenceId válido.");
-    }
-
-    setPreferenceId(data.preferenceId);
-
-    if (!sdkLoaded) {
-      setIsReady(false);
-      return alert("Error: Mercado Pago aún no está listo.");
-    }
-
-    setIsReady(true);
-
-    if (isReady && mercadoPago) {
-      mercadoPago.checkout({
-        preference: { id: data.preferenceId },
-        autoOpen: true,
-      });
-      alert("¡Pedido confirmado exitosamente!");
-    }
-  } else if (formData.paymentMethod === "Pagos desde el exterior") {
-    // No se crea preferencia para Mercado Pago
-    alert("¡Pedido confirmado exitosamente! Proceda con el pago por WhatsApp.");
-  }
-} catch (error) {
-  console.error("Error en el flujo de pago:", error);
-  alert("Hubo un error. Intenta nuevamente.");
-} finally {
-  setLoading(false);
-}
+  };
 
   return (
     <div className="flex flex-col lg:flex-row gap-12 mt-10 px-8 max-w-[1600px] mx-auto">
@@ -231,25 +224,26 @@ const OrderForm = () => {
           Detalles de Facturación
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-       {[
-           { label: "Ciudad *", name: "city", required: true },
-           { label: "Región / Provincia *", name: "state", required: true },
-           { label: "Código Postal *", name: "postalCode", required: true },
-       ].map((field) => (
-         <div key={field.name}>
-         <label className="block text-sm font-medium text-[#4256a6]">
-           {field.label}
-         </label>
-       <input
-          type="text"
-          name={field.name}
-          value={formData[field.name]}
-          onChange={handleChange}
-          className="w-full mt-1 p-3 border border-gray-300 rounded-md"
-          required={field.required}
-          />
-       </div>
-         ))}
+          {[
+            { label: "Nombre *", name: "firstName", required: true },
+            { label: "Apellidos *", name: "lastName", required: true },
+            { label: "Mail *", name: "email", required: true },
+            { label: "DNI / Pasaporte *", name: "dni", required: true },
+          ].map((field) => (
+            <div key={field.name}>
+              <label className="block text-sm font-medium text-[#4256a6]">
+                {field.label}
+              </label>
+              <input
+                type="text"
+                name={field.name}
+                value={formData[field.name]}
+                onChange={handleChange}
+                className="w-full mt-1 p-3 border border-gray-300 rounded-md"
+                required={field.required}
+              />
+            </div>
+          ))}
           <div>
             <label className="block text-sm font-medium text-[#4256a6] mb-1">
               País / Región *
@@ -365,7 +359,7 @@ const OrderForm = () => {
 
                   return (
                     <div
-                     key={`order-item-${item.id_Service}-${index}`}
+                      key={`order-item-${item.id_Service}-${index}`}
                       className="bg-white p-4 rounded-lg shadow-sm border border-[#425a66]/10 hover:shadow-md transition-shadow duration-300"
                     >
                       <p className="text-lg font-medium text-[#4256a6] mb-2 font-poppins">
@@ -488,41 +482,43 @@ const OrderForm = () => {
               <Wallet initialization={{ preferenceId }} />
             </div>
           )}
-       {formData.paymentMethod === "Pagos desde el exterior" && (
-  <a
-    href={`https://wa.me/+541169084059?text=${encodeURIComponent(
-      `¡Hola! Quisiera realizar una reserva con pago desde el exterior.\n\nDetalles de la reserva:\n` +
-      cartItems
-        .map(
-          (item) =>
-            `• ${item.title}\n- Fecha: ${item.selectedDate}\n- Hora: ${item.selectedTime}\n- Personas: ${item.quantities?.adults || 0} adultos, ${item.quantities?.minors || 0} menores, ${item.quantities?.seniors || 0} seniors`
-        )
-        .join("\n\n") + // <-- Correcta concatenación
-      `\n\nTotal a pagar: $${cartItems
-        .reduce((acc, item) => {
-          const totalItemPrice =
-            (item.quantities?.adults * item.price) +
-            (item.quantities?.children *
-              item.price *
-              ((100 - (item.discountForMinors || 0)) / 100)) +
-            (item.quantities?.seniors *
-              item.price *
-              ((100 - (item.discountForSeniors || 0)) / 100));
-          return acc + totalItemPrice;
-        }, 0).toFixed(2)}`
-    )}`}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="flex items-center justify-center gap-2 w-full py-3 bg-[#25D366] text-white rounded-lg hover:bg-[#128C7E] shadow-md hover:shadow-lg transition-all duration-300 mt-4 font-poppins"
-  >
-    <img
-      src="https://img.icons8.com/fluent/24/000000/whatsapp.png"
-      alt="WhatsApp"
-      className="filter brightness-0 invert"
-    />
-    Contactar por WhatsApp para pago
-       </a>
-       )}
+        {formData.paymentMethod === "Pagos desde el exterior" && (
+          <a
+            href={`https://wa.me/+541169084059?text=${encodeURIComponent(
+              `¡Hola! Quisiera realizar una reserva con pago desde el exterior.\n\nDetalles de la reserva:\n${cartItems
+                .map(
+                  (item) => `• ${item.title}
+- Fecha: ${item.selectedDate}
+- Hora: ${item.selectedTime}
+- Personas: ${item.quantities?.adults || 0} adultos, ${
+                    item.quantities?.children || 0
+                  } menores, ${item.quantities?.seniors || 0} jubilados`
+                )
+                .join("\n\n")}\n\nTotal a pagar: $${cartItems
+                .reduce((acc, item) => {
+                  const totalItemPrice =
+                    (item.quantities?.adults * item.price) +
+                    (item.quantities?.children *
+                      item.price *
+                      ((100 - (item.discountForMinors || 0)) / 100)) +
+                    (item.quantities?.seniors *
+                      item.price *
+                      ((100 - (item.discountForSeniors || 0)) / 100));
+                  return acc + totalItemPrice;
+                }, 0).toFixed(2)}`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full py-3 bg-[#25D366] text-white rounded-lg hover:bg-[#128C7E] shadow-md hover:shadow-lg transition-all duration-300 mt-4 font-poppins"
+          >
+            <img
+              src="https://img.icons8.com/fluent/24/000000/whatsapp.png"
+              alt="WhatsApp"
+              className="filter brightness-0 invert"
+            />
+            Contactar por WhatsApp para pago
+          </a>
+        )}
         <div className="mt-4">
           <button
             type="submit"
