@@ -1,29 +1,56 @@
 require("dotenv").config();
 const { Sequelize } = require("sequelize");
-
 const fs = require("fs");
 const path = require("path");
-const { DB_USER, DB_PASSWORD, DB_HOST } = process.env;
+const { NODE_ENV } = process.env;
 
-console.log("Configuración DB:", {
-  user: DB_USER,
-  host: DB_HOST,
-  database: "turismomeru",
-});
+let dbConfig = {
+  environment: NODE_ENV,
+};
 
-// Agregar log para debug
-console.log("DATABASE_URL:", process.env.DATABASE_URL || "no está definida");
-console.log("NODE_ENV:", process.env.NODE_ENV);
+// Extraer información de DATABASE_URL si está disponible
+if (process.env.DATABASE_URL) {
+  try {
+    const url = new URL(process.env.DATABASE_URL);
+    dbConfig = {
+      user: url.username,
+      host: url.hostname,
+      database: url.pathname.split("/")[1],
+      environment: NODE_ENV,
+    };
+  } catch (error) {
+    console.error("Error al parsear DATABASE_URL:", error.message);
+  }
+}
+
+console.log("Configuración DB:", dbConfig);
+
+// Configuración de dialectOptions según el entorno
+const dialectOptions =
+  NODE_ENV === "production"
+    ? {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false,
+        },
+      }
+    : {};
 
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  logging: false, // Desactivar logging en producción
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false,
-    },
-  },
+  logging: false,
+  native: false,
+  dialectOptions: dialectOptions,
 });
+
+// Verificar la conexión usando IIFE
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("Conexión a la base de datos establecida correctamente.");
+  } catch (error) {
+    console.error("No se pudo conectar a la base de datos:", error);
+  }
+})();
 
 const basename = path.basename(__filename);
 
