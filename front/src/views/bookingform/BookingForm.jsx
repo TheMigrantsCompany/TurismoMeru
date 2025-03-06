@@ -168,4 +168,6 @@ return (
     </form>
   </div>
 );
+};
+
 export default BookingForm;
