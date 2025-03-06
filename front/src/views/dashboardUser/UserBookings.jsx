@@ -3,6 +3,7 @@ import axios from "axios";
 
 const UserBookings = ({ id_User }) => {
   const [bookings, setBookings] = useState([]);
+  const [groupedData, setGroupedData] = useState([]); // Datos agrupados
   const [formData, setFormData] = useState({});
   const [updateMessage, setUpdateMessage] = useState({
     show: false,
@@ -12,6 +13,29 @@ const UserBookings = ({ id_User }) => {
 
   console.log("ID del usuario recibido en UserBookings:", id_User);
 
+  // Función para agrupar bookings por un identificador común.
+  // Se usa id_ServiceOrder o, si no existe, se usa serviceTitle + dateTime.
+  const groupBookings = (bookings) => {
+    return bookings.reduce((acc, booking) => {
+      const key = booking.id_ServiceOrder || booking.serviceTitle + booking.dateTime;
+      if (!acc[key]) {
+        acc[key] = {
+          groupKey: key,
+          ...booking,
+          passengers: [],
+        };
+      }
+      // Cada booking representa un pasajero
+      acc[key].passengers.push({
+        DNI: booking.DNI || "",
+        passengerName: booking.passengerName || "",
+        id_Booking: booking.id_Booking,
+      });
+      return acc;
+    }, {});
+  };
+
+  // Obtiene las reservas del usuario
   useEffect(() => {
     if (!id_User) return; // Evita la petición si no hay ID
 
@@ -31,54 +55,56 @@ const UserBookings = ({ id_User }) => {
     fetchBookings();
   }, [id_User]);
 
-  // Inicializa formData con los datos de cada reserva
+  // Agrupa las reservas y inicializa el estado formData
   useEffect(() => {
-    console.log("Inicializando formData con bookings:", bookings);
-    const initialFormData = {};
-    bookings.forEach((booking) => {
-      const passengers = Array(booking.totalPeople || 1)
-        .fill()
-        .map((_, index) => {
-          if (index === 0) {
-            return {
-              DNI: booking.DNI || "",
-              passengerName: booking.passengerName || "",
-            };
-          }
-          return {
-            DNI: "",
-            passengerName: "",
-          };
-        });
+    console.log("Agrupando bookings:", bookings);
+    const grouped = groupBookings(bookings);
+    setGroupedData(Object.values(grouped));
 
-      initialFormData[booking.id_Booking] = passengers;
+    // Se inicializa formData para cada grupo
+    const initialFormData = {};
+    Object.values(grouped).forEach((group) => {
+      initialFormData[group.groupKey] = group.passengers.map((passenger, index) => {
+        // Para el primer pasajero se puede precargar la info
+        if (index === 0) {
+          return {
+            DNI: passenger.DNI,
+            passengerName: passenger.passengerName,
+            id_Booking: passenger.id_Booking,
+          };
+        }
+        return {
+          DNI: "",
+          passengerName: "",
+          id_Booking: passenger.id_Booking,
+        };
+      });
     });
-    console.log("Form Data inicial:", initialFormData);
+    console.log("Form Data inicial agrupado:", initialFormData);
     setFormData(initialFormData);
   }, [bookings]);
 
-  // Maneja el cambio en los inputs
-  const handleInputChange = (bookingId, index, field, value) => {
+  // Maneja el cambio en los inputs usando el groupKey
+  const handleInputChange = (groupKey, index, field, value) => {
     console.log(
-      `handleInputChange para booking ${bookingId}, index ${index}, campo ${field}, valor ${value}`
+      `handleInputChange para grupo ${groupKey}, index ${index}, campo ${field}, valor ${value}`
     );
     setFormData((prevData) => {
-      const updatedPassengers = prevData[bookingId].map((passenger, i) =>
+      const updatedPassengers = prevData[groupKey].map((passenger, i) =>
         i === index ? { ...passenger, [field]: value } : passenger
       );
-      console.log("Pasajeros actualizados para booking", bookingId, ":", updatedPassengers);
-      return { ...prevData, [bookingId]: updatedPassengers };
+      console.log("Pasajeros actualizados para grupo", groupKey, ":", updatedPassengers);
+      return { ...prevData, [groupKey]: updatedPassengers };
     });
   };
 
-  // Actualiza la información de una reserva usando el endpoint de actualización
-  const handleUpdate = async (bookingId, passengerIndex) => {
+  // Actualiza la información de un pasajero usando el endpoint de actualización
+  const handleUpdate = async (groupKey, passengerIndex) => {
     try {
-      const passenger = formData[bookingId][passengerIndex];
-
+      const passenger = formData[groupKey][passengerIndex];
       console.log(
         "URL:",
-        `${import.meta.env.VITE_API_URL}/booking/id/${bookingId}`
+        `${import.meta.env.VITE_API_URL}/booking/id/${passenger.id_Booking}`
       );
       console.log("Datos a enviar:", {
         DNI: passenger.DNI,
@@ -88,7 +114,7 @@ const UserBookings = ({ id_User }) => {
       const formattedDNI = passenger.DNI ? parseInt(passenger.DNI) : null;
 
       const response = await axios.patch(
-        `${import.meta.env.VITE_API_URL}/booking/id/${bookingId}`,
+        `${import.meta.env.VITE_API_URL}/booking/id/${passenger.id_Booking}`,
         {
           DNI: formattedDNI,
           passengerName: passenger.passengerName,
@@ -125,7 +151,6 @@ const UserBookings = ({ id_User }) => {
   // Función para formatear la fecha y hora de la excursión
   const formatDate = (dateString) => {
     if (!dateString) return "No disponible";
-    // Reemplaza el espacio por 'T' para formar una fecha ISO
     const isoString = dateString.includes(" ") ? dateString.replace(" ", "T") : dateString;
     const date = new Date(isoString);
     if (isNaN(date)) return "Fecha inválida";
@@ -144,7 +169,7 @@ const UserBookings = ({ id_User }) => {
     return excursionDate < currentDate;
   };
 
-  console.log("Render: bookings:", bookings);
+  console.log("Render: groupedData:", groupedData);
   console.log("Render: formData:", formData);
 
   return (
@@ -166,24 +191,24 @@ const UserBookings = ({ id_User }) => {
         </div>
       )}
 
-      {bookings.length > 0 ? (
+      {groupedData.length > 0 ? (
         <div className="space-y-6">
-          {bookings.map((booking) => (
+          {groupedData.map((group) => (
             <div
-              key={booking.id_Booking}
+              key={group.groupKey}
               className={`bg-[#dac9aa] shadow-md rounded-lg p-6 border border-[#425a66] hover:shadow-lg transition-shadow ${
-                isBookingPast(booking.dateTime) ? "opacity-60" : ""
+                isBookingPast(group.dateTime) ? "opacity-60" : ""
               }`}
             >
               <div className="mb-4">
                 <h3 className="text-xl font-semibold text-[#4256a6] font-poppins mb-2">
-                  {booking.serviceTitle}
+                  {group.serviceTitle}
                 </h3>
                 <div className="grid grid-cols-2 gap-4 text-sm text-[#425a66]">
                   <div className="bg-[#f9f3e1] p-3 rounded-lg">
                     <span className="font-semibold">Fecha y Hora:</span>
-                    <p className="mt-1">{formatDate(booking.dateTime)}</p>
-                    {isBookingPast(booking.dateTime) && (
+                    <p className="mt-1">{formatDate(group.dateTime)}</p>
+                    {isBookingPast(group.dateTime) && (
                       <p className="text-red-500 text-sm mt-1">
                         Esta reserva ya ha pasado
                       </p>
@@ -193,35 +218,33 @@ const UserBookings = ({ id_User }) => {
                     <span className="font-semibold">Estado:</span>
                     <p
                       className={`mt-1 font-medium ${
-                        booking.status === "Completada"
+                        group.status === "Completada"
                           ? "text-green-600"
-                          : isBookingPast(booking.dateTime)
+                          : isBookingPast(group.dateTime)
                           ? "text-red-600"
                           : "text-yellow-600"
                       }`}
                     >
-                      {isBookingPast(booking.dateTime)
-                        ? "Finalizada"
-                        : booking.status}
+                      {isBookingPast(group.dateTime) ? "Finalizada" : group.status}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {!isBookingPast(booking.dateTime) && (
+              {!isBookingPast(group.dateTime) && (
                 <div className="mt-6">
                   <h4 className="text-lg font-semibold text-[#425a66] mb-3">
-                    Información de Pasajeros ({booking.totalPeople || 1})
+                    Información de Pasajeros ({group.passengers.length})
                   </h4>
                   <div className="flex flex-row gap-4 overflow-x-auto pb-2">
-                    {formData[booking.id_Booking] &&
-                      formData[booking.id_Booking].map((passenger, index) => (
+                    {formData[group.groupKey] &&
+                      formData[group.groupKey].map((passenger, index) => (
                         <div
                           key={index}
                           className="min-w-[300px] p-4 bg-[#dac9aa] rounded-lg border border-[#425a66]/20 shadow-sm hover:shadow-md transition-shadow"
                         >
-                          <p className="text-sm font-semibold text-[#425a66] mb-3 border-b border-[#425a66]/20 pb-2">
-                            Pasajero {index + 1} de {booking.totalPeople || 1}
+                          <p className="text-sm font-semibold text-[#4256a6] mb-3 border-b border-[#425a66]/20 pb-2">
+                            Pasajero {index + 1} de {group.passengers.length}
                           </p>
                           <div className="mb-4">
                             <label className="block text-sm font-medium text-[#425a66] mb-1">
@@ -232,7 +255,7 @@ const UserBookings = ({ id_User }) => {
                               value={passenger.passengerName}
                               onChange={(e) =>
                                 handleInputChange(
-                                  booking.id_Booking,
+                                  group.groupKey,
                                   index,
                                   "passengerName",
                                   e.target.value
@@ -250,21 +273,14 @@ const UserBookings = ({ id_User }) => {
                               type="text"
                               value={passenger.DNI}
                               onChange={(e) =>
-                                handleInputChange(
-                                  booking.id_Booking,
-                                  index,
-                                  "DNI",
-                                  e.target.value
-                                )
+                                handleInputChange(group.groupKey, index, "DNI", e.target.value)
                               }
                               className="w-full p-2 border rounded-md text-black bg-white/90 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent"
                               placeholder="Ingrese DNI"
                             />
                           </div>
                           <button
-                            onClick={() =>
-                              handleUpdate(booking.id_Booking, index)
-                            }
+                            onClick={() => handleUpdate(group.groupKey, index)}
                             className="w-full bg-[#4256a6] text-white px-4 py-2 rounded-md hover:bg-[#2c3d8f] transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-[#4256a6]"
                           >
                             Actualizar Pasajero {index + 1}
