@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getAllOrders,
-  deleteServiceOrder, 
+  deleteServiceOrder,
 } from "../../../redux/actions/actions";
 import ServiceOrdersTable from "../../../components/tables/admin/ServiceOrdersTable";
 import ServiceOrderModal from "../../../components/modals/admin-modal/ServiceOrderModal";
@@ -42,10 +42,19 @@ export function ServiceOrderManagement() {
   };
 
   useEffect(() => {
-    dispatch(getAllOrders());
+    const fetchOrders = async () => {
+      try {
+        await dispatch(getAllOrders());
+      } catch (error) {
+        console.error("Error al obtener órdenes:", error);
+      }
+    };
+
+    fetchOrders();
   }, [dispatch]);
 
   const handleEditOrder = (order) => {
+    console.log("Editando orden:", order);
     setSelectedOrder(order);
   };
 
@@ -119,8 +128,10 @@ export function ServiceOrderManagement() {
       {selectedOrder && (
         <ServiceOrderModal
           order={selectedOrder}
-          onClose={() => setSelectedOrder(null)}
-          onChangeStatus={() => {}}
+          onClose={() => {
+            setSelectedOrder(null);
+            dispatch(getAllOrders());
+          }}
         />
       )}
     </div>
