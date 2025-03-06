@@ -3,7 +3,7 @@ import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import {
   Button,
   IconButton,
-  Typography, 
+  Typography,
   Tooltip,
 } from "@material-tailwind/react";
 
@@ -12,28 +12,16 @@ const ServiceOrdersTable = ({ orders, onEdit, onDelete }) => {
   const [currentFilter, setCurrentFilter] = useState("all");
 
   useEffect(() => {
-    console.log("Órdenes actualizadas:", orders);
+    console.log("Órdenes recibidas en la tabla:", orders);
     filterOrdersByStatus(currentFilter);
-  }, [orders]);
+  }, [orders, currentFilter]);
 
   const filterOrdersByStatus = (status) => {
     setCurrentFilter(status);
-    console.log("Filtrando por estado:", status);
-    console.log("Órdenes disponibles:", orders);
-
     if (status === "all") {
       setFilteredOrders(orders);
     } else {
-      const filtered = orders.filter((order) => {
-        console.log(`Orden ${order.id}:`, {
-          orderStatus: order.status,
-          filterStatus: status,
-          matches: order.status === status,
-        });
-        return order.status === status;
-      });
-
-      console.log("Órdenes filtradas:", filtered);
+      const filtered = orders.filter((order) => order.status === status);
       setFilteredOrders(filtered);
     }
   };
