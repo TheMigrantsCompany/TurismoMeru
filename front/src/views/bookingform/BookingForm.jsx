@@ -13,12 +13,11 @@ const BookingForm = ({ userId }) => {
   const serviceTitle = queryParams.get("title");
   const servicePrice = parseFloat(queryParams.get("price")) || 0;
   const serviceOrderId = queryParams.get("id_ServiceOrder");
-  // Valor original de la fecha para enviar al backend
+
   const selectedDateRaw = queryParams.get("date") || "Fecha no disponible";
   const selectedTime = queryParams.get("time") || "Hora no disponible";
   const selectedQuantity = parseInt(queryParams.get("totalPeople")) || 1;
 
-  // Función para formatear la fecha a dd/mm/yyyy (solo para mostrar)
   const formatDate = (dateString) => {
     const dateObj = new Date(dateString);
     if (isNaN(dateObj)) return dateString;
@@ -28,11 +27,8 @@ const BookingForm = ({ userId }) => {
     return `${day}/${month}/${year}`;
   };
 
-  // Variable para mostrar la fecha formateada
   const displayDate = formatDate(selectedDateRaw);
 
-  // Solo se permite llenar la información de un pasajero,
-  // aunque la compra tenga más asientos.
   const [passenger, setPassenger] = useState({
     passengerName: "",
     dni: "",
@@ -47,7 +43,6 @@ const BookingForm = ({ userId }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Validación de campos
     if (!passenger.passengerName.trim() || !passenger.dni.trim()) {
       setErrorMessage("Todos los campos son obligatorios.");
       return;
@@ -72,7 +67,6 @@ const BookingForm = ({ userId }) => {
             seatNumber: 1,
             DNI_Personal: passenger.dni,
             passengerName: passenger.passengerName || "Desconocido",
-            // Se envía la fecha original al backend
             selectedDate: selectedDateRaw,
             selectedTime,
             lockedStock: 1,
@@ -95,7 +89,6 @@ const BookingForm = ({ userId }) => {
       );
       console.log("Reserva creada:", response.data);
 
-      // Mostrar mensaje de éxito y redirigir
       await Swal.fire({
         title: "Reserva confirmada",
         text: "Tu reserva se ha creado con éxito.",
@@ -107,7 +100,6 @@ const BookingForm = ({ userId }) => {
 
       navigate("/user/reservas");
 
-      // Limpiar el formulario
       setPassenger({ passengerName: "", dni: "" });
     } catch (error) {
       setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
@@ -122,12 +114,12 @@ const BookingForm = ({ userId }) => {
     <div className="flex items-center justify-center min-h-screen bg-[#f9f3e1]">
       <form
         onSubmit={handleSubmit}
-        className="max-w-lg w-full p-6 bg-[#f9f3e1] shadow-md rounded-lg space-y-6 text-[#4256a6]"
+        className="max-w-lg w-full p-8 bg-white shadow-lg rounded-xl text-[#4256a6]"
       >
-        <h2 className="text-2xl font-bold text-center">
+        <h2 className="text-2xl font-bold text-center mb-4">
           Reserva para {serviceTitle}
         </h2>
-        <div className="flex flex-col gap-2 text-lg">
+        <div className="flex flex-col gap-2 text-lg mb-4">
           <p>
             <span className="font-semibold">Precio:</span> ${servicePrice}
           </p>
@@ -139,7 +131,7 @@ const BookingForm = ({ userId }) => {
           </p>
         </div>
 
-        <div className="border p-4 rounded-md">
+        <div className="border p-4 rounded-md mb-4">
           <h3 className="text-xl font-semibold mb-4">Datos del Pasajero</h3>
           <Input
             type="text"
@@ -157,7 +149,7 @@ const BookingForm = ({ userId }) => {
           />
         </div>
 
-        {errorMessage && <p className="text-red-500 text-center">{errorMessage}</p>}
+        {errorMessage && <p className="text-red-500 text-center mb-4">{errorMessage}</p>}
 
         <Button type="submit" color="green" className="w-full">
           Reservar
