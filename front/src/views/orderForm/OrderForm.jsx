@@ -182,7 +182,7 @@ const OrderForm = () => {
         if (!response.ok) {
           const errorText = await response.text();
           console.error("Detalles del error:", errorText);
-          throw new Error(Error en la solicitud: ${response.statusText});
+          throw new Error(`Error en la solicitud: ${response.statusText}`);
         }
 
         data = await response.json();
