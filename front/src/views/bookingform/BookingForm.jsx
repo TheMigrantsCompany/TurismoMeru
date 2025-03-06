@@ -111,7 +111,7 @@ const BookingForm = ({ userId }) => {
   };
 
 return (
-  <div className="flex items-center justify-center min-h-screen bg-gray-100">
+  <div className="flex items-center justify-center min-h-screen">
     <form
       onSubmit={handleSubmit}
       className="max-w-lg w-full p-8 bg-[#f9f3e1] shadow-lg rounded-xl text-[#4256a6]"
@@ -124,32 +124,43 @@ return (
           <span className="font-semibold">Precio:</span> ${servicePrice}
         </p>
         <p>
-          <span className="font-semibold">Fecha:</span> {displayDate}
+          <span className="font-semibold">Fecha:</span> {selectedDate}
         </p>
         <p>
           <span className="font-semibold">Hora:</span> {selectedTime}
         </p>
       </div>
 
-      <div className="border p-4 rounded-md mb-4 bg-white">
-        <h3 className="text-xl font-semibold mb-4">Datos del Pasajero</h3>
-        <Input
-          type="text"
-          placeholder="Nombre"
-          value={passenger.passengerName}
-          onChange={(e) => handlePassengerChange("passengerName", e.target.value)}
-          className="mb-4 text-[#4256a6]"
-        />
-        <Input
-          type="text"
-          placeholder="DNI"
-          value={passenger.dni}
-          onChange={(e) => handlePassengerChange("dni", e.target.value)}
-          className="mb-4 text-[#4256a6]"
-        />
-      </div>
+      {passengers.map((passenger, index) => (
+        <div key={index} className="border p-4 rounded-md bg-white mb-4">
+          <h3 className="text-lg font-semibold">Pasajero {index + 1}</h3>
+          <Input
+            type="text"
+            placeholder="Nombre"
+            value={passenger.passengerName}
+            onChange={(e) =>
+              handlePassengerChange(index, "passengerName", e.target.value)
+            }
+            className="mb-4 text-[#4256a6]"
+          />
+          <Input
+            type="text"
+            placeholder="DNI"
+            value={passenger.dni}
+            onChange={(e) =>
+              handlePassengerChange(index, "dni", e.target.value)
+            }
+            className="mb-4 text-[#4256a6]"
+          />
+        </div>
+      ))}
 
       {errorMessage && <p className="text-red-500 text-center mb-4">{errorMessage}</p>}
+      {reservationSuccess && (
+        <p className="text-green-500 font-semibold text-center mb-4">
+          ¡Tu reserva se ha creado con éxito! Redirigiendo...
+        </p>
+      )}
 
       <Button type="submit" color="green" className="w-full">
         Reservar
@@ -157,6 +168,4 @@ return (
     </form>
   </div>
 );
-};
-
 export default BookingForm;
