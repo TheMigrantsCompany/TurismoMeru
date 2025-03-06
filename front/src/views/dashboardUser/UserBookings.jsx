@@ -88,37 +88,44 @@ const UserBookings = ({ id_User }) => {
     });
   };
 
-  // Función para actualizar TODOS los pasajeros de un grupo
-  const handleUpdateGroup = async (groupKey) => {
-    const passengers = formData[groupKey];
+  // Actualiza la información de un pasajero individualmente
+  const handleUpdate = async (groupKey, passengerIndex) => {
     try {
-      // Se realizan las peticiones en paralelo para cada pasajero
-      const updatePromises = passengers.map((passenger) => {
-        const formattedDNI = passenger.DNI ? parseInt(passenger.DNI) : null;
-        return axios.patch(
-          `${import.meta.env.VITE_API_URL}/booking/id/${passenger.id_Booking}`,
-          {
-            DNI: formattedDNI,
-            passengerName: passenger.passengerName,
-          }
-        );
+      const passenger = formData[groupKey][passengerIndex];
+      console.log(
+        "URL:",
+        `${import.meta.env.VITE_API_URL}/booking/id/${passenger.id_Booking}`
+      );
+      console.log("Datos a enviar:", {
+        DNI: passenger.DNI,
+        passengerName: passenger.passengerName,
       });
 
-      await Promise.all(updatePromises);
+      const formattedDNI = passenger.DNI ? parseInt(passenger.DNI) : null;
 
-      setUpdateMessage({
-        show: true,
-        message: `Todos los pasajeros actualizados correctamente`,
-        isError: false,
-      });
-      setTimeout(() => {
-        setUpdateMessage({ show: false, message: "", isError: false });
-      }, 3000);
+      const response = await axios.patch(
+        `${import.meta.env.VITE_API_URL}/booking/id/${passenger.id_Booking}`,
+        {
+          DNI: formattedDNI,
+          passengerName: passenger.passengerName,
+        }
+      );
+
+      if (response.status === 200) {
+        setUpdateMessage({
+          show: true,
+          message: `Pasajero ${passengerIndex + 1} actualizado correctamente`,
+          isError: false,
+        });
+        setTimeout(() => {
+          setUpdateMessage({ show: false, message: "", isError: false });
+        }, 3000);
+      }
     } catch (error) {
-      console.error("Error al actualizar los pasajeros:", error);
+      console.error("Error al actualizar el pasajero:", error);
       setUpdateMessage({
         show: true,
-        message: `Error al actualizar los pasajeros`,
+        message: `Error al actualizar pasajero ${passengerIndex + 1}`,
         isError: true,
       });
       setTimeout(() => {
@@ -130,6 +137,7 @@ const UserBookings = ({ id_User }) => {
   // Función para formatear la fecha y hora de la excursión
   const formatDate = (dateString) => {
     if (!dateString) return "No disponible";
+    // Reemplaza el espacio por 'T' para formar una fecha ISO
     const isoString = dateString.includes(" ") ? dateString.replace(" ", "T") : dateString;
     const date = new Date(isoString);
     if (isNaN(date)) return "Fecha inválida";
@@ -263,15 +271,15 @@ const UserBookings = ({ id_User }) => {
                               placeholder="Ingrese DNI"
                             />
                           </div>
+                          <button
+                            onClick={() => handleUpdate(group.groupKey, index)}
+                            className="w-full bg-[#4256a6] text-white px-4 py-2 rounded-md hover:bg-[#2c3d8f] transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-[#4256a6]"
+                          >
+                            Actualizar
+                          </button>
                         </div>
                       ))}
                   </div>
-                  <button
-                    onClick={() => handleUpdateGroup(group.groupKey)}
-                    className="w-full bg-[#4256a6] text-white px-4 py-2 rounded-md hover:bg-[#2c3d8f] transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-[#4256a6] mt-4"
-                  >
-                    Actualizar Pasajeros
-                  </button>
                 </div>
               )}
             </div>
