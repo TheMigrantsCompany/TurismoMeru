@@ -5,30 +5,24 @@ import Checkout from "../../components/checkout/CheckOut";
 import { motion } from "framer-motion";
 
 const ShoppingCart = () => {
-  const { cartItems, removeFromCart, clearCart } = useCart();
+  const { cartItems, removeFromCart } = useCart();
   const [showCheckout, setShowCheckout] = useState(false);
   const navigate = useNavigate();
 
   const subtotal = cartItems.reduce((acc, item) => {
     const { price, discountForMinors = 0, discountForSeniors = 0, quantities } = item;
-  
     const adultsTotal = price * (quantities?.adults || 0);
     const minorsTotal = (price - (price * discountForMinors) / 100) * (quantities?.children || 0);
     const seniorsTotal = (price - (price * discountForSeniors) / 100) * (quantities?.seniors || 0);
-  
     return acc + adultsTotal + minorsTotal + seniorsTotal;
   }, 0);
-  
+
   const total = subtotal;
 
   const handlePurchaseSuccess = () => {
-    // Guardamos la data actual del carrito para OrderForm
-    const cartData = [...cartItems];
-    // Vaciamos el carrito
-    clearCart();
+    // No se vacía el carrito aquí para que OrderForm tenga acceso a los datos.
     setShowCheckout(false);
-    // Pasamos la data a OrderForm mediante state
-    navigate('/orderform', { state: { cartData } });
+    navigate('/orderform');
   };
 
   return (
@@ -75,16 +69,14 @@ const ShoppingCart = () => {
                   <div className="p-6 space-y-4">
                     <div className="flex items-start space-x-4">
                       <img
-                        src={
-                          item.photos && item.photos.length > 0
-                            ? item.photos[0]
-                            : "https://via.placeholder.com/80"
-                        }
+                        src={ item.photos && item.photos.length > 0 ? item.photos[0] : "https://via.placeholder.com/80" }
                         alt={item.title}
                         className="w-24 h-24 object-cover rounded-lg shadow-md"
                       />
                       <div className="flex-1">
-                        <h3 className="text-xl font-semibold text-[#4256a6] font-poppins mb-1">{item.title}</h3>
+                        <h3 className="text-xl font-semibold text-[#4256a6] font-poppins mb-1">
+                          {item.title}
+                        </h3>
                         <p className="text-[#425a66] text-sm">
                           Duración: {item.duration || "No disponible"} horas
                         </p>
