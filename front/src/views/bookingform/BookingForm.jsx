@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Input, Button } from "@material-tailwind/react";
+import Swal from "sweetalert2";
 
 const BookingForm = ({ userId }) => {
   const location = useLocation();
@@ -16,47 +17,38 @@ const BookingForm = ({ userId }) => {
   const selectedTime = queryParams.get("time") || "Hora no disponible";
   const selectedQuantity = parseInt(queryParams.get("totalPeople")) || 1;
 
-  const [passengers, setPassengers] = useState(
-    Array.from({ length: selectedQuantity }, () => ({
-      passengerName: "",
-      dni: "",
-    }))
-  );
-
+  // Se utiliza un único objeto para capturar la información del pasajero representante
+  const [passenger, setPassenger] = useState({ passengerName: "", dni: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const [reservationSuccess, setReservationSuccess] = useState(false);
 
-  const handlePassengerChange = (index, field, value) => {
-    setPassengers((prevPassengers) =>
-      prevPassengers.map((p, i) =>
-        i === index ? { ...p, [field]: value } : p
-      )
-    );
+  const handlePassengerChange = (field, value) => {
+    setPassenger((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    for (let i = 0; i < passengers.length; i++) {
-      if (!passengers[i].passengerName.trim() || !passengers[i].dni.trim()) {
-        setErrorMessage("Todos los campos son obligatorios.");
-        return;
-      }
-      if (!/^\d+$/.test(passengers[i].dni)) {
-        setErrorMessage("El DNI debe contener solo números.");
-        return;
-      }
+    // Validación de campos para el pasajero representante
+    if (!passenger.passengerName.trim() || !passenger.dni.trim()) {
+      setErrorMessage("Todos los campos son obligatorios.");
+      return;
+    }
+    if (!/^\d+$/.test(passenger.dni)) {
+      setErrorMessage("El DNI debe contener solo números.");
+      return;
     }
 
     try {
       setErrorMessage("");
 
+      // Se genera el payload utilizando la misma información para todos los asientos
       const payload = {
         id_User: userId,
         id_ServiceOrder: serviceOrderId,
         paymentStatus: "Paid",
-        DNI: passengers[0]?.dni || "",
-        paymentInformation: passengers.map((passenger, index) => ({
+        DNI: passenger.dni,
+        paymentInformation: Array.from({ length: selectedQuantity }, (_, index) => ({
           id_Service: serviceId,
           serviceTitle,
           seatNumber: index + 1,
@@ -83,15 +75,20 @@ const BookingForm = ({ userId }) => {
       );
       console.log("Reserva creada:", response.data);
 
+      // Mostrar mensaje de éxito y redirigir al cerrar el popup
+      await Swal.fire({
+        icon: "success",
+        title: "¡Reserva exitosa!",
+        text: "Tu reserva se ha creado con éxito. Serás redirigido a tus reservas.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+
       setReservationSuccess(true);
       navigate("/user/reservas");
 
-      setPassengers(
-        Array.from({ length: selectedQuantity }, () => ({
-          passengerName: "",
-          dni: "",
-        }))
-      );
+      // Reiniciar la información del pasajero
+      setPassenger({ passengerName: "", dni: "" });
     } catch (error) {
       setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
       console.error(
@@ -102,35 +99,43 @@ const BookingForm = ({ userId }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-xl font-semibold">Reserva para {serviceTitle}</h2>
-      <p className="font-semibold">Precio: <span className="font-normal">${servicePrice}</span></p>
-      <p className="font-semibold">Fecha: <span className="font-normal">{selectedDate}</span></p>
-      <p className="font-semibold">Hora: <span className="font-normal">{selectedTime}</span></p>
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 bg-[#f9f3e1] p-6 rounded-xl shadow-md max-w-xl mx-auto"
+    >
+      <h2 className="text-xl font-semibold text-[#4256a6]">
+        Reserva para {serviceTitle}
+      </h2>
+      <p className="font-semibold text-[#4256a6]">
+        Precio:{" "}
+        <span className="font-normal text-[#425a66]">${servicePrice}</span>
+      </p>
+      <p className="font-semibold text-[#4256a6]">
+        Fecha:{" "}
+        <span className="font-normal text-[#425a66]">{selectedDate}</span>
+      </p>
+      <p className="font-semibold text-[#4256a6]">
+        Hora:{" "}
+        <span className="font-normal text-[#425a66]">{selectedTime}</span>
+      </p>
 
-      {passengers.map((passenger, index) => (
-        <div key={index} className="border p-4 rounded-md shadow-md">
-          <h3 className="font-medium">Pasajero {index + 1}</h3>
-          <Input
-            type="text"
-            placeholder="Nombre"
-            value={passenger.passengerName}
-            onChange={(e) =>
-              handlePassengerChange(index, "passengerName", e.target.value)
-            }
-            className="mt-2"
-          />
-          <Input
-            type="text"
-            placeholder="DNI"
-            value={passenger.dni}
-            onChange={(e) =>
-              handlePassengerChange(index, "dni", e.target.value)
-            }
-            className="mt-2"
-          />
-        </div>
-      ))}
+      <div className="border p-4 rounded-md shadow-md bg-white">
+        <h3 className="font-medium text-[#4256a6]">Información del Pasajero</h3>
+        <Input
+          type="text"
+          placeholder="Nombre"
+          value={passenger.passengerName}
+          onChange={(e) => handlePassengerChange("passengerName", e.target.value)}
+          className="mt-2"
+        />
+        <Input
+          type="text"
+          placeholder="DNI"
+          value={passenger.dni}
+          onChange={(e) => handlePassengerChange("dni", e.target.value)}
+          className="mt-2"
+        />
+      </div>
 
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
       {reservationSuccess && (
