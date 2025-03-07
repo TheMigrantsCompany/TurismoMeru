@@ -26,7 +26,14 @@ const BookingForm = ({ userId }) => {
     setPassenger((prev) => ({ ...prev, [field]: value }));
   };
 
+  console.log("Service Order ID:", serviceOrderId);
+  console.log("Service ID:", serviceId);
+  console.log("Total Personas:", selectedQuantity);
+  console.log("Precio del servicio:", servicePrice);
+  
  const handleSubmit = async (event) => {
+   console.log("➡️ Enviando formulario de reserva...");
+   console.log("Datos del pasajero:", passenger);
   event.preventDefault();
 
   if (!passenger.passengerName.trim() || !passenger.dni.trim()) {
@@ -66,10 +73,13 @@ const BookingForm = ({ userId }) => {
     // Enviar la reserva
     const response = await axios.post(
       `${import.meta.env.VITE_API_URL}/booking`,
+      console.log("API URL:", import.meta.env.VITE_API_URL);
       payload,
       { headers: { "Content-Type": "application/json" } }
     );
     console.log("Reserva creada:", response.data);
+    console.log("✅ Reserva creada con éxito:", response.data);
+    console.error("❌ Error al crear la reserva:", error.response?.data || error.message);
 
     // ✅ ACTUALIZAR ESTADO DE PAGO DE LA ORDEN DE SERVICIO
     const paymentUpdatePayload = { paymentStatus: "Paid", DNI: passenger.dni };
@@ -77,11 +87,13 @@ const BookingForm = ({ userId }) => {
     console.log("Enviando actualización de pago con payload:", paymentUpdatePayload);
 
     await axios.patch(
+      console.log("API URL:", import.meta.env.VITE_API_URL);
       `${import.meta.env.VITE_API_URL}/serviceOrder/id/${serviceOrderId}`,
       paymentUpdatePayload,
       { headers: { "Content-Type": "application/json" } }
     );
-    
+    console.log("📤 Enviando actualización de pago...", paymentUpdatePayload);
+    console.error("❌ Error al actualizar estado de pago:", error.response?.data || error.message);
     console.log("Estado de pago actualizado a 'Paid'");
 
     // Mostrar mensaje de éxito
