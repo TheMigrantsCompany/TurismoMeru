@@ -22,10 +22,10 @@ const ShoppingCart = () => {
   const total = subtotal;
 
   const handlePurchaseSuccess = () => {
-    
-    setShowCheckout(false);
-    navigate('/orderform');
-  };
+  clearCart(); // Vacía el carrito después de la compra exitosa
+  setShowCheckout(false);
+  navigate('/orderform');
+};
 
   return (
     <div className="min-h-screen bg-[#dac9aa]/20 py-12">
