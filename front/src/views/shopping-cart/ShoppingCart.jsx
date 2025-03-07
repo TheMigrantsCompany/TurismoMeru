@@ -22,9 +22,13 @@ const ShoppingCart = () => {
   const total = subtotal;
 
   const handlePurchaseSuccess = () => {
-    // Se elimina clearCart() para mantener los datos en order form
+    // Guardamos la data actual del carrito para OrderForm
+    const cartData = [...cartItems];
+    // Vaciamos el carrito
+    clearCart();
     setShowCheckout(false);
-    navigate('/orderform');
+    // Pasamos la data a OrderForm mediante state
+    navigate('/orderform', { state: { cartData } });
   };
 
   return (
