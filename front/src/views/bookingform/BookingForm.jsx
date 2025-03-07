@@ -26,93 +26,84 @@ const BookingForm = ({ userId }) => {
     setPassenger((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+ const handleSubmit = async (event) => {
+  event.preventDefault();
 
-    // Validación de campos para el pasajero representante
-    if (!passenger.passengerName.trim() || !passenger.dni.trim()) {
-      setErrorMessage("Todos los campos son obligatorios.");
-      return;
-    }
-    if (!/^\d+$/.test(passenger.dni)) {
-      setErrorMessage("El DNI debe contener solo números.");
-      return;
-    }
+  if (!passenger.passengerName.trim() || !passenger.dni.trim()) {
+    setErrorMessage("Todos los campos son obligatorios.");
+    return;
+  }
+  if (!/^\d+$/.test(passenger.dni)) {
+    setErrorMessage("El DNI debe contener solo números.");
+    return;
+  }
 
-    try {
-      setErrorMessage("");
+  try {
+    setErrorMessage("");
 
-      // Payload para la reserva
-      const bookingPayload = {
-        id_User: userId,
-        id_ServiceOrder: serviceOrderId,
-        paymentStatus: "Paid",
-        DNI: passenger.dni,
-        paymentInformation: Array.from({ length: selectedQuantity }, (_, index) => ({
-          id_Service: serviceId,
-          serviceTitle,
-          seatNumber: index + 1,
-          DNI_Personal: "", 
-          passengerName: "",
-          selectedDate,
-          selectedTime,
-          lockedStock: 1,
-          totalPeople: selectedQuantity,
-          totalPrice: servicePrice,
-        })),
-      };
+    // Payload para la reserva
+    const payload = {
+      id_User: userId,
+      id_ServiceOrder: serviceOrderId,
+      paymentStatus: "Paid",
+      DNI: passenger.dni,
+      paymentInformation: Array.from({ length: selectedQuantity }, (_, index) => ({
+        id_Service: serviceId,
+        serviceTitle,
+        seatNumber: index + 1,
+        DNI_Personal: passenger.dni,
+        passengerName: passenger.passengerName || "Desconocido",
+        selectedDate,
+        selectedTime,
+        lockedStock: 1,
+        totalPeople: selectedQuantity,
+        totalPrice: servicePrice,
+      })),
+    };
 
-      console.log("Payload que se enviará:", bookingPayload);
+    console.log("Payload de reserva:", payload);
 
-      // Enviar la reserva
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/booking`,
-        bookingPayload,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      console.log("Reserva creada:", response.data);
+    // Enviar la reserva
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_URL}/booking`,
+      payload,
+      { headers: { "Content-Type": "application/json" } }
+    );
+    console.log("Reserva creada:", response.data);
 
-      // Luego de la reserva, actualizar el estado de pago de la orden
-      const updateResponse = await axios.patch(
-        `${import.meta.env.VITE_API_URL}/serviceOrder/id/${serviceOrderId}`,
-        {
-          paymentStatus: "Pagado", // Asegúrate de que coincida con lo que espera el backend
-          DNI: passenger.dni,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      console.log("Orden actualizada:", updateResponse.data);
+    // ✅ ACTUALIZAR ESTADO DE PAGO DE LA ORDEN DE SERVICIO
+    const paymentUpdatePayload = { paymentStatus: "Paid", DNI: passenger.dni };
+    
+    console.log("Enviando actualización de pago con payload:", paymentUpdatePayload);
 
-      // Mostrar mensaje de éxito y redirigir
-      await Swal.fire({
-        icon: "success",
-        title: "¡Reserva exitosa!",
-        text: "Tu reserva se ha creado y el pago ha sido actualizado correctamente.",
-        timer: 2000,
-        showConfirmButton: false,
-      });
+    await axios.patch(
+      `${import.meta.env.VITE_API_URL}/serviceOrder/id/${serviceOrderId}`,
+      paymentUpdatePayload,
+      { headers: { "Content-Type": "application/json" } }
+    );
+    
+    console.log("Estado de pago actualizado a 'Paid'");
 
-      setReservationSuccess(true);
-      navigate("/user/reservas");
+    // Mostrar mensaje de éxito
+    await Swal.fire({
+      icon: "success",
+      title: "¡Reserva exitosa!",
+      text: "Tu reserva se ha creado con éxito. Serás redirigido a tus reservas.",
+      timer: 2000,
+      showConfirmButton: false,
+    });
 
-      // Reiniciar la información del pasajero
-      setPassenger({ passengerName: "", dni: "" });
-    } catch (error) {
-      setErrorMessage("Error al crear la reserva o actualizar el pago. Intenta nuevamente.");
-      console.error(
-        "Error en el proceso:",
-        error.response?.data || error.message
-      );
-    }
-  };
+    setReservationSuccess(true);
+    navigate("/user/reservas");
+
+    // Reiniciar la información del pasajero
+    setPassenger({ passengerName: "", dni: "" });
+  } catch (error) {
+    setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
+    console.error("Error al crear la reserva o actualizar pago:", error.response?.data || error.message);
+  }
+};
+
 
   return (
     <form
