@@ -17,7 +17,7 @@ const BookingForm = ({ userId }) => {
   const selectedTime = queryParams.get("time") || "Hora no disponible";
   const selectedQuantity = parseInt(queryParams.get("totalPeople")) || 1;
 
-  // Se utiliza un único objeto para capturar la información del pasajero representante
+  // Estado para la información del pasajero
   const [passenger, setPassenger] = useState({ passengerName: "", dni: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const [reservationSuccess, setReservationSuccess] = useState(false);
@@ -42,8 +42,8 @@ const BookingForm = ({ userId }) => {
     try {
       setErrorMessage("");
 
-      // Se genera el payload utilizando la misma información para todos los asientos
-      const payload = {
+      // Payload para la reserva
+      const bookingPayload = {
         id_User: userId,
         id_ServiceOrder: serviceOrderId,
         paymentStatus: "Paid",
@@ -52,8 +52,8 @@ const BookingForm = ({ userId }) => {
           id_Service: serviceId,
           serviceTitle,
           seatNumber: index + 1,
-          DNI_Personal: passenger.dni,
-          passengerName: passenger.passengerName || "Desconocido",
+          DNI_Personal: "", 
+          passengerName: "",
           selectedDate,
           selectedTime,
           lockedStock: 1,
@@ -62,11 +62,12 @@ const BookingForm = ({ userId }) => {
         })),
       };
 
-      console.log("Payload que se enviará:", payload);
+      console.log("Payload que se enviará:", bookingPayload);
 
+      // Enviar la reserva
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/booking`,
-        payload,
+        bookingPayload,
         {
           headers: {
             "Content-Type": "application/json",
@@ -75,11 +76,26 @@ const BookingForm = ({ userId }) => {
       );
       console.log("Reserva creada:", response.data);
 
-      // Mostrar mensaje de éxito y redirigir al cerrar el popup
+      // Luego de la reserva, actualizar el estado de pago de la orden
+      const updateResponse = await axios.patch(
+        `${import.meta.env.VITE_API_URL}/serviceOrder/id/${serviceOrderId}`,
+        {
+          paymentStatus: "Pagado", // Asegúrate de que coincida con lo que espera el backend
+          DNI: passenger.dni,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Orden actualizada:", updateResponse.data);
+
+      // Mostrar mensaje de éxito y redirigir
       await Swal.fire({
         icon: "success",
         title: "¡Reserva exitosa!",
-        text: "Tu reserva se ha creado con éxito. Serás redirigido a tus reservas.",
+        text: "Tu reserva se ha creado y el pago ha sido actualizado correctamente.",
         timer: 2000,
         showConfirmButton: false,
       });
@@ -90,9 +106,9 @@ const BookingForm = ({ userId }) => {
       // Reiniciar la información del pasajero
       setPassenger({ passengerName: "", dni: "" });
     } catch (error) {
-      setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
+      setErrorMessage("Error al crear la reserva o actualizar el pago. Intenta nuevamente.");
       console.error(
-        "Error al crear la reserva:",
+        "Error en el proceso:",
         error.response?.data || error.message
       );
     }
@@ -107,16 +123,13 @@ const BookingForm = ({ userId }) => {
         Reserva para {serviceTitle}
       </h2>
       <p className="font-semibold text-[#4256a6]">
-        Precio:{" "}
-        <span className="font-normal text-[#425a66]">${servicePrice}</span>
+        Precio: <span className="font-normal text-[#425a66]">${servicePrice}</span>
       </p>
       <p className="font-semibold text-[#4256a6]">
-        Fecha:{" "}
-        <span className="font-normal text-[#425a66]">{selectedDate}</span>
+        Fecha: <span className="font-normal text-[#425a66]">{selectedDate}</span>
       </p>
       <p className="font-semibold text-[#4256a6]">
-        Hora:{" "}
-        <span className="font-normal text-[#425a66]">{selectedTime}</span>
+        Hora: <span className="font-normal text-[#425a66]">{selectedTime}</span>
       </p>
 
       <div className="border p-4 rounded-md shadow-md bg-white">
