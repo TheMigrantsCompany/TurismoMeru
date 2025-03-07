@@ -7,7 +7,7 @@ import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
 
 const OrderForm = () => {
   const dispatch = useDispatch();
-  const { cartItems } = useCart();
+  const { cartItems, clearCart } = useCart(); 
   const formRef = useRef(null);
   const { id_User, user } = useContext(AuthContext);
   const token = user?.token;
@@ -178,25 +178,17 @@ const OrderForm = () => {
           console.error("Detalles del error:", errorText);
           throw new Error(`Error en la solicitud: ${response.statusText}`);
         }
-
         data = await response.json();
         console.log("Preference ID recibido:", data.preferenceId);
-
         if (!data || !data.preferenceId) {
           throw new Error("No se recibió un preferenceId válido.");
         }
-
         setPreferenceId(data.preferenceId);
-
-        // Esperar a que el SDK esté listo
         if (!sdkLoaded) {
           setIsReady(false);
           return alert("Error: Mercado Pago aún no está listo.");
         }
-
-        setIsReady(true); // Marcar como listo para proceder con el pago
-
-        // Ejecutar el flujo de pago solo si el SDK está listo
+        setIsReady(true);
         if (isReady && mercadoPago) {
           try {
             mercadoPago.checkout({
@@ -204,14 +196,17 @@ const OrderForm = () => {
               autoOpen: true,
             });
             alert("¡Pedido confirmado exitosamente!");
+           
+            clearCart();
           } catch (error) {
             console.error("Error en el flujo de pago:", error);
             alert("Hubo un error. Intenta nuevamente.");
           }
-        } else if (formData.paymentMethod === "Pagos desde el exterior") {
-          // No se crea preferencia para Mercado Pago
-          alert("¡Pedido confirmado exitosamente! Proceda con el pago por WhatsApp.");
         }
+      } else if (formData.paymentMethod === "Pagos desde el exterior") {
+        alert("¡Pedido confirmado exitosamente! Proceda con el pago por WhatsApp.");
+       
+        clearCart();
       }
     } catch (error) {
       console.error("Error en la solicitud de pago:", error);
