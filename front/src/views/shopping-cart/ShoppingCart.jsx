@@ -22,10 +22,10 @@ const ShoppingCart = () => {
   const total = subtotal;
 
   const handlePurchaseSuccess = () => {
-  clearCart(); // Vacía el carrito después de la compra exitosa
-  setShowCheckout(false);
-  navigate('/orderform');
-};
+    // Se elimina clearCart() para mantener los datos en order form
+    setShowCheckout(false);
+    navigate('/orderform');
+  };
 
   return (
     <div className="min-h-screen bg-[#dac9aa]/20 py-12">
@@ -165,7 +165,9 @@ const ShoppingCart = () => {
                   </div>
                 </div>
               </motion.div>
-              {showCheckout && <Checkout total={total} onPurchaseSuccess={handlePurchaseSuccess} />}
+              {showCheckout && (
+                <Checkout total={total} onPurchaseSuccess={handlePurchaseSuccess} />
+              )}
             </div>
           </div>
         )}
