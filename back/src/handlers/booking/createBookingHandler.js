@@ -1,6 +1,6 @@
 const createBookingController = require('../../controllers/booking/createBookingController');
 
-cconst createBookingHandler = async (data, transaction = null)  => {
+const createBookingHandler = async (data, transaction = null)  => {
   const bookingData = data.body ? data.body : data; // Extraer el body del request
   console.log("[Handler] Datos recibidos en createBookingHandler:", bookingData);
   console.log("paymentInformation recibido:", bookingData.paymentInformation);
