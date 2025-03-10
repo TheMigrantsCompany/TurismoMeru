@@ -354,13 +354,45 @@ export const getOrdersByUser = (id_User) => async (dispatch) => {
 };
 
 export const updateOrderStatus =
-  (id_ServiceOrder, newStatus) => async (dispatch) => {
+  (id_ServiceOrder, newStatus, currentOrder) => async (dispatch) => {
     dispatch({ type: UPDATE_ORDER_STATUS_REQUEST });
     try {
+      console.log("Actualizando orden:", { id_ServiceOrder, newStatus });
+
+      // Si el nuevo estado es "Pendiente", intentamos obtener y eliminar los bookings
+      if (newStatus === "Pendiente") {
+        // Obtener todos los bookings
+        const allBookings = await axios.get("http://localhost:3001/booking");
+        console.log("Todos los bookings:", allBookings.data);
+
+        // Filtrar los bookings que pertenecen a esta orden
+        const orderBookings = allBookings.data.filter(
+          (booking) => booking.id_ServiceOrder === id_ServiceOrder
+        );
+        console.log("Bookings de esta orden:", orderBookings);
+
+        // Eliminar cada booking encontrado
+        for (const booking of orderBookings) {
+          console.log("Intentando eliminar booking:", booking.id_Booking);
+          try {
+            await axios.delete(
+              `http://localhost:3001/booking/id/${booking.id_Booking}`
+            );
+            console.log(`Booking ${booking.id_Booking} eliminado`);
+          } catch (error) {
+            console.error(
+              `Error eliminando booking ${booking.id_Booking}:`,
+              error.response?.data || error
+            );
+          }
+        }
+      }
+
+      // Actualizar el estado de la orden
       const response = await axios.patch(
         `http://localhost:3001/servicesOrder/id/${id_ServiceOrder}`,
         {
-          paymentStatus: newStatus === "completed" ? "Pagado" : "Pendiente",
+          paymentStatus: newStatus,
         }
       );
 
@@ -369,11 +401,13 @@ export const updateOrderStatus =
         payload: response.data,
       });
 
-      // Recargar las órdenes
-      dispatch(getAllOrders());
+      // Recargar las órdenes y bookings
+      await dispatch(getAllOrders());
+      await dispatch(getAllBookings());
 
       return response.data;
     } catch (error) {
+      console.error("Error en updateOrderStatus:", error);
       dispatch({
         type: UPDATE_ORDER_STATUS_FAILURE,
         payload: error.message,
