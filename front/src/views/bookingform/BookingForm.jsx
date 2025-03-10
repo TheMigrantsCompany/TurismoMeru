@@ -29,6 +29,7 @@ const BookingForm = ({ userId }) => {
     event.preventDefault();
     setErrorMessage("");
 
+    // Validaciones
     if (!passenger.passengerName.trim() || !passenger.dni.trim()) {
       setErrorMessage("Todos los campos son obligatorios.");
       return;
@@ -45,16 +46,16 @@ const BookingForm = ({ userId }) => {
     try {
       // 🔹 1️⃣ Actualizar el estado de la orden de servicio a "Pagado"
       console.log("📤 Enviando PATCH para actualizar estado de pago...");
-      await axios.patch(
+      const patchResponse = await axios.patch(
         `${import.meta.env.VITE_API_URL}/serviceOrder/id/${serviceOrderId}`,
         { paymentStatus: "Pagado", DNI: passenger.dni },
         { headers: { "Content-Type": "application/json" } }
       );
-      console.log("✅ Estado de pago actualizado correctamente.");
+      console.log("✅ Estado de pago actualizado correctamente.", patchResponse.data);
 
       // 🔹 2️⃣ Si el PATCH fue exitoso, proceder a crear la reserva
       console.log("📤 Enviando POST para crear la reserva...");
-      await axios.post(
+      const postResponse = await axios.post(
         `${import.meta.env.VITE_API_URL}/booking`,
         {
           id_User: userId,
@@ -76,7 +77,7 @@ const BookingForm = ({ userId }) => {
         },
         { headers: { "Content-Type": "application/json" } }
       );
-      console.log("✅ Reserva creada con éxito.");
+      console.log("✅ Reserva creada con éxito.", postResponse.data);
 
       // 🔹 3️⃣ Mostrar mensaje de éxito y redirigir
       await Swal.fire({
@@ -93,7 +94,15 @@ const BookingForm = ({ userId }) => {
 
     } catch (error) {
       console.error("❌ Error en la operación:", error.response?.data || error.message);
-      setErrorMessage("Ocurrió un error. Intenta nuevamente.");
+
+      // Manejo de errores específicos de la API
+      if (error.response && error.response.status === 404) {
+        setErrorMessage("Orden de servicio no encontrada.");
+      } else if (error.response && error.response.status === 400) {
+        setErrorMessage("Los datos enviados no son válidos.");
+      } else {
+        setErrorMessage("Ocurrió un error. Intenta nuevamente.");
+      }
     }
   };
 
