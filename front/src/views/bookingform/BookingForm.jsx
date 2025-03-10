@@ -81,7 +81,7 @@ const BookingForm = ({ userId }) => {
       console.log("✅ Reserva creada con éxito:", response.data);
 
       // ✅ ACTUALIZAR ESTADO DE PAGO DE LA ORDEN DE SERVICIO
-      const paymentUpdatePayload = { paymentStatus: "Paid", DNI: passenger.dni };
+      const paymentUpdatePayload = { paymentStatus: "Pagado", DNI: passenger.dni };
       
       console.log("📤 Enviando actualización de pago...", paymentUpdatePayload);
 
