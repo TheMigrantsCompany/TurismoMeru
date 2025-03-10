@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { getAllOrders } from "../../../redux/actions/actions";
 import SearchInput from "../../../components/inputs/SearchInput";
 import { ReservationsTable } from "../../../components/tables/admin/Reservations";
 import ReservationModal from "../../../components/modals/admin-modal/ReservationModal";
@@ -6,10 +8,15 @@ import Swal from "sweetalert2";
 import axios from "axios";
 
 export function ReservationManagement() {
+  const dispatch = useDispatch();
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reservations, setReservations] = useState(null);
   const [isSearchActive, setIsSearchActive] = useState(false);
+
+  useEffect(() => {
+    dispatch(getAllOrders()); // Obtener las órdenes al montar el componente
+  }, [dispatch]);
 
   const handleSearch = async (query, searchType) => {
     if (!query.trim()) {
@@ -22,13 +29,13 @@ export function ReservationManagement() {
     try {
       let url = "";
       if (searchType === "service") {
-        url = `${
-          import.meta.env.VITE_API_URL
-        }/booking/serviceName/${encodeURIComponent(query)}`;
+        url = `http://localhost:3001/booking/serviceName/${encodeURIComponent(
+          query
+        )}`;
       } else if (searchType === "passenger") {
-        url = `${
-          import.meta.env.VITE_API_URL
-        }/booking/passenger-name/${encodeURIComponent(query)}`;
+        url = `http://localhost:3001/booking/passenger-name/${encodeURIComponent(
+          query
+        )}`;
       }
 
       const response = await axios.get(url);
