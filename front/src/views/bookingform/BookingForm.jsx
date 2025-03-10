@@ -48,7 +48,7 @@ const BookingForm = ({ userId }) => {
       console.log("📤 Enviando PATCH para actualizar estado de pago...");
       console.log("ServiceOrderId:", serviceOrderId);
       const patchResponse = await axios.patch(
-        `${import.meta.env.VITE_API_URL}/serviceOrder/id/${serviceOrderId}`,
+        `${import.meta.env.VITE_API_URL}/id/${id_ServiceOrder}`,
         { paymentStatus: "Pagado", DNI: passenger.dni },
         { headers: { "Content-Type": "application/json" } }
       );
