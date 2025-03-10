@@ -41,7 +41,8 @@ const updatePaymentStatusController = async (id_ServiceOrder, paymentStatus, bod
 
         console.log('[Controller] Datos para crear la reserva (booking):', bookingData);
 
-        await createBookingHandler(bookingData);
+        await createBookingHandler(bookingData, transaction);
+
       }
     }
 
