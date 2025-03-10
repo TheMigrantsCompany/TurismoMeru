@@ -79,25 +79,23 @@ const BookingForm = ({ userId }) => {
       );
       console.log("✅ Estado de pago actualizado correctamente.", patchResponse.data);
 
-      // Construir paymentInformation. Aquí se crea dateTime en formato ISO válido ("YYYY-MM-DDT15:00:00")
       const paymentInformation = Array.from({ length: selectedQuantity }, (_, index) => {
-        const info = {
-          id_Service: serviceId,
-          serviceTitle,
-          seatNumber: index + 1,
-          // Se elimina DNI_Personal, ya se envía por separado
-          passengerName: passenger.passengerName || "Desconocido",
-          selectedDate, // "YYYY-MM-DD"
-          selectedTime, // "HH:mm"
-          // Construir dateTime en formato ISO válido con "T" y segundos
-          dateTime: `${selectedDate}T${selectedTime}:00`,
-          lockedStock: 1,
-          totalPeople: selectedQuantity,
-          totalPrice: servicePrice,
-        };
+      const dateTimeISO = new Date(`${selectedDate}T${selectedTime}:00`).toISOString();
+      const info = {
+        id_Service: serviceId,
+        serviceTitle,
+        seatNumber: index + 1,
+        passengerName: passenger.passengerName || "Desconocido",
+        selectedDate,    // "YYYY-MM-DD"
+        selectedTime,    // "HH:mm"
+        dateTime: dateTimeISO, // Ej: "2025-03-14T15:00:00.000Z"
+        lockedStock: 1,
+        totalPeople: selectedQuantity,
+        totalPrice: servicePrice,
+         };
         console.log(`Información de pago para asiento ${index + 1}:`, info);
         return info;
-      });
+         });
 
       console.log("📤 Enviando POST para crear la reserva...");
       console.log("Payload de reserva:", {
