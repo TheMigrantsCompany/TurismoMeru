@@ -42,65 +42,72 @@ const BookingForm = ({ userId }) => {
       return;
     }
 
-    try {
-      console.log("ID de la orden de servicio:", serviceOrderId);
-      console.log("📤 Enviando PATCH para actualizar estado de pago...");
-      const patchResponse = await axios.patch(
-    `${import.meta.env.VITE_API_URL}/id/${serviceOrderId}`,
-     { paymentStatus: "Pagado", DNI: passenger.dni },
-     { headers: { "Content-Type": "application/json" } }
-    );
-      console.log("✅ Estado de pago actualizado correctamente.", patchResponse.data);
+try {
+  console.log("ID de la orden de servicio:", serviceOrderId);
+  console.log("📤 Enviando PATCH para actualizar estado de pago...");
 
-      console.log("📤 Enviando POST para crear la reserva...");
-      const postResponse = await axios.post(
-        `${import.meta.env.VITE_API_URL}/booking`,
-        {
-          id_User: userId,
-          id_ServiceOrder: serviceOrderId,
-          paymentStatus: "Pagado",
-          DNI: passenger.dni,
-          paymentInformation: Array.from({ length: selectedQuantity }, (_, index) => ({
-            id_Service: serviceId,
-            serviceTitle,
-            seatNumber: index + 1,
-            DNI_Personal: passenger.dni,
-            passengerName: passenger.passengerName || "Desconocido",
-            selectedDate,
-            selectedTime,
-            lockedStock: 1,
-            totalPeople: selectedQuantity,
-            totalPrice: servicePrice,
-          })),
-        },
-        { headers: { "Content-Type": "application/json" } }
-      );
-      console.log("✅ Reserva creada con éxito.", postResponse.data);
+  // Genera la URL completa y la muestra en consola
+  const url = `${import.meta.env.VITE_API_URL}/serviceOrder/id/${serviceOrderId}`;
+  console.log("📡 URL de la solicitud PATCH:", url);
 
-      await Swal.fire({
-        icon: "success",
-        title: "¡Reserva exitosa!",
-        text: "Tu reserva se ha creado con éxito. Serás redirigido a tus reservas.",
-        timer: 2000,
-        showConfirmButton: false,
-      });
+  // Realiza la solicitud con la URL generada
+  const patchResponse = await axios.patch(
+    url,
+    { paymentStatus: "Pagado", DNI: passenger.dni },
+    { headers: { "Content-Type": "application/json" } }
+  );
 
-      setReservationSuccess(true);
-      navigate("/user/reservas");
-      setPassenger({ passengerName: "", dni: "" });
-    } catch (error) {
-      console.error("❌ Error en la operación:", error.response?.data || error.message);
-      console.log("Detalles del error:", error);
-      
-      if (error.response?.status === 404) {
-        setErrorMessage("Orden de servicio no encontrada.");
-      } else if (error.response?.status === 400) {
-        setErrorMessage("Los datos enviados no son válidos.");
-      } else {
-        setErrorMessage("Ocurrió un error. Intenta nuevamente.");
-      }
-    }
-  };
+  console.log("✅ Estado de pago actualizado correctamente.", patchResponse.data);
+
+  console.log("📤 Enviando POST para crear la reserva...");
+  const postResponse = await axios.post(
+    `${import.meta.env.VITE_API_URL}/booking`,
+    {
+      id_User: userId,
+      id_ServiceOrder: serviceOrderId,
+      paymentStatus: "Pagado",
+      DNI: passenger.dni,
+      paymentInformation: Array.from({ length: selectedQuantity }, (_, index) => ({
+        id_Service: serviceId,
+        serviceTitle,
+        seatNumber: index + 1,
+        DNI_Personal: passenger.dni,
+        passengerName: passenger.passengerName || "Desconocido",
+        selectedDate,
+        selectedTime,
+        lockedStock: 1,
+        totalPeople: selectedQuantity,
+        totalPrice: servicePrice,
+      })),
+    },
+    { headers: { "Content-Type": "application/json" } }
+  );
+  console.log("✅ Reserva creada con éxito.", postResponse.data);
+
+  await Swal.fire({
+    icon: "success",
+    title: "¡Reserva exitosa!",
+    text: "Tu reserva se ha creado con éxito. Serás redirigido a tus reservas.",
+    timer: 2000,
+    showConfirmButton: false,
+  });
+
+  setReservationSuccess(true);
+  navigate("/user/reservas");
+  setPassenger({ passengerName: "", dni: "" });
+
+} catch (error) {
+  console.error("❌ Error en la operación:", error.response?.data || error.message);
+  console.log("Detalles del error:", error);
+
+  if (error.response?.status === 404) {
+    setErrorMessage("Orden de servicio no encontrada.");
+  } else if (error.response?.status === 400) {
+    setErrorMessage("Los datos enviados no son válidos.");
+  } else {
+    setErrorMessage("Ocurrió un error. Intenta nuevamente.");
+  }
+}
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 bg-[#f9f3e1] p-6 rounded-xl shadow-md max-w-xl mx-auto">
