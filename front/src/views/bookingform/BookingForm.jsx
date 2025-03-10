@@ -14,20 +14,20 @@ const BookingForm = ({ userId }) => {
   const servicePrice = parseFloat(queryParams.get("price")) || 0;
   const serviceOrderId = queryParams.get("id_ServiceOrder");
 
-  // Obtener los valores sin formatear
+  // Obtener valores sin formatear
   const rawDate = queryParams.get("date");
   const rawTime = queryParams.get("time");
 
   console.log("rawDate:", rawDate);
   console.log("rawTime:", rawTime);
 
-  // Validar la fecha: si rawDate es válido se usa; de lo contrario se usa la fecha actual en formato ISO (YYYY-MM-DD)
+  // Validar la fecha: si rawDate es válido, se usa; de lo contrario se usa la fecha actual (YYYY-MM-DD)
   const selectedDate =
     rawDate && rawDate !== "Fecha no disponible" && !isNaN(new Date(rawDate))
       ? rawDate.trim()
       : new Date().toISOString().split("T")[0];
 
-  // Validar la hora: si rawTime es válido se usa; de lo contrario se asigna "00:00"
+  // Validar la hora: si rawTime es válida se usa; de lo contrario se asigna "00:00"
   const selectedTime =
     rawTime && rawTime !== "Hora no disponible" && rawTime.trim() !== ""
       ? rawTime.trim()
@@ -71,7 +71,7 @@ const BookingForm = ({ userId }) => {
       const url = `${import.meta.env.VITE_API_URL}/servicesOrder/id/${serviceOrderId}`;
       console.log("📡 URL de la solicitud PATCH:", url);
 
-      // Realiza la solicitud PATCH
+      // Realizar la solicitud PATCH
       const patchResponse = await axios.patch(
         url,
         { paymentStatus: "Pagado", DNI: passenger.dni },
@@ -79,18 +79,18 @@ const BookingForm = ({ userId }) => {
       );
       console.log("✅ Estado de pago actualizado correctamente.", patchResponse.data);
 
-      // Construir paymentInformation sin usar new Date() para evitar error "Invalid time value"
+      // Construir paymentInformation. Aquí se crea dateTime en formato ISO válido ("YYYY-MM-DDT15:00:00")
       const paymentInformation = Array.from({ length: selectedQuantity }, (_, index) => {
         const info = {
           id_Service: serviceId,
           serviceTitle,
           seatNumber: index + 1,
-          // Se elimina DNI_Personal ya que el backend recibe el DNI por separado
+          // Se elimina DNI_Personal, ya se envía por separado
           passengerName: passenger.passengerName || "Desconocido",
-          selectedDate, // En formato YYYY-MM-DD
-          selectedTime, // En formato HH:mm
-          // Construir dateTime en el mismo formato que espera el backend: "YYYY-MM-DD HH:mm"
-          dateTime: `${selectedDate} ${selectedTime}`,
+          selectedDate, // "YYYY-MM-DD"
+          selectedTime, // "HH:mm"
+          // Construir dateTime en formato ISO válido con "T" y segundos
+          dateTime: `${selectedDate}T${selectedTime}:00`,
           lockedStock: 1,
           totalPeople: selectedQuantity,
           totalPrice: servicePrice,
@@ -132,7 +132,6 @@ const BookingForm = ({ userId }) => {
       setReservationSuccess(true);
       navigate("/user/reservas");
       setPassenger({ passengerName: "", dni: "" });
-
     } catch (error) {
       console.error("❌ Error en la operación:", error.response?.data || error.message);
       console.log("Detalles del error:", error);
