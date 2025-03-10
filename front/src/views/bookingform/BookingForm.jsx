@@ -47,7 +47,7 @@ try {
   console.log("📤 Enviando PATCH para actualizar estado de pago...");
 
   // Genera la URL completa y la muestra en consola
-  const url = `${import.meta.env.VITE_API_URL}/serviceOrder/id/${serviceOrderId}`;
+  const url = `${import.meta.env.VITE_API_URL}/servicesOrder/id/${serviceOrderId}`;
   console.log("📡 URL de la solicitud PATCH:", url);
 
   // Realiza la solicitud con la URL generada
