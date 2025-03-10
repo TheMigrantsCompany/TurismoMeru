@@ -34,11 +34,6 @@ const BookingForm = ({ userId }) => {
       : "00:00";
 
   console.log("selectedDate:", selectedDate);
-  try {
-    console.log("new Date(selectedDate):", new Date(selectedDate).toISOString());
-  } catch (err) {
-    console.error("Error al convertir selectedDate:", err);
-  }
   console.log("selectedTime:", selectedTime);
 
   const selectedQuantity = parseInt(queryParams.get("totalPeople")) || 1;
