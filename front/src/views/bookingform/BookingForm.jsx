@@ -26,10 +26,15 @@ const BookingForm = ({ userId }) => {
     setPassenger((prev) => ({ ...prev, [field]: value }));
   };
 
+  console.log("Service Order ID:", serviceOrderId);
+  console.log("Service ID:", serviceId);
+  console.log("Total Personas:", selectedQuantity);
+  console.log("Precio del servicio:", servicePrice);
+  
   const handleSubmit = async (event) => {
-    event.preventDefault();
     console.log("➡️ Enviando formulario de reserva...");
     console.log("Datos del pasajero:", passenger);
+    event.preventDefault();
 
     if (!passenger.passengerName.trim() || !passenger.dni.trim()) {
       setErrorMessage("Todos los campos son obligatorios.");
@@ -58,15 +63,17 @@ const BookingForm = ({ userId }) => {
           selectedDate,
           selectedTime,
           lockedStock: 1,
+          totalPeople: selectedQuantity,
           totalPrice: servicePrice,
         })),
       };
 
       console.log("Payload de reserva:", payload);
+      console.log("API URL:", import.meta.env.VITE_API_URL);
 
       // Enviar la reserva
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/booking`,
+       `${import.meta.env.VITE_API_URL}/booking`,
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -75,18 +82,16 @@ const BookingForm = ({ userId }) => {
 
       // ✅ ACTUALIZAR ESTADO DE PAGO DE LA ORDEN DE SERVICIO
       const paymentUpdatePayload = { paymentStatus: "Paid", DNI: passenger.dni };
+      
+      console.log("📤 Enviando actualización de pago...", paymentUpdatePayload);
 
-      try {
-        console.log("📤 Enviando actualización de pago...", paymentUpdatePayload);
-        const paymentResponse = await axios.patch(
-          `${import.meta.env.VITE_API_URL}/serviceOrder/id/${serviceOrderId}`,
-          paymentUpdatePayload,
-          { headers: { "Content-Type": "application/json" } }
-        );
-        console.log("✅ Estado de pago actualizado:", paymentResponse.data);
-      } catch (error) {
-        console.error("❌ Error al actualizar el estado de pago:", error.response?.data || error.message);
-      }
+      await axios.patch(
+       `${import.meta.env.VITE_API_URL}/serviceOrder/id/${serviceOrderId}`,
+        paymentUpdatePayload,
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      console.log("✅ Estado de pago actualizado a 'Paid'");
 
       // Mostrar mensaje de éxito
       await Swal.fire({
@@ -104,10 +109,9 @@ const BookingForm = ({ userId }) => {
       setPassenger({ passengerName: "", dni: "" });
     } catch (error) {
       setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
-      console.error("❌ Error al crear la reserva:", error.response?.data || error.message);
+      console.error("❌ Error al crear la reserva o actualizar pago:", error.response?.data || error.message);
     }
   };
-
 
 
   return (
