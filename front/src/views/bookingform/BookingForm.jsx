@@ -14,19 +14,21 @@ const BookingForm = ({ userId }) => {
   const servicePrice = parseFloat(queryParams.get("price")) || 0;
   const serviceOrderId = queryParams.get("id_ServiceOrder");
 
-  // Validar y formatear la fecha:
+  // Obtener los valores sin formatear
   const rawDate = queryParams.get("date");
-  // Si rawDate existe y puede convertirse en fecha válida, úsalo; de lo contrario, usa la fecha actual (formato ISO YYYY-MM-DD)
+  const rawTime = queryParams.get("time");
+
+  // Si rawDate existe, no es "Fecha no disponible" y es una fecha válida, se usa; sino, se utiliza la fecha actual en formato ISO (YYYY-MM-DD)
   const selectedDate =
-    rawDate && !isNaN(new Date(rawDate))
+    rawDate && rawDate !== "Fecha no disponible" && !isNaN(new Date(rawDate))
       ? rawDate
       : new Date().toISOString().split("T")[0];
 
-  // Validar la hora:
-  const rawTime = queryParams.get("time");
-  // Si rawTime existe y no es solo espacios, úsalo; de lo contrario, asigna un valor por defecto "00:00"
+  // Si rawTime existe, no es "Hora no disponible" y no está vacío, se usa; sino, se asigna "00:00"
   const selectedTime =
-    rawTime && rawTime.trim() !== "" ? rawTime : "00:00";
+    rawTime && rawTime !== "Hora no disponible" && rawTime.trim() !== ""
+      ? rawTime
+      : "00:00";
 
   const selectedQuantity = parseInt(queryParams.get("totalPeople")) || 1;
 
@@ -63,7 +65,7 @@ const BookingForm = ({ userId }) => {
       const url = `${import.meta.env.VITE_API_URL}/servicesOrder/id/${serviceOrderId}`;
       console.log("📡 URL de la solicitud PATCH:", url);
 
-      // Realiza la solicitud con la URL generada
+      // Realiza la solicitud PATCH
       const patchResponse = await axios.patch(
         url,
         { paymentStatus: "Pagado", DNI: passenger.dni },
