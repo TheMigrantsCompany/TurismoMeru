@@ -49,6 +49,8 @@ const updatePaymentStatusController = async (id_ServiceOrder, paymentStatus, bod
     serviceOrder.paymentStatus = paymentStatus;
     await serviceOrder.save({ transaction });
 
+    console.log('[Controller] Preparando para hacer commit de la transacción...');
+
     await transaction.commit();
     console.log('[Controller] Estado de pago actualizado correctamente.');
 
