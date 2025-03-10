@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { PencilIcon, TrashIcon, EyeIcon } from "@heroicons/react/24/outline";
 import {
   Button,
   IconButton,
@@ -7,7 +7,7 @@ import {
   Tooltip,
 } from "@material-tailwind/react";
 
-const ServiceOrdersTable = ({ orders, onEdit, onDelete }) => {
+const ServiceOrdersTable = ({ orders, onViewDetail, onDelete }) => {
   const [filteredOrders, setFilteredOrders] = useState(orders);
   const [currentFilter, setCurrentFilter] = useState("all");
 
@@ -121,37 +121,37 @@ const ServiceOrdersTable = ({ orders, onEdit, onDelete }) => {
                   </td>
                   <td className="p-4">
                     <span
-                      className={`px-3 py-1 rounded-full font-poppins ${
-                        order.status === "completed"
+                      className={`px-3 py-1 rounded-full ${
+                        order.Bookings?.length > 0 || order.paymentStatus === "Pagado"
                           ? "bg-green-100 text-green-600"
                           : "bg-yellow-100 text-yellow-600"
                       }`}
                     >
-                      {order.status === "completed"
-                        ? "Completada"
-                        : "Pendiente"}
+                      {order.Bookings?.length > 0 ? "Pagado" : order.paymentStatus}
                     </span>
                   </td>
                   <td className="p-4">
-                    <div className="flex gap-3">
-                      <Tooltip content="Editar Orden">
+                    <div className="flex justify-center gap-2">
+                      <Tooltip content="Ver Detalle">
                         <IconButton
                           variant="text"
-                          onClick={() => onEdit(order)}
+                          onClick={() => onViewDetail(order)}
                           className="text-[#4256a6] hover:bg-[#4256a6]/10"
                         >
-                          <PencilIcon className="h-5 w-5" />
+                          <EyeIcon className="h-5 w-5" />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip content="Eliminar Orden">
-                        <IconButton
-                          variant="text"
-                          onClick={() => onDelete(order.id)}
-                          className="text-red-500 hover:bg-red-50"
-                        >
-                          <TrashIcon className="h-5 w-5" />
-                        </IconButton>
-                      </Tooltip>
+                      {onDelete && (
+                        <Tooltip content="Eliminar">
+                          <IconButton
+                            variant="text"
+                            onClick={() => onDelete(order)}
+                            className="text-red-500 hover:bg-red-50"
+                          >
+                            <TrashIcon className="h-5 w-5" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                     </div>
                   </td>
                 </tr>

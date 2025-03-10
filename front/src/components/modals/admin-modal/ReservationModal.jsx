@@ -1,4 +1,5 @@
 import React from "react";
+import { Typography } from "@material-tailwind/react";
 
 const ReservationModal = ({ reservation, onClose }) => {
   if (!reservation) return null;
@@ -7,104 +8,142 @@ const ReservationModal = ({ reservation, onClose }) => {
   const serviceOrder = reservation.serviceOrder;
   const paymentInfo = serviceOrder?.paymentInformation?.[0];
 
+  // Formatear fecha y hora
+  const formatDateTime = (dateString) => {
+    return new Date(dateString).toLocaleString("es-ES", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#000000cc] pointer-events-auto">
-      <div className="bg-[#dac9aa] p-6 rounded-lg max-w-lg w-full relative z-10 overflow-y-auto max-h-[90vh] shadow-xl">
-        <h2 className="text-2xl font-semibold text-[#4256a6] mb-6">
-          Detalles de la Reserva
-        </h2>
-
-        {/* Información de la reserva (booking) */}
-        <div className="mb-4">
-          <label className="block font-semibold text-[#152817]">
-            Nombre del Pasajero:
-          </label>
-          <p className="text-[#4256a6]">{reservation.passengerName}</p>
-        </div>
-
-        <div className="mb-4">
-          <label className="block font-semibold text-[#152817]">
-            Documento de Identidad:
-          </label>
-          <p className="text-[#4256a6]">{reservation.DNI}</p>
-        </div>
-
-        <div className="mb-4">
-          <label className="block font-semibold text-[#152817]">
-            Nombre del Servicio:
-          </label>
-          <p className="text-[#4256a6]">{reservation.serviceTitle}</p>
-        </div>
-
-        <div className="mb-4">
-          <label className="block font-semibold text-[#152817]">
-            Fecha y Horario del Servicio:
-          </label>
-          <p className="text-[#4256a6]">{reservation.dateTime}</p>
-        </div>
-
-        <div className="mb-4">
-          <label className="block font-semibold text-[#152817]">
-            Cantidad Total de Pasajeros:
-          </label>
-          <p className="text-[#4256a6]">{reservation.totalPeople}</p>
-        </div>
-
-        {/* Información adicional de la orden de servicio */}
-        {serviceOrder && (
-          <>
-            <hr className="my-4" />
-            <h3 className="text-xl font-semibold text-[#4256a6] mb-4">
-              Detalles de la Orden de Servicio
-            </h3>
-
-            <div className="mb-4">
-              <label className="block font-semibold text-[#152817]">
-                ID Orden de Servicio:
-              </label>
-              <p className="text-[#4256a6]">{serviceOrder.id_ServiceOrder}</p>
-            </div>
-
-            <div className="mb-4">
-              <label className="block font-semibold text-[#152817]">
-                Estado de Pago:
-              </label>
-              <p className="text-[#4256a6]">{serviceOrder.paymentStatus}</p>
-            </div>
-
-            <div className="mb-4">
-              <label className="block font-semibold text-[#152817]">
-                Método de Pago:
-              </label>
-              <p className="text-[#4256a6]">{serviceOrder.paymentMethod}</p>
-            </div>
-
-            <div className="mb-4">
-              <label className="block font-semibold text-[#152817]">
-                Total:
-              </label>
-              <p className="text-[#4256a6]">${serviceOrder.total}</p>
-            </div>
-
-            {paymentInfo && (
-              <div className="mb-4">
-                <label className="block font-semibold text-[#152817]">
-                  Cantidad de Pasajeros:
-                </label>
-                <p className="text-[#4256a6]">
-                  Adultos: {paymentInfo.adults} | Menores: {paymentInfo.minors}{" "}
-                  | Jubilados: {paymentInfo.seniors}
-                </p>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Botones */}
-        <div className="flex justify-end mt-6">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-[#f9f3e1] rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
+          <Typography variant="h4" className="text-[#4256a6]">
+            Detalle de la Reserva
+          </Typography>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg bg-[#4256a6] text-white hover:bg-[#2a3875] transition-all"
+            className="text-[#4256a6] hover:text-[#2a3875]"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          {/* Información General */}
+          <section>
+            <Typography variant="h6" className="text-[#4256a6] mb-2">
+              Información General
+            </Typography>
+            <div className="bg-white p-4 rounded-lg space-y-2">
+              <p className="text-gray-900">
+                <strong>ID de Reserva:</strong>{" "}
+                <span className="break-all">{reservation.id_Booking}</span>
+              </p>
+              <p className="text-gray-900">
+                <strong>DNI del Pasajero:</strong> {reservation.DNI}
+              </p>
+              <p className="text-gray-900">
+                <strong>Nombre del Pasajero:</strong>{" "}
+                {reservation.passengerName}
+              </p>
+            </div>
+          </section>
+
+          {/* Información del Servicio */}
+          <section>
+            <Typography variant="h6" className="text-[#4256a6] mb-2">
+              Detalles del Servicio
+            </Typography>
+            <div className="bg-white p-4 rounded-lg space-y-2">
+              <p className="text-gray-900">
+                <strong>Nombre del Servicio:</strong> {reservation.serviceTitle}
+              </p>
+              <p className="text-gray-900">
+                <strong>Fecha y Hora:</strong> {reservation.dateTime}
+              </p>
+            </div>
+          </section>
+
+          {/* Detalles de Pasajeros */}
+          <section>
+            <Typography variant="h6" className="text-[#4256a6] mb-2">
+              Detalles de Pasajeros
+            </Typography>
+            <div className="bg-white p-4 rounded-lg space-y-2">
+              <p className="text-gray-900">
+                <strong>Total de Pasajeros:</strong> {reservation.totalPeople}
+              </p>
+              {paymentInfo && (
+                <>
+                  <p className="text-gray-900">
+                    <strong>Adultos:</strong> {paymentInfo.adults}
+                  </p>
+                  <p className="text-gray-900">
+                    <strong>Menores:</strong> {paymentInfo.minors}
+                  </p>
+                  <p className="text-gray-900">
+                    <strong>Jubilados:</strong> {paymentInfo.seniors}
+                  </p>
+                </>
+              )}
+            </div>
+          </section>
+
+          {/* Estado y Fechas */}
+          <section>
+            <Typography variant="h6" className="text-[#4256a6] mb-2">
+              Estado y Fechas
+            </Typography>
+            <div className="bg-white p-4 rounded-lg space-y-2">
+              <p className="text-gray-900">
+                <strong>Estado:</strong>{" "}
+                <span
+                  className={`px-3 py-1 rounded-full ${
+                    reservation.active
+                      ? "bg-green-100 text-green-600"
+                      : "bg-red-100 text-red-600"
+                  }`}
+                >
+                  {reservation.active ? "Activa" : "Inactiva"}
+                </span>
+              </p>
+            </div>
+          </section>
+
+          {/* Información de Pago */}
+          {serviceOrder && (
+            <section>
+              <Typography variant="h6" className="text-[#4256a6] mb-2">
+                Detalles de Pago
+              </Typography>
+              <div className="bg-white p-4 rounded-lg space-y-2">
+                <p className="text-gray-900">
+                  <strong>Precio Total:</strong> ${reservation.totalPrice}
+                </p>
+                <p className="text-gray-900">
+                  <strong>Estado de Pago:</strong> {serviceOrder.paymentStatus}
+                </p>
+                <p className="text-gray-900">
+                  <strong>ID Orden de Servicio:</strong>{" "}
+                  <span className="break-all">
+                    {reservation.id_ServiceOrder}
+                  </span>
+                </p>
+              </div>
+            </section>
+          )}
+        </div>
+
+        <div className="mt-6 flex justify-end">
+          <button
+            onClick={onClose}
+            className="bg-[#4256a6] text-white px-4 py-2 rounded hover:bg-[#2a3875] transition-colors"
           >
             Cerrar
           </button>

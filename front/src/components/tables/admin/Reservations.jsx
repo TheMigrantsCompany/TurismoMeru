@@ -6,24 +6,21 @@ import {
   getAllOrders,
   deleteBooking,
 } from "../../../redux/actions/actions";
-import { EyeIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { EyeIcon, TrashIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
 import {
   Typography,
   IconButton,
   Select,
   Option,
   Tooltip,
+  Accordion,
+  AccordionHeader,
+  AccordionBody,
 } from "@material-tailwind/react";
 import ReservationModal from "../../modals/admin-modal/ReservationModal";
 import Swal from "sweetalert2";
 
-const TABLE_HEAD = [
-  "Cliente",
-  "Excursión",
-  "Cantidad de pasajeros",
-  "Fecha y Hora",
-  "",
-];
+const TABLE_HEAD = ["Excursión", "Cantidad de Reservas", "Estado", ""];
 
 export function ReservationsTable({
   reservations: propReservations,
@@ -40,6 +37,7 @@ export function ReservationsTable({
   const [selectedService, setSelectedService] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [openAccordion, setOpenAccordion] = useState(null);
 
   // Obtener todas las reservas solo si no hay búsqueda activa
   useEffect(() => {
@@ -210,6 +208,26 @@ export function ReservationsTable({
     selectedService,
     selectedDate,
   ]);
+
+  // Agrupar reservas por orden de servicio
+  const groupedReservations = useMemo(() => {
+    const reservations = displayReservations || [];
+    return reservations.reduce((groups, booking) => {
+      const key = booking.id_ServiceOrder;
+      if (!groups[key]) {
+        groups[key] = {
+          serviceTitle: booking.serviceTitle,
+          id_ServiceOrder: key,
+          bookings: [],
+          serviceOrder: ordersState.ordersList.find(
+            (order) => order.id_ServiceOrder === key
+          ),
+        };
+      }
+      groups[key].bookings.push(booking);
+      return groups;
+    }, {});
+  }, [displayReservations, ordersState.ordersList]);
 
   const handleEditReservation = (reservation) => {
     console.log("Reserva seleccionada para editar:", reservation);
@@ -385,6 +403,12 @@ export function ReservationsTable({
     });
   };
 
+  const handleAccordionClick = (id_ServiceOrder) => {
+    setOpenAccordion(
+      openAccordion === id_ServiceOrder ? null : id_ServiceOrder
+    );
+  };
+
   if (reservationsState.loading || ordersState.loading) {
     return (
       <div className="text-center py-8">
@@ -492,105 +516,104 @@ export function ReservationsTable({
         {renderActiveFilters()}
       </div>
 
-      <div className="overflow-x-auto bg-[#f9f3e1]">
-        <table className="w-full min-w-max table-auto text-left bg-[#f9f3e1]">
-          <thead>
-            <tr>
-              {TABLE_HEAD.map((header) => (
-                <th
-                  key={header}
-                  className="border-b border-[#425a66] bg-[#dac9aa] p-4"
-                >
-                  <Typography
-                    variant="small"
-                    className="font-poppins font-bold text-[#4256a6] opacity-90"
+      <div className="space-y-4">
+        {Object.values(groupedReservations).map((group) => (
+          <Accordion
+            key={group.id_ServiceOrder}
+            open={openAccordion === group.id_ServiceOrder}
+            className="bg-white rounded-lg"
+          >
+            <AccordionHeader
+              onClick={() => handleAccordionClick(group.id_ServiceOrder)}
+              className="border-b-0 transition-colors hover:bg-[#dac9aa]/10 rounded-lg px-4"
+            >
+              <div className="w-full grid grid-cols-4 items-center">
+                <Typography className="font-poppins text-[#425a66]">
+                  {group.serviceTitle}
+                </Typography>
+                <Typography className="font-poppins text-[#425a66]">
+                  {group.bookings.length} pasajeros
+                </Typography>
+                <Typography className="font-poppins text-[#425a66]">
+                  <span
+                    className={`px-3 py-1 rounded-full ${
+                      group.serviceOrder?.Bookings?.length > 0 ||
+                      group.serviceOrder?.paymentStatus === "Pagado"
+                        ? "bg-green-100 text-green-600"
+                        : "bg-yellow-100 text-yellow-600"
+                    }`}
                   >
-                    {header}
-                  </Typography>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="bg-[#f9f3e1]">
-            {displayReservations.length > 0 ? (
-              displayReservations.map(
-                ({
-                  id_Booking,
-                  id_User,
-                  id_Service,
-                  dateTime,
-                  totalPeople,
-                  passengerName,
-                }) => (
-                  <tr
-                    key={id_Booking}
-                    className="hover:bg-[#dac9aa]/30 transition-colors border-b border-[#425a66]/20"
-                  >
-                    <td className="p-4">
-                      <Typography className="font-poppins text-[#425a66]">
-                        {passengerName}
-                      </Typography>
-                    </td>
-                    <td className="p-4">
-                      <Typography className="font-poppins text-[#425a66]">
-                        {getServiceTitle(id_Service)}
-                      </Typography>
-                    </td>
-                    <td className="p-4">
-                      <Typography className="font-poppins text-[#425a66]">
-                        {totalPeople}
-                      </Typography>
-                    </td>
-                    <td className="p-4">
-                      <Typography className="font-poppins text-[#425a66]">
-                        {dateTime}
-                      </Typography>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex justify-center gap-2">
-                        <Tooltip content="Ver Detalle">
-                          <IconButton
-                            variant="text"
-                            onClick={() =>
-                              onViewDetail({
-                                id_Booking,
-                                id_User,
-                                id_Service,
-                                dateTime,
-                                totalPeople,
-                                passengerName,
-                              })
-                            }
-                            className="text-[#4256a6] hover:bg-[#4256a6]/10"
-                          >
-                            <EyeIcon className="h-5 w-5" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip content="Eliminar Reserva">
-                          <IconButton
-                            variant="text"
-                            onClick={() => handleDeleteBooking(id_Booking)}
-                            className="text-red-500 hover:bg-red-50"
-                          >
-                            <TrashIcon className="h-5 w-5" />
-                          </IconButton>
-                        </Tooltip>
-                      </div>
-                    </td>
+                    {group.serviceOrder?.Bookings?.length > 0
+                      ? "Pagado"
+                      : group.serviceOrder?.paymentStatus || "Pendiente"}
+                  </span>
+                </Typography>
+                <div className="flex justify-end">
+                  <ChevronDownIcon
+                    className={`h-5 w-5 transition-transform ${
+                      openAccordion === group.id_ServiceOrder
+                        ? "rotate-180"
+                        : ""
+                    }`}
+                  />
+                </div>
+              </div>
+            </AccordionHeader>
+            <AccordionBody className="px-4">
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className="text-left py-2">Pasajero</th>
+                    <th className="text-left py-2">DNI</th>
+                    <th className="text-left py-2">Fecha y Hora</th>
+                    <th className="text-center py-2">Acciones</th>
                   </tr>
-                )
-              )
-            ) : (
-              <tr>
-                <td colSpan="5" className="p-4 text-center">
-                  <Typography className="font-poppins text-[#4256a6]">
-                    No se encontraron reservas para mostrar
-                  </Typography>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                </thead>
+                <tbody>
+                  {group.bookings.map((booking) => (
+                    <tr
+                      key={booking.id_Booking}
+                      className="hover:bg-[#dac9aa]/10 transition-colors"
+                    >
+                      <td className="py-2">{booking.passengerName}</td>
+                      <td className="py-2">{booking.DNI}</td>
+                      <td className="py-2">{booking.dateTime}</td>
+                      <td className="py-2">
+                        <div className="flex justify-center gap-2">
+                          <Tooltip content="Ver Detalle">
+                            <IconButton
+                              variant="text"
+                              onClick={() =>
+                                onViewDetail({
+                                  ...booking,
+                                  serviceOrder: group.serviceOrder,
+                                })
+                              }
+                              className="text-[#4256a6] hover:bg-[#4256a6]/10"
+                            >
+                              <EyeIcon className="h-5 w-5" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip content="Eliminar Reserva">
+                            <IconButton
+                              variant="text"
+                              onClick={() =>
+                                handleDeleteBooking(booking.id_Booking)
+                              }
+                              className="text-red-500 hover:bg-red-50"
+                            >
+                              <TrashIcon className="h-5 w-5" />
+                            </IconButton>
+                          </Tooltip>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </AccordionBody>
+          </Accordion>
+        ))}
       </div>
 
       {selectedReservation && (
