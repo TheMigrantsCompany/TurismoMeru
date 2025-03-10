@@ -46,6 +46,7 @@ const BookingForm = ({ userId }) => {
     try {
       // 🔹 1️⃣ Actualizar el estado de la orden de servicio a "Pagado"
       console.log("📤 Enviando PATCH para actualizar estado de pago...");
+      console.log("ServiceOrderId:", serviceOrderId);
       const patchResponse = await axios.patch(
         `${import.meta.env.VITE_API_URL}/serviceOrder/id/${serviceOrderId}`,
         { paymentStatus: "Pagado", DNI: passenger.dni },
@@ -55,6 +56,25 @@ const BookingForm = ({ userId }) => {
 
       // 🔹 2️⃣ Si el PATCH fue exitoso, proceder a crear la reserva
       console.log("📤 Enviando POST para crear la reserva...");
+      console.log("Datos de reserva:", {
+        id_User: userId,
+        id_ServiceOrder: serviceOrderId,
+        paymentStatus: "Pagado",
+        DNI: passenger.dni,
+        paymentInformation: Array.from({ length: selectedQuantity }, (_, index) => ({
+          id_Service: serviceId,
+          serviceTitle,
+          seatNumber: index + 1,
+          DNI_Personal: passenger.dni,
+          passengerName: passenger.passengerName || "Desconocido",
+          selectedDate,
+          selectedTime,
+          lockedStock: 1,
+          totalPeople: selectedQuantity,
+          totalPrice: servicePrice,
+        })),
+      });
+
       const postResponse = await axios.post(
         `${import.meta.env.VITE_API_URL}/booking`,
         {
@@ -94,6 +114,9 @@ const BookingForm = ({ userId }) => {
 
     } catch (error) {
       console.error("❌ Error en la operación:", error.response?.data || error.message);
+
+      // Mostrar detalles adicionales para la depuración
+      console.log("Detalles del error:", error);
 
       // Manejo de errores específicos de la API
       if (error.response && error.response.status === 404) {
