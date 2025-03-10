@@ -52,7 +52,7 @@ const BookingForm = ({ userId }) => {
       const payload = {
         id_User: userId,
         id_ServiceOrder: serviceOrderId,
-        paymentStatus: "Paid",
+        paymentStatus: "Pagado",
         DNI: passenger.dni,
         paymentInformation: Array.from({ length: selectedQuantity }, (_, index) => ({
           id_Service: serviceId,
