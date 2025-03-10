@@ -21,16 +21,16 @@ const BookingForm = ({ userId }) => {
   console.log("rawDate:", rawDate);
   console.log("rawTime:", rawTime);
 
-  // Si rawDate existe, no es "Fecha no disponible" y es una fecha válida, se usa; de lo contrario, se utiliza la fecha actual en formato ISO (YYYY-MM-DD)
+  // Validar la fecha: si rawDate es válido se usa; de lo contrario se usa la fecha actual en formato ISO (YYYY-MM-DD)
   const selectedDate =
     rawDate && rawDate !== "Fecha no disponible" && !isNaN(new Date(rawDate))
-      ? rawDate
+      ? rawDate.trim()
       : new Date().toISOString().split("T")[0];
 
-  // Si rawTime existe, no es "Hora no disponible" y no está vacío, se usa; de lo contrario, se asigna "00:00"
+  // Validar la hora: si rawTime es válido se usa; de lo contrario se asigna "00:00"
   const selectedTime =
     rawTime && rawTime !== "Hora no disponible" && rawTime.trim() !== ""
-      ? rawTime
+      ? rawTime.trim()
       : "00:00";
 
   console.log("selectedDate:", selectedDate);
@@ -67,7 +67,7 @@ const BookingForm = ({ userId }) => {
       console.log("ID de la orden de servicio:", serviceOrderId);
       console.log("📤 Enviando PATCH para actualizar estado de pago...");
 
-      // Genera la URL completa y la muestra en consola
+      // Construir la URL usando la variable de entorno
       const url = `${import.meta.env.VITE_API_URL}/servicesOrder/id/${serviceOrderId}`;
       console.log("📡 URL de la solicitud PATCH:", url);
 
@@ -79,18 +79,18 @@ const BookingForm = ({ userId }) => {
       );
       console.log("✅ Estado de pago actualizado correctamente.", patchResponse.data);
 
-      // Construir paymentInformation con el nuevo campo dateTime
+      // Construir paymentInformation sin usar new Date() para evitar error "Invalid time value"
       const paymentInformation = Array.from({ length: selectedQuantity }, (_, index) => {
-        const fullDateTime = new Date(`${selectedDate}T${selectedTime}:00`).toISOString();
         const info = {
           id_Service: serviceId,
           serviceTitle,
           seatNumber: index + 1,
-          DNI_Personal: passenger.dni,
+          // Se elimina DNI_Personal ya que el backend recibe el DNI por separado
           passengerName: passenger.passengerName || "Desconocido",
-          selectedDate,
-          selectedTime,
-          dateTime: fullDateTime, // campo combinado para asegurar formato ISO
+          selectedDate, // En formato YYYY-MM-DD
+          selectedTime, // En formato HH:mm
+          // Construir dateTime en el mismo formato que espera el backend: "YYYY-MM-DD HH:mm"
+          dateTime: `${selectedDate} ${selectedTime}`,
           lockedStock: 1,
           totalPeople: selectedQuantity,
           totalPrice: servicePrice,
