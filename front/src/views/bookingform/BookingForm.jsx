@@ -18,17 +18,30 @@ const BookingForm = ({ userId }) => {
   const rawDate = queryParams.get("date");
   const rawTime = queryParams.get("time");
 
-  // Si rawDate existe, no es "Fecha no disponible" y es una fecha válida, se usa; sino, se utiliza la fecha actual en formato ISO (YYYY-MM-DD)
+  // Depurar valores crudos:
+  console.log("rawDate:", rawDate);
+  console.log("rawTime:", rawTime);
+
+  // Si rawDate existe, no es "Fecha no disponible" y es una fecha válida, se usa; de lo contrario, se utiliza la fecha actual (formato ISO YYYY-MM-DD)
   const selectedDate =
     rawDate && rawDate !== "Fecha no disponible" && !isNaN(new Date(rawDate))
       ? rawDate
       : new Date().toISOString().split("T")[0];
 
-  // Si rawTime existe, no es "Hora no disponible" y no está vacío, se usa; sino, se asigna "00:00"
+  // Si rawTime existe, no es "Hora no disponible" y no está vacío, se usa; de lo contrario, se asigna "00:00"
   const selectedTime =
     rawTime && rawTime !== "Hora no disponible" && rawTime.trim() !== ""
       ? rawTime
       : "00:00";
+
+  // Mostrar los valores seleccionados y su conversión a Date (si aplica)
+  console.log("selectedDate:", selectedDate);
+  try {
+    console.log("new Date(selectedDate):", new Date(selectedDate).toISOString());
+  } catch (err) {
+    console.error("Error al convertir selectedDate:", err);
+  }
+  console.log("selectedTime:", selectedTime);
 
   const selectedQuantity = parseInt(queryParams.get("totalPeople")) || 1;
 
@@ -73,7 +86,33 @@ const BookingForm = ({ userId }) => {
       );
       console.log("✅ Estado de pago actualizado correctamente.", patchResponse.data);
 
+      // Construir paymentInformation con logs para depurar
+      const paymentInformation = Array.from({ length: selectedQuantity }, (_, index) => {
+        const info = {
+          id_Service: serviceId,
+          serviceTitle,
+          seatNumber: index + 1,
+          DNI_Personal: passenger.dni,
+          passengerName: passenger.passengerName || "Desconocido",
+          selectedDate,
+          selectedTime,
+          lockedStock: 1,
+          totalPeople: selectedQuantity,
+          totalPrice: servicePrice,
+        };
+        console.log(`Información de pago para asiento ${index + 1}:`, info);
+        return info;
+      });
+
       console.log("📤 Enviando POST para crear la reserva...");
+      console.log("Payload de reserva:", {
+        id_User: userId,
+        id_ServiceOrder: serviceOrderId,
+        paymentStatus: "Pagado",
+        DNI: passenger.dni,
+        paymentInformation,
+      });
+
       const postResponse = await axios.post(
         `${import.meta.env.VITE_API_URL}/booking`,
         {
@@ -81,18 +120,7 @@ const BookingForm = ({ userId }) => {
           id_ServiceOrder: serviceOrderId,
           paymentStatus: "Pagado",
           DNI: passenger.dni,
-          paymentInformation: Array.from({ length: selectedQuantity }, (_, index) => ({
-            id_Service: serviceId,
-            serviceTitle,
-            seatNumber: index + 1,
-            DNI_Personal: passenger.dni,
-            passengerName: passenger.passengerName || "Desconocido",
-            selectedDate,
-            selectedTime,
-            lockedStock: 1,
-            totalPeople: selectedQuantity,
-            totalPrice: servicePrice,
-          })),
+          paymentInformation,
         },
         { headers: { "Content-Type": "application/json" } }
       );
