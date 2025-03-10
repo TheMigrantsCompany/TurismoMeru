@@ -12,7 +12,10 @@ const updatePaymentStatusController = async (id_ServiceOrder, paymentStatus, bod
     const serviceOrder = await ServiceOrder.findByPk(id_ServiceOrder, { transaction });
     console.log('[Controller] Orden de servicio obtenida:', serviceOrder ? serviceOrder.dataValues : 'No encontrada');
 
-    if (!serviceOrder) throw new Error(`Orden de servicio no encontrada para id_ServiceOrder=${id_ServiceOrder}`);
+    if (!serviceOrder) {
+      console.error(`[Controller] Error: Orden de servicio no encontrada para id_ServiceOrder=${id_ServiceOrder}`);
+      throw new Error(`Orden de servicio no encontrada para id_ServiceOrder=${id_ServiceOrder}`);
+    }
 
     const parsedPaymentInformation = serviceOrder.paymentInformation || [];
     console.log('[Controller] Información de pago parseada:', parsedPaymentInformation);
@@ -24,7 +27,10 @@ const updatePaymentStatusController = async (id_ServiceOrder, paymentStatus, bod
         const service = await Service.findByPk(item.id_Service, { transaction });
         console.log('[Controller] Servicio obtenido:', service ? service.dataValues : 'No encontrado');
 
-        if (!service) throw new Error(`Servicio no encontrado para id_Service=${item.id_Service}`);
+        if (!service) {
+          console.error(`[Controller] Error: Servicio no encontrado para id_Service=${item.id_Service}`);
+          throw new Error(`Servicio no encontrado para id_Service=${item.id_Service}`);
+        }
 
         const bookingData = {
           id_User: serviceOrder.id_User,
@@ -36,23 +42,22 @@ const updatePaymentStatusController = async (id_ServiceOrder, paymentStatus, bod
           paymentStatus,
           paymentInformation: parsedPaymentInformation,
           passengerName: item.passengerName || 'Desconocido' 
-          
         };
 
         console.log('[Controller] Datos para crear la reserva (booking):', bookingData);
 
         await createBookingHandler(bookingData, transaction);
-
+        console.log('[Controller] Reserva creada con éxito para el servicio:', item.id_Service);
       }
     }
 
     serviceOrder.paymentStatus = paymentStatus;
     await serviceOrder.save({ transaction });
 
-    console.log('[Controller] Preparando para hacer commit de la transacción...');
+    console.log('[Controller] Estado de pago actualizado a:', serviceOrder.paymentStatus);
 
     await transaction.commit();
-    console.log('[Controller] Estado de pago actualizado correctamente.');
+    console.log('[Controller] Transacción completada exitosamente.');
 
     return { message: 'Estado de pago actualizado correctamente.' };
   } catch (error) {
