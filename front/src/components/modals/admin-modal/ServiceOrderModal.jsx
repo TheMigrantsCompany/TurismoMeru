@@ -11,25 +11,33 @@ const ServiceOrderModal = ({ order, onClose }) => {
   const dispatch = useDispatch();
   const { updateStatus } = useSelector((state) => state.orders);
 
-  const handleStatusChange = async (newStatus) => {
+  console.log("Orden recibida en el modal:", order);
+  console.log("ID de la orden:", order?.id_ServiceOrder);
+
+  const handleStatusChange = async () => {
     try {
-      console.log(
-        "Intentando actualizar orden:",
-        order.id,
-        "a estado:",
-        newStatus
-      );
-      await dispatch(updateOrderStatus(order.id, newStatus));
+      if (!order?.id_ServiceOrder) {
+        console.error("No hay ID de orden válido:", order);
+        Swal.fire({
+          title: "Error",
+          text: "No se pudo identificar la orden",
+          icon: "error",
+          confirmButtonColor: "#4256a6",
+          background: "#f9f3e1",
+        });
+        return;
+      }
+
+      console.log("Intentando actualizar orden con ID:", order.id_ServiceOrder);
+      await dispatch(updateOrderStatus(order.id_ServiceOrder, "Pagado"));
+
       console.log("Orden actualizada exitosamente");
       await dispatch(getAllOrders());
       onClose();
     } catch (error) {
-      console.error(
-        "Error detallado al actualizar el estado:",
-        error.response?.data || error.message
-      );
+      console.error("Error completo:", error);
+      console.error("Respuesta del backend:", error.response?.data);
 
-      // Mostrar el error al usuario
       Swal.fire({
         title: "Error al actualizar estado",
         text:
@@ -56,6 +64,12 @@ const ServiceOrderModal = ({ order, onClose }) => {
     });
   }, [order]);
 
+  useEffect(() => {
+    console.log("Orden completa recibida en el modal:", order);
+    console.log("Estado de pago:", order.paymentStatus);
+    console.log("Información de pago:", order.paymentInformation);
+  }, [order]);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-[#f9f3e1] rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -72,85 +86,112 @@ const ServiceOrderModal = ({ order, onClose }) => {
         </div>
 
         <div className="space-y-6">
-          {/* Información de la excursión */}
+          {/* Información General */}
           <section>
             <Typography variant="h6" className="text-[#4256a6] mb-2">
-              Información de la Excursión
+              Información General
             </Typography>
-            <div className="bg-white p-4 rounded-lg">
+            <div className="bg-white p-4 rounded-lg space-y-2">
               <p className="text-gray-900">
-                <strong>Excursión:</strong> {order.excursionName}
+                <strong>ID de Orden:</strong> {order.id}
               </p>
               <p className="text-gray-900">
-                <strong>Fecha:</strong> {order.date}
+                <strong>ID de Usuario:</strong> {order.id_User}
               </p>
               <p className="text-gray-900">
-                <strong>Total de Pasajeros:</strong> {order.passengers}
+                <strong>Excursión:</strong>{" "}
+                {order.paymentInformation?.[0]?.title || "Sin título"}
               </p>
             </div>
           </section>
 
-          {/* Estado de la orden */}
+          {/* Detalles de Pasajeros */}
           <section>
             <Typography variant="h6" className="text-[#4256a6] mb-2">
-              Estado de la Orden
+              Detalles de Pasajeros
             </Typography>
-            <div className="bg-white p-4 rounded-lg">
-              <p className="mb-4 text-gray-900">
-                <strong>Estado Actual:</strong>{" "}
+            <div className="bg-white p-4 rounded-lg space-y-2">
+              {order.paymentInformation?.[0]?.DNI && (
+                <p className="text-gray-900">
+                  <strong>DNI:</strong> {order.paymentInformation[0].DNI}
+                </p>
+              )}
+              <p className="text-gray-900">
+                <strong>Total de Pasajeros:</strong>{" "}
+                {(order.paymentInformation?.[0]?.adults || 0) +
+                  (order.paymentInformation?.[0]?.minors || 0) +
+                  (order.paymentInformation?.[0]?.seniors || 0)}
+              </p>
+              <div className="ml-4">
+                <p className="text-gray-900">
+                  <strong>Adultos:</strong>{" "}
+                  {order.paymentInformation?.[0]?.adults || 0}
+                </p>
+                <p className="text-gray-900">
+                  <strong>Menores:</strong>{" "}
+                  {order.paymentInformation?.[0]?.minors || 0}
+                </p>
+                <p className="text-gray-900">
+                  <strong>Jubilados:</strong>{" "}
+                  {order.paymentInformation?.[0]?.seniors || 0}
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Estado y Pago */}
+          <section>
+            <Typography variant="h6" className="text-[#4256a6] mb-2">
+              Estado y Pago
+            </Typography>
+            <div className="bg-white p-4 rounded-lg space-y-2">
+              <p className="text-gray-900">
+                <strong>Estado de Pago:</strong>{" "}
                 <span
                   className={`px-3 py-1 rounded-full ${
-                    order.status === "completed" ||
+                    order.Bookings?.length > 0 ||
                     order.paymentStatus === "Pagado"
                       ? "bg-green-100 text-green-600"
                       : "bg-yellow-100 text-yellow-600"
                   }`}
                 >
-                  {order.status === "completed" ||
-                  order.paymentStatus === "Pagado"
-                    ? "Completada"
-                    : "Pendiente"}
+                  {order.Bookings?.length > 0 ? "Pagado" : order.paymentStatus}
                 </span>
               </p>
-
-              <div className="flex gap-4">
+              <p className="text-gray-900">
+                <strong>Precio Total:</strong> $
+                {order.paymentInformation?.[0]?.totalPrice || 0}
+              </p>
+              {order.paymentInformation?.[0]?.lockedStock && (
+                <p className="text-gray-900">
+                  <strong>Stock Reservado:</strong>{" "}
+                  {order.paymentInformation[0].lockedStock}
+                </p>
+              )}
+              {/* Botones de estado */}
+              <div className="flex gap-4 mt-4">
                 <button
-                  onClick={() => handleStatusChange("completed")}
+                  onClick={handleStatusChange}
                   disabled={
-                    updateStatus.loading || order.status === "completed"
+                    updateStatus.loading ||
+                    order.paymentStatus === "Pagado" ||
+                    order.hasBooking
                   }
                   className={`px-4 py-2 rounded-lg ${
-                    order.status === "completed"
+                    order.hasBooking || order.paymentStatus === "Pagado"
                       ? "bg-green-500 text-white cursor-not-allowed"
                       : "bg-green-100 text-green-600 hover:bg-green-500 hover:text-white"
                   } transition-colors ${
                     updateStatus.loading ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                 >
-                  {updateStatus.loading
+                  {order.hasBooking
+                    ? "Reserva ya confirmada"
+                    : updateStatus.loading
                     ? "Actualizando..."
                     : "Marcar como Completada"}
                 </button>
-                <button
-                  onClick={() => handleStatusChange("pending")}
-                  disabled={updateStatus.loading}
-                  className={`px-4 py-2 rounded-lg ${
-                    order.paymentStatus === "Pendiente"
-                      ? "bg-yellow-500 text-white"
-                      : "bg-yellow-100 text-yellow-600 hover:bg-yellow-500 hover:text-white"
-                  } transition-colors ${
-                    updateStatus.loading ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                >
-                  {updateStatus.loading
-                    ? "Actualizando..."
-                    : "Marcar como Pendiente"}
-                </button>
               </div>
-
-              {updateStatus.error && (
-                <p className="text-red-500 mt-2">{updateStatus.error}</p>
-              )}
             </div>
           </section>
         </div>
