@@ -18,11 +18,10 @@ const BookingForm = ({ userId }) => {
   const rawDate = queryParams.get("date");
   const rawTime = queryParams.get("time");
 
-  // Depurar valores crudos:
   console.log("rawDate:", rawDate);
   console.log("rawTime:", rawTime);
 
-  // Si rawDate existe, no es "Fecha no disponible" y es una fecha válida, se usa; de lo contrario, se utiliza la fecha actual (formato ISO YYYY-MM-DD)
+  // Si rawDate existe, no es "Fecha no disponible" y es una fecha válida, se usa; de lo contrario, se utiliza la fecha actual en formato ISO (YYYY-MM-DD)
   const selectedDate =
     rawDate && rawDate !== "Fecha no disponible" && !isNaN(new Date(rawDate))
       ? rawDate
@@ -34,7 +33,6 @@ const BookingForm = ({ userId }) => {
       ? rawTime
       : "00:00";
 
-  // Mostrar los valores seleccionados y su conversión a Date (si aplica)
   console.log("selectedDate:", selectedDate);
   try {
     console.log("new Date(selectedDate):", new Date(selectedDate).toISOString());
@@ -86,8 +84,9 @@ const BookingForm = ({ userId }) => {
       );
       console.log("✅ Estado de pago actualizado correctamente.", patchResponse.data);
 
-      // Construir paymentInformation con logs para depurar
+      // Construir paymentInformation con el nuevo campo dateTime
       const paymentInformation = Array.from({ length: selectedQuantity }, (_, index) => {
+        const fullDateTime = new Date(`${selectedDate}T${selectedTime}:00`).toISOString();
         const info = {
           id_Service: serviceId,
           serviceTitle,
@@ -96,6 +95,7 @@ const BookingForm = ({ userId }) => {
           passengerName: passenger.passengerName || "Desconocido",
           selectedDate,
           selectedTime,
+          dateTime: fullDateTime, // campo combinado para asegurar formato ISO
           lockedStock: 1,
           totalPeople: selectedQuantity,
           totalPrice: servicePrice,
