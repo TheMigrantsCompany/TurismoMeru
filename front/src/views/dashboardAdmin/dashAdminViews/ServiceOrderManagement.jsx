@@ -3,59 +3,70 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getAllOrders,
   deleteServiceOrder,
+  updateOrderStatus,
 } from "../../../redux/actions/actions";
 import ServiceOrdersTable from "../../../components/tables/admin/ServiceOrdersTable";
 import ServiceOrderModal from "../../../components/modals/admin-modal/ServiceOrderModal";
 import Swal from "sweetalert2";
+import axios from "axios";
 
 export function ServiceOrderManagement() {
   const dispatch = useDispatch();
   const { ordersList, loading, error } = useSelector((state) => state.orders);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    dispatch(getAllOrders());
+  }, [dispatch]);
 
   const transformOrders = (orders) => {
     return orders.map((order) => {
-      const totalPassengers = order.paymentInformation.reduce(
-        (sum, info) => sum + info.adults + info.minors + info.seniors,
-        0
-      );
-
-      // Normalizar el estado de pago
-      let status = order.paymentStatus.toLowerCase();
-      // Asegurarnos de que solo usemos 'pending' o 'completed'
-      status = status === "pagado" ? "completed" : "pending";
-
-      console.log("Transformando orden:", {
-        id: order.id_ServiceOrder,
-        paymentStatus: order.paymentStatus,
-        transformedStatus: status,
-      });
+      console.log("Orden original:", order);
 
       return {
+        id_ServiceOrder: order.id_ServiceOrder,
         id: order.id_ServiceOrder,
-        excursionName: order.paymentInformation[0]?.title || "Sin título",
+        id_User: order.id_User,
+        orderDate: order.orderDate,
+        paymentMethod: order.paymentMethod,
+        paymentInformation: order.paymentInformation,
+        total: order.total,
+        paymentStatus:
+          order.Bookings?.length > 0 ? "Pagado" : order.paymentStatus,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+        excursionName: order.paymentInformation?.[0]?.title || "Sin título",
         date: new Date(order.orderDate).toLocaleDateString(),
-        passengers: totalPassengers,
-        status: status,
+        passengers: order.paymentInformation?.reduce(
+          (sum, info) =>
+            sum + (info.adults || 0) + (info.minors || 0) + (info.seniors || 0),
+          0
+        ),
+        Bookings: order.Bookings || [],
+        status:
+          order.Bookings?.length > 0
+            ? "completed"
+            : order.paymentStatus === "Pagado"
+            ? "completed"
+            : "pending",
       };
     });
   };
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        await dispatch(getAllOrders());
-      } catch (error) {
-        console.error("Error al obtener órdenes:", error);
-      }
-    };
+  const transformedOrders = ordersList ? transformOrders(ordersList) : [];
+  console.log("Órdenes transformadas:", transformedOrders);
 
-    fetchOrders();
-  }, [dispatch]);
-
-  const handleEditOrder = (order) => {
-    console.log("Editando orden:", order);
+  const handleViewDetail = (order) => {
+    console.log("Abriendo modal con orden:", order);
     setSelectedOrder(order);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedOrder(null);
+    setIsModalOpen(false);
+    dispatch(getAllOrders());
   };
 
   const handleDeleteOrder = (id_ServiceOrder) => {
@@ -117,22 +128,16 @@ export function ServiceOrderManagement() {
             </div>
           ) : (
             <ServiceOrdersTable
-              orders={transformOrders(ordersList)}
-              onEdit={handleEditOrder}
+              orders={transformedOrders}
+              onViewDetail={handleViewDetail}
               onDelete={handleDeleteOrder}
             />
           )}
         </div>
       </div>
 
-      {selectedOrder && (
-        <ServiceOrderModal
-          order={selectedOrder}
-          onClose={() => {
-            setSelectedOrder(null);
-            dispatch(getAllOrders());
-          }}
-        />
+      {isModalOpen && selectedOrder && (
+        <ServiceOrderModal order={selectedOrder} onClose={handleCloseModal} />
       )}
     </div>
   );
