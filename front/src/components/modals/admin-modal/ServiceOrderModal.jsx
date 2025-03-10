@@ -14,8 +14,11 @@ const ServiceOrderModal = ({ order, onClose }) => {
   console.log("Orden recibida en el modal:", order);
   console.log("ID de la orden:", order?.id_ServiceOrder);
 
-  const handleStatusChange = async () => {
+  const handleStatusChange = async (newStatus) => {
     try {
+      console.log("Orden antes de actualizar:", order);
+      console.log("Bookings a eliminar:", order.Bookings);
+
       if (!order?.id_ServiceOrder) {
         console.error("No hay ID de orden válido:", order);
         Swal.fire({
@@ -28,21 +31,26 @@ const ServiceOrderModal = ({ order, onClose }) => {
         return;
       }
 
-      console.log("Intentando actualizar orden con ID:", order.id_ServiceOrder);
-      await dispatch(updateOrderStatus(order.id_ServiceOrder, "Pagado"));
-
+      await dispatch(
+        updateOrderStatus(order.id_ServiceOrder, newStatus, order)
+      );
       console.log("Orden actualizada exitosamente");
+
       await dispatch(getAllOrders());
       onClose();
-    } catch (error) {
-      console.error("Error completo:", error);
-      console.error("Respuesta del backend:", error.response?.data);
 
       Swal.fire({
-        title: "Error al actualizar estado",
-        text:
-          error.response?.data?.error ||
-          "No se pudo actualizar el estado de la orden",
+        title: "¡Éxito!",
+        text: "Estado de pago actualizado correctamente",
+        icon: "success",
+        confirmButtonColor: "#4256a6",
+        background: "#f9f3e1",
+      });
+    } catch (error) {
+      console.error("Error completo:", error);
+      Swal.fire({
+        title: "Error",
+        text: "No se pudo actualizar el estado de la orden",
         icon: "error",
         confirmButtonColor: "#4256a6",
         background: "#f9f3e1",
@@ -170,27 +178,35 @@ const ServiceOrderModal = ({ order, onClose }) => {
               )}
               {/* Botones de estado */}
               <div className="flex gap-4 mt-4">
-                <button
-                  onClick={handleStatusChange}
-                  disabled={
-                    updateStatus.loading ||
-                    order.paymentStatus === "Pagado" ||
-                    order.hasBooking
-                  }
-                  className={`px-4 py-2 rounded-lg ${
-                    order.hasBooking || order.paymentStatus === "Pagado"
-                      ? "bg-green-500 text-white cursor-not-allowed"
-                      : "bg-green-100 text-green-600 hover:bg-green-500 hover:text-white"
-                  } transition-colors ${
-                    updateStatus.loading ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                >
-                  {order.hasBooking
-                    ? "Reserva ya confirmada"
-                    : updateStatus.loading
-                    ? "Actualizando..."
-                    : "Marcar como Completada"}
-                </button>
+                {order.paymentStatus === "Pendiente" ? (
+                  <button
+                    onClick={() => handleStatusChange("Pagado")}
+                    disabled={updateStatus.loading}
+                    className={`px-4 py-2 rounded-lg bg-green-100 text-green-600 hover:bg-green-500 hover:text-white transition-colors ${
+                      updateStatus.loading
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
+                  >
+                    {updateStatus.loading
+                      ? "Actualizando..."
+                      : "Marcar como Pagado"}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleStatusChange("Pendiente")}
+                    disabled={updateStatus.loading}
+                    className={`px-4 py-2 rounded-lg bg-yellow-100 text-yellow-600 hover:bg-yellow-500 hover:text-white transition-colors ${
+                      updateStatus.loading
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
+                  >
+                    {updateStatus.loading
+                      ? "Actualizando..."
+                      : "Marcar como Pendiente"}
+                  </button>
+                )}
               </div>
             </div>
           </section>
