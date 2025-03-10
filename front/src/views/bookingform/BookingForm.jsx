@@ -17,7 +17,6 @@ const BookingForm = ({ userId }) => {
   const selectedTime = queryParams.get("time") || "Hora no disponible";
   const selectedQuantity = parseInt(queryParams.get("totalPeople")) || 1;
 
-  // Estado para la información del pasajero
   const [passenger, setPassenger] = useState({ passengerName: "", dni: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const [reservationSuccess, setReservationSuccess] = useState(false);
@@ -26,17 +25,10 @@ const BookingForm = ({ userId }) => {
     setPassenger((prev) => ({ ...prev, [field]: value }));
   };
 
-  console.log("Service Order ID:", serviceOrderId);
-  console.log("Service ID:", serviceId);
-  console.log("Total Personas:", selectedQuantity);
-  console.log("Precio del servicio:", servicePrice);
-
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("➡️ Iniciando envío del formulario de reserva...");
-    console.log("Datos del pasajero:", passenger);
+    setErrorMessage("");
 
-    // Validación de campos
     if (!passenger.passengerName.trim() || !passenger.dni.trim()) {
       setErrorMessage("Todos los campos son obligatorios.");
       return;
@@ -50,81 +42,63 @@ const BookingForm = ({ userId }) => {
       return;
     }
 
-    // Payload para la reserva
-    const payload = {
-      id_User: userId,
-      id_ServiceOrder: serviceOrderId,
-      paymentStatus: "Pagado",
-      DNI: passenger.dni,
-      paymentInformation: Array.from({ length: selectedQuantity }, (_, index) => ({
-        id_Service: serviceId,
-        serviceTitle,
-        seatNumber: index + 1,
-        DNI_Personal: passenger.dni,
-        passengerName: passenger.passengerName || "Desconocido",
-        selectedDate,
-        selectedTime,
-        lockedStock: 1,
-        totalPeople: selectedQuantity,
-        totalPrice: servicePrice,
-      })),
-    };
-
-    console.log("Payload de reserva:", payload);
-    console.log("API URL:", import.meta.env.VITE_API_URL);
-
-    // Enviar la reserva
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/booking`,
-        payload,
-        { headers: { "Content-Type": "application/json" } }
-      );
-      console.log("✅ Reserva creada con éxito:", response.data);
-    } catch (error) {
-      setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
-      console.error("❌ Error en el POST de reserva:", error.response?.data || error.message);
-      return;
-    }
-
-    // Preparar payload para actualizar el estado de pago
-    const paymentUpdatePayload = { paymentStatus: "Pagado", DNI: passenger.dni };
-    console.log("📤 Preparando envío de PATCH para actualizar el estado de pago:", paymentUpdatePayload);
-
-    // Enviar la actualización de pago (PATCH)
-    try {
-      const patchResponse = await axios.patch(
+      // 🔹 1️⃣ Actualizar el estado de la orden de servicio a "Pagado"
+      console.log("📤 Enviando PATCH para actualizar estado de pago...");
+      await axios.patch(
         `${import.meta.env.VITE_API_URL}/serviceOrder/id/${serviceOrderId}`,
-        paymentUpdatePayload,
+        { paymentStatus: "Pagado", DNI: passenger.dni },
         { headers: { "Content-Type": "application/json" } }
       );
-      console.log("✅ Estado de pago actualizado correctamente:", patchResponse.data);
+      console.log("✅ Estado de pago actualizado correctamente.");
+
+      // 🔹 2️⃣ Si el PATCH fue exitoso, proceder a crear la reserva
+      console.log("📤 Enviando POST para crear la reserva...");
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/booking`,
+        {
+          id_User: userId,
+          id_ServiceOrder: serviceOrderId,
+          paymentStatus: "Pagado",
+          DNI: passenger.dni,
+          paymentInformation: Array.from({ length: selectedQuantity }, (_, index) => ({
+            id_Service: serviceId,
+            serviceTitle,
+            seatNumber: index + 1,
+            DNI_Personal: passenger.dni,
+            passengerName: passenger.passengerName || "Desconocido",
+            selectedDate,
+            selectedTime,
+            lockedStock: 1,
+            totalPeople: selectedQuantity,
+            totalPrice: servicePrice,
+          })),
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      console.log("✅ Reserva creada con éxito.");
+
+      // 🔹 3️⃣ Mostrar mensaje de éxito y redirigir
+      await Swal.fire({
+        icon: "success",
+        title: "¡Reserva exitosa!",
+        text: "Tu reserva se ha creado con éxito. Serás redirigido a tus reservas.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+
+      setReservationSuccess(true);
+      navigate("/user/reservas");
+      setPassenger({ passengerName: "", dni: "" });
+
     } catch (error) {
-      setErrorMessage("Error al actualizar el pago. Intenta nuevamente.");
-      console.error("❌ Error en el PATCH de actualización:", error.response?.data || error.message);
-      return;
+      console.error("❌ Error en la operación:", error.response?.data || error.message);
+      setErrorMessage("Ocurrió un error. Intenta nuevamente.");
     }
-
-    // Mostrar mensaje de éxito y redirigir
-    await Swal.fire({
-      icon: "success",
-      title: "¡Reserva exitosa!",
-      text: "Tu reserva se ha creado con éxito. Serás redirigido a tus reservas.",
-      timer: 2000,
-      showConfirmButton: false,
-    });
-    setReservationSuccess(true);
-    navigate("/user/reservas");
-
-    // Reiniciar la información del pasajero
-    setPassenger({ passengerName: "", dni: "" });
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-4 bg-[#f9f3e1] p-6 rounded-xl shadow-md max-w-xl mx-auto"
-    >
+    <form onSubmit={handleSubmit} className="space-y-4 bg-[#f9f3e1] p-6 rounded-xl shadow-md max-w-xl mx-auto">
       <h2 className="text-xl font-semibold text-[#4256a6]">
         Reserva para {serviceTitle}
       </h2>
