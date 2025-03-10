@@ -33,7 +33,7 @@ const BookingForm = ({ userId }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("➡️ Enviando formulario de reserva...");
+    console.log("➡️ Iniciando envío del formulario de reserva...");
     console.log("Datos del pasajero:", passenger);
 
     // Validación de campos
@@ -73,8 +73,8 @@ const BookingForm = ({ userId }) => {
     console.log("Payload de reserva:", payload);
     console.log("API URL:", import.meta.env.VITE_API_URL);
 
+    // Enviar la reserva
     try {
-      // Enviar la reserva
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/booking`,
         payload,
@@ -83,24 +83,25 @@ const BookingForm = ({ userId }) => {
       console.log("✅ Reserva creada con éxito:", response.data);
     } catch (error) {
       setErrorMessage("Error al crear la reserva. Intenta nuevamente.");
-      console.error("❌ Error en la reserva:", error.response?.data || error.message);
-      return; // Salir si la reserva falla
+      console.error("❌ Error en el POST de reserva:", error.response?.data || error.message);
+      return;
     }
 
-    // Actualización del estado de pago
+    // Preparar payload para actualizar el estado de pago
     const paymentUpdatePayload = { paymentStatus: "Pagado", DNI: passenger.dni };
-    console.log("📤 Enviando actualización de pago...", paymentUpdatePayload);
+    console.log("📤 Preparando envío de PATCH para actualizar el estado de pago:", paymentUpdatePayload);
 
+    // Enviar la actualización de pago (PATCH)
     try {
       const patchResponse = await axios.patch(
         `${import.meta.env.VITE_API_URL}/serviceOrder/id/${serviceOrderId}`,
         paymentUpdatePayload,
         { headers: { "Content-Type": "application/json" } }
       );
-      console.log("✅ Estado de pago actualizado:", patchResponse.data);
+      console.log("✅ Estado de pago actualizado correctamente:", patchResponse.data);
     } catch (error) {
       setErrorMessage("Error al actualizar el pago. Intenta nuevamente.");
-      console.error("❌ Error actualizando el pago:", error.response?.data || error.message);
+      console.error("❌ Error en el PATCH de actualización:", error.response?.data || error.message);
       return;
     }
 
@@ -112,7 +113,6 @@ const BookingForm = ({ userId }) => {
       timer: 2000,
       showConfirmButton: false,
     });
-
     setReservationSuccess(true);
     navigate("/user/reservas");
 
