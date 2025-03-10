@@ -108,6 +108,7 @@ try {
     setErrorMessage("Ocurrió un error. Intenta nuevamente.");
   }
 }
+ };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 bg-[#f9f3e1] p-6 rounded-xl shadow-md max-w-xl mx-auto">
