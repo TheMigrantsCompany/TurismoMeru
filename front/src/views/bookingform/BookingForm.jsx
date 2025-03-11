@@ -30,15 +30,17 @@ const BookingForm = ({ userId }) => {
       : new Date().toISOString().split("T")[0];
 
   // Función para validar y formatear la hora
-  const formatTime = (time) => {
-    if (!time || typeof time !== "string" || time.length < 5) return "00:00:00";
-    return time.length === 5 ? `${time}:00` : time;
-  };
+  // Función para validar y formatear la hora correctamente
+ const formatTime = (time) => {
+  if (!time || typeof time !== "string" || time.length < 5) return "00:00";
+  return time.slice(0, 5); // Asegura que solo envíe HH:mm
+ };
 
-  const selectedTime =
-    rawTime && rawTime.trim() !== "" && rawTime !== "Hora no disponible"
-      ? formatTime(rawTime.trim())
-      : "00:00:00";
+// Aplicamos el nuevo formato a `selectedTime`
+ const selectedTime = paymentInfo.selectedTime
+  ? formatTime(paymentInfo.selectedTime)
+  : "00:00";
+
 
   console.log("selectedDate:", selectedDate);
   console.log("selectedTime:", selectedTime);
