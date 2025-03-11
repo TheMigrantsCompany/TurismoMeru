@@ -18,43 +18,20 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
   try {
     const bookings = [];
 
-    // Función para validar el formato de hora: acepta "HH:mm" o "HH:mm:ss"
-    const isValidTime = (timeString) => /^\d{2}:\d{2}(:\d{2})?$/.test(timeString);
-
     for (const item of paymentInformation) {
-  console.log('[Controller] Datos del item recibido:', item);
+      console.log('[Controller] Datos del item recibido:', item);
 
-  const { id_Service, lockedStock, totalPeople, totalPrice, passengerName, selectedDate, selectedTime } = item;
+      const { id_Service, lockedStock, totalPeople, totalPrice, date, time } = item;
 
-  // Validar lockedStock
-  if (lockedStock <= 0) {
-    console.error('[Controller] El valor de lockedStock debe ser mayor que 0.');
-    throw new Error('El valor de lockedStock debe ser mayor que 0.');
-  }
+      const validatedTotalPeople = totalPeople || 0;
+      const validatedTotalPrice = totalPrice || 0;
 
-  // Procesar la hora:
-  const rawTime = selectedTime ? selectedTime.trim() : "";
-  let time = "00:00:00";
-  if (rawTime) {
-    const timeParts = rawTime.split(':');
-    if (timeParts.length === 3) {
-      time = `${timeParts[0]}:${timeParts[1]}:${timeParts[2]}`;
-    } else if (timeParts.length === 2) {
-      time = `${timeParts[0]}:${timeParts[1]}:00`;
-    } else {
-      console.warn('[Controller] Formato de hora inesperado. Se asigna valor por defecto "00:00:00".');
-    }
-  }
-
-  // Se asume que selectedDate ya está en formato "YYYY-MM-DD"
-  const date = selectedDate;
-  const validatedTotalPeople = totalPeople || 0;
-  const validatedTotalPrice = totalPrice || 0;
-  
-  if (validatedTotalPeople <= 0 || validatedTotalPrice <= 0) {
-    console.error('[Controller] Valores inválidos en item:', item);
-    throw new Error(`Valores inválidos: totalPeople=${validatedTotalPeople}, totalPrice=${validatedTotalPrice}`);
-  }
+      if (validatedTotalPeople <= 0 || validatedTotalPrice <= 0) {
+        console.error('[Controller] Valores inválidos en item:', item);
+        throw new Error(
+          `Valores inválidos: totalPeople=${validatedTotalPeople}, totalPrice=${validatedTotalPrice}`
+        );
+      }
 
       // Buscar el servicio por ID con bloqueo para evitar conflictos en transacciones concurrentes
       console.log('[Controller] Buscando servicio con ID:', id_Service);
@@ -90,23 +67,22 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
         throw new Error(`Stock global insuficiente para el servicio ${service.title}.`);
       }
 
-      const formattedDate = new Date(date).toISOString().split('T')[0];
-      const formattedTime = time.slice(0, 5); // "HH:mm"
-
       // Buscar el slot específico en availabilityDate
+      const formattedDate = new Date(date).toISOString().split('T')[0];
+      const formattedTime = time.trim();
       const availabilityItem = service.availabilityDate.find(
-       (slot) => slot.date === formattedDate && slot.time === formattedTime
-     );
-
-    if (!availabilityItem) {
-    console.error('[Controller] No se encontró disponibilidad para la fecha y hora especificadas:', {
-      date: formattedDate,
-      time: formattedTime,
-    });
-    throw new Error(
-      `No se encontró disponibilidad para la fecha ${formattedDate} a las ${formattedTime} en el servicio ${service.title}.`
+        (slot) => slot.date === formattedDate && slot.time === formattedTime
       );
-     }
+
+      if (!availabilityItem) {
+        console.error('[Controller] No se encontró disponibilidad para la fecha y hora especificadas:', {
+          date: formattedDate,
+          time: formattedTime,
+        });
+        throw new Error(
+          `No se encontró disponibilidad para la fecha ${formattedDate} a las ${formattedTime} en el servicio ${service.title}.`
+        );
+      }
 
       if (availabilityItem.stock < lockedStock) {
         console.error('[Controller] Stock insuficiente para el slot especificado:', {
@@ -150,7 +126,7 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
 
       console.log('[Controller] Stock actualizado en la base de datos.');
 
-      // Obtener el último número de asiento para asignar el siguiente
+      // Obtener último número de asiento
       const lastBooking = await Booking.findOne({
         where: { id_Service },
         order: [['seatNumber', 'DESC']],
@@ -161,7 +137,6 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
       console.log('[Controller] Último número de asiento:', lastSeatNumber);
 
       // Crear nuevas reservas
-      // Se arma el campo dateTime concatenando formattedDate y formattedTime (en formato "HH:mm")
       const newBookings = Array.from({ length: lockedStock }, (_, i) => ({
         id_User,
         id_Service,
@@ -174,9 +149,10 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
         active: true,
         totalPeople: validatedTotalPeople,
         totalPrice: validatedTotalPrice,
-        dateTime: `${formattedDate}T${time}`, // Asegura "YYYY-MM-DDTHH:mm:ss"
-        passengerName: passengerName || 'Desconocido',
-       }));
+        dateTime: `${formattedDate} ${formattedTime}`,
+        passengerName: item.passengerName || 'Desconocido', 
+      }));
+
       const createdBookings = await Booking.bulkCreate(newBookings, { transaction });
       bookings.push(...createdBookings);
     }
