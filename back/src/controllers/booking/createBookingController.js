@@ -174,7 +174,7 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
         active: true,
         totalPeople: validatedTotalPeople,
         totalPrice: validatedTotalPrice,
-        dateTime: `${formattedDate}T${formattedTime}`,
+        dateTime: `${formattedDate}T${formattedTime}:00`,
         passengerName: passengerName || 'Desconocido',
       }));
 
