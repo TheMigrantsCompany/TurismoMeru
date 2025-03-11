@@ -1,13 +1,29 @@
-const { deleteServiceOrderController } = require('../../controllers/serviceOrder/deleteServiceOrderController');
+const deleteServiceOrderController = require("../../controllers/serviceOrder/deleteServiceOrderController");
 
 const deleteServiceOrderHandler = async (req, res) => {
-  const { id_ServiceOrder } = req.params; // Obtener el ID de la orden desde los parámetros de la URL
-    console.log(id_ServiceOrder)
   try {
+    const { id_ServiceOrder } = req.params;
+    console.log("[Handler] Iniciando eliminación de orden:", id_ServiceOrder);
+
+    if (!id_ServiceOrder) {
+      return res.status(400).json({
+        error: "Se requiere el ID de la orden",
+      });
+    }
+
     const result = await deleteServiceOrderController(id_ServiceOrder);
-    return res.status(200).json(result);
+    console.log("[Handler] Orden eliminada exitosamente:", id_ServiceOrder);
+
+    res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    console.error("[Handler] Error al eliminar orden:", error.message);
+
+    // Determinar el código de estado según el tipo de error
+    const statusCode = error.message.includes("no encontrada") ? 404 : 400;
+
+    res.status(statusCode).json({
+      error: error.message,
+    });
   }
 };
 
