@@ -64,15 +64,16 @@ const BookingForm = ({ userId }) => {
     }
 
     try {
-      // Primero, construir el array paymentInformation usando las claves "date" y "time"
+      // Primero, construir el array paymentInformation usando las claves que espera el backend:
+      // "selectedDate" y "selectedTime"
       const paymentInformation = Array.from({ length: selectedQuantity }, (_, index) => ({
         id_Service: serviceId,
         lockedStock: 1,
         totalPeople: selectedQuantity,
         totalPrice: servicePrice,
         passengerName: passenger.passengerName || "Desconocido",
-        date: selectedDate,    // se envía con clave "date"
-        time: selectedTime,    // se envía con clave "time"
+        selectedDate,    // se envía con clave "selectedDate"
+        selectedTime,    // se envía con clave "selectedTime"
         seatNumber: index + 1
       }));
 
