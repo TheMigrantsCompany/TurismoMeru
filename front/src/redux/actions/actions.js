@@ -420,26 +420,36 @@ export const updateOrderStatus =
 export const deleteServiceOrder = (id_ServiceOrder) => async (dispatch) => {
   dispatch({ type: DELETE_SERVICE_ORDER_REQUEST });
   try {
-    // Usamos la ruta correcta según serviceOrderRouter.js
-    await axios.delete(
+    console.log("Intentando eliminar orden con ID:", id_ServiceOrder);
+
+    if (!id_ServiceOrder) {
+      throw new Error("ID de orden no válido");
+    }
+
+    const response = await axios.delete(
       `http://localhost:3001/servicesOrder/id/${id_ServiceOrder}`
     );
+
+    console.log("Respuesta del servidor:", response.data);
 
     dispatch({
       type: DELETE_SERVICE_ORDER_SUCCESS,
       payload: id_ServiceOrder,
     });
 
-    // Esperamos a que se complete la eliminación antes de obtener todas las órdenes
-    await dispatch(getAllOrders());
-
-    return Promise.resolve(); // Para manejar el then() en el componente
+    return response.data;
   } catch (error) {
+    console.error("Error completo en deleteServiceOrder:", {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+
     dispatch({
       type: DELETE_SERVICE_ORDER_FAILURE,
-      payload: error.message,
+      payload: error.response?.data?.error || error.message,
     });
-    return Promise.reject(error); // Para manejar el catch() en el componente
+    throw error;
   }
 };
 
