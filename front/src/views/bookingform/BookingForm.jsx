@@ -76,10 +76,9 @@ const BookingForm = ({ userId }) => {
         totalPrice: servicePrice,
         passengerName: passenger.passengerName || "Desconocido",
         selectedDate, // Fecha validada
-        // Aseguramos que el valor tenga el formato "HH:mm:00" si es necesario
-        selectedTime: selectedTime.length === 5 ? `${selectedTime}:00` : selectedTime,
+        selectedTime,
         date: selectedDate,
-        time: selectedTime.length === 5 ? `${selectedTime}:00` : selectedTime,
+        time: selectedTime,
         seatNumber: index + 1
       }));
 
