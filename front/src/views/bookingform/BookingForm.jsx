@@ -30,6 +30,12 @@ const BookingForm = ({ userId }) => {
       ? rawTime.trim()
       : "00:00";
 
+  const formatTime = (time) => {
+  if (!time || time.length < 5) return "00:00:00"; // Valor por defecto
+  return time.length === 5 ? `${time}:00` : time; // Agrega segundos si falta
+};
+
+const adjustedTime = formatTime(selectedTime);
   console.log("selectedDate:", selectedDate);
   console.log("selectedTime:", selectedTime);
 
@@ -75,7 +81,7 @@ const BookingForm = ({ userId }) => {
       time: adjustedTime,
       seatNumber: index + 1
       }));
-
+      console.log(paymentInformation);
       console.log("ID de la orden de servicio:", serviceOrderId);
       console.log("📤 Enviando PATCH para actualizar estado de pago...");
 
