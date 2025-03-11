@@ -31,14 +31,13 @@ const selectedDate =
 
 // Validar y formatear la hora correctamente
 const formatTime = (time) => {
-  if (!time || typeof time !== "string" || !/^\d{2}:\d{2}$/.test(time)) {
-    return "00:00"; // Valor por defecto si no es válido
-  }
-  return `${time}:00`; // Agregar segundos para evitar errores de conversión
+  return time.length === 8 ? time.slice(0, 5) : time; // Convierte "HH:mm:ss" en "HH:mm"
 };
 
-// Usar `rawTime` en lugar de `paymentInfo.selectedTime`
-const selectedTime = rawTime ? formatTime(rawTime) : "00:00";
+paymentInformation.forEach(item => {
+  item.time = formatTime(item.time);
+  item.selectedTime = formatTime(item.selectedTime);
+});
 
 console.log("selectedDate:", selectedDate);
 console.log("selectedTime:", selectedTime);
