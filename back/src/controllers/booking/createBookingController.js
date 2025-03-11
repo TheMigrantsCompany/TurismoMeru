@@ -79,7 +79,7 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
 
       // Buscar el slot específico en availabilityDate
       const formattedDate = new Date(date).toISOString().split('T')[0];
-      const formattedTime = time.trim();
+      const formattedTime = time ? time.trim().slice(0, 5) : "00:00";
       const availabilityItem = service.availabilityDate.find(
         (slot) => slot.date === formattedDate && slot.time === formattedTime
       );
