@@ -14,14 +14,14 @@ const BookingForm = ({ userId }) => {
   const servicePrice = parseFloat(queryParams.get("price")) || 0;
   const serviceOrderId = queryParams.get("id_ServiceOrder");
 
-  // Obtener valores sin formatear
+  // Obtener los valores sin formatear
   const rawDate = queryParams.get("date");
   const rawTime = queryParams.get("time");
 
   console.log("rawDate:", rawDate);
   console.log("rawTime:", rawTime);
 
-  // Validar la fecha: si rawDate es válido, se usa; de lo contrario se usa la fecha actual (YYYY-MM-DD)
+  // Validar la fecha: si rawDate es válido se usa; de lo contrario se usa la fecha actual en formato ISO (YYYY-MM-DD)
   const selectedDate =
     rawDate && rawDate !== "Fecha no disponible" && !isNaN(new Date(rawDate))
       ? rawDate.trim()
@@ -79,23 +79,17 @@ const BookingForm = ({ userId }) => {
       );
       console.log("✅ Estado de pago actualizado correctamente.", patchResponse.data);
 
-      const paymentInformation = Array.from({ length: selectedQuantity }, (_, index) => {
-      const dateTimeISO = new Date(`${selectedDate}T${selectedTime}:00`).toISOString();
-      const info = {
+      // Construir paymentInformation con las propiedades exactas que espera el backend
+      const paymentInformation = Array.from({ length: selectedQuantity }, (_, index) => ({
         id_Service: serviceId,
-        serviceTitle,
-        seatNumber: index + 1,
-        passengerName: passenger.passengerName || "Desconocido",
-        selectedDate,    // "YYYY-MM-DD"
-        selectedTime,    // "HH:mm"
-        dateTime: dateTimeISO, // Ej: "2025-03-14T15:00:00.000Z"
         lockedStock: 1,
         totalPeople: selectedQuantity,
         totalPrice: servicePrice,
-         };
-        console.log(`Información de pago para asiento ${index + 1}:`, info);
-        return info;
-         });
+        passengerName: passenger.passengerName || "Desconocido",
+        selectedDate,    // "YYYY-MM-DD"
+        selectedTime,    // "HH:mm"
+        seatNumber: index + 1  // si es necesario para tu lógica
+      }));
 
       console.log("📤 Enviando POST para crear la reserva...");
       console.log("Payload de reserva:", {
