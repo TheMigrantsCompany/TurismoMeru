@@ -126,7 +126,9 @@ const OrderForm = () => {
         paymentMethod: formData.paymentMethod,
         items: cartItems.map((item) => ({
           id_Service: item.id_Service,
-          selectedDate: item.selectedDate,
+          date: item.selectedDate,         
+          time: item.selectedTime,       
+          selectedDate: item.selectedDate, 
           selectedTime: item.selectedTime,
           adults: item.quantities?.adults || 0,
           minors: item.quantities?.children || 0,
