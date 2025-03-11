@@ -18,7 +18,7 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
   try {
     const bookings = [];
 
-    // Función para validar el formato de hora: acepta HH:mm o HH:mm:ss
+    // Función para validar el formato de hora: acepta "HH:mm" o "HH:mm:ss"
     const isValidTime = (timeString) => /^\d{2}:\d{2}(:\d{2})?$/.test(timeString);
 
     for (const item of paymentInformation) {
@@ -32,12 +32,13 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
         throw new Error('El valor de lockedStock debe ser mayor que 0.');
       }
 
-      // Validar y normalizar la hora
-      // Si el formato es válido pero tiene segundos, se recorta a "HH:mm"
+      // Eliminar espacios en blanco del valor recibido
+      const rawTime = selectedTime ? selectedTime.trim() : "";
+      
       let time = "00:00";
-      if (isValidTime(selectedTime)) {
-        // Si tiene segundos (ej: "09:37:00"), recortamos a "09:37"
-        time = selectedTime.length === 8 ? selectedTime.slice(0, 5) : selectedTime;
+      if (rawTime && isValidTime(rawTime)) {
+        // Si rawTime tiene segundos (ej: "09:37:00"), recortamos a "HH:mm"
+        time = rawTime.length === 8 ? rawTime.slice(0, 5) : rawTime;
       } else {
         console.warn('[Controller] Valor de hora inválido recibido, se asigna valor por defecto "00:00".');
       }
