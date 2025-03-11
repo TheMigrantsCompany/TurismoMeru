@@ -72,10 +72,12 @@ const BookingForm = ({ userId }) => {
         totalPeople: selectedQuantity,
         totalPrice: servicePrice,
         passengerName: passenger.passengerName || "Desconocido",
-        selectedDate,    // se envía con clave "selectedDate"
-        selectedTime,    // se envía con clave "selectedTime"
+        selectedDate: selectedDate,
+        selectedTime: selectedTime,
+        date: selectedDate,
+        time: selectedTime,
         seatNumber: index + 1
-      }));
+       }));
 
       console.log("ID de la orden de servicio:", serviceOrderId);
       console.log("📤 Enviando PATCH para actualizar estado de pago...");
