@@ -64,22 +64,7 @@ const BookingForm = ({ userId }) => {
     }
 
     try {
-      console.log("ID de la orden de servicio:", serviceOrderId);
-      console.log("📤 Enviando PATCH para actualizar estado de pago...");
-
-      // Construir la URL usando la variable de entorno
-      const url = `${import.meta.env.VITE_API_URL}/servicesOrder/id/${serviceOrderId}`;
-      console.log("📡 URL de la solicitud PATCH:", url);
-
-      // Realizar la solicitud PATCH
-      const patchResponse = await axios.patch(
-        url,
-        { paymentStatus: "Pagado", DNI: passenger.dni },
-        { headers: { "Content-Type": "application/json" } }
-      );
-      console.log("✅ Estado de pago actualizado correctamente.", patchResponse.data);
-
-      // Construir paymentInformation con las propiedades exactas que espera el backend
+      // Primero, construir el array paymentInformation
       const paymentInformation = Array.from({ length: selectedQuantity }, (_, index) => ({
         id_Service: serviceId,
         lockedStock: 1,
@@ -88,8 +73,27 @@ const BookingForm = ({ userId }) => {
         passengerName: passenger.passengerName || "Desconocido",
         selectedDate,    // "YYYY-MM-DD"
         selectedTime,    // "HH:mm"
-        seatNumber: index + 1  // si es necesario para tu lógica
+        seatNumber: index + 1
       }));
+
+      console.log("ID de la orden de servicio:", serviceOrderId);
+      console.log("📤 Enviando PATCH para actualizar estado de pago...");
+
+      // Construir la URL usando la variable de entorno
+      const url = `${import.meta.env.VITE_API_URL}/servicesOrder/id/${serviceOrderId}`;
+      console.log("📡 URL de la solicitud PATCH:", url);
+
+      // Realizar la solicitud PATCH, enviando también paymentInformation
+      const patchResponse = await axios.patch(
+        url,
+        { 
+          paymentStatus: "Pagado", 
+          DNI: passenger.dni,
+          paymentInformation
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      console.log("✅ Estado de pago actualizado correctamente.", patchResponse.data);
 
       console.log("📤 Enviando POST para crear la reserva...");
       console.log("Payload de reserva:", {
