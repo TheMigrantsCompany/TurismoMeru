@@ -123,16 +123,18 @@ const BookingForm = ({ userId }) => {
       );
       console.log("✅ Reserva creada con éxito.", postResponse.data);
 
-      await Swal.fire({
-        icon: "success",
-        title: "¡Reserva exitosa!",
-        text: "Tu reserva se ha creado con éxito. Serás redirigido a tus reservas.",
-        timer: 2000,
-        showConfirmButton: false,
+      Swal.fire({
+      icon: "success",
+      title: "¡Reserva exitosa!",
+      text: "Tu reserva se ha creado con éxito. Serás redirigido a tus reservas.",
+      timer: 2000,
+      showConfirmButton: false,
+      }).then(() => {
+       setReservationSuccess(true);
+       setPassenger({ passengerName: "", dni: "" });
+       navigate("/user/reservas");
       });
 
-      setReservationSuccess(true);
-      navigate("/user/reservas");
       setPassenger({ passengerName: "", dni: "" });
     } catch (error) {
       console.error("❌ Error en la operación:", error.response?.data || error.message);
