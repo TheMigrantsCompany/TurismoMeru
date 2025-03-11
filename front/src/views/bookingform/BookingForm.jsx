@@ -14,34 +14,28 @@ const BookingForm = ({ userId }) => {
   const servicePrice = parseFloat(queryParams.get("price")) || 0;
   const serviceOrderId = queryParams.get("id_ServiceOrder");
 
-// Obtener los valores sin formatear
-const rawDate = queryParams.get("date");
-const rawTime = queryParams.get("time");
+  // Obtener los valores sin formatear
+  const rawDate = queryParams.get("date");
+  const rawTime = queryParams.get("time");
 
-// Validar y formatear la fecha
-const isValidDate = (dateString) => {
-  const date = new Date(dateString);
-  return !isNaN(date.getTime()) && dateString.match(/^\d{4}-\d{2}-\d{2}$/);
-};
+  // Validar y formatear la fecha
+  const isValidDate = (dateString) => {
+    const date = new Date(dateString);
+    return !isNaN(date.getTime()) && dateString.match(/^\d{4}-\d{2}-\d{2}$/);
+  };
 
-const selectedDate =
-  rawDate && rawDate !== "Fecha no disponible" && isValidDate(rawDate)
-    ? rawDate.trim()
-    : new Date().toISOString().split("T")[0];
+  const selectedDate =
+    rawDate && rawDate !== "Fecha no disponible" && isValidDate(rawDate)
+      ? rawDate.trim()
+      : new Date().toISOString().split("T")[0];
 
-// Validar y formatear la hora correctamente
-const formatTime = (time) => {
-  return time.length === 8 ? time.slice(0, 5) : time; // Convierte "HH:mm:ss" en "HH:mm"
-};
+  // Validar y formatear la hora correctamente
+  const formatTime = (time) => {
+    return time && time.length === 8 ? time.slice(0, 5) : time || "00:00"; // Convierte "HH:mm:ss" en "HH:mm"
+  };
 
-paymentInformation.forEach(item => {
-  item.time = formatTime(item.time);
-  item.selectedTime = formatTime(item.selectedTime);
-});
-
-console.log("selectedDate:", selectedDate);
-console.log("selectedTime:", selectedTime);
-
+  // Definir selectedTime a partir de rawTime
+  const selectedTime = rawTime ? formatTime(rawTime) : "00:00";
 
   console.log("selectedDate:", selectedDate);
   console.log("selectedTime:", selectedTime);
@@ -74,17 +68,18 @@ console.log("selectedTime:", selectedTime);
     }
 
     try {
-      // Construcción del array paymentInformation
+      // Construcción del array paymentInformation, formateando la hora para cada ítem
       const paymentInformation = Array.from({ length: selectedQuantity }, (_, index) => ({
         id_Service: serviceId,
         lockedStock: 1,
         totalPeople: selectedQuantity,
         totalPrice: servicePrice,
         passengerName: passenger.passengerName || "Desconocido",
-        selectedDate, // Ahora está validado
-        selectedTime, // Ahora está validado y con segundos
+        selectedDate, // Fecha validada
+        // Aseguramos que el valor tenga el formato "HH:mm:00" si es necesario
+        selectedTime: selectedTime.length === 5 ? `${selectedTime}:00` : selectedTime,
         date: selectedDate,
-        time: selectedTime,
+        time: selectedTime.length === 5 ? `${selectedTime}:00` : selectedTime,
         seatNumber: index + 1
       }));
 
