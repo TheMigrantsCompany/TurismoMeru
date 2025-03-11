@@ -18,9 +18,6 @@ const BookingForm = ({ userId }) => {
   const rawDate = queryParams.get("date");
   const rawTime = queryParams.get("time");
 
-  console.log("rawDate:", rawDate);
-  console.log("rawTime:", rawTime);
-
   // Validar la fecha: si rawDate es válido se usa; de lo contrario se usa la fecha actual (YYYY-MM-DD)
   const selectedDate =
     rawDate && rawDate !== "Fecha no disponible" && !isNaN(new Date(rawDate))
@@ -41,7 +38,7 @@ const BookingForm = ({ userId }) => {
   const [passenger, setPassenger] = useState({ passengerName: "", dni: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const [reservationSuccess, setReservationSuccess] = useState(false);
-
+  const adjustedTime = selectedTime.length === 5 ? `${selectedTime}:00` : selectedTime;
   const handlePassengerChange = (field, value) => {
     setPassenger((prev) => ({ ...prev, [field]: value }));
   };
@@ -66,18 +63,18 @@ const BookingForm = ({ userId }) => {
     try {
       // Primero, construir el array paymentInformation usando las claves que espera el backend:
       // "selectedDate" y "selectedTime"
-      const paymentInformation = Array.from({ length: selectedQuantity }, (_, index) => ({
-        id_Service: serviceId,
-        lockedStock: 1,
-        totalPeople: selectedQuantity,
-        totalPrice: servicePrice,
-        passengerName: passenger.passengerName || "Desconocido",
-        selectedDate: selectedDate,
-        selectedTime: selectedTime,
-        date: selectedDate,
-        time: selectedTime,
-        seatNumber: index + 1
-       }));
+     const paymentInformation = Array.from({ length: selectedQuantity }, (_, index) => ({
+      id_Service: serviceId,
+      lockedStock: 1,
+      totalPeople: selectedQuantity,
+      totalPrice: servicePrice,
+      passengerName: passenger.passengerName || "Desconocido",
+      selectedDate,            // Sigue usando el valor que ya tienes, por ejemplo "2025-03-13"
+      selectedTime: adjustedTime, // Ahora "09:37:00"
+      date: selectedDate,
+      time: adjustedTime,
+      seatNumber: index + 1
+      }));
 
       console.log("ID de la orden de servicio:", serviceOrderId);
       console.log("📤 Enviando PATCH para actualizar estado de pago...");
