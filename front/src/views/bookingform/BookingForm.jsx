@@ -14,32 +14,32 @@ const BookingForm = ({ userId }) => {
   const servicePrice = parseFloat(queryParams.get("price")) || 0;
   const serviceOrderId = queryParams.get("id_ServiceOrder");
 
-  // Obtener los valores sin formatear
-  const rawDate = queryParams.get("date");
-  const rawTime = queryParams.get("time");
+// Obtener los valores sin formatear
+const rawDate = queryParams.get("date");
+const rawTime = queryParams.get("time");
 
-  // Función para validar y formatear la fecha
-  const isValidDate = (dateString) => {
-    const date = new Date(dateString);
-    return !isNaN(date.getTime()) && dateString.match(/^\d{4}-\d{2}-\d{2}$/);
-  };
+// Validar y formatear la fecha
+const isValidDate = (dateString) => {
+  const date = new Date(dateString);
+  return !isNaN(date.getTime()) && dateString.match(/^\d{4}-\d{2}-\d{2}$/);
+};
 
-  const selectedDate =
-    rawDate && rawDate !== "Fecha no disponible" && isValidDate(rawDate)
-      ? rawDate.trim()
-      : new Date().toISOString().split("T")[0];
+const selectedDate =
+  rawDate && rawDate !== "Fecha no disponible" && isValidDate(rawDate)
+    ? rawDate.trim()
+    : new Date().toISOString().split("T")[0];
 
-  // Función para validar y formatear la hora
-  // Función para validar y formatear la hora correctamente
- const formatTime = (time) => {
+// Validar y formatear la hora correctamente
+const formatTime = (time) => {
   if (!time || typeof time !== "string" || time.length < 5) return "00:00";
   return time.slice(0, 5); // Asegura que solo envíe HH:mm
- };
+};
 
-// Aplicamos el nuevo formato a `selectedTime`
- const selectedTime = paymentInfo.selectedTime
-  ? formatTime(paymentInfo.selectedTime)
-  : "00:00";
+// Usar `rawTime` en lugar de `paymentInfo.selectedTime`
+const selectedTime = rawTime ? formatTime(rawTime) : "00:00";
+
+console.log("selectedDate:", selectedDate);
+console.log("selectedTime:", selectedTime);
 
 
   console.log("selectedDate:", selectedDate);
