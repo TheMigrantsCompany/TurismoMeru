@@ -18,24 +18,28 @@ const BookingForm = ({ userId }) => {
   const rawDate = queryParams.get("date");
   const rawTime = queryParams.get("time");
 
-  // Validar la fecha: si rawDate es válido se usa; de lo contrario se usa la fecha actual (YYYY-MM-DD)
+  // Función para validar y formatear la fecha
+  const isValidDate = (dateString) => {
+    const date = new Date(dateString);
+    return !isNaN(date.getTime()) && dateString.match(/^\d{4}-\d{2}-\d{2}$/);
+  };
+
   const selectedDate =
-    rawDate && rawDate !== "Fecha no disponible" && !isNaN(new Date(rawDate))
+    rawDate && rawDate !== "Fecha no disponible" && isValidDate(rawDate)
       ? rawDate.trim()
       : new Date().toISOString().split("T")[0];
 
-  // Validar la hora: si rawTime es válida se usa; de lo contrario se asigna "00:00"
-  const selectedTime =
-    rawTime && rawTime !== "Hora no disponible" && rawTime.trim() !== ""
-      ? rawTime.trim()
-      : "00:00";
-
+  // Función para validar y formatear la hora
   const formatTime = (time) => {
-  if (!time || time.length < 5) return "00:00:00"; // Valor por defecto
-  return time.length === 5 ? `${time}:00` : time; // Agrega segundos si falta
-};
+    if (!time || typeof time !== "string" || time.length < 5) return "00:00:00";
+    return time.length === 5 ? `${time}:00` : time;
+  };
 
-const adjustedTime = formatTime(selectedTime);
+  const selectedTime =
+    rawTime && rawTime.trim() !== "" && rawTime !== "Hora no disponible"
+      ? formatTime(rawTime.trim())
+      : "00:00:00";
+
   console.log("selectedDate:", selectedDate);
   console.log("selectedTime:", selectedTime);
 
@@ -44,7 +48,7 @@ const adjustedTime = formatTime(selectedTime);
   const [passenger, setPassenger] = useState({ passengerName: "", dni: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const [reservationSuccess, setReservationSuccess] = useState(false);
-  const adjustedTime = selectedTime.length === 5 ? `${selectedTime}:00` : selectedTime;
+
   const handlePassengerChange = (field, value) => {
     setPassenger((prev) => ({ ...prev, [field]: value }));
   };
@@ -67,29 +71,27 @@ const adjustedTime = formatTime(selectedTime);
     }
 
     try {
-      // Primero, construir el array paymentInformation usando las claves que espera el backend:
-      // "selectedDate" y "selectedTime"
-     const paymentInformation = Array.from({ length: selectedQuantity }, (_, index) => ({
-      id_Service: serviceId,
-      lockedStock: 1,
-      totalPeople: selectedQuantity,
-      totalPrice: servicePrice,
-      passengerName: passenger.passengerName || "Desconocido",
-      selectedDate,            // Sigue usando el valor que ya tienes, por ejemplo "2025-03-13"
-      selectedTime: adjustedTime, // Ahora "09:37:00"
-      date: selectedDate,
-      time: adjustedTime,
-      seatNumber: index + 1
+      // Construcción del array paymentInformation
+      const paymentInformation = Array.from({ length: selectedQuantity }, (_, index) => ({
+        id_Service: serviceId,
+        lockedStock: 1,
+        totalPeople: selectedQuantity,
+        totalPrice: servicePrice,
+        passengerName: passenger.passengerName || "Desconocido",
+        selectedDate, // Ahora está validado
+        selectedTime, // Ahora está validado y con segundos
+        date: selectedDate,
+        time: selectedTime,
+        seatNumber: index + 1
       }));
-      console.log(paymentInformation);
-      console.log("ID de la orden de servicio:", serviceOrderId);
-      console.log("📤 Enviando PATCH para actualizar estado de pago...");
 
-      // Construir la URL usando la variable de entorno
+      console.log("📦 Final Payment Information:", JSON.stringify(paymentInformation, null, 2));
+      console.log("📌 ID de la orden de servicio:", serviceOrderId);
+
       const url = `${import.meta.env.VITE_API_URL}/servicesOrder/id/${serviceOrderId}`;
       console.log("📡 URL de la solicitud PATCH:", url);
 
-      // Realizar la solicitud PATCH, enviando también paymentInformation
+      // PATCH para actualizar estado de pago
       const patchResponse = await axios.patch(
         url,
         { 
@@ -110,6 +112,7 @@ const adjustedTime = formatTime(selectedTime);
         paymentInformation,
       });
 
+      // POST para crear la reserva
       const postResponse = await axios.post(
         `${import.meta.env.VITE_API_URL}/booking`,
         {
