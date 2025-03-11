@@ -69,7 +69,24 @@ export function ServiceOrderManagement() {
     dispatch(getAllOrders());
   };
 
-  const handleDeleteOrder = (id_ServiceOrder) => {
+  const handleDeleteOrder = (order) => {
+    console.log("Orden a eliminar:", {
+      id: order.id_ServiceOrder,
+      status: order.paymentStatus,
+      orderComplete: order,
+    });
+
+    if (!order.id_ServiceOrder) {
+      Swal.fire({
+        title: "Error",
+        text: "ID de orden no válido",
+        icon: "error",
+        confirmButtonColor: "#4256a6",
+        background: "#f9f3e1",
+      });
+      return;
+    }
+
     Swal.fire({
       title: "¿Estás seguro?",
       text: "Esta acción no se puede deshacer",
@@ -83,7 +100,8 @@ export function ServiceOrderManagement() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await dispatch(deleteServiceOrder(id_ServiceOrder));
+          await dispatch(deleteServiceOrder(order.id_ServiceOrder));
+          dispatch(getAllOrders());
           Swal.fire({
             title: "¡Eliminado!",
             text: "La orden ha sido eliminada.",
@@ -92,11 +110,16 @@ export function ServiceOrderManagement() {
             background: "#f9f3e1",
           });
         } catch (error) {
-          console.error("Error al eliminar la orden:", error);
+          console.error("Error al eliminar orden:", {
+            message: error.message,
+            responseData: error.response?.data,
+            status: error.response?.status,
+          });
+
           Swal.fire({
             title: "Error",
             text:
-              error.response?.data?.message || "No se pudo eliminar la orden.",
+              error.response?.data?.error || "No se pudo eliminar la orden.",
             icon: "error",
             confirmButtonColor: "#4256a6",
             background: "#f9f3e1",
