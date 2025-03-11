@@ -21,7 +21,7 @@ const BookingForm = ({ userId }) => {
   console.log("rawDate:", rawDate);
   console.log("rawTime:", rawTime);
 
-  // Validar la fecha: si rawDate es válido se usa; de lo contrario se usa la fecha actual en formato ISO (YYYY-MM-DD)
+  // Validar la fecha: si rawDate es válido se usa; de lo contrario se usa la fecha actual (YYYY-MM-DD)
   const selectedDate =
     rawDate && rawDate !== "Fecha no disponible" && !isNaN(new Date(rawDate))
       ? rawDate.trim()
@@ -64,15 +64,15 @@ const BookingForm = ({ userId }) => {
     }
 
     try {
-      // Primero, construir el array paymentInformation
+      // Primero, construir el array paymentInformation usando las claves "date" y "time"
       const paymentInformation = Array.from({ length: selectedQuantity }, (_, index) => ({
         id_Service: serviceId,
         lockedStock: 1,
         totalPeople: selectedQuantity,
         totalPrice: servicePrice,
         passengerName: passenger.passengerName || "Desconocido",
-        selectedDate,    // "YYYY-MM-DD"
-        selectedTime,    // "HH:mm"
+        date: selectedDate,    // se envía con clave "date"
+        time: selectedTime,    // se envía con clave "time"
         seatNumber: index + 1
       }));
 
