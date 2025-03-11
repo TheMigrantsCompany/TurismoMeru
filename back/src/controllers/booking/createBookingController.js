@@ -29,9 +29,13 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
         throw new Error('El valor de lockedStock debe ser mayor que 0.');
       }
 
-      // Asignar selectedDate y selectedTime a las variables date y time
-      const date = selectedDate; // Usar la fecha seleccionada
-      const time = selectedTime; // Usar la hora seleccionada
+      const isValidTime = (timeString) => {
+       return /^\d{2}:\d{2}(:\d{2})?$/.test(timeString); // Acepta HH:mm o HH:mm:ss
+     };
+
+    const date = selectedDate;
+    const time = isValidTime(selectedTime) ? selectedTime : "00:00:00"; // Asegurar formato correcto
+
 
       const validatedTotalPeople = totalPeople || 0;
       const validatedTotalPrice = totalPrice || 0;
