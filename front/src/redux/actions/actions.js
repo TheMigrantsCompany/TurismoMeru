@@ -378,7 +378,9 @@ export const updateOrderStatus =
       // Si el nuevo estado es "Pendiente", intentamos obtener y eliminar los bookings
       if (newStatus === "Pendiente") {
         // Obtener todos los bookings
-        const allBookings = await axios.get("${import.meta.env.VITE_API_URL}/booking");
+        const allBookings = await axios.get(
+          `${import.meta.env.VITE_API_URL}/booking`
+        );
         console.log("Todos los bookings:", allBookings.data);
 
         // Filtrar los bookings que pertenecen a esta orden
@@ -406,7 +408,7 @@ export const updateOrderStatus =
 
       // Actualizar el estado de la orden
       const response = await axios.patch(
-        `${import.meta.env.VITE_API_URL}/id/${id_ServiceOrder}`,
+        `${import.meta.env.VITE_API_URL}/servicesOrder/id/${id_ServiceOrder}`,
         {
           paymentStatus: newStatus,
         }
