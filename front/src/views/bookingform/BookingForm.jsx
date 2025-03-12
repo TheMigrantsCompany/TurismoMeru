@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Input, Button } from "@material-tailwind/react";
+import { Button } from "@material-tailwind/react";
 import Swal from "sweetalert2";
 
 const BookingForm = ({ userId }) => {
@@ -33,67 +33,48 @@ const BookingForm = ({ userId }) => {
   };
 
   const selectedTime = rawTime ? formatTime(rawTime) : "00:00";
-
   const selectedQuantity = parseInt(queryParams.get("totalPeople")) || 1;
-
-  const [passenger, setPassenger] = useState({ passengerName: "", dni: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const [reservationSuccess, setReservationSuccess] = useState(false);
-
-  const handlePassengerChange = (field, value) => {
-    setPassenger((prev) => ({ ...prev, [field]: value }));
-  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setErrorMessage("");
 
-    if (!passenger.passengerName.trim() || !passenger.dni.trim()) {
-      setErrorMessage("Todos los campos son obligatorios.");
-      return;
-    }
-    if (!/^[0-9]+$/.test(passenger.dni)) {
-      setErrorMessage("El DNI debe contener solo números.");
-      return;
-    }
     if (!serviceOrderId) {
       setErrorMessage("ID de la orden de servicio inválido.");
       return;
     }
 
     try {
-      // Construcción del array paymentInformation
+      
       const paymentInformation = Array.from({ length: selectedQuantity }, (_, index) => ({
         id_Service: serviceId,
         lockedStock: 1,
         totalPeople: selectedQuantity,
         totalPrice: servicePrice,
-        passengerName: passenger.passengerName || "Desconocido",
+        passengerName: "Desconocido",
         selectedDate, // Fecha validada
         selectedTime,
         date: selectedDate,
         time: selectedTime,
         seatNumber: index + 1,
-        DNI: passenger.dni // Se envía DNI en cada ítem para mayor claridad
+        
+        DNI: "" 
       }));
 
-      console.log("📦 Final Payment Information:", JSON.stringify(paymentInformation, null, 2));
-      console.log("📌 ID de la orden de servicio:", serviceOrderId);
-
       const url = `${import.meta.env.VITE_API_URL}/servicesOrder/id/${serviceOrderId}`;
-      console.log("📡 URL de la solicitud PATCH:", url);
-
       // PATCH para actualizar el estado de pago y crear la reserva
       const patchResponse = await axios.patch(
         url,
         { 
           paymentStatus: "Pagado", 
-          DNI: passenger.dni,
+          // Si el DNI no se recoge aquí, lo puedes omitir o enviarlo vacío
+          DNI: "", 
           paymentInformation
         },
         { headers: { "Content-Type": "application/json" } }
       );
-      console.log("✅ Estado de pago actualizado y reserva creada.", patchResponse.data);
 
       await Swal.fire({
         icon: "success",
@@ -103,9 +84,6 @@ const BookingForm = ({ userId }) => {
       });
 
       setReservationSuccess(true);
-      // Limpiar el formulario (opcional)
-      setPassenger({ passengerName: "", dni: "" });
-      console.log("Navegando a /user/reservas");
       navigate("/user/reservas");
     } catch (error) {
       console.error("❌ Error en la operación:", error.response?.data || error.message);
@@ -120,7 +98,7 @@ const BookingForm = ({ userId }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 bg-[#f9f3e1] p-6 rounded-xl shadow-md max-w-xl mx-auto">
+    <div className="space-y-4 bg-[#f9f3e1] p-6 rounded-xl shadow-md max-w-xl mx-auto">
       <h2 className="text-xl font-semibold text-[#4256a6]">
         Reserva para {serviceTitle}
       </h2>
@@ -133,23 +111,15 @@ const BookingForm = ({ userId }) => {
       <p className="font-semibold text-[#4256a6]">
         Hora: <span className="font-normal text-[#425a66]">{selectedTime}</span>
       </p>
-      <div className="border p-4 rounded-md shadow-md bg-white">
-        <h3 className="font-medium text-[#4256a6]">Información del Pasajero</h3>
-        <Input
-          type="text"
-          placeholder="Nombre"
-          value={passenger.passengerName}
-          onChange={(e) => handlePassengerChange("passengerName", e.target.value)}
-          className="mt-2"
-        />
-        <Input
-          type="text"
-          placeholder="DNI"
-          value={passenger.dni}
-          onChange={(e) => handlePassengerChange("dni", e.target.value)}
-          className="mt-2"
-        />
-      </div>
+      <p className="font-semibold text-[#4256a6]">
+        Cantidad de Pasajeros: <span className="font-normal text-[#425a66]">{selectedQuantity}</span>
+      </p>
+      <p className="font-semibold text-[#4256a6]">
+        Total a Pagar:{" "}
+        <span className="font-normal text-[#425a66]">
+          ${ (servicePrice * selectedQuantity).toFixed(2) }
+        </span>
+      </p>
 
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
       {reservationSuccess && (
@@ -158,10 +128,10 @@ const BookingForm = ({ userId }) => {
         </p>
       )}
 
-      <Button type="submit" color="green" className="w-full">
-        Reservar
+      <Button onClick={handleSubmit} color="green" className="w-full">
+        Confirmar Reserva
       </Button>
-    </form>
+    </div>
   );
 };
 
