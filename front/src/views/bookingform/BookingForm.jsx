@@ -14,11 +14,10 @@ const BookingForm = ({ userId }) => {
   const servicePrice = parseFloat(queryParams.get("price")) || 0;
   const serviceOrderId = queryParams.get("id_ServiceOrder");
 
-  // Obtener los valores sin formatear
+  // Obtener y formatear fecha y hora
   const rawDate = queryParams.get("date");
   const rawTime = queryParams.get("time");
 
-  // Validar y formatear la fecha
   const isValidDate = (dateString) => {
     const date = new Date(dateString);
     return !isNaN(date.getTime()) && dateString.match(/^\d{4}-\d{2}-\d{2}$/);
@@ -29,16 +28,11 @@ const BookingForm = ({ userId }) => {
       ? rawDate.trim()
       : new Date().toISOString().split("T")[0];
 
-  // Validar y formatear la hora correctamente
   const formatTime = (time) => {
-    return time && time.length === 8 ? time.slice(0, 5) : time || "00:00"; // Convierte "HH:mm:ss" en "HH:mm"
+    return time && time.length === 8 ? time.slice(0, 5) : time || "00:00";
   };
 
-  // Definir selectedTime a partir de rawTime
   const selectedTime = rawTime ? formatTime(rawTime) : "00:00";
-
-  console.log("selectedDate:", selectedDate);
-  console.log("selectedTime:", selectedTime);
 
   const selectedQuantity = parseInt(queryParams.get("totalPeople")) || 1;
 
@@ -68,7 +62,7 @@ const BookingForm = ({ userId }) => {
     }
 
     try {
-      // Construcción del array paymentInformation, formateando la hora para cada ítem
+      // Construcción del array paymentInformation
       const paymentInformation = Array.from({ length: selectedQuantity }, (_, index) => ({
         id_Service: serviceId,
         lockedStock: 1,
@@ -79,7 +73,8 @@ const BookingForm = ({ userId }) => {
         selectedTime,
         date: selectedDate,
         time: selectedTime,
-        seatNumber: index + 1
+        seatNumber: index + 1,
+        DNI: passenger.dni // Se envía DNI en cada ítem para mayor claridad
       }));
 
       console.log("📦 Final Payment Information:", JSON.stringify(paymentInformation, null, 2));
@@ -88,7 +83,7 @@ const BookingForm = ({ userId }) => {
       const url = `${import.meta.env.VITE_API_URL}/servicesOrder/id/${serviceOrderId}`;
       console.log("📡 URL de la solicitud PATCH:", url);
 
-      // PATCH para actualizar estado de pago
+      // PATCH para actualizar el estado de pago y crear la reserva
       const patchResponse = await axios.patch(
         url,
         { 
@@ -98,49 +93,22 @@ const BookingForm = ({ userId }) => {
         },
         { headers: { "Content-Type": "application/json" } }
       );
-      console.log("✅ Estado de pago actualizado correctamente.", patchResponse.data);
+      console.log("✅ Estado de pago actualizado y reserva creada.", patchResponse.data);
 
-      console.log("📤 Enviando POST para crear la reserva...");
-      console.log("Payload de reserva:", {
-        id_User: userId,
-        id_ServiceOrder: serviceOrderId,
-        paymentStatus: "Pagado",
-        DNI: passenger.dni,
-        paymentInformation,
+      await Swal.fire({
+        icon: "success",
+        title: "¡Reserva exitosa!",
+        text: "Tu reserva se ha creado con éxito. Serás redirigido a tus reservas.",
+        showConfirmButton: false,
       });
 
-      // POST para crear la reserva
-      const postResponse = await axios.post(
-        `${import.meta.env.VITE_API_URL}/booking`,
-        {
-          id_User: userId,
-          id_ServiceOrder: serviceOrderId,
-          paymentStatus: "Pagado",
-          DNI: passenger.dni,
-          paymentInformation,
-        },
-        { headers: { "Content-Type": "application/json" } }
-      );
-      console.log("✅ Reserva creada con éxito.", postResponse.data);
-
-     console.log("Antes de SweetAlert");
-      await Swal.fire({
-       icon: "success",
-       title: "¡Reserva exitosa!",
-       text: "Tu reserva se ha creado con éxito. Serás redirigido a tus reservas.",
-       showConfirmButton: false,
-        });
-       console.log("Después de SweetAlert");
-        setReservationSuccess(true);
-        setPassenger({ passengerName: "", dni: "" });
-        console.log("Navegando a /user/reservas");
-        navigate("/user/reservas");
-
+      setReservationSuccess(true);
+      // Limpiar el formulario (opcional)
       setPassenger({ passengerName: "", dni: "" });
+      console.log("Navegando a /user/reservas");
+      navigate("/user/reservas");
     } catch (error) {
       console.error("❌ Error en la operación:", error.response?.data || error.message);
-      console.log("Detalles del error:", error);
-
       if (error.response?.status === 404) {
         setErrorMessage("Orden de servicio no encontrada.");
       } else if (error.response?.status === 400) {
