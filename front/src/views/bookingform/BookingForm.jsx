@@ -4,7 +4,7 @@ import axios from "axios";
 import { Button } from "@material-tailwind/react";
 import Swal from "sweetalert2";
 
-const BookingForm = ({ userId }) => {
+const BookingForm = ({ userId, userName, userDni }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
@@ -34,6 +34,7 @@ const BookingForm = ({ userId }) => {
 
   const selectedTime = rawTime ? formatTime(rawTime) : "00:00";
   const selectedQuantity = parseInt(queryParams.get("totalPeople")) || 1;
+
   const [errorMessage, setErrorMessage] = useState("");
   const [reservationSuccess, setReservationSuccess] = useState(false);
 
@@ -47,20 +48,20 @@ const BookingForm = ({ userId }) => {
     }
 
     try {
-      
+      // Construcción del array paymentInformation.
+      // Para el primer pasajero se usa el nombre y dni del usuario logueado.
       const paymentInformation = Array.from({ length: selectedQuantity }, (_, index) => ({
         id_Service: serviceId,
         lockedStock: 1,
         totalPeople: selectedQuantity,
         totalPrice: servicePrice,
-        passengerName: "Desconocido",
         selectedDate, // Fecha validada
         selectedTime,
         date: selectedDate,
         time: selectedTime,
         seatNumber: index + 1,
-        
-        DNI: "" 
+        passengerName: index === 0 ? userName : "Desconocido",
+        DNI: index === 0 ? userDni : "" // Para los demás se deja vacío o lo que requieras
       }));
 
       const url = `${import.meta.env.VITE_API_URL}/servicesOrder/id/${serviceOrderId}`;
@@ -69,17 +70,18 @@ const BookingForm = ({ userId }) => {
         url,
         { 
           paymentStatus: "Pagado", 
-          // Si el DNI no se recoge aquí, lo puedes omitir o enviarlo vacío
-          DNI: "", 
+          DNI: userDni, 
           paymentInformation
         },
         { headers: { "Content-Type": "application/json" } }
       );
 
+      // Muestra el mensaje de éxito y redirige sin tanta demora
       await Swal.fire({
         icon: "success",
         title: "¡Reserva exitosa!",
         text: "Tu reserva se ha creado con éxito. Serás redirigido a tus reservas.",
+        timer: 1500, // Se cierra automáticamente en 1.5 segundos
         showConfirmButton: false,
       });
 
@@ -117,7 +119,7 @@ const BookingForm = ({ userId }) => {
       <p className="font-semibold text-[#4256a6]">
         Total a Pagar:{" "}
         <span className="font-normal text-[#425a66]">
-          ${ (servicePrice * selectedQuantity).toFixed(2) }
+          ${(servicePrice * selectedQuantity).toFixed(2)}
         </span>
       </p>
 
