@@ -193,7 +193,7 @@ const OrderForm = () => {
       
       else if (formData.paymentMethod === "Pagos desde el exterior") {
         alert("¡Pedido confirmado exitosamente! Proceda con el pago por WhatsApp.");
-        clearCart();
+   
       }
     } 
     catch (error) {
