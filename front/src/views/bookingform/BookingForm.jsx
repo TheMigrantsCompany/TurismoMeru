@@ -85,7 +85,7 @@ const BookingForm = ({ userId, userName, userDni }) => {
         showConfirmButton: false,
       });
 
-      localStorage.removeItem("cart");
+      localStorage.removeItem("cartItems");
       
       setReservationSuccess(true);
       navigate("/user/reservas");
