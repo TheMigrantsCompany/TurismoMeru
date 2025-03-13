@@ -49,7 +49,7 @@ const ShoppingCart = () => {
                 ¡Explora nuestras excursiones y vive una experiencia única!
               </p>
               <button
-                onClick={() => navigate("/#services")}
+                 onClick={() => handleNavigation('services')}
                 className="bg-[#4256a6] text-white px-8 py-3 rounded-lg hover:bg-[#2a3875] transition-all duration-300 font-poppins shadow-md hover:shadow-lg"
               >
                 Ver Excursiones
