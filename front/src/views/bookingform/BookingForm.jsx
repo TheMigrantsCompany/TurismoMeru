@@ -76,9 +76,7 @@ const BookingForm = ({ userId, userName, userDni }) => {
         { headers: { "Content-Type": "application/json" } }
       );
       
-        localStorage.removeItem("cart"); 
-        sessionStorage.removeItem("cart");
-      // Muestra el mensaje de éxito y redirige sin tanta demora
+     
       await Swal.fire({
         icon: "success",
         title: "¡Reserva exitosa!",
