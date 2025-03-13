@@ -103,14 +103,14 @@ export default function CarouselWithContent() {
                 color="white"
                 className="mb-6 text-4xl md:text-5xl lg:text-6xl font-bold drop-shadow-lg"
               >
-                Vivi una experiencia única en Ushuaia
+                PAGINA EN CONSTRUCCIÓN. ENVIE SU CONSULTA LLENANDO EL FORMULARIO MAS ABAJO
               </Typography>
               <Typography
                 variant="lead"
                 color="white"
                 className="mb-16 opacity-90 text-lg md:text-xl drop-shadow-md"
               >
-                Fin del Mundo, principio de todo
+                Gracias 
               </Typography>
             </div>
           </div>
