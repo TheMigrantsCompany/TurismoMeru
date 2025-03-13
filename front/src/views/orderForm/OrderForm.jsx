@@ -1,5 +1,5 @@
 import React, { useState, useRef, useContext, useEffect } from "react";
-import { useCart, clearCart } from "../shopping-cart/CartContext";
+import { useCart } from "../shopping-cart/CartContext";
 import { useDispatch } from "react-redux";
 import { createServiceOrder } from "../../redux/actions/actions";
 import { AuthContext } from "../../firebase/AuthContext";
@@ -176,41 +176,49 @@ const OrderForm = () => {
           }),
         });
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Detalles del error:", errorText);
-          throw new Error(`Error en la solicitud: ${response.statusText}`);
-        }
-        data = await response.json();
-        console.log("Preference ID recibido:", data.preferenceId);
-        if (!data || !data.preferenceId) {
-          throw new Error("No se recibió un preferenceId válido.");
-        }
-        setPreferenceId(data.preferenceId);
-        if (!sdkLoaded) {
-          setIsReady(false);
-          return alert("Error: Mercado Pago aún no está listo.");
-        }
-        setIsReady(true);
-        if (isReady && mercadoPago) {
-          try {
-            mercadoPago.checkout({
-              preference: { id: data.preferenceId },
-              autoOpen: true,
-            });
-            alert("¡Pedido confirmado exitosamente!");
-           
-            clearCart();
-          } catch (error) {
-            console.error("Error en el flujo de pago:", error);
-            alert("Hubo un error. Intenta nuevamente.");
-          }
-        }
-      } else if (formData.paymentMethod === "Pagos desde el exterior") {
-        alert("¡Pedido confirmado exitosamente! Proceda con el pago por WhatsApp.");
-       
+     if (!response.ok) {
+  const errorText = await response.text();
+  console.error("Detalles del error:", errorText);
+  throw new Error(`Error en la solicitud: ${response.statusText}`);
+}
+
+data = await response.json();
+console.log("Preference ID recibido:", data.preferenceId);
+
+if (!data || !data.preferenceId) {
+  throw new Error("No se recibió un preferenceId válido.");
+}
+
+setPreferenceId(data.preferenceId);
+
+if (!sdkLoaded) {
+  setIsReady(false);
+  return alert("Error: Mercado Pago aún no está listo.");
+}
+
+setIsReady(true);
+
+if (mercadoPago) {
+  try {
+    mercadoPago.checkout({
+      preference: { id: data.preferenceId },
+      autoOpen: true,
+      onReturn: () => {
+        // Borra el carrito SOLO cuando el usuario vuelve de Mercado Pago
+        console.log("Pago completado o cancelado. Limpiando carrito...");
         clearCart();
-      }
+      },
+    });
+
+    alert("¡Pedido confirmado exitosamente!");
+  } catch (error) {
+    console.error("Error en el flujo de pago:", error);
+    alert("Hubo un error. Intenta nuevamente.");
+  }
+} else if (formData.paymentMethod === "Pagos desde el exterior") {
+  alert("¡Pedido confirmado exitosamente! Proceda con el pago por WhatsApp.");
+  clearCart();
+}
     } catch (error) {
       console.error("Error en la solicitud de pago:", error);
       alert("Hubo un error en el proceso de pago. Intenta nuevamente.");
