@@ -84,6 +84,8 @@ const BookingForm = ({ userId, userName, userDni }) => {
         timer: 1500, // Se cierra automáticamente en 1.5 segundos
         showConfirmButton: false,
       });
+
+      localStorage.removeItem("cart");
       
       setReservationSuccess(true);
       navigate("/user/reservas");
