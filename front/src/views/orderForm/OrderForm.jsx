@@ -45,9 +45,7 @@ const OrderForm = () => {
         console.error("Mercado Pago key no definida en las variables de entorno.");
         return;
       }
-      const mp = initMercadoPago(mpKey, {
-        locale: "es-AR",
-      });
+      const mp = initMercadoPago(mpKey, { locale: "es-AR" });
       setMercadoPago(mp);
       setSdkLoaded(true);
     }
@@ -80,8 +78,7 @@ const OrderForm = () => {
 
     if (loading) return alert("Solicitud en proceso. Por favor, espera.");
     if (!id_User) return alert("Error: Usuario no autenticado.");
-    if (!validateForm())
-      return alert("Por favor, completa todos los campos obligatorios.");
+    if (!validateForm()) return alert("Por favor, completa todos los campos obligatorios.");
     if (cartItems.length === 0) return alert("El carrito está vacío.");
 
     setLoading(true);
@@ -97,16 +94,8 @@ const OrderForm = () => {
         const totalPeople = adults + minors + seniors;
 
         if (isNaN(basePrice) || totalPeople === 0) {
-          throw new Error(
-            "Error: Hay valores inválidos en los artículos del carrito."
-          );
+          throw new Error("Error: Hay valores inválidos en los artículos del carrito.");
         }
-
-        const discountForMinors = item.discountForMinors || 0;
-        const discountForSeniors = item.discountForSeniors || 0;
-
-        const minorPrice = basePrice - (basePrice * discountForMinors) / 100;
-        const seniorPrice = basePrice - (basePrice * discountForSeniors) / 100;
 
         return {
           id_Service: item.id_Service,
@@ -143,9 +132,6 @@ const OrderForm = () => {
       setOrderId(createdOrder.id_ServiceOrder);
       clearCart();
       
-      let data;
-
-      // Crear preferencia de pago si se selecciona "Pagos desde Argentina"
       if (formData.paymentMethod === "Pagos desde Argentina") {
         const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -164,69 +150,62 @@ const OrderForm = () => {
             external_reference: createdOrder.id_ServiceOrder,
             metadata: {
               orderId: createdOrder.id_ServiceOrder,
-              totalPeople: items.reduce(
-                (total, item) => total + item.totalPeople,
-                0
-              ),
-              totalPrice: items.reduce(
-                (total, item) => total + item.unit_price * item.totalPeople,
-                0
-              ),
+              totalPeople: items.reduce((total, item) => total + item.totalPeople, 0),
+              totalPrice: items.reduce((total, item) => total + item.unit_price * item.totalPeople, 0),
             },
           }),
         });
 
-     if (!response.ok) {
-  const errorText = await response.text();
-  console.error("Detalles del error:", errorText);
-  throw new Error(`Error en la solicitud: ${response.statusText}`);
-}
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Detalles del error:", errorText);
+          throw new Error(`Error en la solicitud: ${response.statusText}`);
+        }
 
-data = await response.json();
-console.log("Preference ID recibido:", data.preferenceId);
+        const data = await response.json();
+        console.log("Preference ID recibido:", data.preferenceId);
 
-if (!data || !data.preferenceId) {
-  throw new Error("No se recibió un preferenceId válido.");
-}
+        if (!data || !data.preferenceId) {
+          throw new Error("No se recibió un preferenceId válido.");
+        }
 
-setPreferenceId(data.preferenceId);
+        setPreferenceId(data.preferenceId);
 
-if (!sdkLoaded) {
-  setIsReady(false);
-  return alert("Error: Mercado Pago aún no está listo.");
-}
+        if (!sdkLoaded) {
+          setIsReady(false);
+          return alert("Error: Mercado Pago aún no está listo.");
+        }
 
-setIsReady(true);
+        setIsReady(true);
 
-if (mercadoPago) {
-  try {
-    mercadoPago.checkout({
-      preference: { id: data.preferenceId },
-      autoOpen: true,
-      onReturn: () => {
-        // Borra el carrito SOLO cuando el usuario vuelve de Mercado Pago
-        console.log("Pago completado o cancelado. Limpiando carrito...");
+        if (mercadoPago) {
+          mercadoPago.checkout({
+            preference: { id: data.preferenceId },
+            autoOpen: true,
+            onReturn: () => {
+              console.log("Pago completado o cancelado. Limpiando carrito...");
+              clearCart();
+            },
+          });
+
+          alert("¡Pedido confirmado exitosamente!");
+        }
+      } 
+      
+      else if (formData.paymentMethod === "Pagos desde el exterior") {
+        alert("¡Pedido confirmado exitosamente! Proceda con el pago por WhatsApp.");
         clearCart();
-      },
-    });
-
-    alert("¡Pedido confirmado exitosamente!");
-  } catch (error) {
-    console.error("Error en el flujo de pago:", error);
-    alert("Hubo un error. Intenta nuevamente.");
-  }
-} else if (formData.paymentMethod === "Pagos desde el exterior") {
-  alert("¡Pedido confirmado exitosamente! Proceda con el pago por WhatsApp.");
-  clearCart();
-}
-    } catch (error) {
+      }
+    } 
+    catch (error) {
       console.error("Error en la solicitud de pago:", error);
       alert("Hubo un error en el proceso de pago. Intenta nuevamente.");
-    } finally {
+    } 
+    finally {
       setLoading(false);
     }
   };
-
+  
   return (
     <div className="flex flex-col lg:flex-row gap-12 mt-10 px-8 max-w-[1600px] mx-auto">
       <form
