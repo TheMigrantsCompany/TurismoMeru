@@ -10,6 +10,7 @@ export function ExcursionManagement() {
   const [excursions, setExcursions] = useState([]);
   const [selectedExcursion, setSelectedExcursion] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     const fetchExcursions = async () => {
@@ -22,7 +23,11 @@ export function ExcursionManagement() {
     };
 
     fetchExcursions();
-  }, [dispatch]);
+  }, [dispatch, refreshTrigger]);
+
+  const refreshExcursions = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   const handleEditExcursion = (excursion) => {
     setSelectedExcursion(excursion);
@@ -84,6 +89,7 @@ export function ExcursionManagement() {
           <ExcursionTable
             excursions={excursions}
             onEdit={handleEditExcursion}
+            onRefresh={refreshExcursions}
           />
         </div>
       </div>
