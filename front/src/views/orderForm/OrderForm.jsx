@@ -182,9 +182,6 @@ const OrderForm = () => {
           mercadoPago.checkout({
             preference: { id: data.preferenceId },
             autoOpen: true,
-            onReturn: () => {
-              console.log("Pago completado o cancelado. Limpiando carrito...");
-            },
           });
 
           alert("¡Pedido confirmado exitosamente!");
