@@ -130,7 +130,7 @@ const OrderForm = () => {
       const createdOrder = await dispatch(createServiceOrder(orderData));
 
       setOrderId(createdOrder.id_ServiceOrder);
-      clearCart();
+      
       
       if (formData.paymentMethod === "Pagos desde Argentina") {
         const apiUrl = import.meta.env.VITE_API_URL;
