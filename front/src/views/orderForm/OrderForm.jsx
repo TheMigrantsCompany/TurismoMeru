@@ -141,7 +141,8 @@ const OrderForm = () => {
       const createdOrder = await dispatch(createServiceOrder(orderData));
 
       setOrderId(createdOrder.id_ServiceOrder);
-
+      clearCart();
+      
       let data;
 
       // Crear preferencia de pago si se selecciona "Pagos desde Argentina"
