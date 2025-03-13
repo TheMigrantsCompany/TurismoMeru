@@ -618,6 +618,24 @@ const rootReducer = (state = initialState, action) => {
         },
       };
 
+    // Agregar estos nuevos cases para manejar el stock
+    case "UPDATE_EXCURSION_STOCK":
+      return {
+        ...state,
+        excursion: {
+          ...state.excursion,
+          excursion: state.excursion.excursion.map((service) =>
+            service.id_Service === action.payload.id_Service
+              ? {
+                  ...service,
+                  stock: action.payload.totalStock,
+                  availabilityDate: action.payload.availabilityDate,
+                }
+              : service
+          ),
+        },
+      };
+
     default:
       return state;
   }

@@ -457,7 +457,6 @@ export const deleteServiceOrder = (id_ServiceOrder) => async (dispatch) => {
 export const deleteBooking = (id_Booking) => async (dispatch) => {
   dispatch({ type: DELETE_BOOKING_REQUEST });
   try {
-    // Usamos la ruta correcta según bookingRouter.js
     await axios.delete(`http://localhost:3001/booking/id/${id_Booking}`);
 
     dispatch({
@@ -465,11 +464,10 @@ export const deleteBooking = (id_Booking) => async (dispatch) => {
       payload: id_Booking,
     });
 
-    // Esperamos a que se complete la eliminación antes de obtener todos los bookings
-    await dispatch(getAllBookings());
-
-    return Promise.resolve();
+    // Forzar actualización de datos
+    return Promise.resolve(id_Booking);
   } catch (error) {
+    console.error("Error en deleteBooking:", error);
     dispatch({
       type: DELETE_BOOKING_FAILURE,
       payload: error.message,

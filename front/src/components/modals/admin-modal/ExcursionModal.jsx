@@ -142,6 +142,10 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
     }));
   };
 
+  const calculateTotalStock = (dates) => {
+    return dates.reduce((total, date) => total + Number(date.stock), 0);
+  };
+
   const handleAddAvailability = () => {
     const { date, time, stock } = newAvailability;
 
@@ -174,12 +178,14 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
       stock: Number(stock),
     };
 
-    setSelectedDates((prev) => [...prev, newAvailabilityEntry]);
+    const updatedDates = [...selectedDates, newAvailabilityEntry];
+    const newTotalStock = calculateTotalStock(updatedDates);
 
+    setSelectedDates(updatedDates);
     setExcursionData((prevData) => ({
       ...prevData,
-      stock: prevData.stock + Number(stock),
-      availabilityDate: [...prevData.availabilityDate, newAvailabilityEntry],
+      stock: newTotalStock,
+      availabilityDate: updatedDates,
     }));
 
     setNewAvailability({
@@ -190,15 +196,29 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
   };
 
   const handleRemoveAvailability = (index) => {
-    const availabilityToRemove = selectedDates[index];
+    const updatedDates = selectedDates.filter((_, i) => i !== index);
+    const newTotalStock = calculateTotalStock(updatedDates);
 
+    setSelectedDates(updatedDates);
     setExcursionData((prevData) => ({
       ...prevData,
-      stock: prevData.stock - availabilityToRemove.stock,
-      availabilityDate: prevData.availabilityDate.filter((_, i) => i !== index),
+      stock: newTotalStock,
+      availabilityDate: updatedDates,
     }));
+  };
 
-    setSelectedDates((prev) => prev.filter((_, i) => i !== index));
+  const handleUpdateAvailabilityStock = (index, newStock) => {
+    const updatedDates = selectedDates.map((date, i) => 
+      i === index ? { ...date, stock: Number(newStock) } : date
+    );
+    const newTotalStock = calculateTotalStock(updatedDates);
+
+    setSelectedDates(updatedDates);
+    setExcursionData((prevData) => ({
+      ...prevData,
+      stock: newTotalStock,
+      availabilityDate: updatedDates,
+    }));
   };
 
   const handleSubmit = async () => {
@@ -652,21 +672,34 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
                   {selectedDates.map((availability, index) => (
                     <li
                       key={index}
-                      className="flex justify-between items-center"
+                      className="flex justify-between items-center bg-gray-50 p-2 rounded-lg"
                     >
                       <span className="text-black">
-                        {availability.date} - {availability.time} - Stock:{" "}
-                        {availability.stock}
+                        {availability.date} - {availability.time}
                       </span>
-                      <button
-                        onClick={() => handleRemoveAvailability(index)}
-                        className="text-red-500 hover:text-red-700 text-xs px-2 py-1"
-                      >
-                        Eliminar
-                      </button>
+                      <div className="flex items-center gap-4">
+                        <input
+                          type="number"
+                          value={availability.stock}
+                          onChange={(e) => handleUpdateAvailabilityStock(index, e.target.value)}
+                          className="w-20 px-2 py-1 rounded border border-gray-300"
+                          min="0"
+                        />
+                        <button
+                          onClick={() => handleRemoveAvailability(index)}
+                          className="text-red-500 hover:text-red-700 text-xs px-2 py-1"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
                     </li>
                   ))}
                 </ul>
+                <div className="mt-4 text-right">
+                  <span className="font-medium">
+                    Stock Total: {excursionData.stock}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
