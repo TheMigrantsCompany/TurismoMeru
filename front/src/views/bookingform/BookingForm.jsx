@@ -4,7 +4,7 @@ import axios from "axios";
 import { Button } from "@material-tailwind/react";
 import Swal from "sweetalert2";
 
-const BookingForm = ({ userId, userName, userDni,clearCart }) => {
+const BookingForm = ({ userId, userName, userDni }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
@@ -85,8 +85,6 @@ const BookingForm = ({ userId, userName, userDni,clearCart }) => {
         showConfirmButton: false,
       });
       
-      clearCart();
-
       setReservationSuccess(true);
       navigate("/user/reservas");
     } catch (error) {
