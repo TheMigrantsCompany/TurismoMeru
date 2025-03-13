@@ -25,6 +25,13 @@ const ShoppingCart = () => {
     navigate('/orderform');
   };
 
+  const handleGoToExcursions = () => {
+    navigate("/");
+    setTimeout(() => {
+      window.location.hash = "#services";
+    }, 100);
+  };
+
   return (
     <div className="min-h-screen bg-[#dac9aa]/20 py-12">
       <div className="container mx-auto px-8 max-w-[1600px]">
@@ -41,7 +48,7 @@ const ShoppingCart = () => {
             animate={{ opacity: 1 }}
             className="text-center py-12"
           >
-            <div className="bg-[#f9f3e1] rounded-xl shadow-lg p-8 max-w-2xl mx-auto">
+           <div className="bg-[#f9f3e1] rounded-xl shadow-lg p-8 max-w-2xl mx-auto">
               <h2 className="text-2xl font-semibold text-[#4256a6] font-poppins mb-4">
                 Tu carrito está vacío
               </h2>
@@ -49,7 +56,7 @@ const ShoppingCart = () => {
                 ¡Explora nuestras excursiones y vive una experiencia única!
               </p>
               <button
-                 onClick={() => handleNavigation('services')}
+                onClick={handleGoToExcursions}
                 className="bg-[#4256a6] text-white px-8 py-3 rounded-lg hover:bg-[#2a3875] transition-all duration-300 font-poppins shadow-md hover:shadow-lg"
               >
                 Ver Excursiones
