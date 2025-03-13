@@ -184,7 +184,6 @@ const OrderForm = () => {
             autoOpen: true,
             onReturn: () => {
               console.log("Pago completado o cancelado. Limpiando carrito...");
-              clearCart();
             },
           });
 
