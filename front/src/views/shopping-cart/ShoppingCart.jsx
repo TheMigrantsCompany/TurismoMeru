@@ -160,9 +160,9 @@ const ShoppingCart = () => {
                     </button>
                     <button
                       className="w-full bg-[#dac9aa] text-[#4256a6] py-3 rounded-lg hover:bg-[#e1d4b0] transition-all duration-300 font-poppins shadow-md hover:shadow-lg"
-                      onClick={() => navigate("/")}
-                    >
-                      Seguir Comprando
+                      onClick={handleGoToExcursions}
+                     >
+                       Seguir Comprando
                     </button>
                   </div>
                 </div>
