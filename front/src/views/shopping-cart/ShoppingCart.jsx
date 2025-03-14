@@ -26,10 +26,8 @@ const ShoppingCart = () => {
   };
 
   const handleGoToExcursions = () => {
+    // Redirige directamente al home
     navigate("/");
-    setTimeout(() => {
-      window.location.hash = "#services";
-    }, 100);
   };
 
   return (
@@ -48,7 +46,7 @@ const ShoppingCart = () => {
             animate={{ opacity: 1 }}
             className="text-center py-12"
           >
-           <div className="bg-[#f9f3e1] rounded-xl shadow-lg p-8 max-w-2xl mx-auto">
+            <div className="bg-[#f9f3e1] rounded-xl shadow-lg p-8 max-w-2xl mx-auto">
               <h2 className="text-2xl font-semibold text-[#4256a6] font-poppins mb-4">
                 Tu carrito está vacío
               </h2>
