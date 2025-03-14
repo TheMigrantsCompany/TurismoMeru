@@ -208,7 +208,7 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
   };
 
   const handleUpdateAvailabilityStock = (index, newStock) => {
-    const updatedDates = selectedDates.map((date, i) => 
+    const updatedDates = selectedDates.map((date, i) =>
       i === index ? { ...date, stock: Number(newStock) } : date
     );
     const newTotalStock = calculateTotalStock(updatedDates);
@@ -681,7 +681,9 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
                         <input
                           type="number"
                           value={availability.stock}
-                          onChange={(e) => handleUpdateAvailabilityStock(index, e.target.value)}
+                          onChange={(e) =>
+                            handleUpdateAvailabilityStock(index, e.target.value)
+                          }
                           className="w-20 px-2 py-1 rounded border border-gray-300"
                           min="0"
                         />
