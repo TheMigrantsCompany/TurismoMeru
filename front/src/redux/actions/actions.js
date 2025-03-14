@@ -417,7 +417,7 @@ export const updateOrderStatus =
         }
 
         // Eliminar los bookings asociados
-        const allBookings = await axios.get("${import.meta.env.VITE_API_URL}/booking");
+        const allBookings = await axios.get(`${import.meta.env.VITE_API_URL}/booking`); // <-- Corregido aquí
         const orderBookings = allBookings.data.filter(
           (booking) => booking.id_ServiceOrder === id_ServiceOrder
         );
