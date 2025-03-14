@@ -48,24 +48,21 @@ const BookingForm = ({ userId, userName, userDni }) => {
     }
 
     try {
-      // Construcción del array paymentInformation.
-      // Para el primer pasajero se usa el nombre y dni del usuario logueado.
       const paymentInformation = Array.from({ length: selectedQuantity }, (_, index) => ({
         id_Service: serviceId,
         lockedStock: 1,
         totalPeople: selectedQuantity,
         totalPrice: servicePrice,
-        selectedDate, // Fecha validada
+        selectedDate, 
         selectedTime,
         date: selectedDate,
         time: selectedTime,
         seatNumber: index + 1,
         passengerName: index === 0 ? userName : "Desconocido",
-        DNI: index === 0 ? userDni : "" // Para los demás se deja vacío o lo que requieras
+        DNI: index === 0 ? userDni : "" /
       }));
 
       const url = `${import.meta.env.VITE_API_URL}/servicesOrder/id/${serviceOrderId}`;
-      // PATCH para actualizar el estado de pago y crear la reserva
       const patchResponse = await axios.patch(
         url,
         { 
@@ -77,18 +74,17 @@ const BookingForm = ({ userId, userName, userDni }) => {
       );
       
      
-      await Swal.fire({
-        icon: "success",
-        title: "¡Reserva exitosa!",
-        text: "Tu reserva se ha creado con éxito. Serás redirigido a tus reservas.",
-        timer: 1500, // Se cierra automáticamente en 1.5 segundos
-        showConfirmButton: false,
+     await Swal.fire({
+       icon: "success",
+       title: "¡Reserva exitosa!",
+       text: "Tu reserva se ha creado con éxito. Serás redirigido a tus reservas.",
+       timer: 1500,
+       showConfirmButton: false,
+       }).then(() => {
+        localStorage.removeItem("cartItems");
+        setReservationSuccess(true);
+        navigate("/user/reservas");
       });
-
-      localStorage.removeItem("cartItems");
-      
-      setReservationSuccess(true);
-      navigate("/user/reservas");
     } catch (error) {
       console.error("❌ Error en la operación:", error.response?.data || error.message);
       if (error.response?.status === 404) {
