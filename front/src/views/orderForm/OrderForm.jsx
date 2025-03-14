@@ -151,7 +151,7 @@ const OrderForm = () => {
             metadata: {
               orderId: createdOrder.id_ServiceOrder,
               totalPeople: items.reduce((total, item) => total + item.totalPeople, 0),
-              totalPrice: items.reduce((total, item) => total + item.unit_price * item.totalPeople, 0),
+              totalPrice: Number(items.reduce((total, item) => total + item.unit_price * item.totalPeople, 0).toFixed(2)),
             },
           }),
         });
@@ -337,15 +337,11 @@ const OrderForm = () => {
                   const adultsTotal =
                     (item.quantities?.adults || 0) * item.price;
                   const childrenTotal =
-                    (item.quantities?.children || 0) *
-                    item.price *
-                    ((100 - (item.discountForMinors || 0)) / 100);
+                    Number(((item.quantities?.children || 0) * item.price * ((100 - (item.discountForMinors || 0)) / 100)).toFixed(2));
                   const seniorsTotal =
-                    (item.quantities?.seniors || 0) *
-                    item.price *
-                    ((100 - (item.discountForSeniors || 0)) / 100);
+                    Number(((item.quantities?.seniors || 0) * item.price * ((100 - (item.discountForSeniors || 0)) / 100)).toFixed(2));
                   const totalItemPrice =
-                    adultsTotal + childrenTotal + seniorsTotal;
+                    Number((adultsTotal + childrenTotal + seniorsTotal).toFixed(2));
 
                   return (
                     <div
