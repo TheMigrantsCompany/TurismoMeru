@@ -86,28 +86,23 @@ const OrderForm = () => {
     try {
       // Preparación de los datos de la orden
       const items = cartItems.map((item) => {
-        console.log("Contenido del carrito:", cartItems);
-        const basePrice = parseFloat(item.price || 0);
-        const adults = parseInt(item.quantities?.adults || 0, 10);
-        const minors = parseInt(item.quantities?.children || 0, 10);
-        const seniors = parseInt(item.quantities?.seniors || 0, 10);
-        const totalPeople = adults + minors + seniors;
+      const totalItemPrice = (
+        (item.quantities?.adults || 0) * item.price +
+        (item.quantities?.children || 0) * item.price * ((100 - (item.discountForMinors || 0)) / 100) +
+        (item.quantities?.seniors || 0) * item.price * ((100 - (item.discountForSeniors || 0)) / 100)
+          ).toFixed(2);
 
-        if (isNaN(basePrice) || totalPeople === 0) {
-          throw new Error("Error: Hay valores inválidos en los artículos del carrito.");
-        }
-
-        return {
-          id_Service: item.id_Service,
-          title: item.title || "Servicio sin título",
-          description: item.description || "Sin descripción",
-          totalPeople,
-          unit_price: basePrice,
-          currency_id: "ARS",
-          selectedDate: item.selectedDate,
-          selectedTime: item.selectedTime,
-        };
-      });
+     return {
+       id_Service: item.id_Service,
+       title: item.title || "Servicio sin título",
+       description: item.description || "Sin descripción",
+       totalPeople: adults + minors + seniors,
+       unit_price: Number(totalItemPrice),  // Asegurar que el número sea correcto
+       currency_id: "ARS",
+       selectedDate: item.selectedDate,
+       selectedTime: item.selectedTime,
+      };
+     });
 
       const orderData = {
         orderDate: new Date().toISOString(),
@@ -149,11 +144,11 @@ const OrderForm = () => {
             id_ServiceOrder: createdOrder.id_ServiceOrder,
             external_reference: createdOrder.id_ServiceOrder,
             metadata: {
-              orderId: createdOrder.id_ServiceOrder,
-              totalPeople: items.reduce((total, item) => total + item.totalPeople, 0),
-              totalPrice: Number(items.reduce((total, item) => total + item.unit_price * item.totalPeople, 0).toFixed(2)),
-            },
-          }),
+               orderId: createdOrder.id_ServiceOrder,
+               totalPeople: items.reduce((total, item) => total + item.totalPeople, 0),
+               totalPrice: Number(items.reduce((total, item) => total + item.unit_price * item.totalPeople, 0).toFixed(2)),
+           },
+          }, null, 2));
         });
 
         if (!response.ok) {
@@ -334,15 +329,11 @@ const OrderForm = () => {
             {cartItems.length > 0 ? (
               <div className="space-y-4">
                 {cartItems.map((item, index) => {
-                  const adultsTotal =
-                    (item.quantities?.adults || 0) * item.price;
-                  const childrenTotal =
-                    Number(((item.quantities?.children || 0) * item.price * ((100 - (item.discountForMinors || 0)) / 100)).toFixed(2));
-                  const seniorsTotal =
-                    Number(((item.quantities?.seniors || 0) * item.price * ((100 - (item.discountForSeniors || 0)) / 100)).toFixed(2));
-                  const totalItemPrice =
-                    Number((adultsTotal + childrenTotal + seniorsTotal).toFixed(2));
-
+                  const adultsTotal = (item.quantities?.adults || 0) * item.price;
+                  const childrenTotal = (item.quantities?.children || 0) * item.price * ((100 - (item.discountForMinors || 0)) / 100);
+                  const seniorsTotal = (item.quantities?.seniors || 0) * item.price * ((100 - (item.discountForSeniors || 0)) / 100);
+                  const totalItemPrice = (adultsTotal + childrenTotal + seniorsTotal).toFixed(2);
+                
                   return (
                     <div
                       key={`order-item-${item.id_Service}-${index}`}
