@@ -3,12 +3,14 @@ import { useCart } from "./CartContext";
 import { useNavigate } from "react-router-dom";
 import Checkout from "../../components/checkout/CheckOut";
 import { motion } from "framer-motion";
+import { AuthContext } from "../../firebase/AuthContext";
 
 const ShoppingCart = () => {
   const { cartItems, removeFromCart } = useCart();
   const [showCheckout, setShowCheckout] = useState(false);
   const navigate = useNavigate();
-
+  const { setAllowHomeNavigation } = useContext(AuthContext);
+  
   const subtotal = cartItems.reduce((acc, item) => {
     const { price, discountForMinors = 0, discountForSeniors = 0, quantities } = item;
     const adultsTotal = price * (quantities?.adults || 0);
@@ -20,15 +22,14 @@ const ShoppingCart = () => {
   const total = subtotal;
 
   const handlePurchaseSuccess = () => {
-    // No se vacía el carrito aquí para que OrderForm tenga acceso a los datos.
     setShowCheckout(false);
     navigate('/orderform');
   };
 
-  const handleGoToExcursions = () => {
-    // Redirige directamente al home
-    navigate("/");
-  };
+ const handleGoToExcursions = () => {
+  setAllowHomeNavigation(true); 
+  navigate("/");
+};
 
   return (
     <div className="min-h-screen bg-[#dac9aa]/20 py-12">
