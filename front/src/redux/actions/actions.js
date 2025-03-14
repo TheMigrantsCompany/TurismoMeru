@@ -373,34 +373,64 @@ export const updateOrderStatus =
   (id_ServiceOrder, newStatus, currentOrder) => async (dispatch) => {
     dispatch({ type: UPDATE_ORDER_STATUS_REQUEST });
     try {
-      console.log("Actualizando orden:", { id_ServiceOrder, newStatus });
+      if (newStatus === "Pendiente" && currentOrder.paymentInformation) {
+        // Para cada item en paymentInformation, restauramos el stock
+        for (const item of currentOrder.paymentInformation) {
+          try {
+            // Obtener el servicio
+            const serviceResponse = await axios.get(
+              `${import.meta.env.VITE_API_URL}/service/id/${item.id_Service}`
+            );
+            const service = serviceResponse.data;
 
-      // Si el nuevo estado es "Pendiente", intentamos obtener y eliminar los bookings
-      if (newStatus === "Pendiente") {
-        // Obtener todos los bookings
-        const allBookings = await axios.get(
-          `${import.meta.env.VITE_API_URL}/booking`
-        );
-        console.log("Todos los bookings:", allBookings.data);
+            // Restaurar el stock específico y global
+            const updatedAvailabilityDate = service.availabilityDate.map(
+              (slot) => {
+                if (slot.date === item.date && slot.time === item.time) {
+                  return {
+                    ...slot,
+                    stock:
+                      Number(slot.stock) +
+                      Number(item.totalPeople || item.lockedStock),
+                  };
+                }
+                return slot;
+              }
+            );
 
-        // Filtrar los bookings que pertenecen a esta orden
+            // Actualizar el servicio con el stock restaurado
+            await axios.put(
+              `${import.meta.env.VITE_API_URL}/service/id/${item.id_Service}`,
+              {
+                ...service,
+                stock:
+                  service.stock + Number(item.totalPeople || item.lockedStock),
+                availabilityDate: updatedAvailabilityDate,
+              }
+            );
+          } catch (error) {
+            console.error(
+              `Error restaurando stock para servicio ${item.id_Service}:`,
+              error
+            );
+          }
+        }
+
+        // Eliminar los bookings asociados
+        const allBookings = await axios.get("${import.meta.env.VITE_API_URL}/booking");
         const orderBookings = allBookings.data.filter(
           (booking) => booking.id_ServiceOrder === id_ServiceOrder
         );
-        console.log("Bookings de esta orden:", orderBookings);
 
-        // Eliminar cada booking encontrado
         for (const booking of orderBookings) {
-          console.log("Intentando eliminar booking:", booking.id_Booking);
           try {
             await axios.delete(
               `${import.meta.env.VITE_API_URL}/booking/id/${booking.id_Booking}`
             );
-            console.log(`Booking ${booking.id_Booking} eliminado`);
           } catch (error) {
             console.error(
               `Error eliminando booking ${booking.id_Booking}:`,
-              error.response?.data || error
+              error
             );
           }
         }
@@ -409,9 +439,7 @@ export const updateOrderStatus =
       // Actualizar el estado de la orden
       const response = await axios.patch(
         `${import.meta.env.VITE_API_URL}/servicesOrder/id/${id_ServiceOrder}`,
-        {
-          paymentStatus: newStatus,
-        }
+        { paymentStatus: newStatus }
       );
 
       dispatch({
@@ -419,13 +447,13 @@ export const updateOrderStatus =
         payload: response.data,
       });
 
-      // Recargar las órdenes y bookings
+      // Recargar datos
       await dispatch(getAllOrders());
       await dispatch(getAllBookings());
+      await dispatch(getAllServices());
 
       return response.data;
     } catch (error) {
-      console.error("Error en updateOrderStatus:", error);
       dispatch({
         type: UPDATE_ORDER_STATUS_FAILURE,
         payload: error.message,
