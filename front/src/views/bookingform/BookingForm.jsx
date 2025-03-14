@@ -59,7 +59,7 @@ const BookingForm = ({ userId, userName, userDni }) => {
         time: selectedTime,
         seatNumber: index + 1,
         passengerName: index === 0 ? userName : "Desconocido",
-        DNI: index === 0 ? userDni : "" /
+        DNI: index === 0 ? userDni : "" 
       }));
 
       const url = `${import.meta.env.VITE_API_URL}/servicesOrder/id/${serviceOrderId}`;
