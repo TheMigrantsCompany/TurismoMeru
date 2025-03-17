@@ -84,12 +84,12 @@ const OrderForm = () => {
   setLoading(true);
 
   try {
-    // Generación de items con precios correctos
-    const items = cartItems.map((item) => {
-    const adults = item.quantities?.adults || 0;
-    const minors = item.quantities?.children || 0;
-    const seniors = item.quantities?.seniors || 0;
-    const totalPeople = adults + minors + seniors;
+// Generación de items con precios correctos
+const items = cartItems.map((item) => {
+  const adults = item.quantities?.adults || 0;
+  const minors = item.quantities?.children || 0;
+  const seniors = item.quantities?.seniors || 0;
+  const totalPeople = adults + minors + seniors;
 
   if (totalPeople === 0) {
     console.warn(`⚠️ Advertencia: El servicio '${item.title}' tiene 0 personas seleccionadas.`);
@@ -100,14 +100,18 @@ const OrderForm = () => {
     title: item.title || "Servicio sin título",
     description: item.description || "Sin descripción",
     totalPeople, // ✅ Ahora siempre es un número válido
-    unit_price: parseFloat(item.price).toFixed(2),
+    unit_price: parseFloat(item.price), // Asegúrate de que esto sea un número
     currency_id: "ARS",
     selectedDate: item.selectedDate,
     selectedTime: item.selectedTime,
   };
 });
 
-    console.log("Items enviados a Mercado Pago:", items); 
+console.log("Items enviados a Mercado Pago:", items);
+
+// Luego, el cálculo del totalPrice sigue siendo numérico
+const totalPrice = items.reduce((total, item) => total + (item.unit_price * item.totalPeople), 0).toFixed(2);
+
 
     const orderData = {
       orderDate: new Date().toISOString(),
