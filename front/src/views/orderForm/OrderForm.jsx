@@ -136,20 +136,19 @@ const OrderForm = () => {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            paymentInformation: items,
-            id_User,
-            DNI: formData.dni,
-            email: formData.email,
-            id_ServiceOrder: createdOrder.id_ServiceOrder,
-            external_reference: createdOrder.id_ServiceOrder,
-            metadata: {
-               orderId: createdOrder.id_ServiceOrder,
-               totalPeople: items.reduce((total, item) => total + item.totalPeople, 0),
-               totalPrice: Number(items.reduce((total, item) => total + item.unit_price * item.totalPeople, 0).toFixed(2)),
-           },
-          }, null, 2));
-        });
+         body: JSON.stringify({
+          paymentInformation: items,
+          id_User,
+          DNI: formData.dni,
+          email: formData.email,
+          id_ServiceOrder: createdOrder.id_ServiceOrder,
+          external_reference: createdOrder.id_ServiceOrder,
+          metadata: {
+          orderId: createdOrder.id_ServiceOrder,
+          totalPeople: items.reduce((total, item) => total + item.totalPeople, 0),
+          totalPrice: Number(items.reduce((total, item) => total + item.unit_price * item.totalPeople, 0).toFixed(2)),
+        }
+      })
 
         if (!response.ok) {
           const errorText = await response.text();
