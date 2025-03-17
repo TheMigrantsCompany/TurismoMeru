@@ -133,7 +133,9 @@ const OrderForm = () => {
 
     if (formData.paymentMethod === "Pagos desde Argentina") {
       const apiUrl = import.meta.env.VITE_API_URL;
-
+      
+    const totalPrice = items.reduce((total, item) => total + (item.unit_price * item.totalPeople), 0).toFixed(2);
+      
       const response = await fetch(`${apiUrl}/payment/create-preference`, {
         method: "POST",
         headers: {
