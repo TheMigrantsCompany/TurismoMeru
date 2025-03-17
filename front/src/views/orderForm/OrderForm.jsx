@@ -86,23 +86,27 @@ const OrderForm = () => {
     try {
       // Preparación de los datos de la orden
       const items = cartItems.map((item) => {
-      const totalItemPrice = (
-        (item.quantities?.adults || 0) * item.price +
-        (item.quantities?.children || 0) * item.price * ((100 - (item.discountForMinors || 0)) / 100) +
-        (item.quantities?.seniors || 0) * item.price * ((100 - (item.discountForSeniors || 0)) / 100)
-          ).toFixed(2);
+      const adults = item.quantities?.adults || 0;
+      const minors = item.quantities?.children || 0;
+      const seniors = item.quantities?.seniors || 0;
 
-     return {
-       id_Service: item.id_Service,
-       title: item.title || "Servicio sin título",
-       description: item.description || "Sin descripción",
-       totalPeople: adults + minors + seniors,
-       unit_price: Number(totalItemPrice),  // Asegurar que el número sea correcto
-       currency_id: "ARS",
-       selectedDate: item.selectedDate,
-       selectedTime: item.selectedTime,
-      };
-     });
+      const totalItemPrice = (
+          adults * item.price +
+          minors * item.price * ((100 - (item.discountForMinors || 0)) / 100) +
+          seniors * item.price * ((100 - (item.discountForSeniors || 0)) / 100)
+        ).toFixed(2);
+
+    return {
+      id_Service: item.id_Service,
+      title: item.title || "Servicio sin título",
+      description: item.description || "Sin descripción",
+      totalPeople: adults + minors + seniors, // ✅ SOLUCIONADO
+      unit_price: Number(totalItemPrice),
+      currency_id: "ARS",
+      selectedDate: item.selectedDate,
+      selectedTime: item.selectedTime,
+     };
+  });
 
       const orderData = {
         orderDate: new Date().toISOString(),
