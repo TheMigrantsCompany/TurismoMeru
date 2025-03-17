@@ -73,74 +73,85 @@ const OrderForm = () => {
     return requiredFields.every((field) => formData[field]?.trim());
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (loading) return alert("Solicitud en proceso. Por favor, espera.");
-    if (!id_User) return alert("Error: Usuario no autenticado.");
-    if (!validateForm()) return alert("Por favor, completa todos los campos obligatorios.");
-    if (cartItems.length === 0) return alert("El carrito está vacío.");
+  if (loading) return alert("Solicitud en proceso. Por favor, espera.");
+  if (!id_User) return alert("Error: Usuario no autenticado.");
+  if (!validateForm()) return alert("Por favor, completa todos los campos obligatorios.");
+  if (cartItems.length === 0) return alert("El carrito está vacío.");
 
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      // Preparación de los datos de la orden
-      const items = cartItems.map((item) => {
+  try {
+    // Generación de items con precios correctos
+    const items = cartItems.map((item) => {
       const adults = item.quantities?.adults || 0;
       const minors = item.quantities?.children || 0;
       const seniors = item.quantities?.seniors || 0;
 
-      const totalItemPrice = (
-          adults * item.price +
-          minors * item.price * ((100 - (item.discountForMinors || 0)) / 100) +
-          seniors * item.price * ((100 - (item.discountForSeniors || 0)) / 100)
-        ).toFixed(2);
-
-    return {
-      id_Service: item.id_Service,
-      title: item.title || "Servicio sin título",
-      description: item.description || "Sin descripción",
-      totalPeople: adults + minors + seniors, // ✅ SOLUCIONADO
-      unit_price: Number(totalItemPrice),
-      currency_id: "ARS",
-      selectedDate: item.selectedDate,
-      selectedTime: item.selectedTime,
-     };
-  });
-
-      const orderData = {
-        orderDate: new Date().toISOString(),
-        id_User,
-        paymentMethod: formData.paymentMethod,
-        items: cartItems.map((item) => ({
+      return [
+        { // Adultos
           id_Service: item.id_Service,
-          date: item.selectedDate,         
-          time: item.selectedTime,       
-          selectedDate: item.selectedDate, 
-          selectedTime: item.selectedTime,
-          adults: item.quantities?.adults || 0,
-          minors: item.quantities?.children || 0,
-          seniors: item.quantities?.seniors || 0,
-        })),
-        paymentStatus: "Pendiente",
-      };
+          title: item.title || "Servicio sin título",
+          description: item.description || "Sin descripción",
+          unit_price: Number(item.price), 
+          quantity: adults,
+          currency_id: "ARS"
+        },
+        { // Menores con descuento
+          id_Service: item.id_Service,
+          title: item.title || "Servicio sin título (menores)",
+          description: item.description || "Sin descripción",
+          unit_price: Number((item.price * ((100 - (item.discountForMinors || 0)) / 100)).toFixed(2)),
+          quantity: minors,
+          currency_id: "ARS"
+        },
+        { // Seniors con descuento
+          id_Service: item.id_Service,
+          title: item.title || "Servicio sin título (seniors)",
+          description: item.description || "Sin descripción",
+          unit_price: Number((item.price * ((100 - (item.discountForSeniors || 0)) / 100)).toFixed(2)), 
+          quantity: seniors,
+          currency_id: "ARS"
+        }
+      ];
+    }).flat();
 
-      // Enviar datos al backend
-      const createdOrder = await dispatch(createServiceOrder(orderData));
+    console.log("Items enviados a Mercado Pago:", items); 
 
-      setOrderId(createdOrder.id_ServiceOrder);
-      
-      
-      if (formData.paymentMethod === "Pagos desde Argentina") {
-        const apiUrl = import.meta.env.VITE_API_URL;
+    const orderData = {
+      orderDate: new Date().toISOString(),
+      id_User,
+      paymentMethod: formData.paymentMethod,
+      items: cartItems.map((item) => ({
+        id_Service: item.id_Service,
+        date: item.selectedDate,         
+        time: item.selectedTime,       
+        selectedDate: item.selectedDate, 
+        selectedTime: item.selectedTime,
+        adults: item.quantities?.adults || 0,
+        minors: item.quantities?.children || 0,
+        seniors: item.quantities?.seniors || 0,
+      })),
+      paymentStatus: "Pendiente",
+    };
 
-        const response = await fetch(`${apiUrl}/payment/create-preference`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-         body: JSON.stringify({
+    //  Enviar datos al backend
+    const createdOrder = await dispatch(createServiceOrder(orderData));
+
+    setOrderId(createdOrder.id_ServiceOrder);
+
+    if (formData.paymentMethod === "Pagos desde Argentina") {
+      const apiUrl = import.meta.env.VITE_API_URL;
+
+      const response = await fetch(`${apiUrl}/payment/create-preference`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
           paymentInformation: items,
           id_User,
           DNI: formData.dni,
@@ -148,58 +159,54 @@ const OrderForm = () => {
           id_ServiceOrder: createdOrder.id_ServiceOrder,
           external_reference: createdOrder.id_ServiceOrder,
           metadata: {
-          orderId: createdOrder.id_ServiceOrder,
-          totalPeople: items.reduce((total, item) => total + item.totalPeople, 0),
-          totalPrice: Number(items.reduce((total, item) => total + item.unit_price * item.totalPeople, 0).toFixed(2)),
-           }
-          }),
-        });
-        
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Detalles del error:", errorText);
-          throw new Error(`Error en la solicitud: ${response.statusText}`);
-        }
+            orderId: createdOrder.id_ServiceOrder,
+            totalPeople: items.reduce((total, item) => total + item.quantity, 0),
+            totalPrice: Number(items.reduce((total, item) => total + item.unit_price * item.quantity, 0).toFixed(2)),
+          }
+        }),
+      });
 
-        const data = await response.json();
-        console.log("Preference ID recibido:", data.preferenceId);
-
-        if (!data || !data.preferenceId) {
-          throw new Error("No se recibió un preferenceId válido.");
-        }
-
-        setPreferenceId(data.preferenceId);
-
-        if (!sdkLoaded) {
-          setIsReady(false);
-          return alert("Error: Mercado Pago aún no está listo.");
-        }
-
-        setIsReady(true);
-
-        if (mercadoPago) {
-          mercadoPago.checkout({
-            preference: { id: data.preferenceId },
-            autoOpen: true,
-          });
-
-          alert("¡Pedido confirmado exitosamente!");
-        }
-      } 
-      
-      else if (formData.paymentMethod === "Pagos desde el exterior") {
-        alert("¡Pedido confirmado exitosamente! Proceda con el pago por WhatsApp.");
-   
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Detalles del error:", errorText);
+        throw new Error(`Error en la solicitud: ${response.statusText}`);
       }
-    } 
-    catch (error) {
-      console.error("Error en la solicitud de pago:", error);
-      alert("Hubo un error en el proceso de pago. Intenta nuevamente.");
-    } 
-    finally {
-      setLoading(false);
+
+      const data = await response.json();
+      console.log("Preference ID recibido:", data.preferenceId);
+
+      if (!data || !data.preferenceId) {
+        throw new Error("No se recibió un preferenceId válido.");
+      }
+
+      setPreferenceId(data.preferenceId);
+
+      if (!sdkLoaded) {
+        setIsReady(false);
+        return alert("Error: Mercado Pago aún no está listo.");
+      }
+
+      setIsReady(true);
+
+      if (mercadoPago) {
+        mercadoPago.checkout({
+          preference: { id: data.preferenceId },
+          autoOpen: true,
+        });
+
+        alert("¡Pedido confirmado exitosamente!");
+      }
+    } else if (formData.paymentMethod === "Pagos desde el exterior") {
+      alert("¡Pedido confirmado exitosamente! Proceda con el pago por WhatsApp.");
     }
-  };
+  } catch (error) {
+    console.error("Error en la solicitud de pago:", error);
+    alert("Hubo un error en el proceso de pago. Intenta nuevamente.");
+  } finally {
+    setLoading(false);
+  }
+};
+
   
   return (
     <div className="flex flex-col lg:flex-row gap-12 mt-10 px-8 max-w-[1600px] mx-auto">
