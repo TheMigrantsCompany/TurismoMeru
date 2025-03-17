@@ -86,37 +86,26 @@ const OrderForm = () => {
   try {
     // Generación de items con precios correctos
     const items = cartItems.map((item) => {
-      const adults = item.quantities?.adults || 0;
-      const minors = item.quantities?.children || 0;
-      const seniors = item.quantities?.seniors || 0;
+    const adults = item.quantities?.adults || 0;
+    const minors = item.quantities?.children || 0;
+    const seniors = item.quantities?.seniors || 0;
+    const totalPeople = adults + minors + seniors;
 
-      return [
-        { // Adultos
-          id_Service: item.id_Service,
-          title: item.title || "Servicio sin título",
-          description: item.description || "Sin descripción",
-          unit_price: Number(item.price), 
-          quantity: adults,
-          currency_id: "ARS"
-        },
-        { // Menores con descuento
-          id_Service: item.id_Service,
-          title: item.title || "Servicio sin título (menores)",
-          description: item.description || "Sin descripción",
-          unit_price: Number((item.price * ((100 - (item.discountForMinors || 0)) / 100)).toFixed(2)),
-          quantity: minors,
-          currency_id: "ARS"
-        },
-        { // Seniors con descuento
-          id_Service: item.id_Service,
-          title: item.title || "Servicio sin título (seniors)",
-          description: item.description || "Sin descripción",
-          unit_price: Number((item.price * ((100 - (item.discountForSeniors || 0)) / 100)).toFixed(2)), 
-          quantity: seniors,
-          currency_id: "ARS"
-        }
-      ];
-    }).flat();
+  if (totalPeople === 0) {
+    console.warn(`⚠️ Advertencia: El servicio '${item.title}' tiene 0 personas seleccionadas.`);
+  }
+
+  return {
+    id_Service: item.id_Service,
+    title: item.title || "Servicio sin título",
+    description: item.description || "Sin descripción",
+    totalPeople, // ✅ Ahora siempre es un número válido
+    unit_price: Number(item.price),
+    currency_id: "ARS",
+    selectedDate: item.selectedDate,
+    selectedTime: item.selectedTime,
+  };
+});
 
     console.log("Items enviados a Mercado Pago:", items); 
 
