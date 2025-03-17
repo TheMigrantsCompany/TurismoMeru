@@ -133,7 +133,7 @@ export function Detail() {
       try {
         // Obtener solo las reviews para esta excursión
         const reviewsResponse = await axios.get(
-          "${import.meta.env.VITE_API_URL}/review/"
+          `${import.meta.env.VITE_API_URL}/review/`
         );
         const reviewsData = reviewsResponse.data;
 
