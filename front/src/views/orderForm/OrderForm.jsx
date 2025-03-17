@@ -100,7 +100,7 @@ const OrderForm = () => {
     title: item.title || "Servicio sin título",
     description: item.description || "Sin descripción",
     totalPeople, // ✅ Ahora siempre es un número válido
-    unit_price: Number(item.price),
+    unit_price: parseFloat(item.price).toFixed(2),
     currency_id: "ARS",
     selectedDate: item.selectedDate,
     selectedTime: item.selectedTime,
@@ -150,7 +150,7 @@ const OrderForm = () => {
           metadata: {
             orderId: createdOrder.id_ServiceOrder,
             totalPeople: items.reduce((total, item) => total + item.quantity, 0),
-            totalPrice: Number(items.reduce((total, item) => total + item.unit_price * item.quantity, 0).toFixed(2)),
+            totalPrice: totalPrice,
           }
         }),
       });
