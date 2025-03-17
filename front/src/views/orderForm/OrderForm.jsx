@@ -147,9 +147,10 @@ const OrderForm = () => {
           orderId: createdOrder.id_ServiceOrder,
           totalPeople: items.reduce((total, item) => total + item.totalPeople, 0),
           totalPrice: Number(items.reduce((total, item) => total + item.unit_price * item.totalPeople, 0).toFixed(2)),
-        }
-      })
-
+           }
+          }),
+        });
+        
         if (!response.ok) {
           const errorText = await response.text();
           console.error("Detalles del error:", errorText);
