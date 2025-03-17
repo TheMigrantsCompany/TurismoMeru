@@ -127,69 +127,70 @@ const OrderForm = () => {
     };
 
     //  Enviar datos al backend
-    const createdOrder = await dispatch(createServiceOrder(orderData));
+   const createdOrder = await dispatch(createServiceOrder(orderData));
 
-    setOrderId(createdOrder.id_ServiceOrder);
+setOrderId(createdOrder.id_ServiceOrder);
 
-    if (formData.paymentMethod === "Pagos desde Argentina") {
-      const apiUrl = import.meta.env.VITE_API_URL;
-      
-    const totalPrice = items.reduce((total, item) => total + (item.unit_price * item.totalPeople), 0).toFixed(2);
-      
-      const response = await fetch(`${apiUrl}/payment/create-preference`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          paymentInformation: items,
-          id_User,
-          DNI: formData.dni,
-          email: formData.email,
-          id_ServiceOrder: createdOrder.id_ServiceOrder,
-          external_reference: createdOrder.id_ServiceOrder,
-          metadata: {
-            orderId: createdOrder.id_ServiceOrder,
-            totalPeople: items.reduce((total, item) => total + item.quantity, 0),
-            totalPrice: totalPrice,
-          }
-        }),
-      });
+if (formData.paymentMethod === "Pagos desde Argentina") {
+  const apiUrl = import.meta.env.VITE_API_URL;
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Detalles del error:", errorText);
-        throw new Error(`Error en la solicitud: ${response.statusText}`);
-      }
+  // Cálculo del total de precio con un redondeo adecuado
+  const totalPrice = items.reduce((total, item) => total + (parseFloat(item.unit_price) * item.totalPeople), 0).toFixed(2);
 
-      const data = await response.json();
-      console.log("Preference ID recibido:", data.preferenceId);
+  const response = await fetch(`${apiUrl}/payment/create-preference`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      paymentInformation: items,
+      id_User,
+      DNI: formData.dni,
+      email: formData.email,
+      id_ServiceOrder: createdOrder.id_ServiceOrder,
+      external_reference: createdOrder.id_ServiceOrder,
+      metadata: {
+        orderId: createdOrder.id_ServiceOrder,
+        totalPeople: items.reduce((total, item) => total + item.totalPeople, 0), // Asegura que se esté utilizando 'totalPeople' correctamente
+        totalPrice: totalPrice,
+      },
+    }),
+  });
 
-      if (!data || !data.preferenceId) {
-        throw new Error("No se recibió un preferenceId válido.");
-      }
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Detalles del error:", errorText);
+    throw new Error(`Error en la solicitud: ${response.statusText}`);
+  }
 
-      setPreferenceId(data.preferenceId);
+  const data = await response.json();
+  console.log("Preference ID recibido:", data.preferenceId);
 
-      if (!sdkLoaded) {
-        setIsReady(false);
-        return alert("Error: Mercado Pago aún no está listo.");
-      }
+  if (!data || !data.preferenceId) {
+    throw new Error("No se recibió un preferenceId válido.");
+  }
 
-      setIsReady(true);
+  setPreferenceId(data.preferenceId);
 
-      if (mercadoPago) {
-        mercadoPago.checkout({
-          preference: { id: data.preferenceId },
-          autoOpen: true,
-        });
+  if (!sdkLoaded) {
+    setIsReady(false);
+    return alert("Error: Mercado Pago aún no está listo.");
+  }
 
-        alert("¡Pedido confirmado exitosamente!");
-      }
-    } else if (formData.paymentMethod === "Pagos desde el exterior") {
-      alert("¡Pedido confirmado exitosamente! Proceda con el pago por WhatsApp.");
-    }
+  setIsReady(true);
+
+  if (mercadoPago) {
+    mercadoPago.checkout({
+      preference: { id: data.preferenceId },
+      autoOpen: true,
+    });
+
+    alert("¡Pedido confirmado exitosamente!");
+  }
+} else if (formData.paymentMethod === "Pagos desde el exterior") {
+  alert("¡Pedido confirmado exitosamente! Proceda con el pago por WhatsApp.");
+}
   } catch (error) {
     console.error("Error en la solicitud de pago:", error);
     alert("Hubo un error en el proceso de pago. Intenta nuevamente.");
