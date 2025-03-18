@@ -135,7 +135,12 @@ const Purchases = () => {
       </div>
     );
   }
-
+  
+const handleGoToExcursions = () => {
+    setAllowHomeNavigation(true); 
+    navigate("/"); 
+  };
+  
   return (
     <div className="container mx-auto p-6 mt-16 bg-[#f9f3e1] border-l-4 border-[#425a66] rounded-lg shadow-lg">
       <h1 className="text-3xl font-bold mb-6 text-[#4256a6] font-poppins">Mis Compras</h1>
@@ -196,7 +201,7 @@ const Purchases = () => {
             No tienes compras registradas.
           </p>
           <button
-            onClick={() => navigate('/services')}
+            onClick={handleGoToExcursions}
             className="mt-4 bg-[#4256a6] text-white py-2 px-6 rounded-lg hover:bg-[#334477] transition-colors"
           >
             Ver servicios disponibles
