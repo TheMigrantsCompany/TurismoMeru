@@ -163,28 +163,30 @@ const ProfileForm = () => {
             </div>
             <div className="p-8">
               <div className="flex flex-col md:flex-row items-start gap-8 mb-8">
-                <div className="relative group w-40 h-40 rounded-2xl overflow-hidden shadow-md mx-auto md:mx-0">
-                  <img src={profile.image} alt="Perfil" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <div className={`relative ${profile.image ? "group" : ""} w-40 h-40 rounded-2xl overflow-hidden shadow-md mx-auto md:mx-0`}>
+                  {profile.image ? (
+                    <img
+                      src={profile.image}
+                      alt="Perfil"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                      <span className="text-gray-500">Sin imagen</span>
+                    </div>
+                  )}
+                  {/* Overlay: se muestra siempre si no hay imagen, o al pasar el cursor si la hay */}
+                  <div
+                    className={`absolute inset-0 bg-black/40 transition-opacity flex items-center justify-center ${
+                      profile.image ? "opacity-0 group-hover:opacity-100" : "opacity-100"
+                    }`}
+                  >
                     <label className="cursor-pointer text-white text-sm font-medium bg-[#4256a6]/80 px-4 py-2 rounded-lg hover:bg-[#4256a6] transition-colors">
-                      Cambiar foto
+                      {profile.image ? "Cambiar foto" : "Agregar foto"}
                       <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
                     </label>
                   </div>
                 </div>
-                <div className="flex-1 w-full space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-[#425a66] mb-2">Nombre completo</label>
-                      <input
-                        type="text"
-                        name="name"
-                        value={profile.name}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white text-black"
-                        placeholder="Tu nombre completo"
-                      />
-                    </div>
                     <div>
                       <label className="block text-sm font-medium text-[#425a66] mb-2">Email</label>
                       <input
