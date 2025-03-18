@@ -13,7 +13,8 @@ const Purchases = () => {
   const services = useSelector((state) => state.excursions);
   const loading = useSelector((state) => state.users.loading);
   const error = useSelector((state) => state.users.error);
-
+  const { setAllowHomeNavigation } = useAuth();
+  
   useEffect(() => {
     if (id_User) {
       dispatch(getUserDetails(id_User));
