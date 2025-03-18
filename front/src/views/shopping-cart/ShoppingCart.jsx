@@ -12,12 +12,18 @@ const ShoppingCart = () => {
   const { setAllowHomeNavigation } = useContext(AuthContext);
   
   const subtotal = cartItems.reduce((acc, item) => {
-    const { price, discountForMinors = 0, discountForSeniors = 0, quantities } = item;
-    const adultsTotal = price * (quantities?.adults || 0);
-    const minorsTotal = (price - (price * discountForMinors) / 100) * (quantities?.children || 0);
-    const seniorsTotal = (price - (price * discountForSeniors) / 100) * (quantities?.seniors || 0);
-    return acc + adultsTotal + minorsTotal + seniorsTotal;
-  }, 0);
+  const price = parseFloat(item.price); // Convertir precio a número
+  const discountForMinors = item.discountForMinors || 0;
+  const discountForSeniors = item.discountForSeniors || 0;
+  const quantities = item.quantities || {};
+
+  const adultsTotal = price * (quantities.adults || 0);
+  const minorsTotal = (price * (1 - discountForMinors / 100)) * (quantities.children || 0);
+  const seniorsTotal = (price * (1 - discountForSeniors / 100)) * (quantities.seniors || 0);
+
+  return acc + adultsTotal + minorsTotal + seniorsTotal;
+}, 0);
+
 
   const total = subtotal;
 
