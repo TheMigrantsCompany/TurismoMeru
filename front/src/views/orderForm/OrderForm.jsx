@@ -163,10 +163,10 @@ if (formData.paymentMethod === "Pagos desde Argentina") {
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    console.error("Detalles del error:", errorText);
-     throw new Error(`Error en la solicitud: ${response.statusText}`);
-  }
+        const errorText = await response.text();
+        console.error("Detalles del error:", errorText);
+        throw new Error(`Error en la solicitud: ${response.statusText}`);
+      }
 
   const data = await response.json();
   console.log("Preference ID recibido:", data.preferenceId);
