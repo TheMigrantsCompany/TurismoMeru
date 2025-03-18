@@ -72,31 +72,31 @@ const OrderForm = () => {
     setLoading(true);
 
     try {
-      // ✅ Generación de items con precios correctos
-     const items = cartItems.map((item) => {
-     const adults = item.quantities?.adults || 0;
-     const minors = item.quantities?.children || 0;
-     const seniors = item.quantities?.seniors || 0;
-  
-      // Aplicar descuentos
-     const priceAdults = adults * Number(item.price);
-     const priceMinors = minors * (Number(item.price) - item.discountForMinors);
-     const priceSeniors = seniors * (Number(item.price) - item.discountForSeniors);
+          // ✅ Generación de items con precios correctos
+         const items = cartItems.map((item) => {
+         const adults = item.quantities?.adults || 0;
+         const minors = item.quantities?.children || 0;
+         const seniors = item.quantities?.seniors || 0;
 
-     // Evitar valores negativos
-      const totalItemPrice = Math.max(0, priceAdults + priceMinors + priceSeniors);
+         // Aplicar descuentos
+         const priceAdults = adults * Number(item.price);
+         const priceMinors = minors * (Number(item.price) - item.discountForMinors);
+         const priceSeniors = seniors * (Number(item.price) - item.discountForSeniors);
 
-       console.log("🔎 Adultos:", priceAdults);
-       console.log("🔎 Menores (con descuento):", priceMinors);
-       console.log("🔎 Seniors (con descuento):", priceSeniors);
-       console.log("💰 Total calculado:", totalItemPrice);
-       
+         // Evitar valores negativos
+          const totalItemPrice = Math.max(0, priceAdults + priceMinors + priceSeniors);
+
+           console.log("🔎 Adultos:", priceAdults);
+           console.log("🔎 Menores (con descuento):", priceMinors);
+           console.log("🔎 Seniors (con descuento):", priceSeniors);
+           console.log("💰 Total calculado:", totalItemPrice);
+
   return {
     id_Service: item.id_Service,
     title: item.title || "Servicio sin título",
     description: item.description || "Sin descripción",
     totalPeople: adults + minors + seniors,
-    unit_price: Number(item.price), // Se usa el precio sin descuento aquí
+    unit_price: Number(totalItemPrice) / (adults + minors + seniors) || 0, // 🔥 AHORA usa el total con descuentos
     currency_id: "ARS",
     selectedDate: item.selectedDate,
     selectedTime: item.selectedTime,
