@@ -105,6 +105,7 @@ const OrderForm = () => {
         adults: item.quantities?.adults || 0,
         minors: item.quantities?.children || 0,
         seniors: item.quantities?.seniors || 0,
+        totalItemPrice: item.totalPrice,
       })),
       paymentStatus: "Pendiente",
     };
@@ -137,7 +138,7 @@ const OrderForm = () => {
           metadata: {
             orderId: createdOrder.id_ServiceOrder,
             totalPeople: items.reduce((total, item) => total + item.totalPeople, 0),
-            totalItemPrice: item.totalPrice,
+            totalPrice: totalPrice,
           },
         }),
       });
