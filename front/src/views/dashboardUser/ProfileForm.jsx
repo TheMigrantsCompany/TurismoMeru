@@ -206,6 +206,19 @@ const ProfileForm = () => {
               <p className="mt-2 text-[#425a66]">
                 Gestiona tu información personal
               </p>
+              <div className="mt-4 p-4 bg-amber-100 border-l-4 border-amber-500 rounded">
+                <p className="text-amber-900 font-medium mb-2">
+                  ⚠️ IMPORTANTE: Para poder realizar cualquier reserva, es
+                  indispensable completar todos los campos del formulario. Por
+                  favor, asegúrese de llenar toda la información antes de
+                  continuar.
+                </p>
+                <p className="text-amber-900 font-medium italic">
+                  ⚠️ IMPORTANT: To make any reservation, it is essential to
+                  complete all fields in the form. Please make sure to fill in
+                  all the information before continuing.
+                </p>
+              </div>
             </div>
 
             <div className="p-8">
