@@ -32,9 +32,9 @@ const ProfileForm = () => {
     }
   }, [userDetails]);
 
-  const handleSave = () => {
+ const handleSave = () => {
   const uuid = localStorage.getItem("uuid");
-  
+
   // Verificar si el correo electrónico cambió
   const isEmailChanged = userDetails.email !== profile.email;
   
@@ -62,7 +62,18 @@ const ProfileForm = () => {
   };
 
   if (uuid) {
-    // Si el correo ha cambiado, podemos ejecutar la acción
+    // Verificamos si algún dato ha cambiado
+    const isProfileChanged = Object.keys(backendProfile).some(
+      (key) => backendProfile[key] !== userDetails[key]
+    );
+
+    // Si no ha cambiado nada, no se hace la llamada al backend
+    if (!isProfileChanged) {
+      Swal.fire("Sin cambios", "No hay cambios que guardar.", "info");
+      return;
+    }
+
+    // Si el correo ha cambiado, se puede ejecutar la acción
     if (isEmailChanged) {
       dispatch(updateUserDetails(uuid, backendProfile))
         .then(() => {
