@@ -74,29 +74,25 @@ const OrderForm = () => {
   try {
     // ✅ Usamos los cartItems directamente sin aplicar descuentos nuevamente
     const items = cartItems.map((item) => {
-      // Usamos el totalPrice calculado previamente (ya con descuentos)
+     
       return {
         id_Service: item.id_Service,
         title: item.title || "Servicio sin título",
         description: item.description || "Sin descripción",
         totalPeople: item.quantities?.adults + item.quantities?.children + item.quantities?.seniors,
-        unit_price: item.totalPrice / (item.quantities?.adults + item.quantities?.children + item.quantities?.seniors) || 0, // Dividir por total de personas para mantener el precio unitario
+        unit_price: item.totalPrice / (item.quantities?.adults + item.quantities?.children + item.quantities?.seniors) || 0, 
         currency_id: "ARS",
         selectedDate: item.selectedDate,
         selectedTime: item.selectedTime,
-        totalItemPrice: item.totalPrice,  // Usamos el totalPrice calculado previamente
+        totalItemPrice: item.totalPrice,  
       };
     });
 
     // Calcular el total correcto sumando los precios de todos los items
     const totalPrice = items.reduce((total, item) => total + item.totalItemPrice, 0);
     
-    // Aseguramos que el total no se altere por redondeos inesperados
-    const formattedTotalPrice = Number(totalPrice.toFixed(2));
-
     console.log("🚀 Total antes de enviar:", totalPrice);
-    console.log("📏 Total formateado (a enviar):", formattedTotalPrice);
-
+  
     // ✅ Creación de la orden
     const orderData = {
       orderDate: new Date().toISOString(),
@@ -141,7 +137,7 @@ const OrderForm = () => {
           metadata: {
             orderId: createdOrder.id_ServiceOrder,
             totalPeople: items.reduce((total, item) => total + item.totalPeople, 0),
-            totalPrice: formattedTotalPrice,
+            totalItemPrice: item.totalPrice,
           },
         }),
       });
