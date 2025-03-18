@@ -33,49 +33,59 @@ const ProfileForm = () => {
   }, [userDetails]);
 
   const handleSave = () => {
-    const uuid = localStorage.getItem("uuid");
-    if (!profile.name || !profile.email) {
-      Swal.fire(
-        "Error",
-        "Por favor completa los campos obligatorios.",
-        "error"
-      );
-      return;
-    }
+  const uuid = localStorage.getItem("uuid");
+  
+  // Verificar si el correo electrónico cambió
+  const isEmailChanged = userDetails.email !== profile.email;
+  
+  if (!profile.name || !profile.email) {
+    Swal.fire("Error", "Por favor completa los campos obligatorios.", "error");
+    return;
+  }
 
-    // Se arma el objeto a enviar al backend con todos los campos
-    const backendProfile = {
-      name: profile.name,
-      email: profile.email,
-      phone: profile.phone,
-      image: profile.image,
-      address: profile.address,
-      DNI: profile.DNI,
-      birthDate: profile.birthDate,
-      gender: profile.gender,
-      nationality: profile.nationality,
-      emergencyContact: profile.emergencyContact,
-      medicalInfo: profile.medicalInfo,
-      experienceLevel: profile.experienceLevel,
-      interests: profile.interests,
-      active: true,
-    };
+  // Se arma el objeto a enviar al backend con todos los campos
+  const backendProfile = {
+    name: profile.name,
+    email: profile.email,
+    phone: profile.phone,
+    image: profile.image,
+    address: profile.address,
+    DNI: profile.DNI,
+    birthDate: profile.birthDate,
+    gender: profile.gender,
+    nationality: profile.nationality,
+    emergencyContact: profile.emergencyContact,
+    medicalInfo: profile.medicalInfo,
+    experienceLevel: profile.experienceLevel,
+    interests: profile.interests,
+    active: true,
+  };
 
-    if (uuid) {
+  if (uuid) {
+    // Si el correo ha cambiado, podemos ejecutar la acción
+    if (isEmailChanged) {
       dispatch(updateUserDetails(uuid, backendProfile))
         .then(() => {
-          Swal.fire(
-            "Perfil actualizado",
-            "Los datos han sido guardados.",
-            "success"
-          );
+          Swal.fire("Perfil actualizado", "Los datos han sido guardados.", "success");
+        })
+        .catch((error) => {
+          console.error("Error al actualizar el perfil:", error);
+          Swal.fire("Error", "Ocurrió un error al guardar los datos.", "error");
+        });
+    } else {
+      // Si el correo no cambió, solo actualizamos el perfil sin validar el email
+      dispatch(updateUserDetails(uuid, backendProfile))
+        .then(() => {
+          Swal.fire("Perfil actualizado", "Los datos han sido guardados.", "success");
         })
         .catch((error) => {
           console.error("Error al actualizar el perfil:", error);
           Swal.fire("Error", "Ocurrió un error al guardar los datos.", "error");
         });
     }
-  };
+  }
+};
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
