@@ -24,7 +24,6 @@ const ProfileForm = () => {
     interests: [],
   });
 
-  // Cuando userDetails cambia, actualizamos el estado local
   useEffect(() => {
     if (userDetails) {
       setProfile(userDetails);
@@ -32,16 +31,13 @@ const ProfileForm = () => {
   }, [userDetails]);
 
   const handleSave = () => {
-    // Validamos campos obligatorios
     if (!profile.name || !profile.email) {
       Swal.fire("Error", "Por favor completa los campos obligatorios.", "error");
       return;
     }
 
-    // Obtenemos el ID directamente de userDetails
     const userId = userDetails.id_User;
 
-    // Armamos el objeto a enviar
     let backendProfile = {
       name: profile.name,
       email: profile.email,
@@ -59,14 +55,12 @@ const ProfileForm = () => {
       active: true,
     };
 
-    // Si el email no cambió, lo eliminamos para evitar validación de unicidad
     const isEmailChanged = userDetails.email !== profile.email;
     if (!isEmailChanged) {
       const { email, ...dataWithoutEmail } = backendProfile;
       backendProfile = dataWithoutEmail;
     }
 
-    // Revisamos si hay algún cambio comparando con userDetails
     const isProfileChanged = Object.keys(backendProfile).some(
       (key) => backendProfile[key] !== userDetails[key]
     );
@@ -76,11 +70,9 @@ const ProfileForm = () => {
       return;
     }
 
-    // Despachamos la acción de actualización usando el ID obtenido del backend
     dispatch(updateUserDetails(userId, backendProfile))
       .then(() => {
         Swal.fire("Perfil actualizado", "Los datos han sido guardados.", "success");
-        // Re-obtenemos los detalles actualizados para persistir los cambios
         dispatch(getUserDetails(userId));
       })
       .catch((error) => {
@@ -163,6 +155,7 @@ const ProfileForm = () => {
             </div>
             <div className="p-8">
               <div className="flex flex-col md:flex-row items-start gap-8 mb-8">
+                {/* Contenedor de la imagen */}
                 <div className={`relative ${profile.image ? "group" : ""} w-40 h-40 rounded-2xl overflow-hidden shadow-md mx-auto md:mx-0`}>
                   {profile.image ? (
                     <img
@@ -187,6 +180,20 @@ const ProfileForm = () => {
                     </label>
                   </div>
                 </div>
+                {/* Formulario de datos */}
+                <div className="flex-1 w-full space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-[#425a66] mb-2">Nombre completo</label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={profile.name}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white text-black"
+                        placeholder="Tu nombre completo"
+                      />
+                    </div>
                     <div>
                       <label className="block text-sm font-medium text-[#425a66] mb-2">Email</label>
                       <input
