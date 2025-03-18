@@ -1,4 +1,4 @@
- import React, { useState, useRef, useContext, useEffect } from "react";
+import React, { useState, useRef, useContext, useEffect } from "react";
 import { useCart } from "../shopping-cart/CartContext";
 import { useDispatch } from "react-redux";
 import { createServiceOrder } from "../../redux/actions/actions";
