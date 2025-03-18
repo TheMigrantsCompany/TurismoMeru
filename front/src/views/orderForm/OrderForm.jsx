@@ -143,10 +143,10 @@ if (formData.paymentMethod === "Pagos desde Argentina") {
 
  const response = await fetch(`${apiUrl}/payment/create-preference`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": Bearer ${token},
-    },
+     headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
     body: JSON.stringify({
       paymentInformation: items,
       id_User,
