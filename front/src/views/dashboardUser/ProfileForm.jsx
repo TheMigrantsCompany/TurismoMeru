@@ -26,36 +26,56 @@ const ProfileForm = () => {
     interests: [],
   });
 
-  // Se sigue usando el uuid para identificar al usuario, pero solo para llamar al backend.
-  useEffect(() => {
-    const uuid = localStorage.getItem("uuid"); 
-    if (uuid) {
-      dispatch(getUserDetails(uuid));
-    }
-  }, [dispatch]);
-
   useEffect(() => {
     if (userDetails) {
-      console.log("Datos del usuario recibidos:", userDetails);
-      // Se setea el estado directamente a partir de la respuesta del backend
-      setProfile({
-        ...userDetails,
-        name: userDetails.name || "",
-        email: userDetails.email || "",
-        DNI: userDetails.DNI || "",
-        phone: userDetails.phone || "",
-        address: userDetails.address || "",
-        image: userDetails.image || "https://via.placeholder.com/150",
-        birthDate: userDetails.birthDate || "",
-        gender: userDetails.gender || "",
-        nationality: userDetails.nationality || "",
-        emergencyContact: userDetails.emergencyContact || { name: "", phone: "" },
-        medicalInfo: userDetails.medicalInfo || "",
-        experienceLevel: userDetails.experienceLevel || "",
-        interests: userDetails.interests || [],
-      });
+      setProfile(userDetails);
     }
   }, [userDetails]);
+
+  const handleSave = () => {
+    const uuid = localStorage.getItem("uuid");
+    if (!profile.name || !profile.email) {
+      Swal.fire(
+        "Error",
+        "Por favor completa los campos obligatorios.",
+        "error"
+      );
+      return;
+    }
+
+    // Se arma el objeto a enviar al backend con todos los campos
+    const backendProfile = {
+      name: profile.name,
+      email: profile.email,
+      phone: profile.phone,
+      image: profile.image,
+      address: profile.address,
+      DNI: profile.DNI,
+      birthDate: profile.birthDate,
+      gender: profile.gender,
+      nationality: profile.nationality,
+      emergencyContact: profile.emergencyContact,
+      medicalInfo: profile.medicalInfo,
+      experienceLevel: profile.experienceLevel,
+      interests: profile.interests,
+      active: true,
+    };
+
+    if (uuid) {
+      dispatch(updateUserDetails(uuid, backendProfile))
+        .then(() => {
+          Swal.fire(
+            "Perfil actualizado",
+            "Los datos han sido guardados.",
+            "success"
+          );
+        })
+        .catch((error) => {
+          console.error("Error al actualizar el perfil:", error);
+          Swal.fire("Error", "Ocurrió un error al guardar los datos.", "error");
+        });
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -113,51 +133,6 @@ const ProfileForm = () => {
         "No se pudo subir la imagen. Inténtalo de nuevo.",
         "error"
       );
-    }
-  };
-
-  const handleSave = () => {
-    const uuid = localStorage.getItem("uuid");
-    if (!profile.name || !profile.email) {
-      Swal.fire(
-        "Error",
-        "Por favor completa los campos obligatorios.",
-        "error"
-      );
-      return;
-    }
-
-    // Se arma el objeto a enviar al backend con todos los campos
-    const backendProfile = {
-      name: profile.name,
-      email: profile.email,
-      phone: profile.phone,
-      image: profile.image,
-      address: profile.address,
-      DNI: profile.DNI,
-      birthDate: profile.birthDate,
-      gender: profile.gender,
-      nationality: profile.nationality,
-      emergencyContact: profile.emergencyContact,
-      medicalInfo: profile.medicalInfo,
-      experienceLevel: profile.experienceLevel,
-      interests: profile.interests,
-      active: true,
-    };
-
-    if (uuid) {
-      dispatch(updateUserDetails(uuid, backendProfile))
-        .then(() => {
-          Swal.fire(
-            "Perfil actualizado",
-            "Los datos han sido guardados.",
-            "success"
-          );
-        })
-        .catch((error) => {
-          console.error("Error al actualizar el perfil:", error);
-          Swal.fire("Error", "Ocurrió un error al guardar los datos.", "error");
-        });
     }
   };
 
@@ -289,175 +264,108 @@ const ProfileForm = () => {
                         value={profile.address}
                         onChange={handleChange}
                         className="w-full px-4 py-3 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white text-black"
-                        placeholder="Tu dirección completa"
+                        placeholder="Tu dirección"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#425a66] mb-2">
+                        Fecha de nacimiento
+                      </label>
+                      <input
+                        type="date"
+                        name="birthDate"
+                        value={profile.birthDate}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white text-black"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#425a66] mb-2">
+                        Género
+                      </label>
+                      <select
+                        name="gender"
+                        value={profile.gender}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white text-black"
+                      >
+                        <option value="">Seleccionar...</option>
+                        <option value="masculino">Masculino</option>
+                        <option value="femenino">Femenino</option>
+                        <option value="otro">Otro</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#425a66] mb-2">
+                        Nacionalidad
+                      </label>
+                      <input
+                        type="text"
+                        name="nationality"
+                        value={profile.nationality}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white text-black"
+                        placeholder="Tu nacionalidad"
                       />
                     </div>
                   </div>
-                </div>
-              </div>
 
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-[#4256a6] mb-4">
-                  Información Personal
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-[#425a66] mb-2">
-                      Fecha de Nacimiento
-                    </label>
-                    <input
-                      type="date"
-                      name="birthDate"
-                      value={profile.birthDate}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white text-black"
-                    />
-                  </div>
+                  <div className="md:grid md:grid-cols-2 gap-4">
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-[#425a66] mb-2">
+                        Nivel de experiencia
+                      </label>
+                      <select
+                        name="experienceLevel"
+                        value={profile.experienceLevel}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white text-black"
+                      >
+                        <option value="">Seleccionar...</option>
+                        {experienceLevels.map((level) => (
+                          <option key={level.value} value={level.value}>
+                            {level.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-[#425a66] mb-2">
-                      Género
-                    </label>
-                    <select
-                      name="gender"
-                      value={profile.gender}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white text-black"
-                    >
-                      <option value="">Seleccionar</option>
-                      <option value="masculino">Masculino</option>
-                      <option value="femenino">Femenino</option>
-                      <option value="otro">Otro</option>
-                      <option value="prefiero_no_decir">
-                        Prefiero no decir
-                      </option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[#425a66] mb-2">
-                      Nacionalidad
-                    </label>
-                    <input
-                      type="text"
-                      name="nationality"
-                      value={profile.nationality}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white text-black"
-                      placeholder="Tu nacionalidad"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-[#4256a6] mb-4">
-                  Información de Emergencia
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-[#425a66] mb-2">
-                      Nombre del Contacto de Emergencia
-                    </label>
-                    <input
-                      type="text"
-                      name="emergencyContact.name"
-                      value={profile.emergencyContact.name}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white text-black"
-                      placeholder="Nombre del contacto"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[#425a66] mb-2">
-                      Teléfono de Emergencia
-                    </label>
-                    <input
-                      type="text"
-                      name="emergencyContact.phone"
-                      value={profile.emergencyContact.phone}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white text-black"
-                      placeholder="Número de emergencia"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-[#425a66] mb-2">
-                      Información Médica Relevante
-                    </label>
-                    <textarea
-                      name="medicalInfo"
-                      value={profile.medicalInfo}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white text-black"
-                      placeholder="Alergias, condiciones médicas o información relevante"
-                      rows="3"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-[#4256a6] mb-4">
-                  Preferencias de Excursiones
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-[#425a66] mb-2">
-                      Nivel de Experiencia
-                    </label>
-                    <select
-                      name="experienceLevel"
-                      value={profile.experienceLevel}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white text-black"
-                    >
-                      <option value="">Seleccionar nivel</option>
-                      {experienceLevels.map((level) => (
-                        <option key={level.value} value={level.value}>
-                          {level.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[#425a66] mb-2">
-                      Intereses
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {interestOptions.map((interest) => (
-                        <label
-                          key={interest}
-                          className="flex items-center space-x-2"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={profile.interests.includes(interest)}
-                            onChange={() => handleInterestChange(interest)}
-                            className="rounded border-[#425a66]/20 text-[#4256a6] focus:ring-[#4256a6]"
-                          />
-                          <span className="text-sm text-[#425a66]">
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-[#425a66] mb-2">
+                        Intereses
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {interestOptions.map((interest) => (
+                          <button
+                            key={interest}
+                            type="button"
+                            onClick={() => handleInterestChange(interest)}
+                            className={`px-4 py-2 rounded-lg ${
+                              profile.interests.includes(interest)
+                                ? "bg-[#4256a6] text-white"
+                                : "bg-[#f9f3e1] text-[#4256a6]"
+                            }`}
+                          >
                             {interest}
-                          </span>
-                        </label>
-                      ))}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              <div className="flex justify-center pt-6 border-t border-[#425a66]/10">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleSave}
-                  className="bg-[#4256a6] text-white px-12 py-3 rounded-lg hover:bg-[#334477] transition-all duration-300 font-medium shadow-md hover:shadow-lg"
-                >
-                  Guardar Cambios
-                </motion.button>
+                  <div className="text-right">
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      className="bg-[#4256a6] text-white py-3 px-6 rounded-xl"
+                      onClick={handleSave}
+                    >
+                      Guardar cambios
+                    </motion.button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
