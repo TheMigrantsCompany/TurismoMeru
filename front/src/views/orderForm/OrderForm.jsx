@@ -51,6 +51,28 @@ useEffect(() => {
   }
 }, [mercadoPago, sdkLoaded]);
 
+    const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const validateForm = () => {
+    const requiredFields = [
+      "firstName",
+      "lastName",
+      "dni",
+      "paymentMethod",
+      "country",
+      "address",
+      "city",
+      "state",
+      "postalCode",
+      "email",
+      "phone",
+    ];
+    return requiredFields.every((field) => formData[field]?.trim());
+  };
+  
 const handleSubmit = async (e) => {
   e.preventDefault();
 
