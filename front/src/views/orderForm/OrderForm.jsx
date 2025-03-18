@@ -73,39 +73,45 @@ const OrderForm = () => {
 
     try {
       // ✅ Generación de items con precios correctos
-      const items = cartItems.map((item) => {
-        const adults = item.quantities?.adults || 0;
-        const minors = item.quantities?.children || 0;
-        const seniors = item.quantities?.seniors || 0;
-        const totalPeople = adults + minors + seniors;
+     const items = cartItems.map((item) => {
+     const adults = item.quantities?.adults || 0;
+     const minors = item.quantities?.children || 0;
+     const seniors = item.quantities?.seniors || 0;
+  
+      // Aplicar descuentos
+     const priceAdults = adults * Number(item.price);
+     const priceMinors = minors * (Number(item.price) - item.discountForMinors);
+     const priceSeniors = seniors * (Number(item.price) - item.discountForSeniors);
 
-        if (totalPeople === 0) {
-          console.warn(`⚠️ Advertencia: El servicio '${item.title}' tiene 0 personas seleccionadas.`);
-        }
+     // Evitar valores negativos
+      const totalItemPrice = Math.max(0, priceAdults + priceMinors + priceSeniors);
 
-        return {
-          id_Service: item.id_Service,
-          title: item.title || "Servicio sin título",
-          description: item.description || "Sin descripción",
-          totalPeople,
-          unit_price: Number(item.price),
-          currency_id: "ARS",
-          selectedDate: item.selectedDate,
-          selectedTime: item.selectedTime,
-        };
-      });
+       console.log("🔎 Adultos:", priceAdults);
+       console.log("🔎 Menores (con descuento):", priceMinors);
+       console.log("🔎 Seniors (con descuento):", priceSeniors);
+       console.log("💰 Total calculado:", totalItemPrice);
+       
+  return {
+    id_Service: item.id_Service,
+    title: item.title || "Servicio sin título",
+    description: item.description || "Sin descripción",
+    totalPeople: adults + minors + seniors,
+    unit_price: Number(item.price), // Se usa el precio sin descuento aquí
+    currency_id: "ARS",
+    selectedDate: item.selectedDate,
+    selectedTime: item.selectedTime,
+    totalItemPrice,
+  };
+});
 
-      console.log("📦 Items enviados a Mercado Pago:", items);
+      // Calcular el total correcto sumando los descuentos
+    const totalPrice = items.reduce((total, item) => total + item.totalItemPrice, 0);
 
-      // ✅ Cálculo correcto del total sin perder los decimales
-     const totalPrice = items.reduce((total, item) => {
-         return total + (item.unit_price * item.totalPeople);
-         }, 0);
+     // Asegurar que el total no se altere con redondeos inesperados
+    const formattedTotalPrice = Number(totalPrice.toFixed(2));
 
-     const formattedTotalPrice = Number(totalPrice.toFixed(2));
-
-       console.log("🚀 Total antes de enviar:", totalPrice);
-       console.log("📏 Total formateado (a enviar):", formattedTotalPrice);
+      console.log("🚀 Total antes de enviar:", totalPrice);
+      console.log("📏 Total formateado (a enviar):", formattedTotalPrice);
 
       // ✅ Creación de la orden
       const orderData = {
