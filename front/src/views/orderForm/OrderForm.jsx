@@ -172,7 +172,7 @@ if (formData.paymentMethod === "Pagos desde Argentina") {
   console.log("Preference ID recibido:", data.preferenceId);
 
   if (!data || !data.preferenceId) {
-    throw new Error("No se recibió un preferenceId válido.");
+     throw new Error(`Error en la solicitud: ${response.statusText}`);
   }
 
   setPreferenceId(data.preferenceId);
