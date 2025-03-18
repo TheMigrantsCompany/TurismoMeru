@@ -17,9 +17,14 @@ const ShoppingCart = () => {
   const discountForSeniors = item.discountForSeniors || 0;
   const quantities = item.quantities || {};
 
+  // Cálculos para cada grupo
   const adultsTotal = price * (quantities.adults || 0);
-  const minorsTotal = (price * (1 - discountForMinors / 100)) * (quantities.children || 0);
-  const seniorsTotal = (price * (1 - discountForSeniors / 100)) * (quantities.seniors || 0);
+  const minorsTotal = quantities.children > 0 
+    ? (price * (1 - discountForMinors / 100)) * quantities.children
+    : 0; // Solo aplicar descuento si hay menores
+  const seniorsTotal = quantities.seniors > 0 
+    ? (price * (1 - discountForSeniors / 100)) * quantities.seniors
+    : 0; // Solo aplicar descuento si hay jubilados
 
   return acc + adultsTotal + minorsTotal + seniorsTotal;
 }, 0);
