@@ -92,7 +92,7 @@ const items = cartItems.map((item) => {
   const totalPeople = adults + minors + seniors;
 
   if (totalPeople === 0) {
-    console.warn(⚠️ Advertencia: El servicio '${item.title}' tiene 0 personas seleccionadas.);
+    console.warn("⚠️ Advertencia: El servicio '" + item.title + "' tiene 0 personas seleccionadas.");
   }
 
   return {
