@@ -88,7 +88,7 @@ const OrderForm = () => {
           title: item.title || "Servicio sin título",
           description: item.description || "Sin descripción",
           totalPeople,
-          unit_price: parseFloat(item.price),
+          unit_price: Number(item.price),
           currency_id: "ARS",
           selectedDate: item.selectedDate,
           selectedTime: item.selectedTime,
@@ -98,8 +98,14 @@ const OrderForm = () => {
       console.log("📦 Items enviados a Mercado Pago:", items);
 
       // ✅ Cálculo correcto del total sin perder los decimales
-      const totalPrice = items.reduce((total, item) => total + (item.unit_price * item.totalPeople), 0);
-      const formattedTotalPrice = Number(totalPrice.toFixed(2));
+     const totalPrice = items.reduce((total, item) => {
+         return total + (item.unit_price * item.totalPeople);
+         }, 0);
+
+     const formattedTotalPrice = Number(totalPrice.toFixed(2));
+
+       console.log("🚀 Total antes de enviar:", totalPrice);
+       console.log("📏 Total formateado (a enviar):", formattedTotalPrice);
 
       // ✅ Creación de la orden
       const orderData = {
