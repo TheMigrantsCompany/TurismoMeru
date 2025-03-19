@@ -119,7 +119,7 @@ export function Detail() {
     const fetchExcursionDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3001/service/id/${id_Service}`
+          `${import.meta.env.VITE_API_URL}/service/id/${id_Service}`
         );
         if (!response.ok) throw new Error("Error al cargar la excursión");
         const data = await response.json();
@@ -133,7 +133,7 @@ export function Detail() {
       try {
         // Obtener solo las reviews para esta excursión
         const reviewsResponse = await axios.get(
-          "http://localhost:3001/review/"
+          "${import.meta.env.VITE_API_URL}/review/"
         );
         const reviewsData = reviewsResponse.data;
 
@@ -148,7 +148,7 @@ export function Detail() {
             try {
               // Usar la ruta específica para obtener usuario por ID
               const userResponse = await axios.get(
-                `http://localhost:3001/user/id/${review.id_User}`
+                `${import.meta.env.VITE_API_URL}/user/id/${review.id_User}`
               );
               const userData = userResponse.data;
 
