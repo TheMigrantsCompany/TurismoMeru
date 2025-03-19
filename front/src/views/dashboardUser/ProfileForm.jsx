@@ -32,7 +32,11 @@ const ProfileForm = () => {
 
   const handleSave = () => {
     if (!profile.name || !profile.email) {
-      Swal.fire("Error", "Por favor completa los campos obligatorios.", "error");
+      Swal.fire(
+        "Error",
+        "Por favor completa los campos obligatorios.",
+        "error"
+      );
       return;
     }
 
@@ -72,7 +76,11 @@ const ProfileForm = () => {
 
     dispatch(updateUserDetails(userId, backendProfile))
       .then(() => {
-        Swal.fire("Perfil actualizado", "Los datos han sido guardados.", "success");
+        Swal.fire(
+          "Perfil actualizado",
+          "Los datos han sido guardados.",
+          "success"
+        );
         dispatch(getUserDetails(userId));
       })
       .catch((error) => {
@@ -110,13 +118,21 @@ const ProfileForm = () => {
       const data = await response.json();
       if (data.secure_url) {
         setProfile((prev) => ({ ...prev, image: data.secure_url }));
-        Swal.fire("Imagen subida", "La imagen se ha cargado correctamente.", "success");
+        Swal.fire(
+          "Imagen subida",
+          "La imagen se ha cargado correctamente.",
+          "success"
+        );
       } else {
         Swal.fire("Error", "Error al subir la imagen a Cloudinary.", "error");
       }
     } catch (error) {
       console.error("Error al subir la imagen:", error);
-      Swal.fire("Error", "No se pudo subir la imagen. Inténtalo de nuevo.", "error");
+      Swal.fire(
+        "Error",
+        "No se pudo subir la imagen. Inténtalo de nuevo.",
+        "error"
+      );
     }
   };
 
@@ -150,13 +166,34 @@ const ProfileForm = () => {
         <div className="max-w-3xl mx-auto">
           <div className="bg-[#f9f3e1] rounded-2xl shadow-lg overflow-hidden">
             <div className="p-8 border-b border-[#425a66]/10">
-              <h2 className="text-3xl font-bold text-[#4256a6] font-poppins">Mi Perfil</h2>
-              <p className="mt-2 text-[#425a66]">Gestiona tu información personal</p>
+              <h2 className="text-3xl font-bold text-[#4256a6] font-poppins">
+                Mi Perfil
+              </h2>
+              <p className="mt-2 text-[#425a66]">
+                Gestiona tu información personal
+              </p>
+              <div className="mt-4 p-4 bg-amber-100 border-l-4 border-amber-500 rounded">
+                <p className="text-amber-900 font-medium mb-2">
+                  ⚠️ IMPORTANTE: Para poder realizar cualquier reserva, es
+                  indispensable completar todos los campos del formulario. Por
+                  favor, asegúrese de llenar toda la información antes de
+                  continuar.
+                </p>
+                <p className="text-amber-900 font-medium italic">
+                  ⚠️ IMPORTANT: To make any reservation, it is essential to
+                  complete all fields in the form. Please make sure to fill in
+                  all the information before continuing.
+                </p>
+              </div>
             </div>
             <div className="p-8">
               <div className="flex flex-col md:flex-row items-start gap-8 mb-8">
                 {/* Contenedor de la imagen */}
-                <div className={`relative ${profile.image ? "group" : ""} w-40 h-40 rounded-2xl overflow-hidden shadow-md mx-auto md:mx-0`}>
+                <div
+                  className={`relative ${
+                    profile.image ? "group" : ""
+                  } w-40 h-40 rounded-2xl overflow-hidden shadow-md mx-auto md:mx-0`}
+                >
                   {profile.image ? (
                     <img
                       src={profile.image}
@@ -171,12 +208,19 @@ const ProfileForm = () => {
                   {/* Overlay: se muestra siempre si no hay imagen, o al pasar el cursor si la hay */}
                   <div
                     className={`absolute inset-0 bg-black/40 transition-opacity flex items-center justify-center ${
-                      profile.image ? "opacity-0 group-hover:opacity-100" : "opacity-100"
+                      profile.image
+                        ? "opacity-0 group-hover:opacity-100"
+                        : "opacity-100"
                     }`}
                   >
                     <label className="cursor-pointer text-white text-sm font-medium bg-[#4256a6]/80 px-4 py-2 rounded-lg hover:bg-[#4256a6] transition-colors">
                       {profile.image ? "Cambiar foto" : "Agregar foto"}
-                      <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handlePhotoUpload}
+                      />
                     </label>
                   </div>
                 </div>
@@ -184,7 +228,9 @@ const ProfileForm = () => {
                 <div className="flex-1 w-full space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-[#425a66] mb-2">Nombre completo</label>
+                      <label className="block text-sm font-medium text-[#425a66] mb-2">
+                        Nombre completo
+                      </label>
                       <input
                         type="text"
                         name="name"
@@ -195,7 +241,9 @@ const ProfileForm = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#425a66] mb-2">Email</label>
+                      <label className="block text-sm font-medium text-[#425a66] mb-2">
+                        Email
+                      </label>
                       <input
                         type="email"
                         name="email"
@@ -207,7 +255,9 @@ const ProfileForm = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#425a66] mb-2">DNI</label>
+                      <label className="block text-sm font-medium text-[#425a66] mb-2">
+                        DNI
+                      </label>
                       <input
                         type="text"
                         name="DNI"
@@ -218,7 +268,9 @@ const ProfileForm = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#425a66] mb-2">Teléfono</label>
+                      <label className="block text-sm font-medium text-[#425a66] mb-2">
+                        Teléfono
+                      </label>
                       <input
                         type="text"
                         name="phone"
@@ -229,7 +281,9 @@ const ProfileForm = () => {
                       />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-[#425a66] mb-2">Dirección</label>
+                      <label className="block text-sm font-medium text-[#425a66] mb-2">
+                        Dirección
+                      </label>
                       <input
                         type="text"
                         name="address"
@@ -244,10 +298,14 @@ const ProfileForm = () => {
               </div>
               {/* Sección de Información Personal */}
               <div className="mb-8">
-                <h3 className="text-xl font-semibold text-[#4256a6] mb-4">Información Personal</h3>
+                <h3 className="text-xl font-semibold text-[#4256a6] mb-4">
+                  Información Personal
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-[#425a66] mb-2">Fecha de Nacimiento</label>
+                    <label className="block text-sm font-medium text-[#425a66] mb-2">
+                      Fecha de Nacimiento
+                    </label>
                     <input
                       type="date"
                       name="birthDate"
@@ -257,7 +315,9 @@ const ProfileForm = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#425a66] mb-2">Género</label>
+                    <label className="block text-sm font-medium text-[#425a66] mb-2">
+                      Género
+                    </label>
                     <select
                       name="gender"
                       value={profile.gender}
@@ -268,11 +328,15 @@ const ProfileForm = () => {
                       <option value="masculino">Masculino</option>
                       <option value="femenino">Femenino</option>
                       <option value="otro">Otro</option>
-                      <option value="prefiero_no_decir">Prefiero no decir</option>
+                      <option value="prefiero_no_decir">
+                        Prefiero no decir
+                      </option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#425a66] mb-2">Nacionalidad</label>
+                    <label className="block text-sm font-medium text-[#425a66] mb-2">
+                      Nacionalidad
+                    </label>
                     <input
                       type="text"
                       name="nationality"
@@ -286,10 +350,14 @@ const ProfileForm = () => {
               </div>
               {/* Sección de Información de Emergencia */}
               <div className="mb-8">
-                <h3 className="text-xl font-semibold text-[#4256a6] mb-4">Información de Emergencia</h3>
+                <h3 className="text-xl font-semibold text-[#4256a6] mb-4">
+                  Información de Emergencia
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-[#425a66] mb-2">Nombre del Contacto de Emergencia</label>
+                    <label className="block text-sm font-medium text-[#425a66] mb-2">
+                      Nombre del Contacto de Emergencia
+                    </label>
                     <input
                       type="text"
                       name="emergencyContact.name"
@@ -300,7 +368,9 @@ const ProfileForm = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#425a66] mb-2">Teléfono de Emergencia</label>
+                    <label className="block text-sm font-medium text-[#425a66] mb-2">
+                      Teléfono de Emergencia
+                    </label>
                     <input
                       type="text"
                       name="emergencyContact.phone"
@@ -311,7 +381,9 @@ const ProfileForm = () => {
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-[#425a66] mb-2">Información Médica Relevante</label>
+                    <label className="block text-sm font-medium text-[#425a66] mb-2">
+                      Información Médica Relevante
+                    </label>
                     <textarea
                       name="medicalInfo"
                       value={profile.medicalInfo}
@@ -325,10 +397,14 @@ const ProfileForm = () => {
               </div>
               {/* Sección de Preferencias */}
               <div className="mb-8">
-                <h3 className="text-xl font-semibold text-[#4256a6] mb-4">Preferencias de Excursiones</h3>
+                <h3 className="text-xl font-semibold text-[#4256a6] mb-4">
+                  Preferencias de Excursiones
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-[#425a66] mb-2">Nivel de Experiencia</label>
+                    <label className="block text-sm font-medium text-[#425a66] mb-2">
+                      Nivel de Experiencia
+                    </label>
                     <select
                       name="experienceLevel"
                       value={profile.experienceLevel}
@@ -344,17 +420,24 @@ const ProfileForm = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#425a66] mb-2">Intereses</label>
+                    <label className="block text-sm font-medium text-[#425a66] mb-2">
+                      Intereses
+                    </label>
                     <div className="grid grid-cols-2 gap-2">
                       {interestOptions.map((interest) => (
-                        <label key={interest} className="flex items-center space-x-2">
+                        <label
+                          key={interest}
+                          className="flex items-center space-x-2"
+                        >
                           <input
                             type="checkbox"
                             checked={profile.interests.includes(interest)}
                             onChange={() => handleInterestChange(interest)}
                             className="rounded border-[#425a66]/20 text-[#4256a6] focus:ring-[#4256a6]"
                           />
-                          <span className="text-sm text-[#425a66]">{interest}</span>
+                          <span className="text-sm text-[#425a66]">
+                            {interest}
+                          </span>
                         </label>
                       ))}
                     </div>
