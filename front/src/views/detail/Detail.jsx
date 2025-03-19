@@ -119,7 +119,7 @@ export function Detail() {
     const fetchExcursionDetails = async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/service/id/${id_Service}`
+          `http://localhost:3001/service/id/${id_Service}`
         );
         if (!response.ok) throw new Error("Error al cargar la excursión");
         const data = await response.json();
@@ -133,7 +133,7 @@ export function Detail() {
       try {
         // Obtener solo las reviews para esta excursión
         const reviewsResponse = await axios.get(
-          `${import.meta.env.VITE_API_URL}/review/`
+          "http://localhost:3001/review/"
         );
         const reviewsData = reviewsResponse.data;
 
@@ -148,7 +148,7 @@ export function Detail() {
             try {
               // Usar la ruta específica para obtener usuario por ID
               const userResponse = await axios.get(
-                `${import.meta.env.VITE_API_URL}/user/id/${review.id_User}`
+                `http://localhost:3001/user/id/${review.id_User}`
               );
               const userData = userResponse.data;
 
@@ -186,6 +186,33 @@ export function Detail() {
 
   const handleAuthAlert = () => {
     navigate("/");
+  };
+
+  const renderAvailability = () => {
+    if (!excursion?.availabilityDate?.length) return null;
+
+    const availableDatesCount = excursion.availabilityDate.filter(
+      (date) => date.stock > 0
+    ).length;
+
+    return (
+      <div className="bg-[#f9f3e1] rounded-xl p-8 shadow-lg mt-8">
+        <Typography variant="h4" className="text-[#4256a6] mb-4">
+          Disponibilidad
+        </Typography>
+        {availableDatesCount > 0 ? (
+          <Typography className="text-[#425a66]">
+            Esta excursión tiene {availableDatesCount} fechas/horarios
+            disponibles.
+          </Typography>
+        ) : (
+          <Typography className="text-[#425a66] italic">
+            Lo sentimos, actualmente no hay fechas disponibles para esta
+            excursión.
+          </Typography>
+        )}
+      </div>
+    );
   };
 
   if (loading) {
@@ -328,6 +355,8 @@ export function Detail() {
                 {excursion.description}
               </Typography>
             </div>
+
+            {renderAvailability()}
 
             {/* Reseñas */}
             <div className="bg-[#f9f3e1] rounded-xl p-8 shadow-lg">
