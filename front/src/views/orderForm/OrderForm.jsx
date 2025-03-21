@@ -40,7 +40,9 @@ const OrderForm = () => {
     if (!sdkLoaded) {
       const mpKey = import.meta.env.VITE_MERCADOPAGO_KEY;
       if (!mpKey) {
-        console.error("⚠️ Mercado Pago key no definida en variables de entorno.");
+        console.error(
+          "⚠️ Mercado Pago key no definida en variables de entorno."
+        );
         return;
       }
       initMercadoPago(mpKey, { locale: "es-AR" });
@@ -55,122 +57,142 @@ const OrderForm = () => {
 
   const validateForm = () => {
     const requiredFields = [
-      "firstName", "lastName", "dni", "paymentMethod", "country",
-      "address", "city", "state", "postalCode", "email", "phone"
+      "firstName",
+      "lastName",
+      "dni",
+      "paymentMethod",
+      "country",
+      "address",
+      "city",
+      "state",
+      "postalCode",
+      "email",
+      "phone",
     ];
     return requiredFields.every((field) => formData[field]?.trim());
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (loading) return alert("⏳ Solicitud en proceso. Por favor, espera.");
-  if (!id_User) return alert("⚠️ Error: Usuario no autenticado.");
-  if (!validateForm()) return alert("⚠️ Por favor, completa todos los campos obligatorios.");
-  if (cartItems.length === 0) return alert("⚠️ El carrito está vacío.");
+    if (loading) return alert("⏳ Solicitud en proceso. Por favor, espera.");
+    if (!id_User) return alert("⚠️ Error: Usuario no autenticado.");
+    if (!validateForm())
+      return alert("⚠️ Por favor, completa todos los campos obligatorios.");
+    if (cartItems.length === 0) return alert("⚠️ El carrito está vacío.");
 
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    // ✅ Usamos los cartItems directamente sin aplicar descuentos nuevamente
-    const items = cartItems.map((item) => {
-     
-      return {
-        id_Service: item.id_Service,
-        title: item.title || "Servicio sin título",
-        description: item.description || "Sin descripción",
-        totalPeople: item.quantities?.adults + item.quantities?.children + item.quantities?.seniors,
-        unit_price: item.totalPrice / (item.quantities?.adults + item.quantities?.children + item.quantities?.seniors) || 0, 
-        currency_id: "ARS",
-        selectedDate: item.selectedDate,
-        selectedTime: item.selectedTime,
-        totalItemPrice: item.totalPrice,  
-      };
-    });
-
-    // Calcular el total correcto sumando los precios de todos los items
-    const totalPrice = items.reduce((total, item) => total + item.totalItemPrice, 0);
-    
-    console.log("🚀 Total antes de enviar:", totalPrice);
-  
-    // ✅ Creación de la orden
-    const orderData = {
-      orderDate: new Date().toISOString(),
-      id_User,
-      paymentMethod: formData.paymentMethod,
-      items: cartItems.map((item) => ({
-        id_Service: item.id_Service,
-        date: item.selectedDate,
-        time: item.selectedTime,
-        adults: item.quantities?.adults || 0,
-        minors: item.quantities?.children || 0,
-        seniors: item.quantities?.seniors || 0,
-        totalItemPrice: item.totalPrice,
-      })),
-      paymentStatus: "Pendiente",
-    };
-
-    const createdOrder = await dispatch(createServiceOrder(orderData));
-
-    if (!createdOrder?.id_ServiceOrder) {
-      throw new Error("Error al crear la orden. ID no recibido.");
-    }
-
-    setOrderId(createdOrder.id_ServiceOrder);
-
-    // Enviar la preferencia a MercadoPago
-    if (formData.paymentMethod === "Pagos desde Argentina") {
-      const apiUrl = import.meta.env.VITE_API_URL;
-      
-      const response = await fetch(`${apiUrl}/payment/create-preference`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          paymentInformation: items,
-          id_User,
-          DNI: formData.dni,
-          email: formData.email,
-          id_ServiceOrder: createdOrder.id_ServiceOrder,
-          external_reference: createdOrder.id_ServiceOrder,
-          metadata: {
-            orderId: createdOrder.id_ServiceOrder,
-            totalPeople: items.reduce((total, item) => total + item.totalPeople, 0),
-            totalPrice: totalPrice,
-          },
-        }),
+    try {
+      // ✅ Usamos los cartItems directamente sin aplicar descuentos nuevamente
+      const items = cartItems.map((item) => {
+        return {
+          id_Service: item.id_Service,
+          title: item.title || "Servicio sin título",
+          description: item.description || "Sin descripción",
+          totalPeople:
+            item.quantities?.adults +
+            item.quantities?.children +
+            item.quantities?.seniors,
+          unit_price:
+            item.totalPrice /
+              (item.quantities?.adults +
+                item.quantities?.children +
+                item.quantities?.seniors) || 0,
+          currency_id: "ARS",
+          selectedDate: item.selectedDate,
+          selectedTime: item.selectedTime,
+          totalItemPrice: item.totalPrice,
+        };
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("❌ Detalles del error:", errorText);
-        throw new Error(`Error en la solicitud: ${response.statusText}`);
+      // Calcular el total correcto sumando los precios de todos los items
+      const totalPrice = items.reduce(
+        (total, item) => total + item.totalItemPrice,
+        0
+      );
+
+      console.log("🚀 Total antes de enviar:", totalPrice);
+
+      // ✅ Creación de la orden
+      const orderData = {
+        orderDate: new Date().toISOString(),
+        id_User,
+        paymentMethod: formData.paymentMethod,
+        items: cartItems.map((item) => ({
+          id_Service: item.id_Service,
+          date: item.selectedDate,
+          time: item.selectedTime,
+          adults: item.quantities?.adults || 0,
+          minors: item.quantities?.children || 0,
+          seniors: item.quantities?.seniors || 0,
+          babies: item.quantities?.babies || 0,
+          totalItemPrice: item.totalPrice,
+        })),
+        paymentStatus: "Pendiente",
+      };
+
+      const createdOrder = await dispatch(createServiceOrder(orderData));
+
+      if (!createdOrder?.id_ServiceOrder) {
+        throw new Error("Error al crear la orden. ID no recibido.");
       }
 
-      const data = await response.json();
-      console.log("✅ Preference ID recibido:", data.preferenceId);
+      setOrderId(createdOrder.id_ServiceOrder);
 
-      if (!data?.preferenceId) {
-        throw new Error("No se recibió un preferenceId válido.");
+      // Enviar la preferencia a MercadoPago
+      if (formData.paymentMethod === "Pagos desde Argentina") {
+        const apiUrl = import.meta.env.VITE_API_URL;
+
+        const response = await fetch(`${apiUrl}/payment/create-preference`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            paymentInformation: items,
+            id_User,
+            DNI: formData.dni,
+            email: formData.email,
+            id_ServiceOrder: createdOrder.id_ServiceOrder,
+            external_reference: createdOrder.id_ServiceOrder,
+            metadata: {
+              orderId: createdOrder.id_ServiceOrder,
+              totalPeople: items.reduce(
+                (total, item) => total + item.totalPeople,
+                0
+              ),
+              totalPrice: totalPrice,
+            },
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("❌ Detalles del error:", errorText);
+          throw new Error(`Error en la solicitud: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log("✅ Preference ID recibido:", data.preferenceId);
+
+        if (!data?.preferenceId) {
+          throw new Error("No se recibió un preferenceId válido.");
+        }
+
+        setPreferenceId(data.preferenceId);
+        alert("✅ ¡Pedido confirmado exitosamente!");
+      } else if (formData.paymentMethod === "Pagos desde el exterior") {
+        alert("✅ ¡Pedido confirmado! Proceda con el pago por WhatsApp.");
       }
-
-      setPreferenceId(data.preferenceId);
-      alert("✅ ¡Pedido confirmado exitosamente!");
-
-    } else if (formData.paymentMethod === "Pagos desde el exterior") {
-      alert("✅ ¡Pedido confirmado! Proceda con el pago por WhatsApp.");
+    } catch (error) {
+      console.error("❌ Error en la solicitud de pago:", error);
+      alert("⚠️ Hubo un error en el proceso de pago. Intenta nuevamente.");
+    } finally {
+      setLoading(false);
     }
-
-  } catch (error) {
-    console.error("❌ Error en la solicitud de pago:", error);
-    alert("⚠️ Hubo un error en el proceso de pago. Intenta nuevamente.");
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   return (
     <div className="flex flex-col lg:flex-row gap-12 mt-10 px-8 max-w-[1600px] mx-auto">
@@ -304,11 +326,22 @@ const OrderForm = () => {
             {cartItems.length > 0 ? (
               <div className="space-y-4">
                 {cartItems.map((item, index) => {
-                  const adultsTotal = (item.quantities?.adults || 0) * item.price;
-                  const childrenTotal = (item.quantities?.children || 0) * item.price * ((100 - (item.discountForMinors || 0)) / 100);
-                  const seniorsTotal = (item.quantities?.seniors || 0) * item.price * ((100 - (item.discountForSeniors || 0)) / 100);
-                  const totalItemPrice = (adultsTotal + childrenTotal + seniorsTotal).toFixed(2);
-                
+                  const adultsTotal =
+                    (item.quantities?.adults || 0) * item.price;
+                  const childrenTotal =
+                    (item.quantities?.children || 0) *
+                    item.price *
+                    ((100 - (item.discountForMinors || 0)) / 100);
+                  const seniorsTotal =
+                    (item.quantities?.seniors || 0) *
+                    item.price *
+                    ((100 - (item.discountForSeniors || 0)) / 100);
+                  const totalItemPrice = (
+                    adultsTotal +
+                    childrenTotal +
+                    seniorsTotal
+                  ).toFixed(2);
+
                   return (
                     <div
                       key={`order-item-${item.id_Service}-${index}`}
@@ -348,12 +381,10 @@ const OrderForm = () => {
                       </div>
                       <div className="mt-2 text-xs text-[#425a66] border-t border-[#425a66]/10 pt-2">
                         <p>
-                          Fecha:{" "}
-                          {item.selectedDate || "Fecha no seleccionada"}
+                          Fecha: {item.selectedDate || "Fecha no seleccionada"}
                         </p>
                         <p>
-                          Hora:{" "}
-                          {item.selectedTime || "Hora no seleccionada"}
+                          Hora: {item.selectedTime || "Hora no seleccionada"}
                         </p>
                       </div>
                     </div>
@@ -374,13 +405,13 @@ const OrderForm = () => {
                   {cartItems
                     .reduce((acc, item) => {
                       const totalItemPrice =
-                        (item.quantities?.adults * item.price) +
-                        (item.quantities?.children *
+                        item.quantities?.adults * item.price +
+                        item.quantities?.children *
                           item.price *
-                          ((100 - (item.discountForMinors || 0)) / 100)) +
-                        (item.quantities?.seniors *
+                          ((100 - (item.discountForMinors || 0)) / 100) +
+                        item.quantities?.seniors *
                           item.price *
-                          ((100 - (item.discountForSeniors || 0)) / 100));
+                          ((100 - (item.discountForSeniors || 0)) / 100);
                       return acc + totalItemPrice;
                     }, 0)
                     .toFixed(2)}
@@ -393,13 +424,13 @@ const OrderForm = () => {
                   {cartItems
                     .reduce((acc, item) => {
                       const totalItemPrice =
-                        (item.quantities?.adults * item.price) +
-                        (item.quantities?.children *
+                        item.quantities?.adults * item.price +
+                        item.quantities?.children *
                           item.price *
-                          ((100 - (item.discountForMinors || 0)) / 100)) +
-                        (item.quantities?.seniors *
+                          ((100 - (item.discountForMinors || 0)) / 100) +
+                        item.quantities?.seniors *
                           item.price *
-                          ((100 - (item.discountForSeniors || 0)) / 100));
+                          ((100 - (item.discountForSeniors || 0)) / 100);
                       return acc + totalItemPrice;
                     }, 0)
                     .toFixed(2)}
@@ -420,52 +451,55 @@ const OrderForm = () => {
             required
           >
             <option value="">Selecciona un método</option>
-            <option value="Pagos desde Argentina">
-              Pagos desde Argentina
-            </option>
+            <option value="Pagos desde Argentina">Pagos desde Argentina</option>
             <option value="Pagos desde el exterior">
               Pagos desde el exterior
             </option>
           </select>
         </div>
-        {formData.paymentMethod === "Pagos desde Argentina" &&
-          preferenceId && (
-            <div className="mt-4">
-              <Wallet initialization={{ preferenceId }} />
-            </div>
-          )}
+        {formData.paymentMethod === "Pagos desde Argentina" && preferenceId && (
+          <div className="mt-4">
+            <Wallet initialization={{ preferenceId }} />
+          </div>
+        )}
         {formData.paymentMethod === "Pagos desde el exterior" && orderId && (
-  <a
-    href={`https://wa.me/+541169084059?text=${encodeURIComponent(
-      `¡Hola! Quisiera realizar una reserva con pago desde el exterior.\n\nDetalles de la reserva:\n${cartItems
-        .map(
-          (item) => `• ${item.title}\n- Fecha: ${item.selectedDate}\n- Hora: ${item.selectedTime}\n- Personas: ${item.quantities?.adults || 0} adultos, ${item.quantities?.children || 0} menores, ${item.quantities?.seniors || 0} jubilados`
-        )
-        .join("\n\n")}\n\nTotal a pagar: $${cartItems
-        .reduce((acc, item) => {
-          const totalItemPrice =
-            (item.quantities?.adults * item.price) +
-            (item.quantities?.children *
-              item.price *
-              ((100 - (item.discountForMinors || 0)) / 100)) +
-            (item.quantities?.seniors *
-              item.price *
-              ((100 - (item.discountForSeniors || 0)) / 100));
-          return acc + totalItemPrice;
-        }, 0).toFixed(2)}`
-    )}`}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="flex items-center justify-center gap-2 w-full py-3 bg-[#25D366] text-white rounded-lg hover:bg-[#128C7E] shadow-md hover:shadow-lg transition-all duration-300 mt-4 font-poppins"
-  >
-    <img
-      src="https://img.icons8.com/fluent/24/000000/whatsapp.png"
-      alt="WhatsApp"
-      className="filter brightness-0 invert"
-    />
-    Contactar por WhatsApp para pago
-  </a>
-)}
+          <a
+            href={`https://wa.me/+541169084059?text=${encodeURIComponent(
+              `¡Hola! Quisiera realizar una reserva con pago desde el exterior.\n\nDetalles de la reserva:\n${cartItems
+                .map(
+                  (item) =>
+                    `• ${item.title}\n- Fecha: ${item.selectedDate}\n- Hora: ${
+                      item.selectedTime
+                    }\n- Personas: ${item.quantities?.adults || 0} adultos, ${
+                      item.quantities?.children || 0
+                    } menores, ${item.quantities?.seniors || 0} jubilados`
+                )
+                .join("\n\n")}\n\nTotal a pagar: $${cartItems
+                .reduce((acc, item) => {
+                  const totalItemPrice =
+                    item.quantities?.adults * item.price +
+                    item.quantities?.children *
+                      item.price *
+                      ((100 - (item.discountForMinors || 0)) / 100) +
+                    item.quantities?.seniors *
+                      item.price *
+                      ((100 - (item.discountForSeniors || 0)) / 100);
+                  return acc + totalItemPrice;
+                }, 0)
+                .toFixed(2)}`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full py-3 bg-[#25D366] text-white rounded-lg hover:bg-[#128C7E] shadow-md hover:shadow-lg transition-all duration-300 mt-4 font-poppins"
+          >
+            <img
+              src="https://img.icons8.com/fluent/24/000000/whatsapp.png"
+              alt="WhatsApp"
+              className="filter brightness-0 invert"
+            />
+            Contactar por WhatsApp para pago
+          </a>
+        )}
 
         <div className="mt-4">
           <button
