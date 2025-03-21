@@ -124,8 +124,8 @@ const ShoppingCart = () => {
 
                     <div className="flex items-center justify-between pt-4 border-t border-[#425a66]/10">
                       <p className="text-xl font-semibold text-[#4256a6]">
-                        ${item.price || "No disponible"}
-                      </p>
+                        ${item.price || "No disponible"} <span className="text-sm">(Precio Unitario)</span>
+                       </p>
                       <button
                         onClick={() => removeFromCart(item.id_Service)}
                         className="text-red-500 hover:text-red-700 transition-colors duration-300 flex items-center gap-2"
