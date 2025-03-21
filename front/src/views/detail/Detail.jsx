@@ -7,6 +7,17 @@ import { AuthContext } from "../../firebase/AuthContext";
 import axios from "axios";
 
 const Review = ({ review, rating, userImage, userName, date }) => {
+  const formatDate = (dateString) => {
+    if (!dateString) return "Fecha no disponible";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "Fecha no disponible";
+    return date.toLocaleDateString("es-ES", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -28,11 +39,7 @@ const Review = ({ review, rating, userImage, userName, date }) => {
           <div className="flex items-center space-x-2 mt-1">
             <Rating value={rating} readonly className="text-[#4256a6]" />
             <span className="text-sm text-[#425a66]">
-              {new Date(date).toLocaleDateString("es-ES", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+              {formatDate(date)}
             </span>
           </div>
         </div>
