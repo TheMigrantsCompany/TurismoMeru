@@ -129,6 +129,12 @@ const ServiceOrderModal = ({ order, onClose }) => {
                 {(order.paymentInformation?.[0]?.adults || 0) +
                   (order.paymentInformation?.[0]?.minors || 0) +
                   (order.paymentInformation?.[0]?.seniors || 0)}
+                {order.paymentInformation?.[0]?.babies > 0 && (
+                  <span className="text-gray-600">
+                    {" "}
+                    (+ {order.paymentInformation[0].babies} bebés sin cargo)
+                  </span>
+                )}
               </p>
               <div className="ml-4">
                 <p className="text-gray-900">
@@ -143,6 +149,12 @@ const ServiceOrderModal = ({ order, onClose }) => {
                   <strong>Jubilados:</strong>{" "}
                   {order.paymentInformation?.[0]?.seniors || 0}
                 </p>
+                {order.paymentInformation?.[0]?.babies > 0 && (
+                  <p className="text-gray-900">
+                    <strong>Bebés (0-2 años):</strong>{" "}
+                    {order.paymentInformation[0].babies} (Sin cargo)
+                  </p>
+                )}
               </div>
             </div>
           </section>
