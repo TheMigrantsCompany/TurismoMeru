@@ -42,6 +42,7 @@ const createServiceOrderController = async (orderData) => {
 
       // Los bebés no cuentan para el total de reservaciones
       const totalReservations = adults + minors + seniors;
+      const totalWithBabies = totalReservations + (babies || 0);
       const availableStock =
         availability.stock - (availability.lockedStock || 0);
 
@@ -90,7 +91,7 @@ const createServiceOrderController = async (orderData) => {
         price,
         totalPrice: parseFloat(itemTotal.toFixed(2)),
         totalPeople: totalReservations,
-        totalPeopleWithBabies: totalReservations + (babies || 0),
+        totalPeopleWithBabies: totalWithBabies,
         DNI: user.DNI,
         lockedStock: availability.lockedStock,
       });
@@ -126,4 +127,3 @@ const createServiceOrderController = async (orderData) => {
 };
 
 module.exports = createServiceOrderController;
-
