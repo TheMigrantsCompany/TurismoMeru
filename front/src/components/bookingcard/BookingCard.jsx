@@ -15,8 +15,11 @@ const BookingCard = ({ id_Service, price }) => {
     adultos: 0,
     menores: 0,
     jubilados: 0,
+    bebes: 0,
   });
   const [totalPrice, setTotalPrice] = useState(0);
+  const [currentStock, setCurrentStock] = useState(0);
+  const [stockError, setStockError] = useState("");
 
   const { addToCart } = useCart();
   const navigate = useNavigate();
@@ -26,12 +29,30 @@ const BookingCard = ({ id_Service, price }) => {
     const fetchExcursionDetails = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/service/id/${id_Service}`
+          `${import.meta.env.VITE_API_URL}/service/id/${id_Service}`
         );
         setExcursion(response.data);
 
         const rawDates = response.data.availabilityDate || [];
-        const uniqueDates = [...new Set(rawDates.map((item) => item.date))];
+
+        // Obtener la fecha actual y establecerla al inicio del día
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const datesWithStock = rawDates.filter((item) => {
+          // Convertir la fecha del string a objeto Date
+          const itemDate = new Date(item.date + "T00:00:00");
+
+          // Comparar solo las fechas (ignorando la hora)
+          const isAfterToday = itemDate.getTime() > today.getTime();
+
+          return item.stock > 0 && isAfterToday;
+        });
+
+        const uniqueDates = [
+          ...new Set(datesWithStock.map((item) => item.date)),
+        ];
+        uniqueDates.sort((a, b) => new Date(a) - new Date(b));
         setAvailableDates(uniqueDates);
       } catch (error) {
         console.error("Error al obtener detalles de la excursión:", error);
@@ -56,13 +77,38 @@ const BookingCard = ({ id_Service, price }) => {
   }, [quantities, excursion]);
 
   useEffect(() => {
+    if (selectedDate && selectedTime && excursion) {
+      const selectedAvailability = excursion.availabilityDate.find(
+        (item) => item.date === selectedDate && item.time === selectedTime
+      );
+      setCurrentStock(selectedAvailability?.stock || 0);
+    }
+  }, [selectedDate, selectedTime, excursion]);
+
+  useEffect(() => {
     if (selectedDate && excursion) {
       const timesForDate = excursion.availabilityDate
-        .filter((item) => item.date === selectedDate)
+        .filter((item) => item.date === selectedDate && item.stock > 0)
         .map((item) => item.time);
       setAvailableTimes(timesForDate);
     }
   }, [selectedDate, excursion]);
+
+  useEffect(() => {
+    const totalPersonas =
+      quantities.adultos +
+      quantities.menores +
+      quantities.jubilados +
+      quantities.bebes;
+
+    if (totalPersonas > currentStock) {
+      setStockError(
+        "No hay lugares disponibles para la fecha y hora seleccionada"
+      );
+    } else {
+      setStockError("");
+    }
+  }, [quantities, currentStock]);
 
   const handleQuantityChange = (type, action) => {
     setQuantities((prev) => ({
@@ -93,7 +139,6 @@ const BookingCard = ({ id_Service, price }) => {
       return;
     }
 
-    // Transformamos las claves de quantities para que coincidan con lo que espera el carrito
     const cartItem = {
       id_Service,
       title: excursion?.title || "Título no disponible",
@@ -105,8 +150,9 @@ const BookingCard = ({ id_Service, price }) => {
         adults: quantities.adultos,
         children: quantities.menores,
         seniors: quantities.jubilados,
+        babies: quantities.bebes,
       },
-      discountForMinors: excursion.discountForMinors, // Se asume que esta propiedad viene del backend
+      discountForMinors: excursion.discountForMinors,
       discountForSeniors: excursion.discountForSeniors,
       photos: excursion?.photos || [],
       stock: excursion?.stock || 0,
@@ -117,7 +163,6 @@ const BookingCard = ({ id_Service, price }) => {
     navigate("/user/shopping-cart");
   };
 
-  // Si el usuario no está activo, ni siquiera deberíamos renderizar el componente
   if (!isUserActive) {
     return null;
   }
@@ -129,7 +174,11 @@ const BookingCard = ({ id_Service, price }) => {
         <select
           className="w-full p-1 rounded text-[#152917] text-sm border border-[#425a66]"
           value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
+          onChange={(e) => {
+            setSelectedDate(e.target.value);
+            setSelectedTime("");
+            setStockError("");
+          }}
         >
           <option value="">Seleccione una fecha</option>
           {availableDates.map((date, index) => (
@@ -139,14 +188,13 @@ const BookingCard = ({ id_Service, price }) => {
           ))}
         </select>
       </div>
-
       <div className="mb-3">
         <label className="block text-sm font-bold">Horario</label>
         <select
           className="w-full p-1 rounded text-[#152917] text-sm border border-[#425a66]"
           value={selectedTime}
           onChange={(e) => setSelectedTime(e.target.value)}
-          disabled={!selectedDate} // Deshabilitado si no se ha seleccionado fecha
+          disabled={!selectedDate}
         >
           <option value="">Seleccione un horario</option>
           {availableTimes.map((time, index) => (
@@ -160,25 +208,47 @@ const BookingCard = ({ id_Service, price }) => {
       <div className="mb-3">
         <label className="block text-sm font-bold">Personas</label>
         {[
-          { type: "adultos", label: "Adultos" },
-          { type: "menores", label: "Menores" },
-          { type: "jubilados", label: "Jubilados" },
-        ].map(({ type, label }) => (
+          {
+            type: "adultos",
+            label: "Adultos (+12 años)",
+            description: "Mayores de 12 años",
+          },
+          {
+            type: "menores",
+            label: "Menores (3-11 años)",
+            description: "Entre 3 y 11 años",
+          },
+          {
+            type: "jubilados",
+            label: "Jubilados (Argentina)",
+            description: "Con credencial de jubilado",
+          },
+          {
+            type: "bebes",
+            label: "Bebés (0-2 años)",
+            description: "Entre 0 y 2 años",
+          },
+        ].map(({ type, label, description }) => (
           <div
             key={type}
-            className="flex items-center justify-between mb-1 text-sm"
+            className="flex items-center justify-between mb-2 text-sm"
           >
-            <span>{label}</span>
+            <div className="flex flex-col">
+              <span className="font-medium">{label}</span>
+              <span className="text-xs text-gray-600">{description}</span>
+            </div>
             <div className="flex items-center space-x-2">
               <button
-                className="bg-[#f4a25b] px-2 rounded"
+                className="bg-[#f4a25b] px-2 rounded hover:bg-[#e8914a] transition-colors"
                 onClick={() => handleQuantityChange(type, "decrement")}
               >
                 -
               </button>
-              <span>{quantities[type]}</span>
+              <span className="min-w-[20px] text-center">
+                {quantities[type]}
+              </span>
               <button
-                className="bg-[#f4a25b] px-2 rounded"
+                className="bg-[#f4a25b] px-2 rounded hover:bg-[#e8914a] transition-colors"
                 onClick={() => handleQuantityChange(type, "increment")}
               >
                 +
@@ -187,10 +257,16 @@ const BookingCard = ({ id_Service, price }) => {
           </div>
         ))}
       </div>
+      {stockError && (
+        <p className="text-red-500 text-sm mt-2 mb-2">{stockError}</p>
+      )}
 
       <button
-        className="bg-[#425a66] text-white w-full py-1 rounded text-sm hover:bg-[#152917]"
+        className={`bg-[#425a66] text-white w-full py-1 rounded text-sm hover:bg-[#152917] ${
+          stockError ? "opacity-50 cursor-not-allowed" : ""
+        }`}
         onClick={handleAddToCart}
+        disabled={!!stockError}
       >
         Añadir al carrito
       </button>

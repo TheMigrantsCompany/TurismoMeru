@@ -7,126 +7,30 @@ import { motion } from "framer-motion";
 const ProfileForm = () => {
   const dispatch = useDispatch();
   const { userDetails } = useSelector((state) => state.users);
+
   const [profile, setProfile] = useState({
     name: "",
     email: "",
     DNI: "",
     phone: "",
     address: "",
-    image: "https://via.placeholder.com/150",
+    image: "",
     birthDate: "",
     gender: "",
     nationality: "",
-    emergencyContact: {
-      name: "",
-      phone: "",
-    },
+    emergencyContact: { name: "", phone: "" },
     medicalInfo: "",
     experienceLevel: "",
     interests: [],
   });
 
   useEffect(() => {
-    const uuid = localStorage.getItem("uuid");
-    if (uuid) {
-      dispatch(getUserDetails(uuid));
-    }
-  }, [dispatch]);
-
-  useEffect(() => {
     if (userDetails) {
-      console.log("Datos del usuario recibidos:", userDetails); // Para debug
-
-      // Intentar obtener datos adicionales del localStorage
-      const savedProfile = localStorage.getItem("userProfile");
-      const parsedProfile = savedProfile ? JSON.parse(savedProfile) : null;
-
-      setProfile({
-        ...userDetails, // Datos base del backend
-        name: userDetails.name || "",
-        email: userDetails.email || "",
-        DNI: userDetails.DNI || "",
-        phone: userDetails.phone || "",
-        address: userDetails.address || "",
-        image: userDetails.image || "https://via.placeholder.com/150",
-        // Usar datos guardados en localStorage si existen, si no usar valores por defecto
-        birthDate: parsedProfile?.birthDate || "",
-        gender: parsedProfile?.gender || "",
-        nationality: parsedProfile?.nationality || "",
-        emergencyContact: {
-          name: parsedProfile?.emergencyContact?.name || "",
-          phone: parsedProfile?.emergencyContact?.phone || "",
-        },
-        medicalInfo: parsedProfile?.medicalInfo || "",
-        experienceLevel: parsedProfile?.experienceLevel || "",
-        interests: parsedProfile?.interests || [],
-      });
+      setProfile(userDetails);
     }
   }, [userDetails]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    if (name.includes(".")) {
-      const [parent, child] = name.split(".");
-      setProfile((prev) => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value,
-        },
-      }));
-    } else {
-      setProfile((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
-  };
-
-  const handlePhotoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", "meruvyt");
-
-    try {
-      const response = await fetch(
-        "https://api.cloudinary.com/v1_1/dzrnybyqo/image/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      const data = await response.json();
-      if (data.secure_url) {
-        setProfile((prev) => ({
-          ...prev,
-          image: data.secure_url,
-        }));
-        Swal.fire(
-          "Imagen subida",
-          "La imagen se ha cargado correctamente.",
-          "success"
-        );
-      } else {
-        Swal.fire("Error", "Error al subir la imagen a Cloudinary.", "error");
-      }
-    } catch (error) {
-      console.error("Error al subir la imagen:", error);
-      Swal.fire(
-        "Error",
-        "No se pudo subir la imagen. Inténtalo de nuevo.",
-        "error"
-      );
-    }
-  };
-
   const handleSave = () => {
-    const uuid = localStorage.getItem("uuid");
     if (!profile.name || !profile.email) {
       Swal.fire(
         "Error",
@@ -136,8 +40,9 @@ const ProfileForm = () => {
       return;
     }
 
-    // Incluir todos los campos en el objeto a enviar al backend
-    const backendProfile = {
+    const userId = userDetails.id_User;
+
+    let backendProfile = {
       name: profile.name,
       email: profile.email,
       phone: profile.phone,
@@ -154,19 +59,80 @@ const ProfileForm = () => {
       active: true,
     };
 
-    if (uuid) {
-      dispatch(updateUserDetails(uuid, backendProfile))
-        .then((response) => {
-          Swal.fire(
-            "Perfil actualizado",
-            "Los datos han sido guardados.",
-            "success"
-          );
-        })
-        .catch((error) => {
-          console.error("Error al actualizar el perfil:", error);
-          Swal.fire("Error", "Ocurrió un error al guardar los datos.", "error");
-        });
+    const isEmailChanged = userDetails.email !== profile.email;
+    if (!isEmailChanged) {
+      const { email, ...dataWithoutEmail } = backendProfile;
+      backendProfile = dataWithoutEmail;
+    }
+
+    const isProfileChanged = Object.keys(backendProfile).some(
+      (key) => backendProfile[key] !== userDetails[key]
+    );
+
+    if (!isProfileChanged) {
+      Swal.fire("Sin cambios", "No hay cambios que guardar.", "info");
+      return;
+    }
+
+    dispatch(updateUserDetails(userId, backendProfile))
+      .then(() => {
+        Swal.fire(
+          "Perfil actualizado",
+          "Los datos han sido guardados.",
+          "success"
+        );
+        dispatch(getUserDetails(userId));
+      })
+      .catch((error) => {
+        console.error("Error al actualizar el perfil:", error);
+        Swal.fire("Error", "Ocurrió un error al guardar los datos.", "error");
+      });
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
+      setProfile((prev) => ({
+        ...prev,
+        [parent]: { ...prev[parent], [child]: value },
+      }));
+    } else {
+      setProfile((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "meruvyt");
+
+    try {
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/dzrnybyqo/image/upload",
+        { method: "POST", body: formData }
+      );
+      const data = await response.json();
+      if (data.secure_url) {
+        setProfile((prev) => ({ ...prev, image: data.secure_url }));
+        Swal.fire(
+          "Imagen subida",
+          "La imagen se ha cargado correctamente.",
+          "success"
+        );
+      } else {
+        Swal.fire("Error", "Error al subir la imagen a Cloudinary.", "error");
+      }
+    } catch (error) {
+      console.error("Error al subir la imagen:", error);
+      Swal.fire(
+        "Error",
+        "No se pudo subir la imagen. Inténtalo de nuevo.",
+        "error"
+      );
     }
   };
 
@@ -220,18 +186,35 @@ const ProfileForm = () => {
                 </p>
               </div>
             </div>
-
             <div className="p-8">
               <div className="flex flex-col md:flex-row items-start gap-8 mb-8">
-                <div className="relative group w-40 h-40 rounded-2xl overflow-hidden shadow-md mx-auto md:mx-0">
-                  <img
-                    src={profile.image}
-                    alt="Perfil"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                {/* Contenedor de la imagen */}
+                <div
+                  className={`relative ${
+                    profile.image ? "group" : ""
+                  } w-40 h-40 rounded-2xl overflow-hidden shadow-md mx-auto md:mx-0`}
+                >
+                  {profile.image ? (
+                    <img
+                      src={profile.image}
+                      alt="Perfil"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                      <span className="text-gray-500">Sin imagen</span>
+                    </div>
+                  )}
+                  {/* Overlay: se muestra siempre si no hay imagen, o al pasar el cursor si la hay */}
+                  <div
+                    className={`absolute inset-0 bg-black/40 transition-opacity flex items-center justify-center ${
+                      profile.image
+                        ? "opacity-0 group-hover:opacity-100"
+                        : "opacity-100"
+                    }`}
+                  >
                     <label className="cursor-pointer text-white text-sm font-medium bg-[#4256a6]/80 px-4 py-2 rounded-lg hover:bg-[#4256a6] transition-colors">
-                      Cambiar foto
+                      {profile.image ? "Cambiar foto" : "Agregar foto"}
                       <input
                         type="file"
                         accept="image/*"
@@ -241,7 +224,7 @@ const ProfileForm = () => {
                     </label>
                   </div>
                 </div>
-
+                {/* Formulario de datos */}
                 <div className="flex-1 w-full space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -257,7 +240,6 @@ const ProfileForm = () => {
                         placeholder="Tu nombre completo"
                       />
                     </div>
-
                     <div>
                       <label className="block text-sm font-medium text-[#425a66] mb-2">
                         Email
@@ -272,7 +254,6 @@ const ProfileForm = () => {
                         readOnly
                       />
                     </div>
-
                     <div>
                       <label className="block text-sm font-medium text-[#425a66] mb-2">
                         DNI
@@ -286,7 +267,6 @@ const ProfileForm = () => {
                         placeholder="Tu DNI"
                       />
                     </div>
-
                     <div>
                       <label className="block text-sm font-medium text-[#425a66] mb-2">
                         Teléfono
@@ -300,7 +280,6 @@ const ProfileForm = () => {
                         placeholder="Tu número de teléfono"
                       />
                     </div>
-
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-[#425a66] mb-2">
                         Dirección
@@ -317,7 +296,7 @@ const ProfileForm = () => {
                   </div>
                 </div>
               </div>
-
+              {/* Sección de Información Personal */}
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-[#4256a6] mb-4">
                   Información Personal
@@ -335,7 +314,6 @@ const ProfileForm = () => {
                       className="w-full px-4 py-3 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white text-black"
                     />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-[#425a66] mb-2">
                       Género
@@ -355,7 +333,6 @@ const ProfileForm = () => {
                       </option>
                     </select>
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-[#425a66] mb-2">
                       Nacionalidad
@@ -371,7 +348,7 @@ const ProfileForm = () => {
                   </div>
                 </div>
               </div>
-
+              {/* Sección de Información de Emergencia */}
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-[#4256a6] mb-4">
                   Información de Emergencia
@@ -390,7 +367,6 @@ const ProfileForm = () => {
                       placeholder="Nombre del contacto"
                     />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-[#425a66] mb-2">
                       Teléfono de Emergencia
@@ -404,7 +380,6 @@ const ProfileForm = () => {
                       placeholder="Número de emergencia"
                     />
                   </div>
-
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-[#425a66] mb-2">
                       Información Médica Relevante
@@ -420,7 +395,7 @@ const ProfileForm = () => {
                   </div>
                 </div>
               </div>
-
+              {/* Sección de Preferencias */}
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-[#4256a6] mb-4">
                   Preferencias de Excursiones
@@ -444,7 +419,6 @@ const ProfileForm = () => {
                       ))}
                     </select>
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-[#425a66] mb-2">
                       Intereses
@@ -470,7 +444,6 @@ const ProfileForm = () => {
                   </div>
                 </div>
               </div>
-
               <div className="flex justify-center pt-6 border-t border-[#425a66]/10">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
