@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useCart } from "../shopping-cart/CartContext";
 import { Button } from "@material-tailwind/react";
 import Swal from "sweetalert2";
 
 const BookingForm = ({ userId, userName, userDni }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { clearCart } = useCart();
   const queryParams = new URLSearchParams(location.search);
 
   const serviceId = queryParams.get("id_Service");
@@ -81,7 +83,7 @@ const BookingForm = ({ userId, userName, userDni }) => {
        timer: 1500,
        showConfirmButton: false,
        }).then(() => {
-        localStorage.removeItem("cartItems");
+        clearCart();
         setReservationSuccess(true);
         navigate("/user/reservas");
       });
