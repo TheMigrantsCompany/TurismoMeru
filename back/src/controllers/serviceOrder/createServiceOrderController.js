@@ -11,11 +11,15 @@ const createServiceOrderController = async (orderData) => {
     console.info(">> Iniciando creación de la orden de servicio...");
 
     // Verificar usuario
-    const user = await User.findByPk(id_User, { attributes: ["DNI"], transaction });
+    const user = await User.findByPk(id_User, {
+      attributes: ["DNI"],
+      transaction,
+    });
     if (!user) throw new Error(`Usuario con ID ${id_User} no encontrado`);
     console.info(">> Usuario verificado:", user.toJSON());
 
-    if (!user.DNI) throw new Error(`Usuario con ID ${id_User} no tiene un DNI registrado`);
+    if (!user.DNI)
+      throw new Error(`Usuario con ID ${id_User} no tiene un DNI registrado`);
 
     for (const item of items) {
       const { id_Service, date, time, adults, minors, seniors, babies } = item;
@@ -23,7 +27,8 @@ const createServiceOrderController = async (orderData) => {
 
       // Verificar servicio
       const excursion = await Service.findByPk(id_Service, { transaction });
-      if (!excursion) throw new Error(`Servicio con ID ${id_Service} no encontrado`);
+      if (!excursion)
+        throw new Error(`Servicio con ID ${id_Service} no encontrado`);
       console.info(">> Servicio encontrado:", excursion.toJSON());
 
       const availability = excursion.availabilityDate.find(
@@ -37,7 +42,8 @@ const createServiceOrderController = async (orderData) => {
 
       // Los bebés no cuentan para el total de reservaciones
       const totalReservations = adults + minors + seniors;
-      const availableStock = availability.stock - (availability.lockedStock || 0);
+      const availableStock =
+        availability.stock - (availability.lockedStock || 0);
 
       if (availableStock < totalReservations) {
         throw new Error(
@@ -46,7 +52,8 @@ const createServiceOrderController = async (orderData) => {
       }
 
       // Bloquear stock
-      availability.lockedStock = (availability.lockedStock || 0) + totalReservations;
+      availability.lockedStock =
+        (availability.lockedStock || 0) + totalReservations;
 
       // Actualizar disponibilidad y lockedStock en la base de datos
       excursion.set(
@@ -57,7 +64,10 @@ const createServiceOrderController = async (orderData) => {
       );
       excursion.lockedStock += totalReservations; // Incrementar el lockedStock general
       await excursion.save({ transaction }); // Guardar los cambios
-      console.info(">> Disponibilidad y lockedStock actualizados para el servicio:", excursion.title);
+      console.info(
+        ">> Disponibilidad y lockedStock actualizados para el servicio:",
+        excursion.title
+      );
 
       // Calcular precios
       const price = parseFloat(excursion.price || 0);
@@ -76,7 +86,7 @@ const createServiceOrderController = async (orderData) => {
         adults,
         minors,
         seniors,
-        babies,
+        babies: babies || 0,
         price,
         totalPrice: parseFloat(itemTotal.toFixed(2)),
         totalPeople: totalReservations,
@@ -100,7 +110,10 @@ const createServiceOrderController = async (orderData) => {
     );
 
     // Asociar servicios
-    await newOrder.addServices(items.map((item) => item.id_Service), { transaction });
+    await newOrder.addServices(
+      items.map((item) => item.id_Service),
+      { transaction }
+    );
 
     await transaction.commit();
     console.info(">> Orden creada exitosamente:", newOrder.toJSON());
