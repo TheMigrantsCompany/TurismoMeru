@@ -170,53 +170,39 @@ const BookingCard = ({ id_Service, price }) => {
       </div>
 
       <div className="mb-3">
-        <label className="block text-sm font-bold">Horario</label>
-        <select
-          className="w-full p-1 rounded text-[#152917] text-sm border border-[#425a66]"
-          value={selectedTime}
-          onChange={(e) => setSelectedTime(e.target.value)}
-          disabled={!selectedDate}
+         <label className="block text-sm font-bold">Personas</label>
+     {[
+           { type: "adultos", label: "Adultos (+12 años)", description: "Mayores de 12 años" },
+           { type: "menores", label: "Menores (3-11 años)", description: "Entre 3 y 11 años" },
+           { type: "jubilados", label: "Jubilados (Argentina)", description: "Con credencial de jubilado" },
+           { type: "bebes", label: "Bebés (0-2 años)", description: "Entre 0 y 2 años" },
+       ].map(({ type, label, description }) => (
+      <div
+      key={type}
+      className="flex items-center justify-between mb-2 text-sm"
+       >
+      <div className="flex flex-col">
+        <span className="font-medium">{label}</span>
+        <span className="text-xs text-gray-600">{description}</span>
+      </div>
+      <div className="flex items-center space-x-2">
+        <button
+          className="bg-[#f4a25b] px-2 rounded hover:bg-[#e8914a] transition-colors"
+          onClick={() => handleQuantityChange(type, "decrement")}
         >
-          <option value="">Seleccione un horario</option>
-          {availableTimes.map((time, index) => (
-            <option key={index} value={time}>
-              {time}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="mb-3">
-        <label className="block text-sm font-bold">Personas</label>
-        {[
-          { type: "adultos", label: "Adultos" },
-          { type: "menores", label: "Menores" },
-          { type: "jubilados", label: "Jubilados" },
-        ].map(({ type, label }) => (
-          <div
-            key={type}
-            className="flex items-center justify-between mb-1 text-sm"
-          >
-            <span>{label}</span>
-            <div className="flex items-center space-x-2">
-              <button
-                className="bg-[#f4a25b] px-2 rounded"
-                onClick={() => handleQuantityChange(type, "decrement")}
-              >
-                -
-              </button>
-              <span>{quantities[type]}</span>
-              <button
-                className="bg-[#f4a25b] px-2 rounded"
-                onClick={() => handleQuantityChange(type, "increment")}
-              >
-                +
-              </button>
-            </div>
+          -
+        </button>
+        <span className="min-w-[20px] text-center">{quantities[type]}</span>
+        <button
+          className="bg-[#f4a25b] px-2 rounded hover:bg-[#e8914a] transition-colors"
+          onClick={() => handleQuantityChange(type, "increment")}
+        >
+          +
+           </button>
           </div>
-        ))}
-      </div>
-
+        </div>
+       ))}
+    </div>
       {stockError && (
         <p className="text-red-500 text-sm mt-2 mb-2">{stockError}</p>
       )}
