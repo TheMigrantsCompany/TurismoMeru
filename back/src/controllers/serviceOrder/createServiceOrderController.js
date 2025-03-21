@@ -18,7 +18,7 @@ const createServiceOrderController = async (orderData) => {
     if (!user.DNI) throw new Error(`Usuario con ID ${id_User} no tiene un DNI registrado`);
 
     for (const item of items) {
-      const { id_Service, date, time, adults, minors, seniors } = item;
+      const { id_Service, date, time, adults, minors, seniors, babies } = item;
       console.info(`>> Procesando ítem con ID de servicio: ${id_Service}`);
 
       // Verificar servicio
@@ -35,6 +35,7 @@ const createServiceOrderController = async (orderData) => {
         );
       }
 
+      // Los bebés no cuentan para el total de reservaciones
       const totalReservations = adults + minors + seniors;
       const availableStock = availability.stock - (availability.lockedStock || 0);
 
@@ -45,18 +46,18 @@ const createServiceOrderController = async (orderData) => {
       }
 
       // Bloquear stock
-availability.lockedStock = (availability.lockedStock || 0) + totalReservations;
+      availability.lockedStock = (availability.lockedStock || 0) + totalReservations;
 
-// Actualizar disponibilidad y lockedStock en la base de datos
-excursion.set(
-  "availabilityDate",
-  excursion.availabilityDate.map((avail) =>
-    avail.date === date && avail.time === time ? availability : avail
-  )
-);
-excursion.lockedStock += totalReservations; // Incrementar el lockedStock general
-await excursion.save({ transaction }); // Guardar los cambios
-console.info(">> Disponibilidad y lockedStock actualizados para el servicio:", excursion.title);
+      // Actualizar disponibilidad y lockedStock en la base de datos
+      excursion.set(
+        "availabilityDate",
+        excursion.availabilityDate.map((avail) =>
+          avail.date === date && avail.time === time ? availability : avail
+        )
+      );
+      excursion.lockedStock += totalReservations; // Incrementar el lockedStock general
+      await excursion.save({ transaction }); // Guardar los cambios
+      console.info(">> Disponibilidad y lockedStock actualizados para el servicio:", excursion.title);
 
       // Calcular precios
       const price = parseFloat(excursion.price || 0);
@@ -75,9 +76,11 @@ console.info(">> Disponibilidad y lockedStock actualizados para el servicio:", e
         adults,
         minors,
         seniors,
+        babies,
         price,
         totalPrice: parseFloat(itemTotal.toFixed(2)),
         totalPeople: totalReservations,
+        totalPeopleWithBabies: totalReservations + (babies || 0),
         DNI: user.DNI,
         lockedStock: availability.lockedStock,
       });
