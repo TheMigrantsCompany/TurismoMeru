@@ -44,7 +44,6 @@ export const CartProvider = ({ children }) => {
       localStorage.setItem(key, JSON.stringify(cartItems));
     }
   }, [cartItems, userId]);
-  
 
   const addToCart = (item) => {
     setCartItems((prev) => {
@@ -58,8 +57,11 @@ export const CartProvider = ({ children }) => {
                 ...cartItem,
                 quantities: {
                   adults: cartItem.quantities.adults + item.quantities.adults,
-                  children: cartItem.quantities.children + item.quantities.children,
-                  seniors: cartItem.quantities.seniors + item.quantities.seniors,
+                  children:
+                    cartItem.quantities.children + item.quantities.children,
+                  seniors:
+                    cartItem.quantities.seniors + item.quantities.seniors,
+                  babies: cartItem.quantities.babies + item.quantities.babies,
                 },
                 totalPrice: cartItem.totalPrice + item.totalPrice,
               }
