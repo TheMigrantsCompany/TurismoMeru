@@ -295,16 +295,22 @@ export const updateUserDetails = (id_User, updatedData) => async (dispatch) => {
 export const createServiceOrder = (orderData) => async (dispatch) => {
   try {
     console.log("Enviando datos al endpoint:", orderData);
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/servicesOrder/`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(orderData),
-      }
-    );
+    // Asegurarnos que los bebés estén incluidos en los items
+    const updatedOrderData = {
+      ...orderData,
+      items: orderData.items.map((item) => ({
+        ...item,
+        babies: item.quantities?.babies || 0, // Agregar bebés manteniendo el resto igual
+      })),
+    };
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/servicesOrder/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedOrderData),
+    });
 
     const data = await response.json();
     console.log("Respuesta del backend:", data);
