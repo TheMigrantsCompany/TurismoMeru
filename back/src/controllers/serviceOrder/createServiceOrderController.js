@@ -89,6 +89,27 @@ const createServiceOrderController = async (orderData) => {
 
       total += itemTotal;
 
+      console.log("Datos antes de crear updatedItems:", {
+        babies,
+        totalWithBabies,
+        updatedItemData: {
+          title: excursion.title,
+          id_Service,
+          date,
+          time,
+          adults,
+          minors,
+          seniors,
+          babies: babies || 0,
+          price,
+          totalPrice: parseFloat(itemTotal.toFixed(2)),
+          totalPeople: totalReservations,
+          totalPeopleWithBabies: totalWithBabies,
+          DNI: user.DNI,
+          lockedStock: availability.lockedStock,
+        },
+      });
+
       updatedItems.push({
         title: excursion.title,
         id_Service,
