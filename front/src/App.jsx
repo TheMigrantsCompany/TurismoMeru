@@ -13,6 +13,8 @@ import Purchases from "./views/dashboardUser/Purchases";
 import OrderForm from "./views/orderForm/OrderForm";
 import BookingForm from "./views/bookingform/BookingForm";
 import UserBookings from "./views/dashboardUser/UserBookings";
+import PaymentFailure from './views/payment/PaymentFailure';
+import PaymentPending from "./views/payment/PaymentPending";
 import { UserManagement } from "./views/dashboardAdmin/dashAdminViews/UserManagement";
 import { ReservationManagement } from "./views/dashboardAdmin/dashAdminViews/ReservationManagement";
 import { ExcursionManagement } from "./views/dashboardAdmin/dashAdminViews/ExcursionManagement";
@@ -32,7 +34,9 @@ function App() {
         {/* Rutas públicas */}
         <Route path="/" element={<Home />} />
         <Route path="/detail/:id_Service" element={<Detail />} />
-
+        <Route path="/payment-failure" element={<PaymentFailure />} />
+        <Route path="/payment-pending" element={<PaymentPending />} />
+        
         {/* Rutas protegidas para el Administrador */}
         <Route
           path="/admin"
