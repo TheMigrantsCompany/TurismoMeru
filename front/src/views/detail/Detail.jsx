@@ -163,6 +163,7 @@ export function Detail() {
                 ...review,
                 userName: userData?.name || "Usuario Anónimo",
                 userImage: userData?.image || "https://via.placeholder.com/50",
+                date: review.bookingDate || review.createdAt || "Fecha no disponible"
               };
             } catch (error) {
               console.error(
@@ -173,6 +174,7 @@ export function Detail() {
                 ...review,
                 userName: "Usuario Anónimo",
                 userImage: "https://via.placeholder.com/50",
+                date: review.bookingDate || review.createdAt || "Fecha no disponible"
               };
             }
           })
