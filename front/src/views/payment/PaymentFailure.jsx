@@ -38,19 +38,19 @@ const PaymentFailure = () => {
         </p>
 
         <div className="space-y-4">
-          <a
-            href="https://wa.me/+541169084059"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white py-2 rounded-lg hover:bg-[#128C7E] transition-colors duration-300"
-          >
-            <img
-              src="https://img.icons8.com/fluent/24/000000/whatsapp.png"
-              alt="WhatsApp"
-              className="w-6 h-6"
-            />
-            Contactar por WhatsApp
-          </a>
+         <a
+          href="https://wa.me/+541169084059?text=Hola!%20Tuve%20un%20problema%20con%20mi%20pago,%20¿podrían%20ayudarme?"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white py-2 rounded-lg hover:bg-[#128C7E] transition-colors duration-300"
+         >
+         <img
+          src="https://img.icons8.com/fluent/24/000000/whatsapp.png"
+          alt="WhatsApp"
+          className="w-6 h-6"
+           />
+           Contactar por WhatsApp
+         </a>
         </div>
       </motion.div>
     </div>
