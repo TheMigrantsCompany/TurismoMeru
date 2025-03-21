@@ -170,7 +170,23 @@ const BookingCard = ({ id_Service, price }) => {
           ))}
         </select>
       </div>
-
+     <div className="mb-3">
+        <label className="block text-sm font-bold">Horario</label>
+        <select
+          className="w-full p-1 rounded text-[#152917] text-sm border border-[#425a66]"
+          value={selectedTime}
+          onChange={(e) => setSelectedTime(e.target.value)}
+          disabled={!selectedDate}
+        >
+          <option value="">Seleccione un horario</option>
+          {availableTimes.map((time, index) => (
+            <option key={index} value={time}>
+              {time}
+            </option>
+          ))}
+        </select>
+      </div>
+      
       <div className="mb-3">
          <label className="block text-sm font-bold">Personas</label>
      {[
