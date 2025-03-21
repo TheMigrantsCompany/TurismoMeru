@@ -23,6 +23,16 @@ const createServiceOrderController = async (orderData) => {
 
     for (const item of items) {
       const { id_Service, date, time, adults, minors, seniors, babies } = item;
+      console.log("Datos recibidos del item:", {
+        id_Service,
+        date,
+        time,
+        adults,
+        minors,
+        seniors,
+        babies,
+        originalItem: item,
+      });
       console.info(`>> Procesando ítem con ID de servicio: ${id_Service}`);
 
       // Verificar servicio
