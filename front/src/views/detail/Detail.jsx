@@ -379,7 +379,7 @@ export function Detail() {
                       rating={review.rating}
                       userImage={review.userImage}
                       userName={review.userName}
-                      date={review.date}
+                      date={review.createdAt} 
                     />
                   ))}
                 </div>
