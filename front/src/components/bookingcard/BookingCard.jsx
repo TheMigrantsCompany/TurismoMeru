@@ -15,6 +15,7 @@ const BookingCard = ({ id_Service, price }) => {
     adultos: 0,
     menores: 0,
     jubilados: 0,
+     bebes: 0,
   });
   const [totalPrice, setTotalPrice] = useState(0);
   const [currentStock, setCurrentStock] = useState(0);
@@ -80,7 +81,7 @@ const BookingCard = ({ id_Service, price }) => {
 
   useEffect(() => {
     const totalPersonas =
-      quantities.adultos + quantities.menores + quantities.jubilados;
+     quantities.adultos + quantities.menores + quantities.jubilados + quantities.bebes;
 
     if (totalPersonas > currentStock) {
       setStockError(
@@ -131,6 +132,7 @@ const BookingCard = ({ id_Service, price }) => {
         adults: quantities.adultos,
         children: quantities.menores,
         seniors: quantities.jubilados,
+        babies: quantities.bebes,
       },
       discountForMinors: excursion.discountForMinors,
       discountForSeniors: excursion.discountForSeniors,
