@@ -50,9 +50,12 @@ const createServiceOrderController = async (orderData) => {
         );
       }
 
+      // Asegurar que babies sea un número
+      const babiesCount = parseInt(babies) || 0;
+
       // Los bebés no cuentan para el total de reservaciones
       const totalReservations = adults + minors + seniors;
-      const totalWithBabies = totalReservations + (babies || 0);
+      const totalWithBabies = totalReservations + babiesCount; // Usar babiesCount
       const availableStock =
         availability.stock - (availability.lockedStock || 0);
 
@@ -90,7 +93,7 @@ const createServiceOrderController = async (orderData) => {
       total += itemTotal;
 
       console.log("Datos antes de crear updatedItems:", {
-        babies,
+        babies: babiesCount,
         totalWithBabies,
         updatedItemData: {
           title: excursion.title,
@@ -100,7 +103,7 @@ const createServiceOrderController = async (orderData) => {
           adults,
           minors,
           seniors,
-          babies: babies || 0,
+          babies: babiesCount,
           price,
           totalPrice: parseFloat(itemTotal.toFixed(2)),
           totalPeople: totalReservations,
@@ -118,7 +121,7 @@ const createServiceOrderController = async (orderData) => {
         adults,
         minors,
         seniors,
-        babies: babies || 0,
+        babies: babiesCount,
         price,
         totalPrice: parseFloat(itemTotal.toFixed(2)),
         totalPeople: totalReservations,
@@ -140,6 +143,13 @@ const createServiceOrderController = async (orderData) => {
       },
       { transaction }
     );
+
+    // Agregar estos logs
+    console.log(
+      "updatedItems antes de crear orden:",
+      JSON.stringify(updatedItems, null, 2)
+    );
+    console.log("Orden creada:", JSON.stringify(newOrder.toJSON(), null, 2));
 
     // Asociar servicios
     await newOrder.addServices(
