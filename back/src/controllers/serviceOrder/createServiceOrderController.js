@@ -23,7 +23,16 @@ const createServiceOrderController = async (orderData) => {
 
     for (const item of items) {
       const { id_Service, date, time, adults, minors, seniors, babies } = item;
-      console.log("1. Valores extraídos del item:", { babies, item });
+      console.log("Datos recibidos del item:", {
+        id_Service,
+        date,
+        time,
+        adults,
+        minors,
+        seniors,
+        babies, // Ver el valor de babies al inicio
+      });
+
       console.info(`>> Procesando ítem con ID de servicio: ${id_Service}`);
 
       // Verificar servicio
@@ -76,20 +85,13 @@ const createServiceOrderController = async (orderData) => {
 
       total += itemTotal;
 
-      console.log("2. Objeto a pushear en updatedItems:", {
+      console.log("Datos antes de pushear a updatedItems:", {
         title: excursion.title,
-        id_Service,
-        date,
-        time,
         adults,
         minors,
         seniors,
-        babies,
-        price,
-        totalPrice: parseFloat(itemTotal.toFixed(2)),
+        babies, // Ver el valor de babies antes de pushear
         totalPeople: totalReservations,
-        DNI: user.DNI,
-        lockedStock: availability.lockedStock,
       });
 
       updatedItems.push({
@@ -100,7 +102,7 @@ const createServiceOrderController = async (orderData) => {
         adults,
         minors,
         seniors,
-        babies,
+        babies, // Usar babies directamente
         price,
         totalPrice: parseFloat(itemTotal.toFixed(2)),
         totalPeople: totalReservations,
@@ -109,8 +111,8 @@ const createServiceOrderController = async (orderData) => {
       });
 
       console.log(
-        "3. Estado de updatedItems:",
-        JSON.stringify(updatedItems, null, 2)
+        "Item agregado a updatedItems:",
+        updatedItems[updatedItems.length - 1]
       );
     }
 
