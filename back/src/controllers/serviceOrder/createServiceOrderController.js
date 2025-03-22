@@ -35,8 +35,13 @@ const createServiceOrderController = async (orderData) => {
         );
       }
 
+       // Asegurar que babies sea un número
+     const babiesCount = Number.isInteger(babies) ? babies : parseInt(babies) || 0;
+
+
       // Los bebés no cuentan para el total de reservaciones
       const totalReservations = adults + minors + seniors;
+      const totalWithBabies = totalReservations + babiesCount; // Usar babiesCount
       const availableStock = availability.stock - (availability.lockedStock || 0);
 
       if (availableStock < totalReservations) {
@@ -68,6 +73,27 @@ const createServiceOrderController = async (orderData) => {
 
       total += itemTotal;
 
+        console.log("Datos antes de crear updatedItems:", {
+        babies: babiesCount,
+        totalWithBabies,
+        updatedItemData: {
+          title: excursion.title,
+          id_Service,
+          date,
+          time,
+          adults,
+          minors,
+          seniors,
+          babies: babiesCount,
+          price,
+          totalPrice: parseFloat(itemTotal.toFixed(2)),
+          totalPeople: totalReservations,
+          totalPeopleWithBabies: totalWithBabies,
+          DNI: user.DNI,
+          lockedStock: availability.lockedStock,
+        },
+      });
+
       updatedItems.push({
         title: excursion.title,
         id_Service,
@@ -76,7 +102,7 @@ const createServiceOrderController = async (orderData) => {
         adults,
         minors,
         seniors,
-        babies,
+        babies: babiesCount,
         price,
         totalPrice: parseFloat(itemTotal.toFixed(2)),
         totalPeople: totalReservations,
@@ -98,6 +124,13 @@ const createServiceOrderController = async (orderData) => {
       },
       { transaction }
     );
+
+    // Agregar estos logs
+    console.log(
+      "updatedItems antes de crear orden:",
+      JSON.stringify(updatedItems, null, 2)
+    );
+    console.log("Orden creada:", JSON.stringify(newOrder.toJSON(), null, 2));
 
     // Asociar servicios
     await newOrder.addServices(items.map((item) => item.id_Service), { transaction });
