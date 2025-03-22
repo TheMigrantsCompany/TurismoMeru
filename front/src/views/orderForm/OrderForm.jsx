@@ -129,7 +129,7 @@ const OrderForm = () => {
             adults: Number(item.quantities?.adults) || 0,
             minors: Number(item.quantities?.children) || 0, // Convertir a número
             seniors: Number(item.quantities?.seniors) || 0,
-            babies: Number(item.quantities?.babies) || 0, // Convertir a número
+            babies: item.quantities?.babies ? Number(item.quantities.babies) : 0, // Asegura que babies tenga el valor correcto
             totalItemPrice: item.totalPrice,
           };
         }),
