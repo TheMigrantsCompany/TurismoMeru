@@ -34,6 +34,7 @@ const QueryForm = () => {
           name: formData.name,
           email: formData.email,
           message: formData.message,
+          to_name: "Francisco"
         },
         import.meta.env.VITE_EMAILJS_PUBLIC_KEY
       );
