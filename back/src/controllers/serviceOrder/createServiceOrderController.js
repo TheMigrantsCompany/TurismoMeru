@@ -1,4 +1,4 @@
- const { ServiceOrder, Service, User, sequelize } = require("../../config/db");
+const { ServiceOrder, Service, User, sequelize } = require("../../config/db");
 
   const createServiceOrderController = async (orderData) => {
   const { orderDate, id_User, paymentMethod, items, paymentStatus } = orderData;
@@ -35,10 +35,9 @@
         );
       }
 
-       // Asegurar que babies sea un número
+      // Asegurar que babies sea un número
       console.log("Valor de babies:", babies);
-      const babiesCount = parseInt(babies, 10) || 0;
-
+      const babiesCount = parseInt(bebes, 10) || 0;
 
       // Los bebés no cuentan para el total de reservaciones
       const totalReservations = adults + minors + seniors;
@@ -74,7 +73,7 @@
 
       total += itemTotal;
 
-        console.log("Datos antes de crear updatedItems:", {
+      console.log("Datos antes de crear updatedItems:", {
         babies: babiesCount,
         totalWithBabies,
         updatedItemData: {
@@ -126,7 +125,6 @@
       { transaction }
     );
 
-    // Agregar estos logs
     console.log(
       "updatedItems antes de crear orden:",
       JSON.stringify(updatedItems, null, 2)
