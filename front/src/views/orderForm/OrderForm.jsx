@@ -96,10 +96,9 @@ const OrderForm = () => {
             item.quantities?.seniors,
           unit_price:
             item.totalPrice /
-            ((item.quantities?.adults || 0) +
-            (item.quantities?.children || 0) +
-            (item.quantities?.seniors || 0) +
-            (item.quantities?.babies || 0)) || 0,
+              (item.quantities?.adults +
+                item.quantities?.children +
+                item.quantities?.seniors) || 0,
           currency_id: "ARS",
           selectedDate: item.selectedDate,
           selectedTime: item.selectedTime,
@@ -121,23 +120,47 @@ const OrderForm = () => {
         id_User,
         paymentMethod: formData.paymentMethod,
         items: cartItems.map((item) => {
-          console.log("Mapeando item del carrito:", item.quantities); // Debug
-          return {
+          // Log del item completo antes del mapeo
+          console.log("Item completo del carrito:", {
+            item,
+            quantities: item.quantities,
+            babies: item.quantities?.babies,
+          });
+
+          // Log de la conversión de babies
+          const babiesCount = Number(item.quantities?.babies);
+          console.log("Conversión de babies:", {
+            original: item.quantities?.babies,
+            converted: babiesCount,
+            isNumber: typeof babiesCount === "number",
+            isNaN: isNaN(babiesCount),
+          });
+
+          const mappedItem = {
             id_Service: item.id_Service,
             date: item.selectedDate,
             time: item.selectedTime,
             adults: Number(item.quantities?.adults) || 0,
-            minors: Number(item.quantities?.children) || 0, // Convertir a número
+            minors: Number(item.quantities?.children) || 0,
             seniors: Number(item.quantities?.seniors) || 0,
-            babies: Number(item.quantities?.babies) ?? 0,
+            babies: babiesCount || 0,
             totalItemPrice: item.totalPrice,
           };
+
+          // Log del item mapeado
+          console.log("Item después del mapeo:", mappedItem);
+
+          return mappedItem;
         }),
         paymentStatus: "Pendiente",
       };
 
-      console.log("Datos de orden preparados:", orderData); // Debug
-      console.log("🚀 Datos enviados al reducer:", orderData);
+      // Log de la orden completa
+      console.log(
+        "Orden completa a enviar:",
+        JSON.stringify(orderData, null, 2)
+      );
+
       const createdOrder = await dispatch(createServiceOrder(orderData));
 
       if (!createdOrder?.id_ServiceOrder) {
@@ -383,12 +406,7 @@ const OrderForm = () => {
                             ).toFixed(2)}{" "}
                             = ${seniorsTotal.toFixed(2)}
                           </p>
-                         )}
-                        {item.quantities?.babies > 0 && (
-                          <p className="text-sm">
-                            Bebés: {item.quantities.babies} x $0 = $0
-                          </p>
-                         )}
+                        )}
                       </div>
                       <div className="mt-2 text-xs text-[#425a66] border-t border-[#425a66]/10 pt-2">
                         <p>
@@ -420,10 +438,9 @@ const OrderForm = () => {
                         item.quantities?.children *
                           item.price *
                           ((100 - (item.discountForMinors || 0)) / 100) +
-                         item.quantities?.seniors *
+                        item.quantities?.seniors *
                           item.price *
-                         ((100 - (item.discountForSeniors || 0)) / 100) +
-                          (item.quantities?.babies || 0) * 0; 
+                          ((100 - (item.discountForSeniors || 0)) / 100);
                       return acc + totalItemPrice;
                     }, 0)
                     .toFixed(2)}
@@ -442,8 +459,7 @@ const OrderForm = () => {
                           ((100 - (item.discountForMinors || 0)) / 100) +
                         item.quantities?.seniors *
                           item.price *
-                          ((100 - (item.discountForSeniors || 0)) / 100) +
-                        (item.quantities?.babies || 0) * 0;
+                          ((100 - (item.discountForSeniors || 0)) / 100);
                       return acc + totalItemPrice;
                     }, 0)
                     .toFixed(2)}
@@ -482,12 +498,10 @@ const OrderForm = () => {
                 .map(
                   (item) =>
                     `• ${item.title}\n- Fecha: ${item.selectedDate}\n- Hora: ${
-                        item.selectedTime
-                      }\n- Personas: ${item.quantities?.adults || 0} adultos, ${
-                        item.quantities?.children || 0
-                      } menores, ${item.quantities?.seniors || 0} jubilados, ${
-                        item.quantities?.babies || 0
-                      } bebés`
+                      item.selectedTime
+                    }\n- Personas: ${item.quantities?.adults || 0} adultos, ${
+                      item.quantities?.children || 0
+                    } menores, ${item.quantities?.seniors || 0} jubilados`
                 )
                 .join("\n\n")}\n\nTotal a pagar: $${cartItems
                 .reduce((acc, item) => {
