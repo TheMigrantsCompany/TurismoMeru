@@ -51,7 +51,7 @@ const createServiceOrderController = async (orderData) => {
       }
 
       // Asegurar que babies sea un número
-      const babiesCount = parseInt(babies) || 0;
+      const babiesCount = Number.isInteger(babies) ? babies : parseInt(babies) || 0;
 
       // Los bebés no cuentan para el total de reservaciones
       const totalReservations = adults + minors + seniors;
@@ -145,10 +145,13 @@ const createServiceOrderController = async (orderData) => {
     );
 
     // Agregar estos logs
-    console.log(
-      "updatedItems antes de crear orden:",
-      JSON.stringify(updatedItems, null, 2)
-    );
+    console.log("Datos antes de crear updatedItems:", {
+       babies: babiesCount,
+       totalWithBabies,
+        updatedItemData: {
+         babies: babiesCount, // ← Verifica aquí
+    },
+   });
     console.log("Orden creada:", JSON.stringify(newOrder.toJSON(), null, 2));
 
     // Asociar servicios
