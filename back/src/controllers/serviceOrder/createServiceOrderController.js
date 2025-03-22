@@ -37,7 +37,7 @@ const { ServiceOrder, Service, User, sequelize } = require("../../config/db");
 
       // Asegurar que babies sea un número
       console.log("Valor de babies:", babies);
-      const babiesCount = parseInt(bebes, 10) || 0;
+      const babiesCount = parseInt(babies, 10) || 0;
 
       // Los bebés no cuentan para el total de reservaciones
       const totalReservations = adults + minors + seniors;
