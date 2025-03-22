@@ -137,7 +137,7 @@ const OrderForm = () => {
       };
 
       console.log("Datos de orden preparados:", orderData); // Debug
-
+      console.log("🚀 Datos enviados al reducer:", orderData);
       const createdOrder = await dispatch(createServiceOrder(orderData));
 
       if (!createdOrder?.id_ServiceOrder) {
