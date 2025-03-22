@@ -383,7 +383,12 @@ const OrderForm = () => {
                             ).toFixed(2)}{" "}
                             = ${seniorsTotal.toFixed(2)}
                           </p>
-                        )}
+                         )}
+                        {item.quantities?.babies > 0 && (
+                          <p className="text-sm">
+                            Bebés: {item.quantities.babies} x $0 = $0
+                          </p>
+                         )}
                       </div>
                       <div className="mt-2 text-xs text-[#425a66] border-t border-[#425a66]/10 pt-2">
                         <p>
