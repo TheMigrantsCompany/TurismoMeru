@@ -76,12 +76,8 @@ const createServiceOrderController = async (orderData) => {
           avail.date === date && avail.time === time ? availability : avail
         )
       );
-      excursion.lockedStock += totalReservations; // Incrementar el lockedStock general
-      await excursion.save({ transaction }); // Guardar los cambios
-      console.info(
-        ">> Disponibilidad y lockedStock actualizados para el servicio:",
-        excursion.title
-      );
+      excursion.lockedStock += totalReservations;
+      await excursion.save({ transaction });
 
       // Calcular precios
       const price = parseFloat(excursion.price || 0);
