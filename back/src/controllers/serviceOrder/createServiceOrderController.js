@@ -145,13 +145,10 @@ const createServiceOrderController = async (orderData) => {
     );
 
     // Agregar estos logs
-    console.log("Datos antes de crear updatedItems:", {
-       babies: babiesCount,
-       totalWithBabies,
-        updatedItemData: {
-         babies: babiesCount, // ← Verifica aquí
-    },
-   });
+    console.log(
+      "updatedItems antes de crear orden:",
+      JSON.stringify(updatedItems, null, 2)
+    );
     console.log("Orden creada:", JSON.stringify(newOrder.toJSON(), null, 2));
 
     // Asociar servicios
@@ -166,7 +163,7 @@ const createServiceOrderController = async (orderData) => {
   } catch (error) {
     console.error(">> Error al crear la orden:", error.message);
     await transaction.rollback();
-    throw new Error(`Error al crear la orden: ${error.message}`);
+    throw new Error(Error al crear la orden: ${error.message});
   }
 };
 
