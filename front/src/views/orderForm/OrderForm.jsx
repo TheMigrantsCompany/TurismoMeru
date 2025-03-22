@@ -477,12 +477,12 @@ const OrderForm = () => {
                 .map(
                   (item) =>
                     `• ${item.title}\n- Fecha: ${item.selectedDate}\n- Hora: ${
-                      item.selectedTime
-                    }\n- Personas: ${item.quantities?.adults || 0} adultos, ${
-                      item.quantities?.children || 0
-                    } menores, ${item.quantities?.seniors || 0} jubilados` ${
-                      item.quantities?.babies || 0
-                    } bebés`
+                        item.selectedTime
+                      }\n- Personas: ${item.quantities?.adults || 0} adultos, ${
+                        item.quantities?.children || 0
+                      } menores, ${item.quantities?.seniors || 0} jubilados, ${
+                        item.quantities?.babies || 0
+                      } bebés`
                 )
                 .join("\n\n")}\n\nTotal a pagar: $${cartItems
                 .reduce((acc, item) => {
