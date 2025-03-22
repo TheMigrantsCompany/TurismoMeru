@@ -96,10 +96,10 @@ const OrderForm = () => {
             item.quantities?.seniors,
           unit_price:
             item.totalPrice /
-              (item.quantities?.adults +
-                item.quantities?.children +
-                item.quantities?.seniors || 0 +
-                item.quantities?.babies) || 0,
+            ((item.quantities?.adults || 0) +
+            (item.quantities?.children || 0) +
+            (item.quantities?.seniors || 0) +
+            (item.quantities?.babies || 0)) || 0,
           currency_id: "ARS",
           selectedDate: item.selectedDate,
           selectedTime: item.selectedTime,
