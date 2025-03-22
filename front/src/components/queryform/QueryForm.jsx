@@ -1,7 +1,8 @@
+
 import React, { useState } from "react";
 import { Typography, Button } from "@material-tailwind/react";
 import { motion } from "framer-motion";
-import axios from "axios";
+import emailjs from "emailjs-com";
 
 const QueryForm = () => {
   const [formData, setFormData] = useState({
@@ -26,7 +27,18 @@ const QueryForm = () => {
     e.preventDefault();
     try {
       setStatus({ type: "loading", message: "Enviando consulta..." });
-      await axios.post(`${import.meta.env.VITE_API_URL}/query`, formData);
+
+      await emailjs.send(
+        process.env.REACT_APP_EMAILJS_SERVICE_ID,
+        process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
+        {
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+        },
+        process.env.REACT_APP_EMAILJS_PUBLIC_KEY
+      );
+
       setStatus({
         type: "success",
         message: "¡Gracias por tu consulta! Te responderemos a la brevedad.",
@@ -35,8 +47,7 @@ const QueryForm = () => {
     } catch (error) {
       setStatus({
         type: "error",
-        message:
-          "Hubo un error al enviar tu consulta. Por favor, intenta nuevamente.",
+        message: "Hubo un error al enviar tu consulta. Por favor, intenta nuevamente.",
       });
     }
   };
@@ -60,10 +71,7 @@ const QueryForm = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label
-              className="block text-sm font-medium text-[#4256a6] mb-1"
-              htmlFor="name"
-            >
+            <label className="block text-sm font-medium text-[#4256a6] mb-1" htmlFor="name">
               Nombre completo
             </label>
             <input
@@ -79,10 +87,7 @@ const QueryForm = () => {
           </div>
 
           <div>
-            <label
-              className="block text-sm font-medium text-[#4256a6] mb-1"
-              htmlFor="email"
-            >
+            <label className="block text-sm font-medium text-[#4256a6] mb-1" htmlFor="email">
               Correo electrónico
             </label>
             <input
@@ -99,10 +104,7 @@ const QueryForm = () => {
         </div>
 
         <div>
-          <label
-            className="block text-sm font-medium text-[#4256a6] mb-1"
-            htmlFor="message"
-          >
+          <label className="block text-sm font-medium text-[#4256a6] mb-1" htmlFor="message">
             Tu consulta
           </label>
           <textarea
