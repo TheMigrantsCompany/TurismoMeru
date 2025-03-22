@@ -160,7 +160,25 @@ const BookingCard = ({ id_Service, price }) => {
       stock: excursion?.stock || 0,
       duration: excursion?.duration || "No disponible",
     };
-
+     console.log("Datos a enviar al backend:", {
+    id_Service,
+    title: excursion?.title || "Título no disponible",
+    price,
+    totalPrice,
+    selectedDate,
+    selectedTime,
+    quantities: {
+      adults: quantities.adultos,
+      children: quantities.menores,
+      seniors: quantities.jubilados,
+      babies: quantities.bebes, // Verificar este valor
+    },
+    discountForMinors: excursion.discountForMinors,
+    discountForSeniors: excursion.discountForSeniors,
+    photos: excursion?.photos || [],
+    stock: excursion?.stock || 0,
+    duration: excursion?.duration || "No disponible",
+  });
     addToCart(cartItem);
     navigate("/user/shopping-cart");
   };
