@@ -3,6 +3,21 @@ const { ServiceOrder, Service, User, sequelize } = require("../../config/db");
 const createServiceOrderController = async (orderData) => {
   const { orderDate, id_User, paymentMethod, items, paymentStatus } = orderData;
 
+  // Log inicial de los datos recibidos
+  console.log("🔍 Controller - Datos recibidos del handler:", {
+    orderDate,
+    id_User,
+    items: items.map((item) => ({
+      id_Service: item.id_Service,
+      adults: item.adults,
+      minors: item.minors,
+      seniors: item.seniors,
+      babies: item.babies,
+      date: item.date,
+      time: item.time,
+    })),
+  });
+
   let total = 0;
   const updatedItems = [];
   const transaction = await sequelize.transaction();
@@ -23,14 +38,17 @@ const createServiceOrderController = async (orderData) => {
 
     for (const item of items) {
       const { id_Service, date, time, adults, minors, seniors, babies } = item;
-      console.log("Datos recibidos del item:", {
+
+      // Log de cada item después del destructuring
+      console.log("🔍 Controller - Item después de destructuring:", {
         id_Service,
-        date,
-        time,
         adults,
         minors,
         seniors,
-        babies, // Ver el valor de babies al inicio
+        babies,
+        date,
+        time,
+        originalItem: item,
       });
 
       console.info(`>> Procesando ítem con ID de servicio: ${id_Service}`);
