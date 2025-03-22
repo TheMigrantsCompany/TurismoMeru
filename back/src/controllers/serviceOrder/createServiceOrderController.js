@@ -15,11 +15,11 @@ const createServiceOrderController = async (orderData) => {
       attributes: ["DNI"],
       transaction,
     });
-    if (!user) throw new Error(`Usuario con ID ${id_User} no encontrado`);
+    if (!user) throw new Error(Usuario con ID ${id_User} no encontrado);
     console.info(">> Usuario verificado:", user.toJSON());
 
     if (!user.DNI)
-      throw new Error(`Usuario con ID ${id_User} no tiene un DNI registrado`);
+      throw new Error(Usuario con ID ${id_User} no tiene un DNI registrado);
 
     for (const item of items) {
       const { id_Service, date, time, adults, minors, seniors, babies } = item;
@@ -33,12 +33,12 @@ const createServiceOrderController = async (orderData) => {
         babies,
         originalItem: item,
       });
-      console.info(`>> Procesando ítem con ID de servicio: ${id_Service}`);
+      console.info(>> Procesando ítem con ID de servicio: ${id_Service});
 
       // Verificar servicio
       const excursion = await Service.findByPk(id_Service, { transaction });
       if (!excursion)
-        throw new Error(`Servicio con ID ${id_Service} no encontrado`);
+        throw new Error(Servicio con ID ${id_Service} no encontrado);
       console.info(">> Servicio encontrado:", excursion.toJSON());
 
       const availability = excursion.availabilityDate.find(
@@ -46,12 +46,12 @@ const createServiceOrderController = async (orderData) => {
       );
       if (!availability) {
         throw new Error(
-          `No hay disponibilidad para la fecha ${date} a las ${time} en ${excursion.title}`
+          No hay disponibilidad para la fecha ${date} a las ${time} en ${excursion.title}
         );
       }
 
       // Asegurar que babies sea un número
-      const babiesCount = Number.isInteger(babies) ? babies : parseInt(babies) || 0;
+      const babiesCount = parseInt(babies) || 0;
 
       // Los bebés no cuentan para el total de reservaciones
       const totalReservations = adults + minors + seniors;
@@ -61,7 +61,7 @@ const createServiceOrderController = async (orderData) => {
 
       if (availableStock < totalReservations) {
         throw new Error(
-          `Stock insuficiente para ${totalReservations} personas en ${excursion.title}`
+          Stock insuficiente para ${totalReservations} personas en ${excursion.title}
         );
       }
 
