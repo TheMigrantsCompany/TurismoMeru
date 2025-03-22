@@ -415,9 +415,10 @@ const OrderForm = () => {
                         item.quantities?.children *
                           item.price *
                           ((100 - (item.discountForMinors || 0)) / 100) +
-                        item.quantities?.seniors *
+                         item.quantities?.seniors *
                           item.price *
-                          ((100 - (item.discountForSeniors || 0)) / 100);
+                         ((100 - (item.discountForSeniors || 0)) / 100) +
+                          (item.quantities?.babies || 0) * 0; 
                       return acc + totalItemPrice;
                     }, 0)
                     .toFixed(2)}
@@ -436,7 +437,8 @@ const OrderForm = () => {
                           ((100 - (item.discountForMinors || 0)) / 100) +
                         item.quantities?.seniors *
                           item.price *
-                          ((100 - (item.discountForSeniors || 0)) / 100);
+                          ((100 - (item.discountForSeniors || 0)) / 100) +
+                        (item.quantities?.babies || 0) * 0;
                       return acc + totalItemPrice;
                     }, 0)
                     .toFixed(2)}
@@ -478,7 +480,9 @@ const OrderForm = () => {
                       item.selectedTime
                     }\n- Personas: ${item.quantities?.adults || 0} adultos, ${
                       item.quantities?.children || 0
-                    } menores, ${item.quantities?.seniors || 0} jubilados`
+                    } menores, ${item.quantities?.seniors || 0} jubilados` ${
+                      item.quantities?.babies || 0
+                    } bebés`
                 )
                 .join("\n\n")}\n\nTotal a pagar: $${cartItems
                 .reduce((acc, item) => {
