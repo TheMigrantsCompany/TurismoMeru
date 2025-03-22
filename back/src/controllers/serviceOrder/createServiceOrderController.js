@@ -106,7 +106,7 @@ const createServiceOrderController = async (orderData) => {
         price,
         totalPrice: parseFloat(itemTotal.toFixed(2)),
         totalPeople: totalReservations,
-        totalPeopleWithBabies: totalReservations + (babies || 0),
+        totalPeopleWithBabies: totalReservations + babiesCount,
         DNI: user.DNI,
         lockedStock: availability.lockedStock,
       });
