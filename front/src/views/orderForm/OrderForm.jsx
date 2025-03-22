@@ -119,18 +119,23 @@ const OrderForm = () => {
         orderDate: new Date().toISOString(),
         id_User,
         paymentMethod: formData.paymentMethod,
-        items: cartItems.map((item) => ({
-          id_Service: item.id_Service,
-          date: item.selectedDate,
-          time: item.selectedTime,
-          adults: item.quantities?.adults || 0,
-          minors: item.quantities?.children || 0,
-          seniors: item.quantities?.seniors || 0,
-          babies: item.quantities?.babies || 0,
-          totalItemPrice: item.totalPrice,
-        })),
+        items: cartItems.map((item) => {
+          console.log("Mapeando item del carrito:", item.quantities); // Debug
+          return {
+            id_Service: item.id_Service,
+            date: item.selectedDate,
+            time: item.selectedTime,
+            adults: Number(item.quantities?.adults) || 0,
+            minors: Number(item.quantities?.children) || 0, // Convertir a número
+            seniors: Number(item.quantities?.seniors) || 0,
+            babies: Number(item.quantities?.babies) || 0, // Convertir a número
+            totalItemPrice: item.totalPrice,
+          };
+        }),
         paymentStatus: "Pendiente",
       };
+
+      console.log("Datos de orden preparados:", orderData); // Debug
 
       const createdOrder = await dispatch(createServiceOrder(orderData));
 
@@ -378,11 +383,6 @@ const OrderForm = () => {
                             = ${seniorsTotal.toFixed(2)}
                           </p>
                         )}
-                        {item.quantities?.babies > 0 && (
-                          <p className="text-sm">
-                            Bebés: {item.quantities.babies} x $0 = $0
-                          </p>
-                        )}
                       </div>
                       <div className="mt-2 text-xs text-[#425a66] border-t border-[#425a66]/10 pt-2">
                         <p>
@@ -474,12 +474,10 @@ const OrderForm = () => {
                 .map(
                   (item) =>
                     `• ${item.title}\n- Fecha: ${item.selectedDate}\n- Hora: ${
-                       item.selectedTime
+                      item.selectedTime
                     }\n- Personas: ${item.quantities?.adults || 0} adultos, ${
-                       item.quantities?.children || 0
-                    } menores, ${item.quantities?.seniors || 0} jubilados, ${
-                       item.quantities?.babies || 0
-                    } bebés`
+                      item.quantities?.children || 0
+                    } menores, ${item.quantities?.seniors || 0} jubilados`
                 )
                 .join("\n\n")}\n\nTotal a pagar: $${cartItems
                 .reduce((acc, item) => {
