@@ -36,7 +36,8 @@ const createServiceOrderController = async (orderData) => {
       }
 
        // Asegurar que babies sea un número
-     const babiesCount = Number.isInteger(babies) ? babies : parseInt(babies) || 0;
+      console.log("Valor de babies:", babies);
+      const babiesCount = Number.isInteger(babies) ? babies : parseInt(babies) || 0;
 
 
       // Los bebés no cuentan para el total de reservaciones
