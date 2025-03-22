@@ -135,7 +135,8 @@ const ServiceOrderModal = ({ order, onClose }) => {
                 <strong>Total de Pasajeros:</strong>{" "}
                 {(order.paymentInformation?.[0]?.adults || 0) +
                   (order.paymentInformation?.[0]?.minors || 0) +
-                  (order.paymentInformation?.[0]?.seniors || 0)}
+                  (order.paymentInformation?.[0]?.seniors || 0) +
+                  (order.paymentInformation?.[0]?.babies || 0)}
               </p>
               <div className="ml-4">
                 <p className="text-gray-900">
