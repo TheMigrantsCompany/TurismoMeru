@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Typography, Button } from "@material-tailwind/react";
 import { motion } from "framer-motion";
-import axios from "axios";
+import emailjs from "emailjs-com";
 
 const QueryForm = () => {
   const [formData, setFormData] = useState({
@@ -26,7 +26,18 @@ const QueryForm = () => {
     e.preventDefault();
     try {
       setStatus({ type: "loading", message: "Enviando consulta..." });
-      await axios.post("http://localhost:3001/query", formData);
+
+      await emailjs.send(
+        process.env.REACT_APP_EMAILJS_SERVICE_ID,
+        process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
+        {
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+        },
+        process.env.REACT_APP_EMAILJS_PUBLIC_KEY
+      );
+
       setStatus({
         type: "success",
         message: "¡Gracias por tu consulta! Te responderemos a la brevedad.",
@@ -124,10 +135,7 @@ const QueryForm = () => {
         )}
 
         <div className="flex justify-center">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button
               type="submit"
               disabled={status.type === "loading"}
