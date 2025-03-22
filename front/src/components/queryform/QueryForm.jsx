@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Typography, Button } from "@material-tailwind/react";
 import { motion } from "framer-motion";
@@ -24,38 +23,36 @@ const QueryForm = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    setStatus({ type: "loading", message: "Enviando consulta..." });
+    e.preventDefault();
+    try {
+      setStatus({ type: "loading", message: "Enviando consulta..." });
 
-    const response = await emailjs.send(
-      process.env.REACT_APP_EMAILJS_SERVICE_ID,
-      process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
-      {
-        name: formData.name,
-        email: formData.email,
-        message: formData.message,
-      },
-      process.env.REACT_APP_EMAILJS_PUBLIC_KEY
-    );
+      const response = await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        {
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+        },
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+      );
 
-    console.log("Email enviado:", response);
-    
-    setStatus({
-      type: "success",
-      message: "¡Gracias por tu consulta! Te responderemos a la brevedad.",
-    });
-    setFormData({ name: "", email: "", message: "" });
-
-  } catch (error) {
-    console.error("Error al enviar el email:", error);
-    setStatus({
-      type: "error",
-      message: "Hubo un error al enviar tu consulta. Por favor, intenta nuevamente.",
-    });
-  }
-};
-
+      console.log("Email enviado:", response);
+      
+      setStatus({
+        type: "success",
+        message: "¡Gracias por tu consulta! Te responderemos a la brevedad.",
+      });
+      setFormData({ name: "", email: "", message: "" });
+    } catch (error) {
+      console.error("Error al enviar el email:", error);
+      setStatus({
+        type: "error",
+        message: "Hubo un error al enviar tu consulta. Por favor, intenta nuevamente.",
+      });
+    }
+  };
 
   return (
     <motion.div
