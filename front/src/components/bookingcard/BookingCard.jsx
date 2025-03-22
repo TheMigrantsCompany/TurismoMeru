@@ -94,6 +94,8 @@ const BookingCard = ({ id_Service, price }) => {
     }
   }, [selectedDate, excursion]);
 
+  console.log("Quantities:", quantities);
+  
   useEffect(() => {
     const totalPersonas =
       quantities.adultos +
