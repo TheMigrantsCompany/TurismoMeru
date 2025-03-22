@@ -50,12 +50,9 @@ const createServiceOrderController = async (orderData) => {
         );
       }
 
-      // Asegurar que babies sea un número
-      const babiesCount = parseInt(babies) || 0;
-
       // Los bebés no cuentan para el total de reservaciones
       const totalReservations = adults + minors + seniors;
-      const totalWithBabies = totalReservations + babiesCount;
+      const totalWithBabies = totalReservations + babies;
       const availableStock =
         availability.stock - (availability.lockedStock || 0);
 
@@ -89,7 +86,7 @@ const createServiceOrderController = async (orderData) => {
       total += itemTotal;
 
       console.log("Datos antes de crear updatedItems:", {
-        babies: babiesCount,
+        babies,
         totalWithBabies,
         updatedItemData: {
           title: excursion.title,
@@ -99,7 +96,7 @@ const createServiceOrderController = async (orderData) => {
           adults,
           minors,
           seniors,
-          babies: babiesCount,
+          babies,
           price,
           totalPrice: parseFloat(itemTotal.toFixed(2)),
           totalPeople: totalReservations,
@@ -117,7 +114,7 @@ const createServiceOrderController = async (orderData) => {
         adults,
         minors,
         seniors,
-        babies: babiesCount,
+        babies,
         price,
         totalPrice: parseFloat(itemTotal.toFixed(2)),
         totalPeople: totalReservations,
