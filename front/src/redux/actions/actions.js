@@ -294,22 +294,24 @@ export const updateUserDetails = (id_User, updatedData) => async (dispatch) => {
 //ORDENES DE SERVICIO
 export const createServiceOrder = (orderData) => async (dispatch) => {
   try {
-    console.log("Enviando datos al endpoint:", orderData);
-    // Asegurarnos que los bebés estén incluidos en los items
-    const updatedOrderData = {
-      ...orderData,
-      items: orderData.items.map((item) => ({
-        ...item,
-        babies: item.quantities?.babies || 0, // Agregar bebés manteniendo el resto igual
-      })),
-    };
+    // Log antes de la serialización
+    console.log("🔍 Action - Datos antes de JSON.stringify:", {
+      orderData,
+      babies: orderData.items[0].babies,
+    });
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/servicesOrder/`, {
+    const jsonData = JSON.stringify(orderData);
+    
+    // Log después de la serialización
+    console.log("🔍 Action - Datos después de JSON.stringify:", {
+      jsonData,
+      parsedBack: JSON.parse(jsonData).items[0].babies,
+    });
+
+    const response = await fetch( `${import.meta.env.VITE_API_URL}/servicesOrder/`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedOrderData),
+      headers: { "Content-Type": "application/json" },
+      body: jsonData,
     });
 
     const data = await response.json();
