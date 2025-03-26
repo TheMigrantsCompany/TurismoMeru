@@ -38,8 +38,6 @@ const QueryForm = () => {
         },
         import.meta.env.VITE_EMAILJS_PUBLIC_KEY
       );
-
-      console.log("Email enviado:", response);
       
       setStatus({
         type: "success",
@@ -47,7 +45,6 @@ const QueryForm = () => {
       });
       setFormData({ name: "", email: "", message: "" });
     } catch (error) {
-      console.error("Error al enviar el email:", error);
       setStatus({
         type: "error",
         message: "Hubo un error al enviar tu consulta. Por favor, intenta nuevamente.",
