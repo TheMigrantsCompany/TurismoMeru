@@ -253,22 +253,17 @@ const NewExcursionModal = ({ onClose, onSave }) => {
 
   const handleSubmit = async () => {
     const errors = validateForm();
-    console.log("Errores de validación:", errors); // Verifica errores
-
+    
     if (Object.keys(errors).length) {
       setFormErrors(errors);
       return;
     }
-
     setFormErrors({});
-
     try {
       const excursionPayload = {
         ...excursionData,
         availabilityDate: availabilities,
       };
-
-      console.log("Enviando datos:", excursionPayload);
 
       await dispatch(createExcursion(excursionPayload));
       dispatch(getAllServices());
