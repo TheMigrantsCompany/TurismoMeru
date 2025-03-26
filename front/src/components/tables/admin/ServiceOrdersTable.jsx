@@ -117,17 +117,25 @@ const ServiceOrdersTable = ({ orders, onViewDetail, onDelete }) => {
                   <td className="p-4">
                     <Typography className="font-poppins text-[#425a66]">
                       {order.passengers}
+                      {order.paymentInformation?.[0]?.babies > 0 && (
+                        <span className="text-gray-500 text-sm ml-2">
+                          (+{order.paymentInformation[0].babies} bebés)
+                        </span>
+                      )}
                     </Typography>
                   </td>
                   <td className="p-4">
                     <span
                       className={`px-3 py-1 rounded-full ${
-                        order.Bookings?.length > 0 || order.paymentStatus === "Pagado"
+                        order.Bookings?.length > 0 ||
+                        order.paymentStatus === "Pagado"
                           ? "bg-green-100 text-green-600"
                           : "bg-yellow-100 text-yellow-600"
                       }`}
                     >
-                      {order.Bookings?.length > 0 ? "Pagado" : order.paymentStatus}
+                      {order.Bookings?.length > 0
+                        ? "Pagado"
+                        : order.paymentStatus}
                     </span>
                   </td>
                   <td className="p-4">
@@ -158,8 +166,8 @@ const ServiceOrdersTable = ({ orders, onViewDetail, onDelete }) => {
               ))
             ) : (
               <tr>
-                <td colSpan="5" className="p-4 text-center">
-                  <Typography className="font-poppins text-[#4256a6]">
+                <td colSpan={5} className="text-center p-4">
+                  <Typography className="font-poppins text-[#425a66]">
                     No se encontraron órdenes.
                   </Typography>
                 </td>
