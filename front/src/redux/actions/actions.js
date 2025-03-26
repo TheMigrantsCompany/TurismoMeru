@@ -116,7 +116,7 @@ export const deleteService = (title) => async (dispatch) => {
     dispatch({ type: DELETE_SERVICE, payload: title });
     return response.data;
   } catch (error) {
-    console.error("Error eliminando la excursión:", error);
+   
     throw error;
   }
 };
@@ -142,7 +142,6 @@ export const toggleServiceActiveStatus = (id_Service) => async (dispatch) => {
 
 //GET todos los users
 export const getUsers = () => async (dispatch) => {
-  console.log("Actions - getUsers: Iniciando solicitud para obtener usuarios");
   dispatch({ type: GET_USERS_REQUEST });
   try {
     const response = await axios.get(`${import.meta.env.VITE_API_URL}/user`);
@@ -152,10 +151,7 @@ export const getUsers = () => async (dispatch) => {
     );
     dispatch({ type: GET_USERS_SUCCESS, payload: response.data });
   } catch (error) {
-    console.error(
-      "Actions - getUsers: Error al obtener usuarios:",
-      error.message
-    );
+    
     dispatch({ type: GET_USERS_FAILURE, payload: error.message });
   }
 };
@@ -186,7 +182,6 @@ export const toggleUserActiveStatus = (id_User) => async (dispatch) => {
 
 //DELETE user por ID
 export const deleteUser = (id_User) => async (dispatch) => {
-  console.log(`Actions - deleteUser: Eliminando usuario con ID: ${id_User}`);
   dispatch({ type: DELETE_USER_REQUEST }); // Inicio del proceso
   try {
     const response = await axios.delete(
@@ -230,13 +225,13 @@ export const getUserDetails = (id_User) => async (dispatch) => {
 
 //GET user por nombre
 export const getUserByName = (name) => async (dispatch) => {
-  console.log(`Actions - getUserByName: Buscando usuario por nombre: ${name}`);
+  
   dispatch({ type: GET_USER_BY_NAME_REQUEST });
   try {
     const response = await axios.get(
       `${import.meta.env.VITE_API_URL}/user/name/${name}`
     );
-    console.log("Actions - getUserByName: Usuario encontrado:", response.data);
+    
     dispatch({ type: GET_USER_BY_NAME_SUCCESS, payload: response.data });
   } catch (error) {
     console.error(
@@ -249,13 +244,11 @@ export const getUserByName = (name) => async (dispatch) => {
 
 //GET user por DNI
 export const getUserByDni = (dni) => async (dispatch) => {
-  console.log(`Actions - getUserByDni: Buscando usuario por DNI: ${dni}`);
   dispatch({ type: GET_USER_BY_DNI_REQUEST });
   try {
     const response = await axios.get(
       `${import.meta.env.VITE_API_URL}/user/DNI/${dni}`
     );
-    console.log("Actions - getUserByDni: Usuario encontrado:", response.data);
     dispatch({ type: GET_USER_BY_DNI_SUCCESS, payload: response.data });
   } catch (error) {
     console.error(
@@ -268,25 +261,14 @@ export const getUserByDni = (dni) => async (dispatch) => {
 
 //UPDATE user por ID
 export const updateUserDetails = (id_User, updatedData) => async (dispatch) => {
-  console.log(
-    `Actions - updateUserDetails: Actualizando detalles del usuario con ID: ${id_User}`
-  );
   dispatch({ type: UPDATE_USER_REQUEST });
   try {
     const response = await axios.put(
       `${import.meta.env.VITE_API_URL}/user/id/${id_User}`,
       updatedData
     );
-    console.log(
-      "Actions - updateUserDetails: Usuario actualizado con éxito:",
-      response.data
-    );
     dispatch({ type: UPDATE_USER_SUCCESS, payload: response.data });
   } catch (error) {
-    console.error(
-      "Actions - updateUserDetails: Error al actualizar usuario:",
-      error.message
-    );
     dispatch({ type: UPDATE_USER_FAILURE, payload: error.message });
   }
 };
@@ -294,20 +276,8 @@ export const updateUserDetails = (id_User, updatedData) => async (dispatch) => {
 //ORDENES DE SERVICIO
 export const createServiceOrder = (orderData) => async (dispatch) => {
   try {
-    // Log antes de la serialización
-    console.log("🔍 Action - Datos antes de JSON.stringify:", {
-      orderData,
-      babies: orderData.items[0].babies,
-    });
-
+   
     const jsonData = JSON.stringify(orderData);
-    
-    // Log después de la serialización
-    console.log("🔍 Action - Datos después de JSON.stringify:", {
-      jsonData,
-      parsedBack: JSON.parse(jsonData).items[0].babies,
-    });
-
     const response = await fetch( `${import.meta.env.VITE_API_URL}/servicesOrder/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -315,8 +285,6 @@ export const createServiceOrder = (orderData) => async (dispatch) => {
     });
 
     const data = await response.json();
-    console.log("Respuesta del backend:", data);
-
     if (!response.ok) {
       throw new Error(data.message || "Error al crear la orden");
     }
@@ -327,7 +295,6 @@ export const createServiceOrder = (orderData) => async (dispatch) => {
     });
     return data.order;
   } catch (error) {
-    console.error("Error en createServiceOrder:", error);
     dispatch({
       type: CREATE_ORDER_FAILURE,
       payload: error.message,
@@ -474,8 +441,6 @@ export const updateOrderStatus =
 export const deleteServiceOrder = (id_ServiceOrder) => async (dispatch) => {
   dispatch({ type: DELETE_SERVICE_ORDER_REQUEST });
   try {
-    console.log("Intentando eliminar orden con ID:", id_ServiceOrder);
-
     if (!id_ServiceOrder) {
       throw new Error("ID de orden no válido");
     }
@@ -483,9 +448,6 @@ export const deleteServiceOrder = (id_ServiceOrder) => async (dispatch) => {
     const response = await axios.delete(
       `${import.meta.env.VITE_API_URL}/servicesOrder/id/${id_ServiceOrder}`
     );
-
-    console.log("Respuesta del servidor:", response.data);
-
     dispatch({
       type: DELETE_SERVICE_ORDER_SUCCESS,
       payload: id_ServiceOrder,
