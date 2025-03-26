@@ -13,17 +13,15 @@ export const CartProvider = ({ children }) => {
     if (storedUserId) {
       setUserId(storedUserId);
     } else {
-      // Si no hay usuario logueado, se inicia con carrito vacío.
       setCartItems([]);
     }
   }, []);
 
-  // Función que retorna la clave para guardar/leer el carrito
+
   const getCartKey = () => {
     return userId ? `cartItems_${userId}` : null;
   };
 
-  // Cargar el carrito desde localStorage solo si el usuario está logueado
   useEffect(() => {
     if (userId) {
       const key = getCartKey();
@@ -32,7 +30,7 @@ export const CartProvider = ({ children }) => {
         setCartItems(JSON.parse(storedCart));
       }
     } else {
-      // Si no hay usuario, el carrito se reinicia
+    
       setCartItems([]);
     }
   }, [userId]);
