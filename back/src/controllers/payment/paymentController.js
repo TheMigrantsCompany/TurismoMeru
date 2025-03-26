@@ -58,7 +58,7 @@ exports.createPaymentPreference = async (req, res) => {
     const { paymentInformation, id_User, DNI, email } = req.body;
 
     validateRequestBody({ paymentInformation, id_User, DNI, email });
-    console.log('ID de la orden de servicio:', req.body.id_ServiceOrder);
+   // console.log('ID de la orden de servicio:', req.body.id_ServiceOrder);
     const preference = {
       external_reference: req.body.id_ServiceOrder,
       items: paymentInformation.map(item => ({
@@ -100,7 +100,7 @@ exports.createPaymentPreference = async (req, res) => {
 
     const paymentPreference = await preferenceAPI.create({ body: preference });
 
-    console.log("Respuesta completa de Mercado Pago:", paymentPreference);
+    //console.log("Respuesta completa de Mercado Pago:", paymentPreference);
 
     
     if (!paymentPreference || !paymentPreference.id) {
@@ -116,7 +116,7 @@ exports.createPaymentPreference = async (req, res) => {
 
 exports.processPaymentWebhook = async (req, res) => {
   try {
-    console.log("Webhook recibido:", req.body);
+    //console.log("Webhook recibido:", req.body);
 
     const { type, data } = req.body;
 
@@ -134,7 +134,7 @@ exports.processPaymentWebhook = async (req, res) => {
       return res.status(500).send("Error al obtener el pago.");
     }
 
-    console.log("Respuesta de MercadoPago:", paymentData);
+    //console.log("Respuesta de MercadoPago:", paymentData);
 
     // Intentar obtener metadata desde diferentes fuentes
     const metadata = paymentData.metadata || paymentData.additional_info?.payer || {};
@@ -149,7 +149,7 @@ exports.processPaymentWebhook = async (req, res) => {
     const selectedDate = metadata?.selectedDate; 
     const selectedTime = metadata?.selectedTime;
 
-    console.log("Metadata obtenida:", metadata);
+   // console.log("Metadata obtenida:", metadata);
 
     if (!serviceOrderId || !id_Service) {
       console.error("Error: Metadata no encontrada o sin ID de orden o servicio.");
@@ -171,13 +171,13 @@ exports.processPaymentWebhook = async (req, res) => {
         ],
       };
 
-      console.log("Actualizando orden con datos:", updateData);
+     // console.log("Actualizando orden con datos:", updateData);
 
       await updatePaymentStatusController(updateData.id_ServiceOrder, updateData.paymentStatus, { paymentInformation: updateData.paymentInformation });
-      console.log("Estado de pago actualizado a 'Pagado' en la base de datos.");
+      //console.log("Estado de pago actualizado a 'Pagado' en la base de datos.");
       return res.status(200).send("OK");
     } else {
-      console.log(`Pago ${paymentData.status} - No se actualiza la orden.`);
+     // console.log(`Pago ${paymentData.status} - No se actualiza la orden.`);
       return res.status(200).send("Pago no aprobado.");
     }
   } catch (error) {
