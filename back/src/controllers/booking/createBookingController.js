@@ -1,8 +1,8 @@
 const { Booking, Service, sequelize } = require('../../config/db');
 
 const createBookingController = async (id_User, paymentStatus, paymentInformation, id_ServiceOrder, DNI) => {
-  console.log('[Controller] paymentInformation recibido:', paymentInformation);
-  console.log('[Controller] id_ServiceOrder recibido:', id_ServiceOrder);
+  //console.log('[Controller] paymentInformation recibido:', paymentInformation);
+ // console.log('[Controller] id_ServiceOrder recibido:', id_ServiceOrder);
 
   if (!DNI) {
     console.error('[Controller] El campo DNI es obligatorio.');
@@ -19,7 +19,7 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
     const bookings = [];
 
     for (const item of paymentInformation) {
-      console.log('[Controller] Datos del item recibido:', item);
+      //console.log('[Controller] Datos del item recibido:', item);
 
       const { id_Service, lockedStock, totalPeople, totalPrice, date, time } = item;
 
@@ -34,7 +34,7 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
       }
 
       // Buscar el servicio por ID con bloqueo para evitar conflictos en transacciones concurrentes
-      console.log('[Controller] Buscando servicio con ID:', id_Service);
+      //console.log('[Controller] Buscando servicio con ID:', id_Service);
       const service = await Service.findByPk(id_Service, {
         transaction,
         lock: transaction.LOCK.UPDATE,
@@ -43,7 +43,7 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
         throw new Error(`El servicio con ID ${id_Service} no existe.`);
       }
 
-      console.log('[Controller] Servicio encontrado:', service);
+      //console.log('[Controller] Servicio encontrado:', service);
 
       // Validar formato de availabilityDate
       if (
@@ -94,10 +94,10 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
         );
       }
 
-      console.log('[Controller] Reducción de stock. Antes:', {
+      /*console.log('[Controller] Reducción de stock. Antes:', {
         globalStock: service.stock,
         slotStock: availabilityItem.stock,
-      });
+      });*/
 
       // Actualizar el arreglo de availabilityDate con el nuevo stock
       const updatedAvailabilityDate = service.availabilityDate.map((slot) =>
@@ -109,10 +109,10 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
       // Reducir el stock global del servicio
       service.stock -= lockedStock;
 
-      console.log('[Controller] Reducción de stock. Después:', {
+      /*console.log('[Controller] Reducción de stock. Después:', {
         globalStock: service.stock,
         updatedAvailabilityDate,
-      });
+      });*/
 
       // Guardar los cambios en la base de datos
       await service.update(
@@ -124,7 +124,7 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
         { transaction }
       );
 
-      console.log('[Controller] Stock actualizado en la base de datos.');
+      //console.log('[Controller] Stock actualizado en la base de datos.');
 
       // Obtener último número de asiento
       const lastBooking = await Booking.findOne({
@@ -134,7 +134,7 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
       });
       const lastSeatNumber = lastBooking ? lastBooking.seatNumber : 0;
 
-      console.log('[Controller] Último número de asiento:', lastSeatNumber);
+      //console.log('[Controller] Último número de asiento:', lastSeatNumber);
 
       // Crear nuevas reservas
       const newBookings = Array.from({ length: lockedStock }, (_, i) => ({
@@ -158,7 +158,7 @@ const createBookingController = async (id_User, paymentStatus, paymentInformatio
     }
 
     await transaction.commit();
-    console.log('[Controller] Reservas creadas exitosamente:', bookings);
+    //console.log('[Controller] Reservas creadas exitosamente:', bookings);
     return bookings;
   } catch (error) {
     await transaction.rollback();
