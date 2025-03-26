@@ -51,7 +51,6 @@ export default function StickyNavbar() {
         }
       }
     } catch (error) {
-      console.error("Error al verificar usuario:", error);
       Swal.fire("Error", "No se pudo verificar el usuario", "error");
     }
   };
