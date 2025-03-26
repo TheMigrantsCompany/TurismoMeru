@@ -38,9 +38,7 @@ const Review = ({ review, rating, userImage, userName, date }) => {
           </Typography>
           <div className="flex items-center space-x-2 mt-1">
             <Rating value={rating} readonly className="text-[#4256a6]" />
-            <span className="text-sm text-[#425a66]">
-              {formatDate(date)}
-            </span>
+            <span className="text-sm text-[#425a66]">{formatDate(date)}</span>
           </div>
         </div>
       </div>
@@ -163,7 +161,10 @@ export function Detail() {
                 ...review,
                 userName: userData?.name || "Usuario Anónimo",
                 userImage: userData?.image || "https://via.placeholder.com/50",
-                date: review.bookingDate || review.createdAt || "Fecha no disponible"
+                date:
+                  review.bookingDate ||
+                  review.createdAt ||
+                  "Fecha no disponible",
               };
             } catch (error) {
               console.error(
@@ -174,7 +175,10 @@ export function Detail() {
                 ...review,
                 userName: "Usuario Anónimo",
                 userImage: "https://via.placeholder.com/50",
-                date: review.bookingDate || review.createdAt || "Fecha no disponible"
+                date:
+                  review.bookingDate ||
+                  review.createdAt ||
+                  "Fecha no disponible",
               };
             }
           })
@@ -200,20 +204,53 @@ export function Detail() {
   const renderAvailability = () => {
     if (!excursion?.availabilityDate?.length) return null;
 
-    const availableDatesCount = excursion.availabilityDate.filter(
-      (date) => date.stock > 0
-    ).length;
+    // Filtrar solo las fechas futuras con stock disponible
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0); // Resetear la hora a 00:00:00
+
+    const availableDates = excursion.availabilityDate.filter((date) => {
+      const excursionDate = new Date(date.date);
+      excursionDate.setHours(0, 0, 0, 0);
+
+      return date.stock > 0 && excursionDate >= currentDate;
+    });
 
     return (
       <div className="bg-[#f9f3e1] rounded-xl p-8 shadow-lg mt-8">
         <Typography variant="h4" className="text-[#4256a6] mb-4">
           Disponibilidad
         </Typography>
-        {availableDatesCount > 0 ? (
-          <Typography className="text-[#425a66]">
-            Esta excursión tiene {availableDatesCount} fechas/horarios
-            disponibles.
-          </Typography>
+
+        {availableDates.length > 0 ? (
+          <div className="space-y-4">
+            <Typography className="text-[#425a66]">
+              Fechas y horarios disponibles:
+            </Typography>
+            <div className="grid gap-4 md:grid-cols-2">
+              {availableDates.map((date, index) => (
+                <div key={index} className="bg-[#dac9aa]/20 p-4 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <Typography className="text-[#4256a6] font-semibold">
+                        {new Date(date.date).toLocaleDateString("es-ES", {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </Typography>
+                      <Typography className="text-[#425a66]">
+                        Hora: {date.time}
+                      </Typography>
+                    </div>
+                    <Typography className="text-[#425a66]">
+                      {date.stock} lugares
+                    </Typography>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         ) : (
           <Typography className="text-[#425a66] italic">
             Lo sentimos, actualmente no hay fechas disponibles para esta
@@ -381,7 +418,7 @@ export function Detail() {
                       rating={review.rating}
                       userImage={review.userImage}
                       userName={review.userName}
-                      date={review.createdAt} 
+                      date={review.createdAt}
                     />
                   ))}
                 </div>
