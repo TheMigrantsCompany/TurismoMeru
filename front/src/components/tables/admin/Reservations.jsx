@@ -39,46 +39,32 @@ export function ReservationsTable({
   const [selectedTime, setSelectedTime] = useState("");
   const [openAccordion, setOpenAccordion] = useState(null);
 
-  // Obtener todas las reservas solo si no hay búsqueda activa
   useEffect(() => {
     if (propReservations === null) {
-      console.log("Cargando todas las reservas...");
       dispatch(getAllBookings());
     }
   }, [dispatch, propReservations]);
 
-  // Obtener todas las órdenes desde el principio (si no se obtienen de otra manera)
   useEffect(() => {
-    console.log("Obteniendo todas las órdenes...");
     dispatch(getAllOrders());
   }, [dispatch]);
 
-  // Obtener las órdenes solo cuando se selecciona una reserva
   useEffect(() => {
     if (selectedReservation && selectedReservation.id_User) {
-      console.log(
-        "Obteniendo órdenes del usuario con ID:",
-        selectedReservation.id_User
-      );
       // No es necesario obtener las órdenes de nuevo si ya están disponibles
     }
   }, [dispatch, selectedReservation]);
 
-  // Buscar la orden correspondiente a la reserva seleccionada
   useEffect(() => {
     if (
       Array.isArray(ordersState.ordersList) &&
       ordersState.ordersList.length > 0 &&
       selectedReservation
     ) {
-      console.log("Órdenes disponibles:", ordersState.ordersList);
-
-      // Verifica si ya está asociada la orden con la reserva
       if (selectedReservation.serviceOrder) {
-        return; // No hacer nada si la reserva ya tiene una orden asociada
+        return;
       }
 
-      // Buscar la orden correspondiente
       const matchingOrder = ordersState.ordersList.find(
         (order) =>
           String(order.id_ServiceOrder) ===
@@ -86,34 +72,23 @@ export function ReservationsTable({
       );
 
       if (matchingOrder) {
-        console.log("Orden encontrada:", matchingOrder);
         setSelectedReservation((prevState) => ({
           ...prevState,
           serviceOrder: matchingOrder,
         }));
-      } else {
-        console.log("No se encontró una orden para esta reserva.");
       }
-    } else if (selectedReservation) {
-      console.log("Órdenes aún no disponibles o lista vacía.");
     }
   }, [ordersState.ordersList, selectedReservation]);
 
-  // Cargar reservas filtradas por servicio, fecha o hora
   useEffect(() => {
     if (selectedService || selectedDate || selectedTime) {
-      console.log(
-        `Filtrando reservas con servicio: ${selectedService}, fecha: ${selectedDate}, hora: ${selectedTime}`
-      );
       dispatch(
         getBookingsByService(selectedService, selectedDate, selectedTime)
       );
     }
   }, [dispatch, selectedService, selectedDate, selectedTime]);
 
-  // Determinar qué reservas mostrar y aplicar filtros
   const displayReservations = useMemo(() => {
-    // Si hay resultados de búsqueda, usar esos
     const baseReservations =
       propReservations || reservationsState.bookingsList || [];
 
@@ -123,27 +98,22 @@ export function ReservationsTable({
 
     let filtered = baseReservations;
 
-    // Aplicar filtros solo si no hay una búsqueda activa
     if (!propReservations) {
       if (selectedService) {
         filtered = filtered.filter(
           (booking) => booking.id_Service === selectedService
         );
       }
-
       if (selectedDate) {
         filtered = filtered.filter((booking) =>
           booking.dateTime.includes(selectedDate)
         );
       }
-
       if (selectedTime) {
         filtered = filtered.filter((booking) =>
           booking.dateTime.includes(selectedTime)
         );
       }
-
-      // Mostrar mensaje si no hay resultados después de aplicar los filtros
       if (
         filtered.length === 0 &&
         (selectedService || selectedDate || selectedTime)
@@ -158,8 +128,6 @@ export function ReservationsTable({
         });
       }
     }
-
-    console.log("Reservas filtradas:", filtered);
     return filtered;
   }, [
     propReservations,
@@ -169,7 +137,6 @@ export function ReservationsTable({
     selectedTime,
   ]);
 
-  // Calcular fechas disponibles basadas en el servicio seleccionado
   const availableDates = useMemo(() => {
     const reservations =
       propReservations || reservationsState.bookingsList || [];
@@ -184,7 +151,6 @@ export function ReservationsTable({
     );
   }, [propReservations, reservationsState.bookingsList, selectedService]);
 
-  // Calcular horas disponibles basadas en el servicio y fecha seleccionados
   const availableTimes = useMemo(() => {
     const reservations =
       propReservations || reservationsState.bookingsList || [];
@@ -209,7 +175,6 @@ export function ReservationsTable({
     selectedDate,
   ]);
 
-  // Agrupar reservas por orden de servicio
   const groupedReservations = useMemo(() => {
     const reservations = displayReservations || [];
     return reservations.reduce((groups, booking) => {
@@ -230,44 +195,30 @@ export function ReservationsTable({
   }, [displayReservations, ordersState.ordersList]);
 
   const handleEditReservation = (reservation) => {
-    console.log("Reserva seleccionada para editar:", reservation);
-
     if (!reservation) {
-      console.warn("No se proporcionó una reserva para editar");
       return;
     }
-
-    // Determinar qué array de reservas usar
     const reservationsArray =
       propReservations || reservationsState.bookingsList;
 
     if (!reservationsArray || !Array.isArray(reservationsArray)) {
-      console.warn("No hay reservas disponibles para buscar");
       return;
     }
-
     if (!ordersState.ordersList) {
-      console.warn("No hay órdenes disponibles");
       return;
     }
-
-    // Buscar la reserva completa
     const fullReservation = reservationsArray.find(
       (booking) => booking.id_Booking === reservation.id_Booking
     );
 
     if (!fullReservation) {
-      console.warn("No se encontró la reserva completa");
       return;
     }
-
-    // Buscar la orden correspondiente
     const serviceOrder = ordersState.ordersList.find(
       (order) => order.id_ServiceOrder === fullReservation.id_ServiceOrder
     );
 
     if (!serviceOrder) {
-      console.warn("No se encontró una orden para esta reserva");
       return;
     }
 
@@ -276,7 +227,6 @@ export function ReservationsTable({
       serviceOrder,
     };
 
-    console.log("Reserva con orden:", reservationWithOrder);
     setSelectedReservation(reservationWithOrder);
   };
 
@@ -288,43 +238,7 @@ export function ReservationsTable({
       confirmButtonText: "OK",
     });
   };
-
-  const handleResetFilters = () => {
-    setSelectedService("");
-    setSelectedDate("");
-    setSelectedTime("");
-  };
-
-  // Función para obtener el título del servicio
-  const getServiceTitle = (serviceId) => {
-    const service = reservationsState.bookingsList?.find(
-      (booking) => booking.id_Service === serviceId
-    );
-    return service?.serviceTitle || serviceId;
-  };
-
-  // Función para formatear la fecha
-  const formatDate = (date) => {
-    if (!date) return "";
-    const [year, month, day] = date.split("-");
-    return `${day}/${month}/${year}`;
-  };
-
-  // Función para mostrar los filtros activos
-  const renderActiveFilters = () => {
-    const activeFilters = [];
-
-    if (selectedService) {
-      activeFilters.push(`Servicio: ${getServiceTitle(selectedService)}`);
-    }
-    if (selectedDate) {
-      activeFilters.push(`Fecha: ${formatDate(selectedDate)}`);
-    }
-    if (selectedTime) {
-      activeFilters.push(`Hora: ${selectedTime}`);
-    }
-
-    if (activeFilters.length === 0) return null;
+}
 
     return (
       <div className="mt-4 p-4 bg-blue-50 rounded-lg">
