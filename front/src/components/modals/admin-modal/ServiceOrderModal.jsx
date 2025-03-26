@@ -135,8 +135,12 @@ const ServiceOrderModal = ({ order, onClose }) => {
                 <strong>Total de Pasajeros:</strong>{" "}
                 {(order.paymentInformation?.[0]?.adults || 0) +
                   (order.paymentInformation?.[0]?.minors || 0) +
-                  (order.paymentInformation?.[0]?.seniors || 0) +
-                  (order.paymentInformation?.[0]?.babies || 0)}
+                  (order.paymentInformation?.[0]?.seniors || 0)}
+                {order.paymentInformation?.[0]?.babies > 0 && (
+                  <span className="text-gray-500 text-sm ml-2">
+                    (+{order.paymentInformation[0].babies} bebés)
+                  </span>
+                )}
               </p>
               <div className="ml-4">
                 <p className="text-gray-900">
@@ -238,4 +242,3 @@ const ServiceOrderModal = ({ order, onClose }) => {
 };
 
 export default ServiceOrderModal;
-
