@@ -10,6 +10,8 @@ import {
 const ServiceOrdersTable = ({ orders, onViewDetail, onDelete }) => {
   const [filteredOrders, setFilteredOrders] = useState(orders);
   const [currentFilter, setCurrentFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isSearchActive, setIsSearchActive] = useState(false);
 
   useEffect(() => {
     console.log("Órdenes recibidas en la tabla:", orders);
@@ -26,12 +28,20 @@ const ServiceOrdersTable = ({ orders, onViewDetail, onDelete }) => {
     }
   };
 
-  const handleSearchByName = (name) => {
+  const handleSearchByName = (value) => {
+    setSearchTerm(value);
+    setIsSearchActive(!!value);
     setFilteredOrders(
       orders.filter((order) =>
-        order.excursionName.toLowerCase().includes(name.toLowerCase())
+        order.excursionName.toLowerCase().includes(value.toLowerCase())
       )
     );
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm("");
+    setIsSearchActive(false);
+    setFilteredOrders(orders);
   };
 
   return (
@@ -63,13 +73,40 @@ const ServiceOrdersTable = ({ orders, onViewDetail, onDelete }) => {
         </Button>
       </div>
 
-      <div className="px-4 mb-6">
-        <input
-          type="text"
-          placeholder="Buscar por nombre de excursión"
-          onChange={(e) => handleSearchByName(e.target.value)}
-          className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white"
-        />
+      <div className="flex flex-col items-center gap-4 mb-6">
+        <div className="w-full px-4">
+          <input
+            type="text"
+            placeholder="Buscar por nombre de excursión"
+            value={searchTerm}
+            onChange={(e) => handleSearchByName(e.target.value)}
+            className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 
+            focus:ring-2 focus:ring-[#4256a6] focus:border-transparent 
+            transition-all bg-white text-[#425a66] placeholder-[#425a66]/50"
+          />
+        </div>
+
+        {isSearchActive && (
+          <button
+            onClick={handleClearSearch}
+            className="px-4 py-2 bg-[#4256a6] text-white rounded-lg hover:bg-[#2c3e7e] 
+            transition-colors duration-200 flex items-center gap-2 font-poppins"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Limpiar búsqueda
+          </button>
+        )}
       </div>
 
       <div className="overflow-x-auto bg-[#f9f3e1]">
@@ -117,17 +154,25 @@ const ServiceOrdersTable = ({ orders, onViewDetail, onDelete }) => {
                   <td className="p-4">
                     <Typography className="font-poppins text-[#425a66]">
                       {order.passengers}
+                      {order.paymentInformation?.[0]?.babies > 0 && (
+                        <span className="text-gray-500 text-sm ml-2">
+                          (+{order.paymentInformation[0].babies} bebés)
+                        </span>
+                      )}
                     </Typography>
                   </td>
                   <td className="p-4">
                     <span
                       className={`px-3 py-1 rounded-full ${
-                        order.Bookings?.length > 0 || order.paymentStatus === "Pagado"
+                        order.Bookings?.length > 0 ||
+                        order.paymentStatus === "Pagado"
                           ? "bg-green-100 text-green-600"
                           : "bg-yellow-100 text-yellow-600"
                       }`}
                     >
-                      {order.Bookings?.length > 0 ? "Pagado" : order.paymentStatus}
+                      {order.Bookings?.length > 0
+                        ? "Pagado"
+                        : order.paymentStatus}
                     </span>
                   </td>
                   <td className="p-4">
@@ -158,8 +203,8 @@ const ServiceOrdersTable = ({ orders, onViewDetail, onDelete }) => {
               ))
             ) : (
               <tr>
-                <td colSpan="5" className="p-4 text-center">
-                  <Typography className="font-poppins text-[#4256a6]">
+                <td colSpan={5} className="text-center p-4">
+                  <Typography className="font-poppins text-[#425a66]">
                     No se encontraron órdenes.
                   </Typography>
                 </td>

@@ -5,16 +5,16 @@ const SearchInput = ({ onSearch, showSelect, type = "service" }) => {
   const [searchType, setSearchType] = useState("service");
 
   const handleInputChange = (e) => {
-    let value = e.target.value.trim();
-    value = value.replace(/\s+/g, " ");
-    value = value.replace(/\t/g, "");
-    setQuery(value);
+    const value = e.target.value;
+    const cleanValue = value.replace(/\s+/g, " ");
+    setQuery(cleanValue);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (query.trim()) {
-      onSearch(query, searchType);
+    const searchValue = query.trim();
+    if (searchValue) {
+      onSearch(searchValue, searchType);
     }
   };
 

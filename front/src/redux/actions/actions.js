@@ -287,13 +287,24 @@ export const updateUserDetails = (id_User, updatedData) => async (dispatch) => {
 //ORDENES DE SERVICIO
 export const createServiceOrder = (orderData) => async (dispatch) => {
   try {
-    console.log("Enviando datos al endpoint:", orderData);
+    // Log antes de la serialización
+    console.log("🔍 Action - Datos antes de JSON.stringify:", {
+      orderData,
+      babies: orderData.items[0].babies,
+    });
+
+    const jsonData = JSON.stringify(orderData);
+    
+    // Log después de la serialización
+    console.log("🔍 Action - Datos después de JSON.stringify:", {
+      jsonData,
+      parsedBack: JSON.parse(jsonData).items[0].babies,
+    });
+
     const response = await fetch("http://localhost:3001/servicesOrder/", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(orderData),
+      headers: { "Content-Type": "application/json" },
+      body: jsonData,
     });
 
     const data = await response.json();

@@ -25,8 +25,6 @@ const TABLE_HEAD = ["Excursión", "Cantidad de Reservas", "Estado", ""];
 export function ReservationsTable({
   reservations: propReservations,
   onViewDetail,
-  onRefresh,
-  refreshTrigger,
 }) {
   const dispatch = useDispatch();
 
@@ -43,18 +41,17 @@ export function ReservationsTable({
 
   // Obtener todas las reservas solo si no hay búsqueda activa
   useEffect(() => {
-    const loadData = async () => {
-      if (propReservations === null) {
-        console.log("Cargando todas las reservas y órdenes...");
-        await Promise.all([
-          dispatch(getAllBookings()),
-          dispatch(getAllOrders())
-        ]);
-      }
-    };
-    
-    loadData();
-  }, [dispatch, propReservations, refreshTrigger, ordersState.updateStatus]);
+    if (propReservations === null) {
+      console.log("Cargando todas las reservas...");
+      dispatch(getAllBookings());
+    }
+  }, [dispatch, propReservations]);
+
+  // Obtener todas las órdenes desde el principio (si no se obtienen de otra manera)
+  useEffect(() => {
+    console.log("Obteniendo todas las órdenes...");
+    dispatch(getAllOrders());
+  }, [dispatch]);
 
   // Obtener las órdenes solo cuando se selecciona una reserva
   useEffect(() => {
@@ -381,36 +378,27 @@ export function ReservationsTable({
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
       background: "#f9f3e1",
-    }).then(async (result) => {
+    }).then((result) => {
       if (result.isConfirmed) {
-        try {
-          await dispatch(deleteBooking(id_Booking));
-          
-          // Forzar la recarga de datos
-          await Promise.all([
-            dispatch(getAllBookings()),
-            dispatch(getAllOrders())
-          ]);
-
-          if (onRefresh) onRefresh();
-
-          Swal.fire({
-            title: "¡Eliminado!",
-            text: "La reserva ha sido eliminada.",
-            icon: "success",
-            confirmButtonColor: "#4256a6",
-            background: "#f9f3e1",
+        dispatch(deleteBooking(id_Booking))
+          .then(() => {
+            Swal.fire({
+              title: "¡Eliminado!",
+              text: "La reserva ha sido eliminada.",
+              icon: "success",
+              confirmButtonColor: "#4256a6",
+              background: "#f9f3e1",
+            });
+          })
+          .catch((error) => {
+            Swal.fire({
+              title: "Error",
+              text: "No se pudo eliminar la reserva.",
+              icon: "error",
+              confirmButtonColor: "#4256a6",
+              background: "#f9f3e1",
+            });
           });
-        } catch (error) {
-          console.error("Error al eliminar booking:", error);
-          Swal.fire({
-            title: "Error",
-            text: "No se pudo eliminar la reserva.",
-            icon: "error",
-            confirmButtonColor: "#4256a6",
-            background: "#f9f3e1",
-          });
-        }
       }
     });
   };
@@ -545,6 +533,11 @@ export function ReservationsTable({
                 </Typography>
                 <Typography className="font-poppins text-[#425a66]">
                   {group.bookings.length} pasajeros
+                  {group.serviceOrder?.paymentInformation?.[0]?.babies > 0 && (
+                    <span className="text-gray-500 text-sm ml-2">
+                      (+{group.serviceOrder.paymentInformation[0].babies} bebés)
+                    </span>
+                  )}
                 </Typography>
                 <Typography className="font-poppins text-[#425a66]">
                   <span

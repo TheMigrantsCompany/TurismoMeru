@@ -14,6 +14,13 @@ const ServiceOrderModal = ({ order, onClose }) => {
   console.log("Orden recibida en el modal:", order);
   console.log("ID de la orden:", order?.id_ServiceOrder);
 
+  // Agregar este console.log para verificar los datos
+  console.log("Datos de bebés:", {
+    babies: order.paymentInformation?.[0]?.babies,
+    fullPaymentInfo: order.paymentInformation?.[0],
+    allInfo: order.paymentInformation,
+  });
+
   const handleStatusChange = async (newStatus) => {
     try {
       console.log("Orden antes de actualizar:", order);
@@ -129,6 +136,11 @@ const ServiceOrderModal = ({ order, onClose }) => {
                 {(order.paymentInformation?.[0]?.adults || 0) +
                   (order.paymentInformation?.[0]?.minors || 0) +
                   (order.paymentInformation?.[0]?.seniors || 0)}
+                {order.paymentInformation?.[0]?.babies > 0 && (
+                  <span className="text-gray-500 text-sm ml-2">
+                    (+{order.paymentInformation[0].babies} bebés)
+                  </span>
+                )}
               </p>
               <div className="ml-4">
                 <p className="text-gray-900">
@@ -142,6 +154,10 @@ const ServiceOrderModal = ({ order, onClose }) => {
                 <p className="text-gray-900">
                   <strong>Jubilados:</strong>{" "}
                   {order.paymentInformation?.[0]?.seniors || 0}
+                </p>
+                <p className="text-gray-900">
+                  <strong>Bebés (0-2 años):</strong>{" "}
+                  {order.paymentInformation?.[0]?.babies || 0} (Sin cargo)
                 </p>
               </div>
             </div>

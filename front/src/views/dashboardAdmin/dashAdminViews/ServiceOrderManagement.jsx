@@ -43,6 +43,7 @@ export function ServiceOrderManagement() {
             sum + (info.adults || 0) + (info.minors || 0) + (info.seniors || 0),
           0
         ),
+        babies: order.paymentInformation?.[0]?.babies || 0,
         Bookings: order.Bookings || [],
         status:
           order.Bookings?.length > 0
