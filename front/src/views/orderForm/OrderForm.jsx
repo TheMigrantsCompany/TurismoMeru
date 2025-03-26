@@ -33,10 +33,6 @@ const OrderForm = () => {
   const [sdkLoaded, setSdkLoaded] = useState(false);
 
   useEffect(() => {
-    console.log("cartItems en OrderForm:", cartItems);
-  }, [cartItems]);
-
-  useEffect(() => {
     if (!sdkLoaded) {
       const mpKey = import.meta.env.VITE_MERCADOPAGO_KEY;
       if (!mpKey) {
@@ -84,7 +80,6 @@ const OrderForm = () => {
     setLoading(true);
 
     try {
-      // ✅ Usamos los cartItems directamente sin aplicar descuentos nuevamente
       const items = cartItems.map((item) => {
         return {
           id_Service: item.id_Service,
@@ -112,9 +107,7 @@ const OrderForm = () => {
         0
       );
 
-      console.log("🚀 Total antes de enviar:", totalPrice);
-
-      // ✅ Creación de la orden
+      //  Creación de la orden
       const orderData = {
         orderDate: new Date().toISOString(),
         id_User,
@@ -147,19 +140,10 @@ const OrderForm = () => {
             totalItemPrice: item.totalPrice,
           };
 
-          // Log del item mapeado
-          console.log("Item después del mapeo:", mappedItem);
-
           return mappedItem;
         }),
         paymentStatus: "Pendiente",
       };
-
-      // Log de la orden completa
-      console.log(
-        "Orden completa a enviar:",
-        JSON.stringify(orderData, null, 2)
-      );
 
       const createdOrder = await dispatch(createServiceOrder(orderData));
 
@@ -199,13 +183,10 @@ const OrderForm = () => {
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error("❌ Detalles del error:", errorText);
           throw new Error(`Error en la solicitud: ${response.statusText}`);
         }
 
         const data = await response.json();
-        console.log("✅ Preference ID recibido:", data.preferenceId);
-
         if (!data?.preferenceId) {
           throw new Error("No se recibió un preferenceId válido.");
         }
@@ -216,7 +197,6 @@ const OrderForm = () => {
         alert("✅ ¡Pedido confirmado! Proceda con el pago por WhatsApp.");
       }
     } catch (error) {
-      console.error("❌ Error en la solicitud de pago:", error);
       alert("⚠️ Hubo un error en el proceso de pago. Intenta nuevamente.");
     } finally {
       setLoading(false);
