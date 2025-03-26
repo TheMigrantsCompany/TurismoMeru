@@ -73,7 +73,7 @@ const ExcursionTable = () => {
           const searchResults = response.data || [];
           setFilteredExcursions(searchResults);
         } catch (error) {
-          console.error("Error al buscar la excursión:", error);
+          
           setFilteredExcursions([]);
         }
       } else {
