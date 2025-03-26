@@ -1,7 +1,7 @@
 const { Booking } = require('../../config/db'); // Asegúrate de que el modelo está bien importado
 
 const getBookingByIdController = async (id_Booking) => {
-    console.log(id_Booking)
+    //console.log(id_Booking)
   try {
     // Buscar una reserva específica por su ID usando findByPk (clave primaria)
     const booking = await Booking.findByPk(id_Booking);
