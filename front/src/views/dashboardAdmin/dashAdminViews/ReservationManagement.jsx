@@ -15,7 +15,7 @@ export function ReservationManagement() {
   const [isSearchActive, setIsSearchActive] = useState(false);
 
   useEffect(() => {
-    dispatch(getAllOrders()); // Obtener las órdenes al montar el componente
+    dispatch(getAllOrders()); 
   }, [dispatch]);
 
   const handleSearch = async (query, searchType) => {
