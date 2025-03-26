@@ -42,8 +42,6 @@ export function ReservationsTable({
   useEffect(() => {
     if (selectedReservation && selectedReservation.id_User) {
         selectedReservation.id_User
-      );
-      // No es necesario obtener las órdenes de nuevo si ya están disponibles
     }
   }, [dispatch, selectedReservation]);
 
@@ -81,13 +79,13 @@ export function ReservationsTable({
   }, [ordersState.ordersList, selectedReservation]);
 
   // Cargar reservas filtradas por servicio, fecha o hora
-  useEffect(() => {
+  uuseEffect(() => {
     if (selectedService || selectedDate || selectedTime) {
       console.log(
-      `Filtrando reservas con servicio: ${selectedService}, fecha: ${selectedDate}, hora: ${selectedTime}`
+      `Filtrando reservas con servicio: ${selectedService}, fecha: ${selectedDate}, hora: ${selectedTime}`,
       dispatch(
         getBookingsByService(selectedService, selectedDate, selectedTime)
-      );
+      ));
     }
   }, [dispatch, selectedService, selectedDate, selectedTime]);
 
@@ -622,4 +620,4 @@ export function ReservationsTable({
       )}
     </div>
   );
-
+}
