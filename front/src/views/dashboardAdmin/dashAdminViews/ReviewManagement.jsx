@@ -40,17 +40,28 @@ export function ReviewsManagement() {
 
     setSearchLoading(true);
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/review/service/${encodeURIComponent(
-          query
-        )}`
+      // Primero intentamos búsqueda local por coincidencia parcial
+      const searchValue = query.toLowerCase().trim();
+      const localResults = reviews.filter((review) =>
+        review.serviceTitle?.toLowerCase().includes(searchValue)
       );
 
-      if (response.data && response.data.length > 0) {
-        setFilteredReviews(response.data);
+      if (localResults.length > 0) {
+        setFilteredReviews(localResults);
       } else {
-        setFilteredReviews([]);
-        console.warn("No se encontraron reseñas para el término buscado.");
+        // Si no hay coincidencias locales, buscamos en el backend
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/review/service/${encodeURIComponent(
+            query
+          )}`
+        );
+
+        if (response.data && response.data.length > 0) {
+          setFilteredReviews(response.data);
+        } else {
+          setFilteredReviews([]);
+          console.warn("No se encontraron reseñas para el término buscado.");
+        }
       }
     } catch (err) {
       console.error("Error al buscar reseñas:", err.message);
