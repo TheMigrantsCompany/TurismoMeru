@@ -4,13 +4,9 @@ import Swal from "sweetalert2";
 
 const UserBookings = ({ id_User }) => {
   const [bookings, setBookings] = useState([]);
-  const [groupedData, setGroupedData] = useState([]); // Datos agrupados
+  const [groupedData, setGroupedData] = useState([]);
   const [formData, setFormData] = useState({});
 
-  console.log("ID del usuario recibido en UserBookings:", id_User);
-
-  // Función para agrupar bookings por un identificador común.
-  // Se usa id_ServiceOrder o, si no existe, se usa serviceTitle + dateTime.
   const groupBookings = (bookings) => {
     return bookings.reduce((acc, booking) => {
       const key = booking.id_ServiceOrder || booking.serviceTitle + booking.dateTime;
@@ -21,7 +17,6 @@ const UserBookings = ({ id_User }) => {
           passengers: [],
         };
       }
-      // Cada booking representa un pasajero
       acc[key].passengers.push({
         DNI: booking.DNI || "",
         passengerName: booking.passengerName || "",
@@ -31,16 +26,15 @@ const UserBookings = ({ id_User }) => {
     }, {});
   };
 
-  // Obtiene las reservas del usuario
+ 
   useEffect(() => {
-    if (!id_User) return; // Evita la petición si no hay ID
+    if (!id_User) return; 
 
     const fetchBookings = async () => {
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_API_URL}/booking/user/${id_User}`
         );
-        console.log("Reservas obtenidas:", response.data);
         setBookings(response.data);
       } catch (error) {
         console.error("Error al obtener las reservas:", error);
@@ -53,7 +47,6 @@ const UserBookings = ({ id_User }) => {
 
   // Agrupa las reservas y inicializa el estado formData
   useEffect(() => {
-    console.log("Agrupando bookings:", bookings);
     const grouped = groupBookings(bookings);
     setGroupedData(Object.values(grouped));
 
@@ -79,7 +72,6 @@ const UserBookings = ({ id_User }) => {
       const updatedPassengers = prevData[groupKey].map((passenger, i) =>
         i === index ? { ...passenger, [field]: value } : passenger
       );
-      console.log("Pasajeros actualizados para grupo", groupKey, ":", updatedPassengers);
       return { ...prevData, [groupKey]: updatedPassengers };
     });
   };
@@ -128,10 +120,10 @@ const UserBookings = ({ id_User }) => {
     }
   };
 
-  // Función para formatear la fecha y hora de la excursión
+  
   const formatDate = (dateString) => {
     if (!dateString) return "No disponible";
-    // Reemplaza el espacio por 'T' para formar una fecha ISO
+   
     const isoString = dateString.includes(" ") ? dateString.replace(" ", "T") : dateString;
     const date = new Date(isoString);
     if (isNaN(date)) return "Fecha inválida";
@@ -150,8 +142,7 @@ const UserBookings = ({ id_User }) => {
     return excursionDate < currentDate;
   };
 
-  console.log("Render: groupedData:", groupedData);
-  console.log("Render: formData:", formData);
+
 
   return (
     <div className="container mx-auto p-6 mt-16 bg-[#f9f3e1] border-l-4 border-[#425a66] rounded-lg shadow-lg">
