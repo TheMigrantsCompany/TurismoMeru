@@ -29,11 +29,11 @@ export function ReservationManagement() {
     try {
       let url = "";
       if (searchType === "service") {
-        url = `http://localhost:3001/booking/serviceName/${encodeURIComponent(
+        url = `${import.meta.env.VITE_API_URL}/booking/serviceName/${encodeURIComponent(
           query
         )}`;
       } else if (searchType === "passenger") {
-        url = `http://localhost:3001/booking/passenger-name/${encodeURIComponent(
+        url = `${import.meta.env.VITE_API_URL}/booking/passenger-name/${encodeURIComponent(
           query
         )}`;
       }
