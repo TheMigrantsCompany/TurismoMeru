@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3001; // Usar el puerto que asigna Render en pr
 server.listen(PORT, async () => {
   try {
     await sequelize.sync({ force: false });
-    console.log(`Server listening on port ${PORT}`);
+   // console.log(`Server listening on port ${PORT}`);
   } catch (error) {
     console.error(error);
   }
