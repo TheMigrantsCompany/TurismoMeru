@@ -17,7 +17,7 @@ const Reviews = () => {
   const services = useSelector((state) => state.excursions);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [reviews, setReviews] = useState({}); // Objeto para almacenar todas las reseñas por id_ServiceOrder
+  const [reviews, setReviews] = useState({}); 
 
   useEffect(() => {
     const fetchData = async () => {
