@@ -1,24 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import Swal from "sweetalert2";
 import {
   getAllBookings,
   getBookingsByService,
-  getAllOrders,
-  deleteBooking,
-} from "../../../redux/actions/actions";
-import { EyeIcon, TrashIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
-import {
-  Typography,
-  IconButton,
-  Select,
-  Option,
-  Tooltip,
-  Accordion,
-  AccordionHeader,
-  AccordionBody,
-} from "@material-tailwind/react";
-import ReservationModal from "../../modals/admin-modal/ReservationModal";
-import Swal from "sweetalert2";
+} from "../../../redux/actions/bookingActions";
+import { getAllOrders } from "../../../redux/actions/orderActions";
 
 const TABLE_HEAD = ["Excursión", "Cantidad de Reservas", "Estado", ""];
 
@@ -28,7 +15,6 @@ export function ReservationsTable({
 }) {
   const dispatch = useDispatch();
 
-  // Obtener id_User desde el estado global de autenticación
   const id_User = useSelector((state) => state.user?.id_User);
   const reservationsState = useSelector((state) => state.bookings);
   const ordersState = useSelector((state) => state.orders);
@@ -48,37 +34,6 @@ export function ReservationsTable({
   useEffect(() => {
     dispatch(getAllOrders());
   }, [dispatch]);
-
-  useEffect(() => {
-    if (selectedReservation && selectedReservation.id_User) {
-      // No es necesario obtener las órdenes de nuevo si ya están disponibles
-    }
-  }, [dispatch, selectedReservation]);
-
-  useEffect(() => {
-    if (
-      Array.isArray(ordersState.ordersList) &&
-      ordersState.ordersList.length > 0 &&
-      selectedReservation
-    ) {
-      if (selectedReservation.serviceOrder) {
-        return;
-      }
-
-      const matchingOrder = ordersState.ordersList.find(
-        (order) =>
-          String(order.id_ServiceOrder) ===
-          String(selectedReservation.id_ServiceOrder)
-      );
-
-      if (matchingOrder) {
-        setSelectedReservation((prevState) => ({
-          ...prevState,
-          serviceOrder: matchingOrder,
-        }));
-      }
-    }
-  }, [ordersState.ordersList, selectedReservation]);
 
   useEffect(() => {
     if (selectedService || selectedDate || selectedTime) {
@@ -137,99 +92,6 @@ export function ReservationsTable({
     selectedTime,
   ]);
 
-  const availableDates = useMemo(() => {
-    const reservations =
-      propReservations || reservationsState.bookingsList || [];
-    if (!selectedService || !Array.isArray(reservations)) return [];
-
-    return Array.from(
-      new Set(
-        reservations
-          .filter((reservation) => reservation.id_Service === selectedService)
-          .map((reservation) => reservation.dateTime.split(" ")[0])
-      )
-    );
-  }, [propReservations, reservationsState.bookingsList, selectedService]);
-
-  const availableTimes = useMemo(() => {
-    const reservations =
-      propReservations || reservationsState.bookingsList || [];
-    if (!selectedService || !selectedDate || !Array.isArray(reservations))
-      return [];
-
-    return Array.from(
-      new Set(
-        reservations
-          .filter(
-            (reservation) =>
-              reservation.id_Service === selectedService &&
-              reservation.dateTime.includes(selectedDate)
-          )
-          .map((reservation) => reservation.dateTime.split(" ")[1])
-      )
-    );
-  }, [
-    propReservations,
-    reservationsState.bookingsList,
-    selectedService,
-    selectedDate,
-  ]);
-
-  const groupedReservations = useMemo(() => {
-    const reservations = displayReservations || [];
-    return reservations.reduce((groups, booking) => {
-      const key = booking.id_ServiceOrder;
-      if (!groups[key]) {
-        groups[key] = {
-          serviceTitle: booking.serviceTitle,
-          id_ServiceOrder: key,
-          bookings: [],
-          serviceOrder: ordersState.ordersList.find(
-            (order) => order.id_ServiceOrder === key
-          ),
-        };
-      }
-      groups[key].bookings.push(booking);
-      return groups;
-    }, {});
-  }, [displayReservations, ordersState.ordersList]);
-
-  const handleEditReservation = (reservation) => {
-    if (!reservation) {
-      return;
-    }
-    const reservationsArray =
-      propReservations || reservationsState.bookingsList;
-
-    if (!reservationsArray || !Array.isArray(reservationsArray)) {
-      return;
-    }
-    if (!ordersState.ordersList) {
-      return;
-    }
-    const fullReservation = reservationsArray.find(
-      (booking) => booking.id_Booking === reservation.id_Booking
-    );
-
-    if (!fullReservation) {
-      return;
-    }
-    const serviceOrder = ordersState.ordersList.find(
-      (order) => order.id_ServiceOrder === fullReservation.id_ServiceOrder
-    );
-
-    if (!serviceOrder) {
-      return;
-    }
-
-    const reservationWithOrder = {
-      ...fullReservation,
-      serviceOrder,
-    };
-
-    setSelectedReservation(reservationWithOrder);
-  };
-
   const handleSaveReservation = () => {
     Swal.fire({
       title: "¡Reserva modificada!",
@@ -238,48 +100,58 @@ export function ReservationsTable({
       confirmButtonText: "OK",
     });
   };
-}
 
-    return (
-      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-medium text-blue-800 mb-2">
-              Filtros activos:
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {activeFilters.map((filter, index) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
-                >
-                  {filter}
-                </span>
-              ))}
-            </div>
+  return (
+    <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-sm font-medium text-blue-800 mb-2">
+            Filtros activos:
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {selectedService && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                Servicio: {selectedService}
+              </span>
+            )}
+            {selectedDate && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                Fecha: {selectedDate}
+              </span>
+            )}
+            {selectedTime && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                Hora: {selectedTime}
+              </span>
+            )}
           </div>
-          <button
-            onClick={handleResetFilters}
-            className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Limpiar filtros
-          </button>
         </div>
+        <button
+          onClick={() => {
+            setSelectedService("");
+            setSelectedDate("");
+            setSelectedTime("");
+          }}
+          className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+              clipRule="evenodd"
+            />
+          </svg>
+          Limpiar filtros
+        </button>
       </div>
-    );
-  };
+    </div>
+  );
+}
 
   const handleDeleteBooking = (id_Booking) => {
     Swal.fire({
