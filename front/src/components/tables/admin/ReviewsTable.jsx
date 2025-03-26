@@ -24,7 +24,6 @@ const ReviewsTable = ({ reviews, onReviewStatusChange, onViewDetails }) => {
 
     fetchUsers();
   }, []);
-};
 
   return (
     <div className="rounded-lg bg-[#f9f3e1] shadow-lg p-6">
@@ -140,3 +139,4 @@ const ReviewsTable = ({ reviews, onReviewStatusChange, onViewDetails }) => {
 };
 
 export default ReviewsTable;
+
