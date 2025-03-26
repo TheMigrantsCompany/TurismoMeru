@@ -238,7 +238,6 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
       );
       if (!response.ok) throw new Error("Error al actualizar el servicio");
       const updatedExcursion = await response.json();
-      console.log("Excursión actualizada:", updatedExcursion);
       onUpdate(updatedExcursion);
       onClose();
     } catch (error) {
