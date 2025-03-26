@@ -2,7 +2,7 @@ const { Service } = require('../../config/db');
 
 const createServiceController = async (serviceData) => {
   try {
-    console.log('Datos originales del servicio:', serviceData);
+   // console.log('Datos originales del servicio:', serviceData);
 
     // Validar y procesar `availabilityDate`
     if (serviceData.availabilityDate) {
@@ -28,7 +28,7 @@ const createServiceController = async (serviceData) => {
 
     // Crear el servicio en la base de datos
     const newService = await Service.create(serviceData);
-    console.log('Nuevo servicio creado:', newService);
+    //console.log('Nuevo servicio creado:', newService);
     return newService;
   } catch (error) {
     console.error('Error en createServiceController:', error);
