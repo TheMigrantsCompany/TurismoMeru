@@ -4,8 +4,8 @@ import Swal from "sweetalert2";
 import {
   getAllBookings,
   getBookingsByService,
-} from "../../../redux/actions/bookingActions";
-import { getAllOrders } from "../../../redux/actions/orderActions";
+  getAllOrders,
+} from "../../../redux/actions/actions";
 
 const TABLE_HEAD = ["Excursión", "Cantidad de Reservas", "Estado", ""];
 
