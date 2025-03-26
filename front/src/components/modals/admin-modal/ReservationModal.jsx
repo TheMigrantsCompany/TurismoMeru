@@ -90,6 +90,14 @@ const ReservationModal = ({ reservation, onClose }) => {
                   <p className="text-gray-900">
                     <strong>Jubilados:</strong> {paymentInfo.seniors}
                   </p>
+                  <p className="text-gray-900">
+                    <strong>Bebés:</strong> {paymentInfo.babies || 0}
+                    {paymentInfo.babies > 0 && (
+                      <span className="ml-2 text-sm text-gray-500 italic">
+                        (No abonan)
+                      </span>
+                    )}
+                  </p>
                 </>
               )}
             </div>
@@ -154,4 +162,3 @@ const ReservationModal = ({ reservation, onClose }) => {
 };
 
 export default ReservationModal;
-
