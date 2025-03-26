@@ -6,7 +6,7 @@ const searchServicesOrders = async (title, date) => {
     const cleanTitle = title.trim().toLowerCase();
     const cleanDate = Array.isArray(date) ? date[0] : date; // Usa solo un valor de date
 
-    console.log(`Buscando órdenes con title: ${cleanTitle} y date: ${cleanDate}`);
+   // console.log(`Buscando órdenes con title: ${cleanTitle} y date: ${cleanDate}`);
 
     const query = `(
       SELECT 1
@@ -23,7 +23,7 @@ const searchServicesOrders = async (title, date) => {
       ),
     });
 
-    console.log('Órdenes encontradas:', orders);
+    //console.log('Órdenes encontradas:', orders);
 
     if (orders.length === 0) {
       throw new Error('No se encontraron órdenes con los filtros aplicados');
