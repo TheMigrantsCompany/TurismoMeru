@@ -42,14 +42,14 @@ export function ReservationsTable({
   // Obtener todas las reservas solo si no hay búsqueda activa
   useEffect(() => {
     if (propReservations === null) {
-      console.log("Cargando todas las reservas...");
+      
       dispatch(getAllBookings());
     }
   }, [dispatch, propReservations]);
 
   // Obtener todas las órdenes desde el principio (si no se obtienen de otra manera)
   useEffect(() => {
-    console.log("Obteniendo todas las órdenes...");
+ 
     dispatch(getAllOrders());
   }, [dispatch]);
 
