@@ -11,16 +11,6 @@ const ServiceOrderModal = ({ order, onClose }) => {
   const dispatch = useDispatch();
   const { updateStatus } = useSelector((state) => state.orders);
 
-  console.log("Orden recibida en el modal:", order);
-  console.log("ID de la orden:", order?.id_ServiceOrder);
-
-  // Agregar este console.log para verificar los datos
-  console.log("Datos de bebés:", {
-    babies: order.paymentInformation?.[0]?.babies,
-    fullPaymentInfo: order.paymentInformation?.[0],
-    allInfo: order.paymentInformation,
-  });
-
   const handleStatusChange = async (newStatus) => {
     try {
       console.log("Orden antes de actualizar:", order);
@@ -41,8 +31,6 @@ const ServiceOrderModal = ({ order, onClose }) => {
       await dispatch(
         updateOrderStatus(order.id_ServiceOrder, newStatus, order)
       );
-      console.log("Orden actualizada exitosamente");
-
       await dispatch(getAllOrders());
       onClose();
 
@@ -64,26 +52,6 @@ const ServiceOrderModal = ({ order, onClose }) => {
       });
     }
   };
-
-  // Verificar que la orden tiene toda la información necesaria
-  useEffect(() => {
-    console.log("Orden recibida en el modal:", order);
-  }, [order]);
-
-  // Verificar el estado actual del botón
-  useEffect(() => {
-    console.log("Estado actual de la orden:", {
-      id: order.id,
-      status: order.status,
-      paymentStatus: order.paymentStatus,
-    });
-  }, [order]);
-
-  useEffect(() => {
-    console.log("Orden completa recibida en el modal:", order);
-    console.log("Estado de pago:", order.paymentStatus);
-    console.log("Información de pago:", order.paymentInformation);
-  }, [order]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
