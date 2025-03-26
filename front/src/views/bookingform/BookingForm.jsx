@@ -88,7 +88,6 @@ const BookingForm = ({ userId, userName, userDni }) => {
         navigate("/user/reservas");
       });
     } catch (error) {
-      console.error("❌ Error en la operación:", error.response?.data || error.message);
       if (error.response?.status === 404) {
         setErrorMessage("Orden de servicio no encontrada.");
       } else if (error.response?.status === 400) {
