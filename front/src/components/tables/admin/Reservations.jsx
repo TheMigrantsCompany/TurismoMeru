@@ -533,6 +533,11 @@ export function ReservationsTable({
                 </Typography>
                 <Typography className="font-poppins text-[#425a66]">
                   {group.bookings.length} pasajeros
+                  {group.serviceOrder?.paymentInformation?.[0]?.babies > 0 && (
+                    <span className="text-gray-500 text-sm ml-2">
+                      (+{group.serviceOrder.paymentInformation[0].babies} bebés)
+                    </span>
+                  )}
                 </Typography>
                 <Typography className="font-poppins text-[#425a66]">
                   <span
