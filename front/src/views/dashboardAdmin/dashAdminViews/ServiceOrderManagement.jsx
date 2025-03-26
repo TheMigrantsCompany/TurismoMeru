@@ -40,13 +40,10 @@ export function ServiceOrderManagement() {
         date: new Date(order.orderDate).toLocaleDateString(),
         passengers: order.paymentInformation?.reduce(
           (sum, info) =>
-            sum +
-            (info.adults || 0) +
-            (info.minors || 0) +
-            (info.seniors || 0) +
-            (info.babies || 0),
+            sum + (info.adults || 0) + (info.minors || 0) + (info.seniors || 0),
           0
         ),
+        babies: order.paymentInformation?.[0]?.babies || 0,
         Bookings: order.Bookings || [],
         status:
           order.Bookings?.length > 0
