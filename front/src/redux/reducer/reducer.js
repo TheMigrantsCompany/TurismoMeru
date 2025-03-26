@@ -168,17 +168,12 @@ const rootReducer = (state = initialState, action) => {
 
     //USERS
     case GET_USERS_REQUEST:
-      console.log("Reducer - GET_USERS_REQUEST: Solicitando usuarios");
       return {
         ...state,
         users: { ...state.users, loading: true, error: null },
       };
 
     case GET_USERS_SUCCESS:
-      console.log(
-        "Reducer - GET_USERS_SUCCESS: Usuarios obtenidos con éxito",
-        action.payload
-      );
       return {
         ...state,
         users: {
@@ -191,10 +186,6 @@ const rootReducer = (state = initialState, action) => {
       };
 
     case GET_USERS_FAILURE:
-      console.error(
-        "Reducer - GET_USERS_FAILURE: Error al obtener usuarios",
-        action.payload
-      );
       return {
         ...state,
         users: { ...state.users, loading: false, error: action.payload },
@@ -217,9 +208,6 @@ const rootReducer = (state = initialState, action) => {
       };
 
     case TOGGLE_USER_STATUS_REQUEST:
-      console.log(
-        "Reducer - TOGGLE_USER_STATUS_REQUEST: Solicitando cambio de estado de usuario"
-      );
       return {
         ...state,
         users: {
@@ -230,10 +218,6 @@ const rootReducer = (state = initialState, action) => {
       };
 
     case TOGGLE_USER_STATUS_SUCCESS:
-      console.log(
-        "Reducer - TOGGLE_USER_STATUS_SUCCESS: Estado de usuario cambiado con éxito",
-        action.payload
-      );
       return {
         ...state,
         users: {
@@ -247,10 +231,6 @@ const rootReducer = (state = initialState, action) => {
       };
 
     case TOGGLE_USER_STATUS_FAILURE:
-      console.error(
-        "Reducer - TOGGLE_USER_STATUS_FAILURE: Error al cambiar el estado del usuario",
-        action.payload
-      );
       return {
         ...state,
         users: {
@@ -261,9 +241,6 @@ const rootReducer = (state = initialState, action) => {
       };
 
     case DELETE_USER_REQUEST:
-      console.log(
-        "Reducer - DELETE_USER_REQUEST: Solicitando eliminación de usuario"
-      );
       return {
         ...state,
         users: {
@@ -274,10 +251,6 @@ const rootReducer = (state = initialState, action) => {
       };
 
     case DELETE_USER_SUCCESS:
-      console.log(
-        "Reducer - DELETE_USER_SUCCESS: Usuario eliminado con éxito",
-        action.payload
-      );
       return {
         ...state,
         users: {
@@ -289,10 +262,6 @@ const rootReducer = (state = initialState, action) => {
       };
 
     case DELETE_USER_FAILURE:
-      console.error(
-        "Reducer - DELETE_USER_FAILURE: Error al eliminar usuario",
-        action.payload
-      );
       return {
         ...state,
         users: {
@@ -303,21 +272,12 @@ const rootReducer = (state = initialState, action) => {
       };
 
     case GET_USER_DETAILS_REQUEST:
-      console.log(
-        "Reducer - GET_USER_DETAILS_REQUEST: Solicitando detalles de usuario"
-      );
       return {
         ...state,
         users: { ...state.users, loading: true, error: null },
       };
 
     case GET_USER_DETAILS_SUCCESS:
-      console.log("Actualizando userDetails en el reducer", action.payload);
-      console.log(
-        "Reducer - GET_USER_DETAILS_SUCCESS: Detalles de usuario obtenidos con éxito",
-
-        action.payload
-      );
       return {
         ...state,
         users: {
@@ -329,29 +289,18 @@ const rootReducer = (state = initialState, action) => {
       };
 
     case GET_USER_DETAILS_FAILURE:
-      console.error(
-        "Reducer - GET_USER_DETAILS_FAILURE: Error al obtener detalles de usuario",
-        action.payload
-      );
       return {
         ...state,
         users: { ...state.users, loading: false, error: action.payload },
       };
 
     case GET_USER_BY_NAME_REQUEST:
-      console.log(
-        "Reducer - GET_USER_BY_NAME_REQUEST: Solicitando usuario por nombre"
-      );
       return {
         ...state,
         users: { ...state.users, loading: true, error: null },
       };
 
     case GET_USER_BY_NAME_SUCCESS:
-      console.log(
-        "Reducer - GET_USER_BY_NAME_SUCCESS: Usuario encontrado por nombre",
-        action.payload
-      );
       return {
         ...state,
         users: {
@@ -363,29 +312,18 @@ const rootReducer = (state = initialState, action) => {
       };
 
     case GET_USER_BY_NAME_FAILURE:
-      console.error(
-        "Reducer - GET_USER_BY_NAME_FAILURE: Error al buscar usuario por nombre",
-        action.payload
-      );
       return {
         ...state,
         users: { ...state.users, loading: false, error: action.payload },
       };
 
     case GET_USER_BY_DNI_REQUEST:
-      console.log(
-        "Reducer - GET_USER_BY_DNI_REQUEST: Solicitando usuario por DNI"
-      );
       return {
         ...state,
         users: { ...state.users, loading: true, error: null },
       };
 
     case GET_USER_BY_DNI_SUCCESS:
-      console.log(
-        "Reducer - GET_USER_BY_DNI_SUCCESS: Usuario encontrado por DNI",
-        action.payload
-      );
       return {
         ...state,
         users: {
@@ -397,29 +335,18 @@ const rootReducer = (state = initialState, action) => {
       };
 
     case GET_USER_BY_DNI_FAILURE:
-      console.error(
-        "Reducer - GET_USER_BY_DNI_FAILURE: Error al buscar usuario por DNI",
-        action.payload
-      );
       return {
         ...state,
         users: { ...state.users, loading: false, error: action.payload },
       };
 
     case UPDATE_USER_REQUEST:
-      console.log(
-        "Reducer - UPDATE_USER_REQUEST: Solicitando actualización de usuario"
-      );
       return {
         ...state,
         users: { ...state.users, loading: true, error: null },
       };
 
     case UPDATE_USER_SUCCESS:
-      console.log(
-        "Reducer - UPDATE_USER_SUCCESS: Usuario actualizado con éxito",
-        action.payload
-      );
       return {
         ...state,
         users: {
@@ -434,10 +361,6 @@ const rootReducer = (state = initialState, action) => {
       };
 
     case UPDATE_USER_FAILURE:
-      console.error(
-        "Reducer - UPDATE_USER_FAILURE: Error al actualizar usuario",
-        action.payload
-      );
       return {
         ...state,
         users: { ...state.users, loading: false, error: action.payload },
@@ -448,7 +371,6 @@ const rootReducer = (state = initialState, action) => {
     case CREATE_ORDER_REQUEST:
       return { ...state, loading: true };
     case CREATE_ORDER_SUCCESS:
-      console.log("Orden recibida en el reducer:", action.payload);
       return { ...state, loading: false, order: action.payload };
     case CREATE_ORDER_FAILURE:
       return { ...state, loading: false, error: action.payload };
@@ -491,7 +413,6 @@ const rootReducer = (state = initialState, action) => {
       };
 
     case GET_ORDERS_BY_USER_SUCCESS:
-      console.log("Órdenes obtenidas:", action.payload);
       return {
         ...state,
         loading: false,
