@@ -1,11 +1,24 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import Swal from "sweetalert2";
 import {
   getAllBookings,
   getBookingsByService,
   getAllOrders,
+  deleteBooking,
 } from "../../../redux/actions/actions";
+import { EyeIcon, TrashIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
+import {
+  Typography,
+  IconButton,
+  Select,
+  Option,
+  Tooltip,
+  Accordion,
+  AccordionHeader,
+  AccordionBody,
+} from "@material-tailwind/react";
+import ReservationModal from "../../modals/admin-modal/ReservationModal";
+import Swal from "sweetalert2";
 
 const TABLE_HEAD = ["Excursión", "Cantidad de Reservas", "Estado", ""];
 
@@ -29,19 +42,25 @@ export function ReservationsTable({
   // Obtener todas las reservas solo si no hay búsqueda activa
   useEffect(() => {
     if (propReservations === null) {
+      console.log("Cargando todas las reservas...");
       dispatch(getAllBookings());
     }
   }, [dispatch, propReservations]);
 
   // Obtener todas las órdenes desde el principio (si no se obtienen de otra manera)
   useEffect(() => {
+    console.log("Obteniendo todas las órdenes...");
     dispatch(getAllOrders());
   }, [dispatch]);
 
   // Obtener las órdenes solo cuando se selecciona una reserva
   useEffect(() => {
     if (selectedReservation && selectedReservation.id_User) {
+      console.log(
+        "Obteniendo órdenes del usuario con ID:",
         selectedReservation.id_User
+      );
+      // No es necesario obtener las órdenes de nuevo si ya están disponibles
     }
   }, [dispatch, selectedReservation]);
 
@@ -52,7 +71,8 @@ export function ReservationsTable({
       ordersState.ordersList.length > 0 &&
       selectedReservation
     ) {
-     
+      console.log("Órdenes disponibles:", ordersState.ordersList);
+
       // Verifica si ya está asociada la orden con la reserva
       if (selectedReservation.serviceOrder) {
         return; // No hacer nada si la reserva ya tiene una orden asociada
@@ -66,6 +86,7 @@ export function ReservationsTable({
       );
 
       if (matchingOrder) {
+        console.log("Orden encontrada:", matchingOrder);
         setSelectedReservation((prevState) => ({
           ...prevState,
           serviceOrder: matchingOrder,
@@ -79,13 +100,14 @@ export function ReservationsTable({
   }, [ordersState.ordersList, selectedReservation]);
 
   // Cargar reservas filtradas por servicio, fecha o hora
-  uuseEffect(() => {
+  useEffect(() => {
     if (selectedService || selectedDate || selectedTime) {
       console.log(
-      `Filtrando reservas con servicio: ${selectedService}, fecha: ${selectedDate}, hora: ${selectedTime}`,
+        `Filtrando reservas con servicio: ${selectedService}, fecha: ${selectedDate}, hora: ${selectedTime}`
+      );
       dispatch(
         getBookingsByService(selectedService, selectedDate, selectedTime)
-      ));
+      );
     }
   }, [dispatch, selectedService, selectedDate, selectedTime]);
 
@@ -299,62 +321,51 @@ export function ReservationsTable({
       activeFilters.push(`Fecha: ${formatDate(selectedDate)}`);
     }
     if (selectedTime) {
-     activeFilters.push(`Hora: ${selectedTime}`);
+      activeFilters.push(`Hora: ${selectedTime}`);
     }
 
     if (activeFilters.length === 0) return null;
 
-  return (
-    <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-sm font-medium text-blue-800 mb-2">
-            Filtros activos:
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {selectedService && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                Servicio: {selectedService}
-              </span>
-            )}
-            {selectedDate && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                Fecha: {selectedDate}
-              </span>
-            )}
-            {selectedTime && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                Hora: {selectedTime}
-              </span>
-            )}
+    return (
+      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-medium text-blue-800 mb-2">
+              Filtros activos:
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {activeFilters.map((filter, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+                >
+                  {filter}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
-        <button
-          onClick={() => {
-            setSelectedService("");
-            setSelectedDate("");
-            setSelectedTime("");
-          }}
-          className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4"
-            viewBox="0 0 20 20"
-            fill="currentColor"
+          <button
+            onClick={handleResetFilters}
+            className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
           >
-            <path
-              fillRule="evenodd"
-              d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-              clipRule="evenodd"
-            />
-          </svg>
-          Limpiar filtros
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Limpiar filtros
+          </button>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  };
 
   const handleDeleteBooking = (id_Booking) => {
     Swal.fire({
