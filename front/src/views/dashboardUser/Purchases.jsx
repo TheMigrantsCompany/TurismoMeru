@@ -38,32 +38,24 @@ const Purchases = () => {
     }
   }, [orders, services]);
 
-  // Filtramos las órdenes del usuario y agregamos la información del servicio
-  const userOrders = orders?.filter(order => order.id_User === id_User).map(order => {
-    // Verificamos la estructura de la orden
-    console.log('Procesando orden completa:', order);
-    console.log('Payment Information detallada:', JSON.stringify(order.paymentInformation, null, 2));
-    
+      // Filtramos las órdenes del usuario y agregamos la información del servicio
+     const userOrders = orders?.filter(order => order.id_User === id_User).map(order => {
+
     // Obtenemos el ServiceId y título del primer elemento de paymentInformation
     const paymentInfo = order.paymentInformation?.[0] || {};
-    console.log('Payment Info extraída:', paymentInfo);
 
     // Intentamos obtener el id del servicio de diferentes propiedades posibles
     const serviceId = paymentInfo.ServiceId || paymentInfo.id_Service || paymentInfo.serviceId;
-    console.log('ServiceId encontrado:', serviceId);
-    
+
     // Intentamos obtener el título de diferentes propiedades posibles
     const title = paymentInfo.serviceTitle || paymentInfo.title || paymentInfo.name;
-    console.log('Título encontrado:', title);
-    
+       
     // Buscamos el servicio usando el ServiceId
     const service = services?.find(s => s.id_Service === serviceId);
-    console.log('Servicio encontrado en la lista:', service);
-    
+
     // Calculamos el total de personas
     const totalPeople = order.totalPeople || paymentInfo.totalPeople || paymentInfo.quantity || 1;
-    console.log('Total de personas:', totalPeople);
-    
+
     return {
       ...order,
       serviceTitle: title || service?.title || 'Excursión no encontrada',
