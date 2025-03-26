@@ -16,7 +16,6 @@ const Home = () => {
     axios
       .get(`${import.meta.env.VITE_API_URL}/service`)
       .then((response) => {
-        // Filtrar solo las excursiones activas
         const activeExcursions = response.data.filter(
           (excursion) => excursion.active === true
         );
