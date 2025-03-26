@@ -61,7 +61,7 @@ const deleteServiceOrderController = async (id_ServiceOrder) => {
         );
 
         await service.save({ transaction });
-        console.log(`Stock actualizado para servicio ${service.title}`);
+        //console.log(`Stock actualizado para servicio ${service.title}`);
       }
     }
 
@@ -72,12 +72,12 @@ const deleteServiceOrderController = async (id_ServiceOrder) => {
         where: { id_ServiceOrder },
         transaction,
       });
-      console.log("Bookings eliminados");
+      //console.log("Bookings eliminados");
     }
 
     // Eliminar la orden
     await order.destroy({ transaction });
-    console.log("Orden eliminada");
+    //console.log("Orden eliminada");
 
     await transaction.commit();
     return { message: "Orden eliminada exitosamente" };
