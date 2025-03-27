@@ -56,13 +56,13 @@ const BookingForm = ({ userId, userName, userDni }) => {
         lockedStock: 1,
         totalPeople: selectedQuantity,
         totalPrice: totalPrice,
-        selectedDate, 
+        selectedDate,
         selectedTime,
         date: selectedDate,
         time: selectedTime,
         seatNumber: index + 1,
         passengerName: index === 0 ? userName : "Desconocido",
-        DNI: index === 0 ? userDni : "" 
+        DNI: index === 0 ? userDni : ""
       }));
 
       const url = `${import.meta.env.VITE_API_URL}/servicesOrder/id/${serviceOrderId}`;
@@ -104,9 +104,6 @@ const BookingForm = ({ userId, userName, userDni }) => {
         Reserva para {serviceTitle}
       </h2>
       <p className="font-semibold text-[#4256a6]">
-        Precio: <span className="font-normal text-[#425a66]">${servicePrice.toFixed(2)}</span>
-      </p>
-      <p className="font-semibold text-[#4256a6]">
         Fecha: <span className="font-normal text-[#425a66]">{selectedDate}</span>
       </p>
       <p className="font-semibold text-[#4256a6]">
@@ -114,6 +111,12 @@ const BookingForm = ({ userId, userName, userDni }) => {
       </p>
       <p className="font-semibold text-[#4256a6]">
         Cantidad de Pasajeros: <span className="font-normal text-[#425a66]">{selectedQuantity}</span>
+      </p>
+      <p className="font-semibold text-[#4256a6]">
+        Total Pagado:{" "}
+        <span className="font-normal text-[#425a66]">
+          ${totalPrice.toFixed(2)}
+        </span>
       </p>
 
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
