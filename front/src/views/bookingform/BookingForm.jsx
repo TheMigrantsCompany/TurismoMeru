@@ -35,7 +35,7 @@ const BookingForm = ({ userId, userName, userDni }) => {
   };
 
   const selectedTime = rawTime ? formatTime(rawTime) : "00:00";
-  const selectedQuantity = parseInt(queryParams.get("totalPeople")) || 1;
+  const totalPrice = parseFloat(queryParams.get("totalPrice")) || 0;
 
   const [errorMessage, setErrorMessage] = useState("");
   const [reservationSuccess, setReservationSuccess] = useState(false);
@@ -54,7 +54,7 @@ const BookingForm = ({ userId, userName, userDni }) => {
         id_Service: serviceId,
         lockedStock: 1,
         totalPeople: selectedQuantity,
-        totalPrice: servicePrice,
+        totalPrice: totalPrice,
         selectedDate, 
         selectedTime,
         date: selectedDate,
@@ -116,9 +116,9 @@ const BookingForm = ({ userId, userName, userDni }) => {
         Cantidad de Pasajeros: <span className="font-normal text-[#425a66]">{selectedQuantity}</span>
       </p>
       <p className="font-semibold text-[#4256a6]">
-        Total a Pagar:{" "}
+         Total Pagado:{" "}
         <span className="font-normal text-[#425a66]">
-          ${(servicePrice * selectedQuantity).toFixed(2)}
+        ${totalPrice.toFixed(2)}
         </span>
       </p>
 
