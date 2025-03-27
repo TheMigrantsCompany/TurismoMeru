@@ -35,6 +35,7 @@ const BookingForm = ({ userId, userName, userDni }) => {
   };
 
   const selectedTime = rawTime ? formatTime(rawTime) : "00:00";
+  const selectedQuantity = parseInt(queryParams.get("totalPeople")) || 1;
   const totalPrice = parseFloat(queryParams.get("totalPrice")) || 0;
 
   const [errorMessage, setErrorMessage] = useState("");
