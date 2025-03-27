@@ -373,7 +373,7 @@ const OrderForm = () => {
 
                   return (
                     <div
-                      key={`order-item-${item.id_Service}-${index}`}
+                       key={`order-item-${item.id_Service}-${index}`}
                       className="bg-white p-4 rounded-lg shadow-sm border border-[#425a66]/10 hover:shadow-md transition-shadow duration-300"
                     >
                       <p className="text-lg font-medium text-[#4256a6] mb-2 font-poppins">
