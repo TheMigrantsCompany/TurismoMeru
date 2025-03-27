@@ -13,7 +13,7 @@ const BookingForm = ({ userId, userName, userDni }) => {
 
   const serviceId = queryParams.get("id_Service");
   const serviceTitle = queryParams.get("title");
-  const servicePrice = Number(queryParams.get("price") || 0).toFixed(2);
+  const servicePrice = Math.round(parseFloat(queryParams.get("price")) * 100) / 100 || 0;
   const serviceOrderId = queryParams.get("id_ServiceOrder");
 
   // Obtener y formatear fecha y hora
@@ -104,7 +104,7 @@ const BookingForm = ({ userId, userName, userDni }) => {
         Reserva para {serviceTitle}
       </h2>
       <p className="font-semibold text-[#4256a6]">
-        Precio: <span className="font-normal text-[#425a66]">${servicePrice}</span>
+        Precio: <span className="font-normal text-[#425a66]">${servicePrice.toFixed(2)}</span>
       </p>
       <p className="font-semibold text-[#4256a6]">
         Fecha: <span className="font-normal text-[#425a66]">{selectedDate}</span>
