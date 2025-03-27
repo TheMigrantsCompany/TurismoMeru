@@ -105,7 +105,7 @@ const BookingForm = ({ userId, userName, userDni }) => {
         Reserva para {serviceTitle}
       </h2>
       <p className="font-semibold text-[#4256a6]">
-        Precio: <span className="font-normal text-[#425a66]">${servicePrice}</span>
+        Precio: <span className="font-normal text-[#425a66]">${servicePrice.toFixed(2)}</span>
       </p>
       <p className="font-semibold text-[#4256a6]">
         Fecha: <span className="font-normal text-[#425a66]">{selectedDate}</span>
