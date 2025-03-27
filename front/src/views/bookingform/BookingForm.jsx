@@ -13,7 +13,7 @@ const BookingForm = ({ userId, userName, userDni }) => {
 
   const serviceId = queryParams.get("id_Service");
   const serviceTitle = queryParams.get("title");
-  const servicePrice = parseFloat(queryParams.get("price")) || 0;
+  const servicePrice = Number(queryParams.get("price") || 0).toFixed(2);
   const serviceOrderId = queryParams.get("id_ServiceOrder");
 
   // Obtener y formatear fecha y hora
@@ -36,7 +36,7 @@ const BookingForm = ({ userId, userName, userDni }) => {
 
   const selectedTime = rawTime ? formatTime(rawTime) : "00:00";
   const selectedQuantity = parseInt(queryParams.get("totalPeople")) || 1;
-  const totalPrice = parseFloat(queryParams.get("totalPrice")) || 0;
+  const totalPrice = Number(queryParams.get("totalPrice")) || (selectedQuantity * parseFloat(servicePrice));
 
   const [errorMessage, setErrorMessage] = useState("");
   const [reservationSuccess, setReservationSuccess] = useState(false);
@@ -76,7 +76,6 @@ const BookingForm = ({ userId, userName, userDni }) => {
         { headers: { "Content-Type": "application/json" } }
       );
       
-     
      await Swal.fire({
        icon: "success",
        title: "¡Reserva exitosa!",
@@ -105,7 +104,7 @@ const BookingForm = ({ userId, userName, userDni }) => {
         Reserva para {serviceTitle}
       </h2>
       <p className="font-semibold text-[#4256a6]">
-        Precio: <span className="font-normal text-[#425a66]">${servicePrice.toFixed(2)}</span>
+        Precio: <span className="font-normal text-[#425a66]">${servicePrice}</span>
       </p>
       <p className="font-semibold text-[#4256a6]">
         Fecha: <span className="font-normal text-[#425a66]">{selectedDate}</span>
