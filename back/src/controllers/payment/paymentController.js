@@ -78,9 +78,10 @@ exports.createPaymentPreference = async (req, res) => {
         },
       },
       back_urls: {
-      success: `https://www.meruviajes.tur.ar/bookingform?id_ServiceOrder=${req.body.id_ServiceOrder}&id_Service=${paymentInformation[0].id_Service}&title=${encodeURIComponent(paymentInformation[0].title)}&price=${parseFloat(paymentInformation[0].unit_price).toFixed(2)}&date=${paymentInformation[0].selectedDate || ''}&time=${paymentInformation[0].selectedTime || ''}&totalPeople=${req.body.metadata.totalPeople}`,
-      failure:  "https://www.meruviajes.tur.ar/payment-failure",
-      pending: "https://www.meruviajes.tur.ar/payment-pending",
+       success: `https://www.meruviajes.tur.ar/bookingform?id_ServiceOrder=${req.body.id_ServiceOrder}&id_Service=${paymentInformation[0].id_Service}&title=${encodeURIComponent(paymentInformation[0].title)}&price=${parseFloat(paymentInformation[0].unit_price).toFixed(2)}&date=${paymentInformation[0].selectedDate || ''}&time=${paymentInformation[0].selectedTime || ''}&totalPeople=${req.body.metadata.totalPeople}`,
+       failure: "https://www.meruviajes.tur.ar/payment-failure",
+       pending: "https://www.meruviajes.tur.ar/payment-pending",
+            },
        },
       auto_return: "approved",
       notification_url: "https://www.meruviajes.tur.ar/api/payment/webhook",  // para recibir y reenviar las notificaciones de mervado pago webhookrelay.com
