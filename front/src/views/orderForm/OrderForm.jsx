@@ -72,20 +72,6 @@ const OrderForm = () => {
     return requiredFields.every((field) => formData[field]?.trim());
   };
 
-  // Función helper para calcular el total de cada item
-  const computeItemTotal = (item) => {
-    const adults = (item.quantities?.adults || 0) * item.price;
-    const children =
-      (item.quantities?.children || 0) *
-      item.price *
-      ((100 - (item.discountForMinors || 0)) / 100);
-    const seniors =
-      (item.quantities?.seniors || 0) *
-      item.price *
-      ((100 - (item.discountForSeniors || 0)) / 100);
-    return adults + children + seniors;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -98,45 +84,50 @@ const OrderForm = () => {
     setLoading(true);
 
     try {
-      // Usamos los cartItems y recalculamos el total usando computeItemTotal
+      // ✅ Usamos los cartItems directamente sin aplicar descuentos nuevamente
       const items = cartItems.map((item) => {
-        const totalPeople =
-          (item.quantities?.adults || 0) +
-          (item.quantities?.children || 0) +
-          (item.quantities?.seniors || 0);
-        const itemTotal = computeItemTotal(item);
         return {
           id_Service: item.id_Service,
           title: item.title || "Servicio sin título",
           description: item.description || "Sin descripción",
-          totalPeople,
-          unit_price: totalPeople ? itemTotal / totalPeople : 0,
+          totalPeople:
+            item.quantities?.adults +
+            item.quantities?.children +
+            item.quantities?.seniors,
+          unit_price:
+            item.totalPrice /
+              (item.quantities?.adults +
+                item.quantities?.children +
+                item.quantities?.seniors) || 0,
           currency_id: "ARS",
           selectedDate: item.selectedDate,
           selectedTime: item.selectedTime,
-          totalItemPrice: itemTotal,
+          totalItemPrice: item.totalPrice,
         };
       });
 
       // Calcular el total correcto sumando los precios de todos los items
-      const totalPrice = cartItems.reduce(
-        (total, item) => total + computeItemTotal(item),
+      const totalPrice = items.reduce(
+        (total, item) => total + item.totalItemPrice,
         0
       );
 
       console.log("🚀 Total antes de enviar:", totalPrice);
 
-      // Creación de la orden
+      // ✅ Creación de la orden
       const orderData = {
         orderDate: new Date().toISOString(),
         id_User,
         paymentMethod: formData.paymentMethod,
         items: cartItems.map((item) => {
+          // Log del item completo antes del mapeo
           console.log("Item completo del carrito:", {
             item,
             quantities: item.quantities,
             babies: item.quantities?.babies,
           });
+
+          // Log de la conversión de babies
           const babiesCount = Number(item.quantities?.babies);
           console.log("Conversión de babies:", {
             original: item.quantities?.babies,
@@ -144,7 +135,8 @@ const OrderForm = () => {
             isNumber: typeof babiesCount === "number",
             isNaN: isNaN(babiesCount),
           });
-          return {
+
+          const mappedItem = {
             id_Service: item.id_Service,
             date: item.selectedDate,
             time: item.selectedTime,
@@ -152,11 +144,22 @@ const OrderForm = () => {
             minors: Number(item.quantities?.children) || 0,
             seniors: Number(item.quantities?.seniors) || 0,
             babies: babiesCount || 0,
-            totalItemPrice: computeItemTotal(item),
+            totalItemPrice: item.totalPrice,
           };
+
+          // Log del item mapeado
+          console.log("Item después del mapeo:", mappedItem);
+
+          return mappedItem;
         }),
         paymentStatus: "Pendiente",
       };
+
+      // Log de la orden completa
+      console.log(
+        "Orden completa a enviar:",
+        JSON.stringify(orderData, null, 2)
+      );
 
       const createdOrder = await dispatch(createServiceOrder(orderData));
 
@@ -219,7 +222,6 @@ const OrderForm = () => {
       setLoading(false);
     }
   };
-
 
   return (
     <div className="flex flex-col lg:flex-row gap-12 mt-10 px-8 max-w-[1600px] mx-auto">
@@ -364,7 +366,9 @@ const OrderForm = () => {
                     item.price *
                     ((100 - (item.discountForSeniors || 0)) / 100);
                   const totalItemPrice = (
-                    adultsTotal + childrenTotal + seniorsTotal
+                    adultsTotal +
+                    childrenTotal +
+                    seniorsTotal
                   ).toFixed(2);
 
                   return (
@@ -375,7 +379,7 @@ const OrderForm = () => {
                       <p className="text-lg font-medium text-[#4256a6] mb-2 font-poppins">
                         {item.title}
                       </p>
-                      <div className="space-y-1 text-[#4256a6]">
+                      <div className="space-y-1 text-[#425a66]">
                         {item.quantities?.adults > 0 && (
                           <p className="text-sm">
                             Adultos: {item.quantities.adults} x $
@@ -423,12 +427,22 @@ const OrderForm = () => {
             )}
 
             <div className="bg-white p-4 rounded-lg mt-4">
-              <div className="flex justify-between text-[#4256a66] text-lg font-semibold">
+              <div className="flex justify-between text-[#425a66] text-lg font-semibold">
                 <p>Subtotal</p>
                 <p>
                   $
                   {cartItems
-                    .reduce((acc, item) => acc + computeItemTotal(item), 0)
+                    .reduce((acc, item) => {
+                      const totalItemPrice =
+                        item.quantities?.adults * item.price +
+                        item.quantities?.children *
+                          item.price *
+                          ((100 - (item.discountForMinors || 0)) / 100) +
+                        item.quantities?.seniors *
+                          item.price *
+                          ((100 - (item.discountForSeniors || 0)) / 100);
+                      return acc + totalItemPrice;
+                    }, 0)
                     .toFixed(2)}
                 </p>
               </div>
@@ -437,7 +451,17 @@ const OrderForm = () => {
                 <p>
                   $
                   {cartItems
-                    .reduce((acc, item) => acc + computeItemTotal(item), 0)
+                    .reduce((acc, item) => {
+                      const totalItemPrice =
+                        item.quantities?.adults * item.price +
+                        item.quantities?.children *
+                          item.price *
+                          ((100 - (item.discountForMinors || 0)) / 100) +
+                        item.quantities?.seniors *
+                          item.price *
+                          ((100 - (item.discountForSeniors || 0)) / 100);
+                      return acc + totalItemPrice;
+                    }, 0)
                     .toFixed(2)}
                 </p>
               </div>
@@ -480,7 +504,17 @@ const OrderForm = () => {
                     } menores, ${item.quantities?.seniors || 0} jubilados`
                 )
                 .join("\n\n")}\n\nTotal a pagar: $${cartItems
-                .reduce((acc, item) => acc + computeItemTotal(item), 0)
+                .reduce((acc, item) => {
+                  const totalItemPrice =
+                    item.quantities?.adults * item.price +
+                    item.quantities?.children *
+                      item.price *
+                      ((100 - (item.discountForMinors || 0)) / 100) +
+                    item.quantities?.seniors *
+                      item.price *
+                      ((100 - (item.discountForSeniors || 0)) / 100);
+                  return acc + totalItemPrice;
+                }, 0)
                 .toFixed(2)}`
             )}`}
             target="_blank"
