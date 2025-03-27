@@ -204,15 +204,16 @@ export function Detail() {
   const renderAvailability = () => {
     if (!excursion?.availabilityDate?.length) return null;
 
-    // Filtrar solo las fechas futuras con stock disponible
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0); // Resetear la hora a 00:00:00
+    // Crear fecha de mañana (00:00:00)
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
 
     const availableDates = excursion.availabilityDate.filter((date) => {
-      const excursionDate = new Date(date.date);
-      excursionDate.setHours(0, 0, 0, 0);
-
-      return date.stock > 0 && excursionDate >= currentDate;
+      // Asegurarnos de que la fecha se parsee correctamente
+      const [year, month, day] = date.date.split("-").map(Number);
+      const excursionDate = new Date(year, month - 1, day);
+      return date.stock > 0 && excursionDate >= tomorrow; // Comparar con mañana
     });
 
     return (
@@ -227,28 +228,34 @@ export function Detail() {
               Fechas y horarios disponibles:
             </Typography>
             <div className="grid gap-4 md:grid-cols-2">
-              {availableDates.map((date, index) => (
-                <div key={index} className="bg-[#dac9aa]/20 p-4 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <Typography className="text-[#4256a6] font-semibold">
-                        {new Date(date.date).toLocaleDateString("es-ES", {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </Typography>
+              {availableDates.map((date, index) => {
+                // Parsear la fecha correctamente
+                const [year, month, day] = date.date.split("-").map(Number);
+                const excursionDate = new Date(year, month - 1, day);
+
+                return (
+                  <div key={index} className="bg-[#dac9aa]/20 p-4 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <Typography className="text-[#4256a6] font-semibold">
+                          {excursionDate.toLocaleDateString("es-ES", {
+                            weekday: "long",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </Typography>
+                        <Typography className="text-[#425a66]">
+                          Hora: {date.time}
+                        </Typography>
+                      </div>
                       <Typography className="text-[#425a66]">
-                        Hora: {date.time}
+                        {date.stock} lugares
                       </Typography>
                     </div>
-                    <Typography className="text-[#425a66]">
-                      {date.stock} lugares
-                    </Typography>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         ) : (
