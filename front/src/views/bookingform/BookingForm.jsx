@@ -115,12 +115,6 @@ const BookingForm = ({ userId, userName, userDni }) => {
       <p className="font-semibold text-[#4256a6]">
         Cantidad de Pasajeros: <span className="font-normal text-[#425a66]">{selectedQuantity}</span>
       </p>
-      <p className="font-semibold text-[#4256a6]">
-         Total Pagado:{" "}
-        <span className="font-normal text-[#425a66]">
-        ${totalPrice.toFixed(2)}
-        </span>
-      </p>
 
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
       {reservationSuccess && (
