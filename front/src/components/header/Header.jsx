@@ -103,14 +103,14 @@ export default function CarouselWithContent() {
                 color="white"
                 className="mb-6 text-4xl md:text-5xl lg:text-6xl font-bold drop-shadow-lg"
               >
-                PAGINA EN CONSTRUCCIÓN. ENVIE SU CONSULTA LLENANDO EL FORMULARIO MAS ABAJO
+               AVENTURATE EN EL FIN DEL MUNDO CON MERU
               </Typography>
               <Typography
                 variant="lead"
                 color="white"
                 className="mb-16 opacity-90 text-lg md:text-xl drop-shadow-md"
               >
-                Gracias 
+               VIAJES Y TURISMO
               </Typography>
             </div>
           </div>
