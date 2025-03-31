@@ -3,20 +3,20 @@ const { ServiceOrder, Service, User, sequelize } = require("../../config/db");
 const createServiceOrderController = async (orderData) => {
   const { orderDate, id_User, paymentMethod, items, paymentStatus } = orderData;
 
-  /*Log inicial de los datos recibidos
-  console.log("🔍 Controller - Datos recibidos del handler:", {
-    orderDate,
-    id_User,
-    items: items.map((item) => ({
-      id_Service: item.id_Service,
-      adults: item.adults,
-      minors: item.minors,
-      seniors: item.seniors,
-      babies: item.babies,
-      date: item.date,
-      time: item.time,
-    })),
-  });*/
+  // Log inicial de los datos recibidos
+  // console.log("🔍 Controller - Datos recibidos del handler:", {
+  //   orderDate,
+  //   id_User,
+  //   items: items.map((item) => ({
+  //     id_Service: item.id_Service,
+  //     adults: item.adults,
+  //     minors: item.minors,
+  //     seniors: item.seniors,
+  //     babies: item.babies,
+  //     date: item.date,
+  //     time: item.time,
+  //   })),
+  // });
 
   let total = 0;
   const updatedItems = [];
@@ -39,17 +39,17 @@ const createServiceOrderController = async (orderData) => {
     for (const item of items) {
       const { id_Service, date, time, adults, minors, seniors, babies } = item;
 
-      /* Log de cada item después del destructuring
-      console.log("🔍 Controller - Item después de destructuring:", {
-        id_Service,
-        adults,
-        minors,
-        seniors,
-        babies,
-        date,
-        time,
-        originalItem: item,
-      });*/
+      // Log de cada item después del destructuring
+      // console.log("🔍 Controller - Item después de destructuring:", {
+      //   id_Service,
+      //   adults,
+      //   minors,
+      //   seniors,
+      //   babies,
+      //   date,
+      //   time,
+      //   originalItem: item,
+      // });
 
       console.info(`>> Procesando ítem con ID de servicio: ${id_Service}`);
 
@@ -103,14 +103,15 @@ const createServiceOrderController = async (orderData) => {
 
       total += itemTotal;
 
-     /* console.log("Datos antes de pushear a updatedItems:", {
-        title: excursion.title,
-        adults,
-        minors,
-        seniors,
-        babies, // Ver el valor de babies antes de pushear
-        totalPeople: totalReservations,
-      });*/
+      // Log de datos antes de pushear a updatedItems
+      // console.log("Datos antes de pushear a updatedItems:", {
+      //   title: excursion.title,
+      //   adults,
+      //   minors,
+      //   seniors,
+      //   babies, // Ver el valor de babies antes de pushear
+      //   totalPeople: totalReservations,
+      // });
 
       updatedItems.push({
         title: excursion.title,
@@ -128,11 +129,12 @@ const createServiceOrderController = async (orderData) => {
         lockedStock: availability.lockedStock,
       });
 
-      /*console.log(
-        "Item agregado a updatedItems:",
-        updatedItems[updatedItems.length - 1]
-      );
-    }*/
+      // Log después de agregar un ítem a updatedItems
+      // console.log(
+      //   "Item agregado a updatedItems:",
+      //   updatedItems[updatedItems.length - 1]
+      // );
+    }
 
     // Crear orden
     const newOrder = await ServiceOrder.create(
@@ -147,21 +149,22 @@ const createServiceOrderController = async (orderData) => {
       { transaction }
     );
 
-   /* console.log("4. Datos para crear orden:", {
-      orderDate,
-      id_User,
-      paymentMethod,
-      paymentInformation: updatedItems,
-      total: total.toFixed(2),
-      paymentStatus,
-    });*/
+    // Log de los datos para crear la orden
+    // console.log("4. Datos para crear orden:", {
+    //   orderDate,
+    //   id_User,
+    //   paymentMethod,
+    //   paymentInformation: updatedItems,
+    //   total: total.toFixed(2),
+    //   paymentStatus,
+    // });
 
     // Agregar estos logs
-   /* console.log(
-      "updatedItems antes de crear orden:",
-      JSON.stringify(updatedItems, null, 2)
-    );
-    console.log("5. Orden creada:", JSON.stringify(newOrder.toJSON(), null, 2));*/
+    // console.log(
+    //   "updatedItems antes de crear orden:",
+    //   JSON.stringify(updatedItems, null, 2)
+    // );
+    // console.log("5. Orden creada:", JSON.stringify(newOrder.toJSON(), null, 2));
 
     // Asociar servicios
     await newOrder.addServices(
