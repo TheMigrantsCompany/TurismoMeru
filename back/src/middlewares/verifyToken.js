@@ -49,7 +49,7 @@ const verifyToken = async (req, res, next) => {
       if (!user) {
         const adminEmails = [
           "franciscomeruviajes@gmail.com",
-          "lautiu9@gmail.com",
+          "meruevt@gmail.com",
           "agusramos12@gmail.com",
           "iaba.sur@gmail.com",
         ];
