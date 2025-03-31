@@ -126,9 +126,8 @@ const NewExcursionModal = ({ onClose, onSave }) => {
       return;
     }
 
-    const formattedDate = `${date.getFullYear()}-${String(
-      date.getMonth() + 1
-    ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    // Usar el mismo formato que en ExcursionModal
+    const formattedDate = date.toLocaleDateString("en-CA");
     const formattedTime = `${String(time.getHours()).padStart(2, "0")}:${String(
       time.getMinutes()
     ).padStart(2, "0")}`;
@@ -253,7 +252,7 @@ const NewExcursionModal = ({ onClose, onSave }) => {
 
   const handleSubmit = async () => {
     const errors = validateForm();
-    
+
     if (Object.keys(errors).length) {
       setFormErrors(errors);
       return;
@@ -657,22 +656,20 @@ const NewExcursionModal = ({ onClose, onSave }) => {
                 </label>
                 <ul className="space-y-2">
                   {availabilities.map((availability, index) => {
-                    const formattedDate = new Date(
-                      availability.date
-                    ).toLocaleDateString("es-ES", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    });
-
                     return (
                       <li
                         key={index}
                         className="flex justify-between items-center"
                       >
                         <span className="text-[#425a66] font-poppins">
-                          {formattedDate} - {availability.time} - Stock:{" "}
-                          {availability.stock}
+                          {new Date(
+                            availability.date + "T00:00:00"
+                          ).toLocaleDateString("es-ES", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}{" "}
+                          - {availability.time} - Stock: {availability.stock}
                         </span>
                         <button
                           onClick={() => handleRemoveAvailability(index)}
