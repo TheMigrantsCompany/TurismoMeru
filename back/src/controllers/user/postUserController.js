@@ -13,9 +13,9 @@ const postUserController = async (userData) => {
   // Lista de correos que deben tener el rol de admin
   const adminEmails = [
     'franciscomeruviajes@gmail.com',
-    'lautiu9@gmail.com',
     'agusramos12@gmail.com',
     'iaba.sur@gmail.com',
+    'meruevt@gmail.com',
   ];
 
   // Determinar el rol del usuario
