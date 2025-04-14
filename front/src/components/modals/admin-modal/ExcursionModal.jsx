@@ -336,12 +336,6 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
     const newAvailabilities = [];
     let skippedDays = 0;
 
-    // Verificar si ya existen fechas para este mes
-    const existingDates = excursionData.availabilityDate.reduce((acc, curr) => {
-      acc[curr.date] = true;
-      return acc;
-    }, {});
-
     // Crear disponibilidad para cada día del mes
     for (let day = 1; day <= daysInMonth; day++) {
       const currentDate = new Date(year, monthIndex, day);
@@ -354,12 +348,7 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
 
       const formattedDate = currentDate.toLocaleDateString("en-CA");
 
-      // Verificar si la fecha ya existe
-      if (existingDates[formattedDate]) {
-        skippedDays++;
-        continue;
-      }
-
+      // Ya no verificamos si la fecha existe, permitimos múltiples horarios
       newAvailabilities.push({
         date: formattedDate,
         time: formattedTime,
@@ -368,22 +357,12 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
     }
 
     if (newAvailabilities.length === 0) {
-      if (skippedDays === daysInMonth) {
-        alert(
-          "No se pueden agregar fechas para este mes ya que todas son anteriores a hoy o ya existen."
-        );
-      } else {
-        alert(
-          "No se pueden agregar fechas para este mes ya que todas son anteriores a hoy."
-        );
-      }
+      alert("No se pueden agregar fechas para este mes ya que todas son anteriores a hoy.");
       return;
     }
 
     if (skippedDays > 0) {
-      alert(
-        `Se omitieron ${skippedDays} días por ser fechas pasadas o ya existentes.`
-      );
+      alert(`Se omitieron ${skippedDays} días por ser fechas pasadas.`);
     }
 
     // Actualizar el estado con todas las nuevas fechas
@@ -668,44 +647,46 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
               </div>
             </div>
 
-            {/* Guías */}
+            {/* ¿Qué incluye? */}
             <div className="bg-white p-4 rounded-lg shadow">
               <h3 className="text-lg font-semibold text-[#4256a6] mb-4 font-poppins">
-                Guías
+                ¿Qué incluye?
               </h3>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
-                    Nombre del Guía:
+                    Agregar item incluido:
                   </label>
-                  <input
-                    type="text"
-                    value={newGuide.name}
-                    onChange={(e) => setNewGuide({ name: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newGuide.name}
+                      onChange={(e) => setNewGuide({ name: e.target.value })}
+                      className="flex-1 px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
+                      placeholder="Ej: Transporte desde el hotel"
+                    />
+                    <button
+                      onClick={handleAddGuide}
+                      className="px-4 py-2 bg-[#4256a6] text-white rounded-lg hover:bg-[#334477] transition-colors font-poppins"
+                    >
+                      Agregar
+                    </button>
+                  </div>
                 </div>
 
-                <button
-                  onClick={handleAddGuide}
-                  className="px-4 py-2 bg-[#4256a6] text-white rounded-lg hover:bg-[#334477] transition-colors font-poppins"
-                >
-                  Agregar Guía
-                </button>
-
-                {/* Lista de guías agregados */}
+                {/* Lista de items incluidos */}
                 <div className="mt-4">
                   <h4 className="text-sm font-medium text-[#425a66] mb-2 font-poppins">
-                    Guías Agregados:
+                    La excursión incluye:
                   </h4>
                   <ul className="space-y-2">
-                    {excursionData.guides.map((guide, index) => (
+                    {excursionData.guides.map((item, index) => (
                       <li
                         key={index}
                         className="flex justify-between items-center bg-gray-50 p-2 rounded-lg"
                       >
                         <span className="text-[#425a66] font-poppins">
-                          {guide.name}
+                          {item.name}
                         </span>
                         <button
                           onClick={() => handleRemoveGuide(index)}
