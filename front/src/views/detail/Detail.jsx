@@ -117,6 +117,7 @@ export function Detail() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [expandedMonth, setExpandedMonth] = useState(null);
   const { user, isUserActive } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -204,17 +205,46 @@ export function Detail() {
   const renderAvailability = () => {
     if (!excursion?.availabilityDate?.length) return null;
 
-    // Crear fecha de mañana (00:00:00)
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(0, 0, 0, 0);
 
-    const availableDates = excursion.availabilityDate.filter((date) => {
-      // Asegurarnos de que la fecha se parsee correctamente
-      const [year, month, day] = date.date.split("-").map(Number);
-      const excursionDate = new Date(year, month - 1, day);
-      return date.stock > 0 && excursionDate >= tomorrow; // Comparar con mañana
-    });
+    // Filtrar y agrupar fechas disponibles por mes
+    const availableDatesGrouped = excursion.availabilityDate
+      .filter((date) => {
+        const [year, month, day] = date.date.split("-").map(Number);
+        const excursionDate = new Date(year, month - 1, day);
+        return date.stock > 0 && excursionDate >= tomorrow;
+      })
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .reduce((groups, date) => {
+        const [year, month] = date.date.split("-");
+        const monthKey = `${year}-${month}`;
+        const monthName = new Date(year, month - 1).toLocaleDateString(
+          "es-ES",
+          {
+            month: "long",
+            year: "numeric",
+          }
+        );
+
+        if (!groups[monthKey]) {
+          groups[monthKey] = {
+            name: monthName,
+            dates: [],
+          };
+        }
+        groups[monthKey].dates.push(date);
+        return groups;
+      }, {});
+
+    const sortedMonths = Object.entries(availableDatesGrouped).sort(
+      ([keyA], [keyB]) => keyA.localeCompare(keyB)
+    );
+
+    const toggleMonth = (monthKey) => {
+      setExpandedMonth(expandedMonth === monthKey ? null : monthKey);
+    };
 
     return (
       <div className="bg-[#f9f3e1] rounded-xl p-8 shadow-lg mt-8">
@@ -222,41 +252,88 @@ export function Detail() {
           Disponibilidad
         </Typography>
 
-        {availableDates.length > 0 ? (
+        {sortedMonths.length > 0 ? (
           <div className="space-y-4">
-            <Typography className="text-[#425a66]">
-              Fechas y horarios disponibles:
-            </Typography>
-            <div className="grid gap-4 md:grid-cols-2">
-              {availableDates.map((date, index) => {
-                // Parsear la fecha correctamente
-                const [year, month, day] = date.date.split("-").map(Number);
-                const excursionDate = new Date(year, month - 1, day);
-
-                return (
-                  <div key={index} className="bg-[#dac9aa]/20 p-4 rounded-lg">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <Typography className="text-[#4256a6] font-semibold">
-                          {excursionDate.toLocaleDateString("es-ES", {
-                            weekday: "long",
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}
-                        </Typography>
-                        <Typography className="text-[#425a66]">
-                          Hora: {date.time}
-                        </Typography>
-                      </div>
-                      <Typography className="text-[#425a66]">
-                        {date.stock} lugares
-                      </Typography>
-                    </div>
+            {sortedMonths.map(([monthKey, monthData]) => (
+              <div
+                key={monthKey}
+                className="border border-[#dac9aa]/30 rounded-lg overflow-hidden"
+              >
+                {/* Cabecera del mes (siempre visible) */}
+                <button
+                  onClick={() => toggleMonth(monthKey)}
+                  className="w-full flex items-center justify-between p-4 bg-[#dac9aa]/10 hover:bg-[#dac9aa]/20 transition-colors"
+                >
+                  <Typography className="text-[#4256a6] font-semibold text-lg capitalize">
+                    {monthData.name}
+                  </Typography>
+                  <div className="flex items-center gap-2">
+                    <Typography className="text-[#425a66] text-sm">
+                      {monthData.dates.length} fechas disponibles
+                    </Typography>
+                    <svg
+                      className={`w-5 h-5 transform transition-transform ${
+                        expandedMonth === monthKey ? "rotate-180" : ""
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
                   </div>
-                );
-              })}
-            </div>
+                </button>
+
+                {/* Contenido desplegable */}
+                <div
+                  className={`transition-all duration-300 ease-in-out ${
+                    expandedMonth === monthKey
+                      ? "max-h-[1000px] opacity-100"
+                      : "max-h-0 opacity-0 overflow-hidden"
+                  }`}
+                >
+                  <div className="grid gap-3 md:grid-cols-2 p-4">
+                    {monthData.dates
+                      .sort((a, b) => new Date(a.date) - new Date(b.date))
+                      .map((date, index) => {
+                        const [year, month, day] = date.date
+                          .split("-")
+                          .map(Number);
+                        const excursionDate = new Date(year, month - 1, day);
+
+                        return (
+                          <div
+                            key={`${date.date}-${index}`}
+                            className="bg-[#dac9aa]/20 p-3 rounded-lg"
+                          >
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <Typography className="text-[#4256a6] font-medium">
+                                  {excursionDate.toLocaleDateString("es-ES", {
+                                    weekday: "long",
+                                    day: "numeric",
+                                  })}
+                                </Typography>
+                                <Typography className="text-[#425a66] text-sm">
+                                  Hora: {date.time}
+                                </Typography>
+                              </div>
+                              <Typography className="text-[#425a66] bg-white px-3 py-1 rounded-full text-sm">
+                                {date.stock} lugares
+                              </Typography>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <Typography className="text-[#425a66] italic">
