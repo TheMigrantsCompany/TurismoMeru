@@ -895,7 +895,7 @@ const NewExcursionModal = ({ onClose, onSave }) => {
                           <div
                             className={`transition-all duration-300 ease-in-out ${
                               expandedMonth === monthKey
-                                ? "max-h-[500px] opacity-100"
+                                ? "max-h-[300px] opacity-100 overflow-y-auto"
                                 : "max-h-0 opacity-0 overflow-hidden"
                             }`}
                           >
