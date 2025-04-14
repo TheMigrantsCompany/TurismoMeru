@@ -555,3 +555,4 @@ export function Detail() {
 }
 
 export default Detail;
+
