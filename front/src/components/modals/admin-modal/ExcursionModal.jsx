@@ -41,6 +41,15 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
     name: "",
   });
 
+  const [isMonthlyAvailability, setIsMonthlyAvailability] = useState(false);
+  const [monthlyData, setMonthlyData] = useState({
+    month: new Date(),
+    time: new Date(),
+    stock: 0,
+  });
+
+  const [expandedMonth, setExpandedMonth] = useState(null);
+
   useEffect(() => {
     if (excursion.photos && excursion.photos.length > 0) {
       setImagePreviews(excursion.photos);
@@ -165,9 +174,8 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
       return;
     }
 
-    const formattedDate = `${date.getFullYear()}-${String(
-      date.getMonth() + 1
-    ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    // Crear la fecha en la zona horaria local
+    const formattedDate = date.toLocaleDateString("en-CA"); // Formato YYYY-MM-DD
     const formattedTime = `${String(time.getHours()).padStart(2, "0")}:${String(
       time.getMinutes()
     ).padStart(2, "0")}`;
@@ -287,6 +295,166 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
       guides: guidesToRemove,
     }));
   };
+
+  const handleAddMonthlyAvailability = () => {
+    const { month, time, stock } = monthlyData;
+
+    if (!month || !time || stock <= 0) {
+      alert("Debes seleccionar un mes, una hora y un stock válido.");
+      return;
+    }
+
+    const year = month.getFullYear();
+    const monthIndex = month.getMonth();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Validar que el mes no sea anterior al actual
+    if (
+      year < today.getFullYear() ||
+      (year === today.getFullYear() && monthIndex < today.getMonth())
+    ) {
+      alert("No puedes seleccionar un mes anterior al actual.");
+      return;
+    }
+
+    const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+
+    // Si es el mes actual, verificar que haya días disponibles
+    if (year === today.getFullYear() && monthIndex === today.getMonth()) {
+      const currentDay = today.getDate();
+      if (currentDay >= daysInMonth) {
+        alert("No quedan días disponibles en el mes actual.");
+        return;
+      }
+    }
+
+    const formattedTime = `${String(time.getHours()).padStart(2, "0")}:${String(
+      time.getMinutes()
+    ).padStart(2, "0")}`;
+
+    const newAvailabilities = [];
+    let skippedDays = 0;
+
+    // Verificar si ya existen fechas para este mes
+    const existingDates = excursionData.availabilityDate.reduce((acc, curr) => {
+      acc[curr.date] = true;
+      return acc;
+    }, {});
+
+    // Crear disponibilidad para cada día del mes
+    for (let day = 1; day <= daysInMonth; day++) {
+      const currentDate = new Date(year, monthIndex, day);
+
+      // Saltar días pasados si es el mes actual
+      if (currentDate < today) {
+        skippedDays++;
+        continue;
+      }
+
+      const formattedDate = currentDate.toLocaleDateString("en-CA");
+
+      // Verificar si la fecha ya existe
+      if (existingDates[formattedDate]) {
+        skippedDays++;
+        continue;
+      }
+
+      newAvailabilities.push({
+        date: formattedDate,
+        time: formattedTime,
+        stock: Number(stock),
+      });
+    }
+
+    if (newAvailabilities.length === 0) {
+      if (skippedDays === daysInMonth) {
+        alert(
+          "No se pueden agregar fechas para este mes ya que todas son anteriores a hoy o ya existen."
+        );
+      } else {
+        alert(
+          "No se pueden agregar fechas para este mes ya que todas son anteriores a hoy."
+        );
+      }
+      return;
+    }
+
+    if (skippedDays > 0) {
+      alert(
+        `Se omitieron ${skippedDays} días por ser fechas pasadas o ya existentes.`
+      );
+    }
+
+    // Actualizar el estado con todas las nuevas fechas
+    setExcursionData((prevData) => ({
+      ...prevData,
+      stock: prevData.stock + Number(stock) * newAvailabilities.length,
+      availabilityDate: [...prevData.availabilityDate, ...newAvailabilities],
+    }));
+
+    // Resetear el formulario mensual
+    setMonthlyData({
+      month: new Date(),
+      time: new Date(),
+      stock: 0,
+    });
+  };
+
+  const MonthlyAvailabilityForm = () => (
+    <div className="space-y-4 border-t pt-4 mt-4">
+      <h4 className="font-medium text-[#425a66]">Disponibilidad Mensual</h4>
+
+      <div className="relative mb-2">
+        <DatePicker
+          selected={monthlyData.month}
+          onChange={(date) =>
+            setMonthlyData((prev) => ({ ...prev, month: date }))
+          }
+          dateFormat="MMMM yyyy"
+          showMonthYearPicker
+          className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent"
+        />
+      </div>
+
+      <div className="relative mb-2">
+        <DatePicker
+          selected={monthlyData.time}
+          onChange={(time) =>
+            setMonthlyData((prev) => ({ ...prev, time: time }))
+          }
+          showTimeSelect
+          showTimeSelectOnly
+          timeIntervals={15}
+          timeCaption="Hora"
+          dateFormat="h:mm aa"
+          className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent"
+        />
+      </div>
+
+      <div className="relative mb-2">
+        <input
+          type="number"
+          value={monthlyData.stock || ""}
+          onChange={(e) =>
+            setMonthlyData((prev) => ({
+              ...prev,
+              stock: Number(e.target.value),
+            }))
+          }
+          className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent"
+          placeholder="Stock diario"
+        />
+      </div>
+
+      <button
+        onClick={handleAddMonthlyAvailability}
+        className="px-4 py-2 bg-[#4256a6] text-white rounded-lg hover:bg-[#334477] transition-colors"
+      >
+        Agregar Mes Completo
+      </button>
+    </div>
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#000000cc]">
@@ -610,97 +778,199 @@ const ExcursionModal = ({ excursion, onClose, onToggleActive, onUpdate }) => {
               <h3 className="text-lg font-semibold text-[#4256a6] mb-4 font-poppins">
                 Disponibilidad
               </h3>
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
-                  Agregar Nueva Fecha:
-                </label>
-
-                <div className="relative mb-2">
-                  <DatePicker
-                    selected={newAvailability.date}
-                    onChange={handleDateChange}
-                    dateFormat="MMMM d, yyyy"
-                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
-                  />
-                </div>
-
-                <div className="relative mb-2">
-                  <DatePicker
-                    selected={newAvailability.time}
-                    onChange={handleTimeChange}
-                    showTimeSelect
-                    showTimeSelectOnly
-                    timeIntervals={15}
-                    timeCaption="Hora"
-                    dateFormat="h:mm aa"
-                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
-                  />
-                </div>
-
-                <div className="relative mb-2">
-                  <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
-                    Stock Disponible:
-                  </label>
-                  <input
-                    type="number"
-                    value={newAvailability.stock || ""}
-                    onChange={(e) =>
-                      setNewAvailability({
-                        ...newAvailability,
-                        stock: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
-                    placeholder="Cantidad disponible"
-                  />
-                </div>
-
+              <div className="flex gap-4 mb-4">
                 <button
-                  onClick={handleAddAvailability}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-poppins"
+                  onClick={() => setIsMonthlyAvailability(false)}
+                  className={`px-4 py-2 rounded-lg ${
+                    !isMonthlyAvailability
+                      ? "bg-[#4256a6] text-white"
+                      : "bg-gray-200"
+                  }`}
                 >
-                  Agregar Fecha
+                  Por Día
+                </button>
+                <button
+                  onClick={() => setIsMonthlyAvailability(true)}
+                  className={`px-4 py-2 rounded-lg ${
+                    isMonthlyAvailability
+                      ? "bg-[#4256a6] text-white"
+                      : "bg-gray-200"
+                  }`}
+                >
+                  Por Mes
                 </button>
               </div>
+
+              {isMonthlyAvailability ? (
+                <MonthlyAvailabilityForm />
+              ) : (
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                    Agregar Nueva Fecha:
+                  </label>
+
+                  <div className="relative mb-2">
+                    <DatePicker
+                      selected={newAvailability.date}
+                      onChange={handleDateChange}
+                      dateFormat="MMMM d, yyyy"
+                      className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
+                    />
+                  </div>
+
+                  <div className="relative mb-2">
+                    <DatePicker
+                      selected={newAvailability.time}
+                      onChange={handleTimeChange}
+                      showTimeSelect
+                      showTimeSelectOnly
+                      timeIntervals={15}
+                      timeCaption="Hora"
+                      dateFormat="h:mm aa"
+                      className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
+                    />
+                  </div>
+
+                  <div className="relative mb-2">
+                    <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
+                      Stock Disponible:
+                    </label>
+                    <input
+                      type="number"
+                      value={newAvailability.stock || ""}
+                      onChange={(e) =>
+                        setNewAvailability({
+                          ...newAvailability,
+                          stock: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-2 rounded-lg border border-[#425a66]/20 focus:ring-2 focus:ring-[#4256a6] focus:border-transparent transition-all bg-white font-poppins text-[#425a66]"
+                      placeholder="Cantidad disponible"
+                    />
+                  </div>
+
+                  <button
+                    onClick={handleAddAvailability}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-poppins"
+                  >
+                    Agregar Fecha
+                  </button>
+                </div>
+              )}
 
               <div className="mt-6">
                 <label className="block text-sm font-medium text-[#425a66] mb-2 font-poppins">
                   Fechas Agregadas:
                 </label>
-                <ul className="space-y-2">
-                  {selectedDates.map((availability, index) => (
-                    <li
-                      key={index}
-                      className="flex justify-between items-center bg-gray-50 p-2 rounded-lg"
-                    >
-                      <span className="text-black">
-                        {availability.date} - {availability.time}
-                      </span>
-                      <div className="flex items-center gap-4">
-                        <input
-                          type="number"
-                          value={availability.stock}
-                          onChange={(e) =>
-                            handleUpdateAvailabilityStock(index, e.target.value)
-                          }
-                          className="w-20 px-2 py-1 rounded border border-gray-300"
-                          min="0"
-                        />
-                        <button
-                          onClick={() => handleRemoveAvailability(index)}
-                          className="text-red-500 hover:text-red-700 text-xs px-2 py-1"
+                {excursionData.availabilityDate.length > 0 ? (
+                  <div className="space-y-2">
+                    {Object.entries(
+                      excursionData.availabilityDate.reduce((groups, date) => {
+                        const [year, month] = date.date.split("-");
+                        const monthKey = `${year}-${month}`;
+                        const monthName = new Date(
+                          year,
+                          month - 1
+                        ).toLocaleDateString("es-ES", {
+                          month: "long",
+                          year: "numeric",
+                        });
+
+                        if (!groups[monthKey]) {
+                          groups[monthKey] = {
+                            name: monthName,
+                            dates: [],
+                          };
+                        }
+                        groups[monthKey].dates.push(date);
+                        return groups;
+                      }, {})
+                    )
+                      .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+                      .map(([monthKey, monthData]) => (
+                        <div
+                          key={monthKey}
+                          className="border border-[#dac9aa]/30 rounded-lg overflow-hidden"
                         >
-                          Eliminar
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-4 text-right">
-                  <span className="font-medium">
-                    Stock Total: {excursionData.stock}
-                  </span>
-                </div>
+                          <button
+                            onClick={() =>
+                              setExpandedMonth(
+                                expandedMonth === monthKey ? null : monthKey
+                              )
+                            }
+                            className="w-full flex items-center justify-between p-3 bg-[#dac9aa]/10 hover:bg-[#dac9aa]/20 transition-colors"
+                          >
+                            <span className="text-[#4256a6] font-semibold capitalize">
+                              {monthData.name}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[#425a66] text-sm">
+                                {monthData.dates.length} fechas
+                              </span>
+                              <svg
+                                className={`w-4 h-4 transform transition-transform ${
+                                  expandedMonth === monthKey ? "rotate-180" : ""
+                                }`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 9l-7 7-7-7"
+                                />
+                              </svg>
+                            </div>
+                          </button>
+
+                          <div
+                            className={`transition-all duration-300 ease-in-out ${
+                              expandedMonth === monthKey
+                                ? "max-h-[500px] opacity-100"
+                                : "max-h-0 opacity-0 overflow-hidden"
+                            }`}
+                          >
+                            <ul className="p-3 space-y-2">
+                              {monthData.dates
+                                .sort(
+                                  (a, b) => new Date(a.date) - new Date(b.date)
+                                )
+                                .map((date, index) => (
+                                  <li
+                                    key={index}
+                                    className="flex justify-between items-center bg-white p-2 rounded-lg"
+                                  >
+                                    <span className="text-[#425a66] font-poppins">
+                                      {new Date(
+                                        date.date + "T00:00:00"
+                                      ).toLocaleDateString("es-ES", {
+                                        weekday: "long",
+                                        day: "numeric",
+                                      })}{" "}
+                                      - {date.time} - Stock: {date.stock}
+                                    </span>
+                                    <button
+                                      onClick={() =>
+                                        handleRemoveAvailability(index)
+                                      }
+                                      className="text-red-500 hover:text-red-700 text-xs px-2 py-1 font-poppins"
+                                    >
+                                      Eliminar
+                                    </button>
+                                  </li>
+                                ))}
+                            </ul>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <p className="text-[#425a66] italic text-sm">
+                    No hay fechas agregadas aún.
+                  </p>
+                )}
               </div>
             </div>
           </div>
