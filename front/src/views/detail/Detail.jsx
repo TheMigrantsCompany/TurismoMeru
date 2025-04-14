@@ -513,6 +513,39 @@ export function Detail() {
                 </Typography>
               )}
             </div>
+
+            {excursion.guides && excursion.guides.length > 0 && (
+              <div className="bg-[#f9f3e1] rounded-xl p-8 shadow-lg mt-8">
+                <Typography variant="h4" className="text-[#4256a6] mb-4">
+                  ¿Qué incluye?
+                </Typography>
+                <ul className="grid gap-3 md:grid-cols-2">
+                  {excursion.guides.map((item, index) => (
+                    <li
+                      key={index}
+                      className="flex items-center gap-2 bg-[#dac9aa]/20 p-3 rounded-lg"
+                    >
+                      <svg
+                        className="w-5 h-5 text-[#4256a6]"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      <Typography className="text-[#425a66]">
+                        {item.name}
+                      </Typography>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* Tarjeta de reserva */}
